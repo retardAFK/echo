@@ -1,0 +1,16 @@
+; Engine configuration file.
+; Godot 4: open this project with the latest stable Godot 4 release (4.6 at setup).
+; The editor will rewrite this file on first save; keep the Compatibility renderer.
+
+config_version=5
+
+[application]
+
+config/name="Écho"
+run/main_scene="res://game/maps/main.tscn"
+config/features=PackedStringArray("4.6", "GL Compatibility")
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

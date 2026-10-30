@@ -1,0 +1,24 @@
+# Godot 4
+.godot/
+/android/
+*.translation
+*.import.tmp
+
+# Exports (web, PC)
+build/
+export/
+*.pck
+*.zip
+
+# Blender backups
+*.blend1
+*.blend2
+*.blend@
+
+# OS / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.tmp
