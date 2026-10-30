@@ -17,7 +17,7 @@ env:
   GODOT_VERSION: "4.7.2"
   GUT_VERSION: "9.7.1"
   GDTOOLKIT_VERSION: "4.5.0"
-  # Constitution 2.2: web download budget
+  # Constitution 2.2 and D-007: uncompressed web build budget
   WEB_BUDGET_MB: "60"
 
 jobs:
@@ -116,7 +116,8 @@ jobs:
           size=$(du -sb build/web | cut -f1)
           limit=$((WEB_BUDGET_MB * 1024 * 1024))
           echo "Web build: $((size / 1024 / 1024)) MB / ${WEB_BUDGET_MB} MB"
-          echo "Web build size: $((size / 1024 / 1024)) MB / ${WEB_BUDGET_MB} MB" >> "$GITHUB_STEP_SUMMARY"
+          gz=$(tar -C build/web -cf - . | gzip -9 | wc -c)
+          echo "Web build size: $((size / 1024 / 1024)) MB / ${WEB_BUDGET_MB} MB (gzip: $((gz / 1024 / 1024)) MB)" >> "$GITHUB_STEP_SUMMARY"
           if [ "$size" -gt "$limit" ]; then
             echo "::error::Web build exceeds the ${WEB_BUDGET_MB} MB budget (constitution 2.2)"
             exit 1
