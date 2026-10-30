@@ -79,7 +79,7 @@ jobs:
         run: |
           chmod +x ~/godot/godot
           echo "$HOME/godot" >> "$GITHUB_PATH"
-          godot --version
+          ~/godot/godot --headless --version
 
       - name: Install GUT
         run: |
