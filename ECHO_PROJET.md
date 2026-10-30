@@ -492,6 +492,7 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-004 | 27/10/2026 | Godot plutôt que Three.js | Éditeur visuel, assets réels, export web et PC |
 | D-005 | 29/10/2026 | Méthode Spec Driven Development, assets créés avec Blender | Apprentissage du SDD, travail structuré avec l'IA |
 | D-006 | 29/10/2026 | Prototype solo contre IA avant tout multijoueur | Valider le fun avant la partie la plus difficile |
+| D-007 | 30/10/2026 | Priorité à un jeu léger et très optimisé : le budget de 60 Mo s'applique à la taille **non compressée** du build Web (le moteur seul en pèse déjà 38), et la CI bloque toute PR qui le dépasse | Aucune lourdeur, chargement rapide dans le navigateur, sur la machine de référence comme ailleurs |
 
 ### 10.2 Questions ouvertes
 
