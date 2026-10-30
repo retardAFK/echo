@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  GODOT_VERSION: "4.7.2"
+  GUT_VERSION: "9.7.1"
+  GDTOOLKIT_VERSION: "4.5.0"
+  # Constitution 2.2: web download budget
+  WEB_BUDGET_MB: "60"
+
+jobs:
+  lint:
+    name: GDScript lint and format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install gdtoolkit
+        run: pip install "gdtoolkit==${GDTOOLKIT_VERSION}"
+
+      - name: gdformat
+        run: gdformat --check game tests
+
+      - name: gdlint
+        run: gdlint game tests
+
+  godot:
+    name: Import, tests and web export
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - name: Cache Godot and web templates
+        id: cache-godot
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.stable
+          key: godot-${{ env.GODOT_VERSION }}-web-${{ runner.os }}
+
+      - name: Download Godot and web export templates
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          mkdir -p ~/godot
+          curl -fsSL -o /tmp/godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d ~/godot
+          mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
+          # Only the web templates are kept, to keep the cache small
+          curl -fsSL -o /tmp/templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          dest=~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          mkdir -p "$dest"
+          unzip -q -j /tmp/templates.tpz 'templates/web_*' 'templates/version.txt' -d "$dest"
+          rm /tmp/godot.zip /tmp/templates.tpz
+          ls -la "$dest"
+
+      - name: Add Godot to PATH
+        run: |
+          chmod +x ~/godot/godot
+          echo "$HOME/godot" >> "$GITHUB_PATH"
+          godot --version
+
+      - name: Install GUT
+        run: |
+          git clone --depth 1 --branch "v${GUT_VERSION}" https://github.com/bitwes/Gut.git /tmp/gut
+          mkdir -p addons
+          cp -r /tmp/gut/addons/gut addons/gut
+
+      - name: Import project
+        run: godot --headless --import
+
+      - name: Run GUT tests
+        run: |
+          mkdir -p build/test-results
+          godot --headless -s addons/gut/gut_cmdln.gd
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: build/test-results/
+          if-no-files-found: warn
+
+      - name: Export web build
+        run: |
+          mkdir -p build/web
+          godot --headless --export-release "Web" build/web/index.html
+          test -f build/web/index.html
+          test -f build/web/index.pck
+          test -f build/web/index.wasm
+
+      - name: Check web download budget
+        run: |
+          size=$(du -sb build/web | cut -f1)
+          limit=$((WEB_BUDGET_MB * 1024 * 1024))
+          echo "Web build: $((size / 1024 / 1024)) MB / ${WEB_BUDGET_MB} MB"
+          echo "Web build size: $((size / 1024 / 1024)) MB / ${WEB_BUDGET_MB} MB" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$size" -gt "$limit" ]; then
+            echo "::error::Web build exceeds the ${WEB_BUDGET_MB} MB budget (constitution 2.2)"
+            exit 1
+          fi
+
+      - name: Upload web build
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-build
+          path: build/web/
+          retention-days: 14

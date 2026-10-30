@@ -22,3 +22,6 @@ desktop.ini
 .vscode/
 .idea/
 *.tmp
+
+# GUT is installed per machine (AssetLib) and in CI, pinned in .github/workflows/ci.yml
+addons/gut/
