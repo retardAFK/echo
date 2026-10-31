@@ -15,7 +15,7 @@
 - [x] T-005 — Map de test en greybox
   - Résultat vérifiable : `greybox_test.tscn` devient la scène principale, contient marche de 0,25 m, muret de 0,6 m, passage de 1,2 m, couloir et angles ; tous les critères de déplacement de la spec se vérifient dedans
   - Dépend de : T-004
-- [ ] T-006 — Résolution interne 640 × 360 et compteur FPS de debug
+- [x] T-006 — Résolution interne 640 × 360 et compteur FPS de debug
   - Résultat vérifiable : rendu en 640 × 360 agrandi en pixels nets, compteur FPS avec F3, 60 images/s dans Chrome sur la machine de référence (vérification à la main par Maxime)
   - Dépend de : T-005
 
@@ -25,3 +25,4 @@
 - T-003 (31/10/2026) : actions d'entrée en touches physiques, scène `player.tscn` (marche, regard souris, capture au clic, Échap), sol de test dans `main.tscn`, 8 tests GUT, PR #5.
 - T-004 (31/10/2026) : course (Maj), accroupi en bascule (C) avec transition douce, impossible de se relever sous un plafond bas, montée des marches ≤ 0,3 m, balancement de tête, signal `gait_changed`, 5 tests GUT, PR #6.
 - T-005 (31/10/2026) : `greybox_test.tscn` devient la scène principale (escalier en marches de 0,25 m, marche isolée, muret de 0,6 m, passage bas de 1,2 m, couloir de 1,3 m, angle, piliers), `main.tscn` supprimée, 3 tests GUT, PR #7.
+- T-006 (31/10/2026) : résolution interne 640 × 360 agrandie en entier (pixels nets), compteur FPS + allure + vitesse (F3, visible d'office en build debug), 5 tests GUT, PR #8. Reste à vérifier à la main : 60 images/s dans Chrome sur la machine de référence.
