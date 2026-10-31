@@ -20,3 +20,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
 current = true
+
+[node name="HeadroomCast" type="ShapeCast3D" parent="."]
+max_results = 1

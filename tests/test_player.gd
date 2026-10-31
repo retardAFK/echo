@@ -22,7 +22,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	for action in ["move_forward", "move_back", "move_left", "move_right"]:
+	for action in ["move_forward", "move_back", "move_left", "move_right", "sprint"]:
 		Input.action_release(action)
 
 
@@ -77,3 +77,68 @@ func test_look_never_flips_over() -> void:
 	assert_almost_eq(_player.get_pitch(), deg_to_rad(_player.settings.pitch_limit), EPSILON)
 	_player.look(Vector2(0.0, 100000.0))
 	assert_almost_eq(_player.get_pitch(), -deg_to_rad(_player.settings.pitch_limit), EPSILON)
+
+
+func _add_box(size: Vector3, center: Vector3) -> StaticBody3D:
+	var body := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = size
+	shape.shape = box
+	body.add_child(shape)
+	body.position = center
+	add_child_autofree(body)
+	return body
+
+
+func test_sprints_faster_and_signals_gait() -> void:
+	watch_signals(_player)
+	Input.action_press("move_forward")
+	Input.action_press("sprint")
+	await wait_physics_frames(ONE_SECOND_FRAMES)
+	assert_eq(_player.get_gait(), PlayerMotion.Gait.SPRINT)
+	assert_almost_eq(_horizontal_speed(), _player.settings.sprint_speed, 0.05)
+	assert_signal_emitted_with_parameters(_player, "gait_changed", [PlayerMotion.Gait.SPRINT])
+
+
+func test_crouch_lowers_eyes_and_slows_down() -> void:
+	_player.toggle_crouch()
+	Input.action_press("move_forward")
+	await wait_physics_frames(ONE_SECOND_FRAMES)
+	assert_eq(_player.get_gait(), PlayerMotion.Gait.CROUCH)
+	assert_almost_eq(_player.get_height(), _player.settings.crouch_height, EPSILON)
+	assert_almost_eq(_horizontal_speed(), _player.settings.crouch_speed, 0.05)
+	_player.toggle_crouch()
+	await wait_physics_frames(ONE_SECOND_FRAMES)
+	assert_eq(_player.get_gait(), PlayerMotion.Gait.WALK)
+	assert_almost_eq(_player.get_height(), _player.settings.standing_height, EPSILON)
+
+
+func test_cannot_stand_under_low_ceiling() -> void:
+	_player.toggle_crouch()
+	await wait_physics_frames(ONE_SECOND_FRAMES)
+	# A 1.2 m high passage, as in the spec, right above the crouched player.
+	var slab := _add_box(Vector3(4.0, 0.3, 4.0), Vector3(0.0, 1.35, 0.0))
+	_player.toggle_crouch()
+	await wait_physics_frames(ONE_SECOND_FRAMES)
+	assert_eq(_player.get_gait(), PlayerMotion.Gait.CROUCH)
+	assert_almost_eq(_player.get_height(), _player.settings.crouch_height, EPSILON)
+	slab.free()
+	await wait_physics_frames(ONE_SECOND_FRAMES)
+	assert_eq(_player.get_gait(), PlayerMotion.Gait.WALK)
+
+
+func test_climbs_low_step() -> void:
+	_add_box(Vector3(4.0, 0.25, 20.0), Vector3(0.0, 0.125, -11.0))
+	Input.action_press("move_forward")
+	await wait_physics_frames(ONE_SECOND_FRAMES * 2)
+	assert_lt(_player.global_position.z, -1.5, "Player must be on the step")
+	assert_almost_eq(_player.global_position.y, 0.25, 0.05)
+
+
+func test_blocked_by_low_wall() -> void:
+	_add_box(Vector3(4.0, 0.6, 0.3), Vector3(0.0, 0.3, -2.0))
+	Input.action_press("move_forward")
+	await wait_physics_frames(ONE_SECOND_FRAMES * 2)
+	assert_gt(_player.global_position.z, -2.0, "Player must stay behind the wall")
+	assert_almost_eq(_player.global_position.y, 0.0, 0.05)

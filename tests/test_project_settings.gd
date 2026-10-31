@@ -24,7 +24,9 @@ func test_main_scene_instantiates() -> void:
 
 func test_movement_actions_use_physical_keys() -> void:
 	# Physical key codes give ZQSD on AZERTY and WASD on QWERTY (spec S-001).
-	for action in ["move_forward", "move_back", "move_left", "move_right", "release_mouse"]:
+	for action in [
+		"move_forward", "move_back", "move_left", "move_right", "sprint", "crouch", "release_mouse"
+	]:
 		assert_true(InputMap.has_action(action), "Missing input action: %s" % action)
 		for event in InputMap.action_get_events(action):
 			if event is InputEventKey:
