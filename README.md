@@ -24,6 +24,17 @@ git clone https://github.com/retardAFK/echo.git
 1. Ouvre Godot, clique sur **Importer**, choisis le fichier `project.godot` à la racine du dépôt.
 2. Appuie sur **F5** pour lancer la scène principale (`game/maps/main.tscn`).
 
+### Commandes
+
+| Action | Touche |
+|---|---|
+| Se déplacer | ZQSD (AZERTY) ou WASD (QWERTY), ou les flèches |
+| Regarder | Souris (clic dans le jeu pour la capturer) |
+| Courir | Maj (maintenir) |
+| S'accroupir / se relever | C |
+| Libérer la souris | Échap |
+| Compteur FPS (debug) | F3 |
+
 Le projet utilise le moteur de rendu **Compatibility**, le seul accepté par l'export web.
 
 ## Exporter pour le navigateur
