@@ -3,7 +3,7 @@
 - [x] T-001 — Rédiger la spec, le plan et les tâches de S-001
   - Résultat vérifiable : spec validée par Maxime, clarifications répondues
   - Dépend de : —
-- [ ] T-002 — Réglages du joueur et logique de mouvement testable
+- [x] T-002 — Réglages du joueur et logique de mouvement testable
   - Résultat vérifiable : `PlayerSettings` + `player_settings.tres`, `PlayerMotion`, tests GUT (vitesse par allure, diagonale normalisée, limite du regard, accélération)
   - Dépend de : T-001
 - [ ] T-003 — Actions d'entrée et scène joueur : marche et regard souris
@@ -21,3 +21,4 @@
 
 ## Compte rendu
 - T-001 (31/10/2026) : spec, plan et tâches rédigés et validés (propositions retenues), PR #3.
+- T-002 (31/10/2026) : `PlayerSettings` + `player_settings.tres`, `PlayerMotion`, 19 tests GUT, PR #4.
