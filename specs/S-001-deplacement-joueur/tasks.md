@@ -12,7 +12,7 @@
 - [x] T-004 — Course, accroupi et signal d'allure
   - Résultat vérifiable : course avec Maj, accroupi avec C, impossible de se relever sous un plafond bas, signal `gait_changed` testé
   - Dépend de : T-003
-- [ ] T-005 — Map de test en greybox
+- [x] T-005 — Map de test en greybox
   - Résultat vérifiable : `greybox_test.tscn` devient la scène principale, contient marche de 0,25 m, muret de 0,6 m, passage de 1,2 m, couloir et angles ; tous les critères de déplacement de la spec se vérifient dedans
   - Dépend de : T-004
 - [ ] T-006 — Résolution interne 640 × 360 et compteur FPS de debug
@@ -24,3 +24,4 @@
 - T-002 (31/10/2026) : `PlayerSettings` + `player_settings.tres`, `PlayerMotion`, 19 tests GUT, PR #4.
 - T-003 (31/10/2026) : actions d'entrée en touches physiques, scène `player.tscn` (marche, regard souris, capture au clic, Échap), sol de test dans `main.tscn`, 8 tests GUT, PR #5.
 - T-004 (31/10/2026) : course (Maj), accroupi en bascule (C) avec transition douce, impossible de se relever sous un plafond bas, montée des marches ≤ 0,3 m, balancement de tête, signal `gait_changed`, 5 tests GUT, PR #6.
+- T-005 (31/10/2026) : `greybox_test.tscn` devient la scène principale (escalier en marches de 0,25 m, marche isolée, muret de 0,6 m, passage bas de 1,2 m, couloir de 1,3 m, angle, piliers), `main.tscn` supprimée, 3 tests GUT, PR #7.
