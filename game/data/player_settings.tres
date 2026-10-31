@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PlayerSettings" format=3]
+
+[ext_resource type="Script" path="res://game/data/player_settings.gd" id="1_settings"]
+
+[resource]
+script = ExtResource("1_settings")
+walk_speed = 3.0
+sprint_speed = 5.5
+crouch_speed = 1.5
+acceleration = 30.0
+deceleration = 40.0
+mouse_sensitivity = 0.15
+pitch_limit = 89.0
+standing_height = 1.75
+crouch_height = 1.0
+capsule_radius = 0.3
+eye_offset = 0.15
+crouch_transition_time = 0.15
+max_step_height = 0.3
+head_bob_enabled = true
+head_bob_walk_amplitude = 0.03
+head_bob_sprint_amplitude = 0.06
+head_bob_cycles_per_meter = 0.35
