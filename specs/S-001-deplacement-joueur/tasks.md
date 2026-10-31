@@ -9,7 +9,7 @@
 - [x] T-003 — Actions d'entrée et scène joueur : marche et regard souris
   - Résultat vérifiable : dans une scène vide avec un sol, on marche en ZQSD/WASD et on regarde à la souris, capture au clic, libération sur Échap
   - Dépend de : T-002
-- [ ] T-004 — Course, accroupi et signal d'allure
+- [x] T-004 — Course, accroupi et signal d'allure
   - Résultat vérifiable : course avec Maj, accroupi avec C, impossible de se relever sous un plafond bas, signal `gait_changed` testé
   - Dépend de : T-003
 - [ ] T-005 — Map de test en greybox
@@ -23,3 +23,4 @@
 - T-001 (31/10/2026) : spec, plan et tâches rédigés et validés (propositions retenues), PR #3.
 - T-002 (31/10/2026) : `PlayerSettings` + `player_settings.tres`, `PlayerMotion`, 19 tests GUT, PR #4.
 - T-003 (31/10/2026) : actions d'entrée en touches physiques, scène `player.tscn` (marche, regard souris, capture au clic, Échap), sol de test dans `main.tscn`, 8 tests GUT, PR #5.
+- T-004 (31/10/2026) : course (Maj), accroupi en bascule (C) avec transition douce, impossible de se relever sous un plafond bas, montée des marches ≤ 0,3 m, balancement de tête, signal `gait_changed`, 5 tests GUT, PR #6.
