@@ -1,6 +1,6 @@
 # Plan — S-001
 
-**Statut** : proposé, à valider après les clarifications de la spec
+**Statut** : validé (31/10/2026)
 
 ## Approche technique
 - **Scène joueur** `game/entities/player/player.tscn` + `player.gd` (classe `Player`) :
@@ -37,7 +37,7 @@ Valeurs de départ, à ajuster en playtest (Q1, Q5).
 
 ## Impact sur la performance
 - Map de test : moins de 50 objets, moins de 5 000 triangles, environ 20 draw calls, 1 lumière. Très loin des budgets (150 000 triangles, 300 draw calls, 4 lumières).
-- Résolution interne 640 × 360 (si Q6 validée) : `display/window/stretch/mode = "viewport"`, `scale_mode = "integer"`, fenêtre de 1280 × 720 par défaut. Ça réduit fortement le coût de rendu.
+- Résolution interne 640 × 360 (Q6 validée) : `display/window/stretch/mode = "viewport"`, `scale_mode = "integer"`, fenêtre de 1280 × 720 par défaut. Ça réduit fortement le coût de rendu.
 - Aucun asset ajouté : la taille du build Web ne bouge presque pas.
 
 ## Risques et alternatives
@@ -52,4 +52,4 @@ Valeurs de départ, à ajuster en playtest (Q1, Q5).
 - Communication par signaux : `gait_changed` pour S-002.
 - Code en anglais, textes joueur en français via des clés de traduction : le seul texte affiché est le compteur debug, qui n'est pas destiné au joueur.
 - Logique testable couverte par GUT : `PlayerMotion` et `PlayerSettings`.
-- Écart possible : la résolution de 640 × 360 arrive avant la phase 5 (Q6).
+- Écart validé : la résolution de 640 × 360 arrive avant la phase 5 (Q6).

@@ -1,6 +1,6 @@
 # S-001 — Déplacement du joueur en vue subjective
 
-**Statut** : en clarification
+**Statut** : validée (31/10/2026)
 **Piliers servis** : P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : 1 — Le joueur dans une boîte grise
 
@@ -37,17 +37,17 @@ J'ouvre le jeu dans mon navigateur. Je clique dans la fenêtre : la souris dispa
 - Le menu des options (sensibilité réglable en jeu) : phase 11.
 - La manette.
 - Les sons de pas et le modèle 3D du joueur.
-- Le style visuel PS1 (S-005), sauf la résolution interne de 640 × 360 si la question 6 est validée.
+- Le style visuel PS1 (S-005), sauf la résolution interne de 640 × 360 (Q6).
 
 ## Clarifications
-Chaque question a une proposition. Il suffit de répondre « ok » ou de corriger.
+Le 31/10/2026, Maxime a demandé de continuer sans corriger les propositions : elles sont retenues. Les valeurs restent réglables dans `player_settings.tres` après playtest.
 
-- Q1 : Vitesses de départ ? → Proposition : marche 3,0 m/s, course 5,5 m/s, accroupi 1,5 m/s. Ajustées en playtest.
-- Q2 : Course en maintenant Maj, ou en bascule ? → Proposition : maintenir Maj.
-- Q3 : Touche d'accroupi ? → Proposition : C en bascule (un appui pour s'accroupir, un pour se relever). On évite Ctrl, car dans un navigateur Ctrl + W ferme l'onglet.
-- Q4 : Pas de saut du tout ? → Proposition : pas de saut, le jeu est une traque, pas un jeu de plateforme. Les marches basses se montent seules.
-- Q5 : Balancement de la caméra en marchant (« head bob ») ? → Proposition : léger, plus marqué en course, et désactivable dans le fichier de réglage (certaines personnes en ont la nausée).
-- Q6 : Appliquer dès maintenant la résolution interne de 640 × 360 de la constitution (2.2) ? → Proposition : oui, c'est un simple réglage du projet, ça aide les performances et ça évite de régler les vitesses de souris sur une image qui changera en phase 5.
+- Q1 : Vitesses de départ ? → Proposition : marche 3,0 m/s, course 5,5 m/s, accroupi 1,5 m/s. Ajustées en playtest. → R : retenu (31/10/2026).
+- Q2 : Course en maintenant Maj, ou en bascule ? → Proposition : maintenir Maj. → R : retenu (31/10/2026).
+- Q3 : Touche d'accroupi ? → Proposition : C en bascule (un appui pour s'accroupir, un pour se relever). On évite Ctrl, car dans un navigateur Ctrl + W ferme l'onglet. → R : retenu (31/10/2026).
+- Q4 : Pas de saut du tout ? → Proposition : pas de saut, le jeu est une traque, pas un jeu de plateforme. Les marches basses se montent seules. → R : retenu (31/10/2026).
+- Q5 : Balancement de la caméra en marchant (« head bob ») ? → Proposition : léger, plus marqué en course, et désactivable dans le fichier de réglage (certaines personnes en ont la nausée). → R : retenu (31/10/2026).
+- Q6 : Appliquer dès maintenant la résolution interne de 640 × 360 de la constitution (2.2) ? → Proposition : oui, c'est un simple réglage du projet, ça aide les performances et ça évite de régler les vitesses de souris sur une image qui changera en phase 5. → R : retenu (31/10/2026).
 
 ## Notes de playtest
 - (à remplir)

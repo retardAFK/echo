@@ -17,7 +17,7 @@
   - Dépend de : T-004
 - [ ] T-006 — Résolution interne 640 × 360 et compteur FPS de debug
   - Résultat vérifiable : rendu en 640 × 360 agrandi en pixels nets, compteur FPS avec F3, 60 images/s dans Chrome sur la machine de référence (vérification à la main par Maxime)
-  - Dépend de : T-005, et Q6 de la spec
+  - Dépend de : T-005
 
 ## Compte rendu
-- T-001 (31/10/2026) : spec, plan et tâches rédigés, en attente des réponses aux clarifications.
+- T-001 (31/10/2026) : spec, plan et tâches rédigés et validés (propositions retenues), PR #3.
