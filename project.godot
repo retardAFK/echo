@@ -7,7 +7,7 @@ config_version=5
 [application]
 
 config/name="Écho"
-run/main_scene="res://game/maps/main.tscn"
+run/main_scene="res://game/maps/greybox_test.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [input]
