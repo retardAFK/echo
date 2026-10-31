@@ -20,3 +20,12 @@ func test_main_scene_instantiates() -> void:
 	var root := packed.instantiate()
 	add_child_autofree(root)
 	assert_true(root is Node3D, "Main scene root must be a Node3D")
+
+
+func test_movement_actions_use_physical_keys() -> void:
+	# Physical key codes give ZQSD on AZERTY and WASD on QWERTY (spec S-001).
+	for action in ["move_forward", "move_back", "move_left", "move_right", "release_mouse"]:
+		assert_true(InputMap.has_action(action), "Missing input action: %s" % action)
+		for event in InputMap.action_get_events(action):
+			if event is InputEventKey:
+				assert_ne(event.physical_keycode, KEY_NONE, "%s must use a physical key" % action)
