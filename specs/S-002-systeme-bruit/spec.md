@@ -1,6 +1,6 @@
 # S-002 — Le système de bruit
 
-**Statut** : en clarification
+**Statut** : validée (03/11/2026)
 **Piliers servis** : P1 (le son est la vision), P2 (le dilemme permanent)
 **Phase** : 2 — Le système de bruit
 
@@ -38,13 +38,15 @@ En appuyant sur F4, je vois les bruits : chaque pas dessine au sol un cercle ora
 - Le bruit d'atterrissage après une chute.
 
 ## Clarifications
-Chaque question a une proposition. Il suffit de répondre « ok » ou de corriger.
+Le 03/11/2026, Maxime a validé la gestion des bruits proposée : les propositions Q1 à Q5 sont retenues.
 
-- Q1 : Que fait un mur exactement ? La section 6.2 dit « un mur divise l'intensité par deux ». → Proposition : chaque mur entre le bruit et l'auditeur **divise la portée par deux**. Une course (14 m) derrière un mur s'entend à 7 m, derrière deux murs à 3,5 m. Simple à comprendre et à régler. Note : l'exemple du modèle de spec (« à 10 m derrière un mur, il m'entend courir ») ne marcherait pas avec cette règle ; il faudrait alors un facteur de 0,75 au lieu de 0,5.
-- Q2 : Un bruit par pas, ou un bruit continu ? → Proposition : **un bruit par pas**, calculé sur la distance parcourue (environ un pas tous les 0,7 m en marchant, 0,9 m en courant, 0,5 m accroupi). Ça colle à la future idée « le monstre voit des taches orange qui s'effacent » (section 6.3).
-- Q3 : Comment lire la jauge ? → Proposition : de 0 à 10, où 10 correspond à un bruit de 15 m. La course (14 m) donne donc 9, la marche 3, l'accroupi 1. Barre orange en bas à gauche, toujours visible pour le chassé.
-- Q4 : Les cercles de debug ? → Proposition : cachés par défaut, F4 pour les afficher, y compris dans le build Web (pour tester).
-- Q5 : Les micros de test ? → Proposition : 3 micros dans la map de test (un en terrain dégagé à 10 m du départ, un derrière un mur, un dans le couloir), visibles seulement avec F4. Ils serviront de « faux monstre » jusqu'à S-003.
+- Q1 : Que fait un mur exactement ? La section 6.2 dit « un mur divise l'intensité par deux ». → Proposition : chaque mur entre le bruit et l'auditeur **divise la portée par deux**. Une course (14 m) derrière un mur s'entend à 7 m, derrière deux murs à 3,5 m. Simple à comprendre et à régler. Note : l'exemple du modèle de spec (« à 10 m derrière un mur, il m'entend courir ») ne marcherait pas avec cette règle ; il faudrait alors un facteur de 0,75 au lieu de 0,5. → R : retenu (03/11/2026).
+- Q2 : Un bruit par pas, ou un bruit continu ? → Proposition : **un bruit par pas**, calculé sur la distance parcourue (environ un pas tous les 0,7 m en marchant, 0,9 m en courant, 0,5 m accroupi). Ça colle à la future idée « le monstre voit des taches orange qui s'effacent » (section 6.3). → R : retenu (03/11/2026).
+- Q3 : Comment lire la jauge ? → Proposition : de 0 à 10, où 10 correspond à un bruit de 15 m. La course (14 m) donne donc 9, la marche 3, l'accroupi 1. Barre orange en bas à gauche, toujours visible pour le chassé. → R : retenu (03/11/2026).
+- Q4 : Les cercles de debug ? → Proposition : cachés par défaut, F4 pour les afficher, y compris dans le build Web (pour tester). → R : retenu (03/11/2026).
+- Q5 : Les micros de test ? → Proposition : 3 micros dans la map de test (un en terrain dégagé à 10 m du départ, un derrière un mur, un dans le couloir), visibles seulement avec F4. Ils serviront de « faux monstre » jusqu'à S-003. → R : retenu (03/11/2026).
+
+- Q6 (ajout du 03/11/2026) : chaque bruit porte un **type** (pas, porte, objet…) pour que le monstre puisse plus tard réagir selon ce qu'il entend. En S-002, seul le type « pas » existe. → R : retenu, sans objection de Maxime à la proposition.
 
 ## Notes de playtest
 - (à remplir)

@@ -20,4 +20,4 @@
   - Dépend de : T-010
 
 ## Compte rendu
-- T-007 (03/11/2026) : S-001 marquée livrée (60 images/s confirmé par Maxime), spec, plan et tâches de S-002 rédigés, en attente des réponses aux clarifications.
+- T-007 (03/11/2026) : S-001 marquée livrée (60 images/s confirmé par Maxime), spec, plan et tâches de S-002 rédigés, validés par Maxime (propositions retenues, ajout du type de bruit), PR #9.

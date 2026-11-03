@@ -1,12 +1,12 @@
 # Plan — S-002
 
-**Statut** : proposé, à valider après les clarifications de la spec
+**Statut** : validé (03/11/2026)
 
 ## Approche technique
-- **`NoiseEvent`** (`game/autoload/noise_event.gd`, `RefCounted`) : position, portée en mètres, source (nœud émetteur), date d'émission. Pas de logique.
+- **`NoiseEvent`** (`game/autoload/noise_event.gd`, `RefCounted`) : type (`NoiseType` : `FOOTSTEP` pour l'instant), position, portée en mètres, source (nœud émetteur), date d'émission. Pas de logique.
 - **`NoiseMath`** (`game/autoload/noise_math.gd`, fonctions statiques, sans scène) : portée perçue selon le nombre de murs, « est-ce que ce point entend ce bruit », niveau de jauge à partir d'une portée, décroissance de la jauge. Entièrement couvert par GUT.
 - **`NoiseBus`** (autoload, `game/autoload/noise_bus.gd`, constitution 2.4) :
-  - `emit_noise(position, range, source)` crée un `NoiseEvent` et émet le signal `noise_emitted(event)`. Toute source de bruit passe par lui.
+  - `emit_noise(type, position, range, source)` crée un `NoiseEvent` et émet le signal `noise_emitted(event)`. Toute source de bruit passe par lui.
   - `walls_between(from, to)` compte les murs avec des lancers de rayons successifs sur la couche physique « murs ».
   - `perceived_range(event, listener_position)` combine les deux via `NoiseMath`.
 - **Couches physiques** nommées dans `project.godot` : 1 « monde » (sols), 2 « murs » (ce qui étouffe le son), 3 « joueur ». Les blocs verticaux de la greybox passent sur la couche « murs » ; les marches et le sol non.
