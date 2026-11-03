@@ -275,9 +275,10 @@ Modificateurs : un **mur** divise l'intensité par deux, l'**eau** la double, la
 - **Vision normale** : le monstre voit comme le chassé, de nuit et dans le brouillard (D-008). Il n'y a ni sonar, ni cri, ni clic.
 - **Bruits** : chaque bruit qu'il entend (portées de la section 6.2, atténuées par les murs) apparaît en orange à sa position, avec sa distance, et s'efface en 3 s.
 - **Scan de bâtiment (focus)** : il vise un bâtiment et maintient une touche. Après 1 s de concentration, il entend en direct tous les bruits de ce bâtiment, même ceux trop faibles pour lui parvenir normalement. Pendant le scan, il est immobile.
-  - Les chassés dans le bâtiment sentent le scan (grondement sourd, lumières qui vacillent). Un chassé qui se fige n'apparaît pas.
-  - Limite proposée : une jauge de concentration de 8 s de scan, qui se recharge en 45 s, et qu'on ne peut pas lancer sous 25 % (Q-008).
-- **Discrétion (proposée, Q-009)** : le monstre suit le même système de bruit que le chassé, mais en plus discret. Il est inaudible quand il rôde lentement, s'entend de près quand il marche (environ 3 m), et de loin quand il court (environ 12 m). Son souffle s'entend à moins de 2 m. Le chassé n'est donc jamais prévenu de loin d'un monstre patient, mais un monstre pressé se trahit.
+  - **Alerte discrète** : dans le bâtiment scanné, les lumières vacillent. Aucun message à l'écran : un chassé qui regarde ailleurs ou qui est dans le noir peut la rater.
+  - **Se figer a un prix** : un chassé immobile et silencieux n'apparaît pas, mais le scan entend le souffle d'un chassé essoufflé (environ 10 s après une course), et lâcher une quête en cours (tableau électrique, porte à forcer) fait perdre une partie de sa progression.
+  - **Limite** : une jauge de concentration de 8 s de scan au total, qui se recharge en 45 s, et qu'on ne peut pas lancer sous 25 %.
+- **Discrétion** : le monstre suit le même système de bruit que le chassé, mais en plus discret. Il est inaudible quand il rôde lentement, s'entend de près quand il marche (environ 3 m), et de loin quand il court (environ 12 m). Son souffle s'entend à moins de 2 m. Le chassé n'est donc jamais prévenu de loin d'un monstre patient, mais un monstre pressé se trahit.
 
 ### 6.4 Attracteurs et zones
 
@@ -496,6 +497,7 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-006 | 29/10/2026 | Prototype solo contre IA avant tout multijoueur | Valider le fun avant la partie la plus difficile |
 | D-007 | 30/10/2026 | Priorité à un jeu léger et très optimisé : le budget de 60 Mo s'applique à la taille **non compressée** du build Web (le moteur seul en pèse déjà 38), et la CI bloque toute PR qui le dépasse | Aucune lourdeur, chargement rapide dans le navigateur, sur la machine de référence comme ailleurs |
 | D-008 | 03/11/2026 | Le monstre voit normalement. Son atout : les bruits lui donnent la position et la distance des chassés, et il peut scanner un bâtiment pour en entendre tous les bruits en direct. Le chassé n'a que sa ruse et l'environnement. La contamination est supprimée, l'hôpital reste un lieu prévu. | Rôle du monstre plus agréable et moins lassant que l'écran noir à sonar ; jeu plus lisible pour les deux camps |
+| D-009 | 03/11/2026 | Scan de bâtiment limité par une jauge (8 s, recharge 45 s, seuil 25 %), alerte discrète par les lumières, se figer a un prix (souffle après une course, progression de quête perdue). Monstre discret : inaudible en rôdant, 3 m en marche, 12 m en course, souffle à 2 m | Le scan doit être un pari et non une victoire automatique, et se figer ne doit pas suffire |
 
 ### 10.2 Questions ouvertes
 
@@ -506,5 +508,5 @@ Points vérifiés, et écarts éventuels à faire valider.
 - [ ] **Q-005** : Multijoueur entre amis seulement, ou matchmaking public ?
 - [ ] **Q-006** : Le PC de développement est fourni par l'employeur. Faut-il un PC personnel pour ce projet ?
 - [ ] **Q-007** : Projet gratuit ou payant à terme (itch.io, Steam) ? Lien avec la structure envisagée pour publier des applications.
-- [ ] **Q-008** : Limite du scan de bâtiment : jauge de concentration (proposée) ou nombre de scans par partie ?
-- [ ] **Q-009** : Discrétion du monstre : portées de ses propres bruits, et le scan doit-il prévenir les chassés ?
+- [x] **Q-008** : Limite du scan de bâtiment → jauge de concentration (D-009).
+- [x] **Q-009** : Discrétion du monstre et alerte du scan → voir D-009.
