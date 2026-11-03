@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/noise_probe/noise_probe.gd" id="1_probe"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_probe"]
+radius = 0.2
+height = 0.4
+radial_segments = 12
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="Mat_probe_idle"]
+shading_mode = 0
+albedo_color = Color(0.6, 0.6, 0.6, 1)
+
+[node name="NoiseProbe" type="Node3D"]
+script = ExtResource("1_probe")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_probe")
+material_override = SubResource("Mat_probe_idle")

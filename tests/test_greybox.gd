@@ -26,6 +26,16 @@ func test_map_stays_light() -> void:
 	assert_lt(meshes.size(), MAX_MESHES)
 
 
-func test_every_mesh_has_a_collision() -> void:
-	for mesh: MeshInstance3D in _map.find_children("*", "MeshInstance3D", true, false):
+func test_every_block_is_solid() -> void:
+	var blocks := _map.get_node("Blocks")
+	for mesh: MeshInstance3D in blocks.find_children("*", "MeshInstance3D", true, false):
 		assert_true(mesh.get_parent() is StaticBody3D, "%s must be solid" % mesh.name)
+
+
+func test_walls_muffle_and_floors_do_not() -> void:
+	# Spec S-002: vertical blocks are on the "walls" layer, floors and steps are not.
+	var walls_layer := 1 << 1
+	assert_eq(_map.get_node("Blocks/WallNorth").collision_layer, walls_layer)
+	assert_eq(_map.get_node("Blocks/NoiseWall").collision_layer, walls_layer)
+	assert_ne(_map.get_node("Blocks/Floor").collision_layer, walls_layer)
+	assert_ne(_map.get_node("Blocks/Stair1").collision_layer, walls_layer)

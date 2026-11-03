@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/ui/noise_debug.gd" id="1_noise_debug"]
+
+[node name="NoiseDebug" type="Node3D"]
+script = ExtResource("1_noise_debug")
