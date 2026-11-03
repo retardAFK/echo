@@ -5,7 +5,7 @@
 **Phase** : 2 — Le système de bruit
 
 ## Pourquoi
-Le monstre est aveugle : il ne connaîtra le chassé que par le bruit qu'il fait. Avant de construire le monstre (S-003), il faut que chaque pas du joueur produise un bruit mesurable, que ce bruit porte plus ou moins loin selon l'allure, et que les murs l'étouffent. Le joueur doit aussi sentir ce bruit, pour faire le choix permanent entre aller vite et rester discret.
+Le monstre repère le chassé par le bruit qu'il fait (D-008). Avant de construire le monstre (S-003), il faut que chaque pas du joueur produise un bruit mesurable, que ce bruit porte plus ou moins loin selon l'allure, et que les murs l'étouffent. Le joueur doit aussi sentir ce bruit, pour faire le choix permanent entre aller vite et rester discret.
 
 ## Ce que vit le joueur
 Je marche dans la map de test. En bas de l'écran, une jauge orange monte un peu à chaque pas. Accroupi, elle bouge à peine. En courant, elle grimpe presque au maximum. Quand je m'arrête, elle redescend doucement jusqu'à zéro.

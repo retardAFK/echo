@@ -24,14 +24,14 @@
 ## 1. Vision du jeu
 
 **Pitch en une phrase**
-Une chasse à l'homme asymétrique dans des espaces liminaux, où le monstre est aveugle et ne perçoit le monde que par le son.
+Une chasse à l'homme asymétrique dans des espaces liminaux, où chaque bruit trahit la position des chassés auprès du monstre.
 
 **Les 4 piliers** (toute fonctionnalité doit servir au moins un pilier, sinon elle est refusée)
 
 | # | Pilier | Ce que ça veut dire concrètement |
 |---|---|---|
-| P1 | **Le son est la vision** | Chaque action du chassé fait du bruit. Le monstre ne voit que les sons et son écholocalisation. |
-| P2 | **Le dilemme permanent** | Le monstre doit crier pour voir, mais son cri le trahit. Le chassé doit bouger pour gagner, mais bouger fait du bruit. |
+| P1 | **Le son trahit** | Chaque action du chassé fait du bruit, et chaque bruit donne sa position et sa distance au monstre. Le chassé n'a que sa ruse et l'environnement pour brouiller les pistes. |
+| P2 | **Le dilemme permanent** | Le monstre doit s'arrêter pour scanner un bâtiment, et son scan prévient ceux qui sont dedans. Le chassé doit bouger pour réussir ses quêtes, mais bouger fait du bruit. |
 | P3 | **L'inquiétante familiarité** | Lieux réels et vides (cité HLM, hôpital, gare, piscine), de nuit, dans le brouillard. Peu de monstre visible, beaucoup de tension. |
 | P4 | **Le rétro qui dérange** | Style low-poly façon PS1 et *Neyasnoe* : basse résolution, textures pixelisées, sommets qui tremblent. |
 
@@ -85,7 +85,7 @@ Toute fonctionnalité qui dépasse un budget doit être simplifiée ou faire l'o
 - **Textures** : 64 ou 128 px pour les petits objets, 256 px pour les bâtiments, 512 px maximum. Filtrage **Nearest** (pixels nets).
 - **Densité** : environ 64 pixels de texture par mètre, partout, pour que les pixels aient la même taille sur tous les objets.
 - **Polygones** : objet décoratif 50 à 500 triangles, bâtiment 500 à 3 000, personnage 800 à 2 500.
-- **Palette** : gris béton, ocre des lampadaires au sodium, vert néon d'hôpital, noir. Accents réservés au gameplay : **orange = bruit**, **violet = contamination**, **cyan = sonar**. Ces trois couleurs ne servent jamais pour le décor.
+- **Palette** : gris béton, ocre des lampadaires au sodium, vert néon d'hôpital, noir. Accent réservé au gameplay : **orange = bruit**. Cette couleur ne sert jamais pour le décor.
 - **Éclairage** : précalculé (baking) partout où c'est possible, brouillard obligatoire en extérieur.
 - **Le monstre ne se montre pas** côté chassé plus de 2 secondes d'affilée.
 
@@ -191,7 +191,7 @@ echo/
 │   ├── autoload/           ← services globaux (NoiseBus, GameState)
 │   ├── entities/           ← player/, monster/, door/, fuse/ … (scène + script)
 │   ├── maps/               ← une scène par map
-│   ├── shaders/            ← sonar, ps1, post-process
+│   ├── shaders/            ← ps1, post-process
 │   ├── ui/                 ← menus, HUD
 │   ├── data/               ← fichiers de réglage (.tres)
 │   └── assets/
@@ -250,10 +250,10 @@ Cette section décrit le jeu cible. Chaque point deviendra une ou plusieurs spec
 | | Chassé | Monstre |
 |---|---|---|
 | Nombre | 3 (prototype : 1, plus des IA alliées éventuelles) | 1 |
-| Vue | Vision normale, nuit et brouillard | Écran noir, voit les sons et l'écho de ses cris |
+| Vue | Vision normale, nuit et brouillard | Vision normale, nuit et brouillard, plus les bruits affichés à leur position avec leur distance |
 | Objectif | Trouver 3 fusibles, réparer le transformateur, atteindre la sortie | Attraper tous les chassés avant qu'ils ne sortent |
-| Force | Vision, lampe torche, objets de diversion | Rapide, perçoit à travers les murs, tue au contact |
-| Faiblesse | Lent, fragile, chaque action fait du bruit | Aveugle, chaque cri révèle sa position |
+| Force | Ruse, cachettes, objets de diversion et leurres, connaissance du terrain | Rapide, entend à travers les murs, scan de bâtiment, tue au contact |
+| Faiblesse | Lent, fragile, chaque action fait du bruit | Un chassé immobile et silencieux lui échappe s'il ne le voit pas ; le scan l'immobilise et prévient les chassés |
 
 ### 6.2 Le système de bruit (cœur du jeu)
 
@@ -272,22 +272,23 @@ Modificateurs : un **mur** divise l'intensité par deux, l'**eau** la double, la
 
 ### 6.3 Le monstre
 
-- **Cri (sonar large)** : révèle la géométrie sur environ 25 m pendant 1,5 s. Audible par les chassés à 40 m. Temps de recharge.
-- **Clic (sonar discret)** : environ 6 m, presque inaudible.
-- Perçoit les bruits sous forme de taches orange qui s'effacent en 3 s.
-- Perçoit les traces de contamination en violet, en continu.
+- **Vision normale** : le monstre voit comme le chassé, de nuit et dans le brouillard (D-008). Il n'y a ni sonar, ni cri, ni clic.
+- **Bruits** : chaque bruit qu'il entend (portées de la section 6.2, atténuées par les murs) apparaît en orange à sa position, avec sa distance, et s'efface en 3 s.
+- **Scan de bâtiment (focus)** : il vise un bâtiment et maintient une touche. Après 1 s de concentration, il entend en direct tous les bruits de ce bâtiment, même ceux trop faibles pour lui parvenir normalement. Pendant le scan, il est immobile.
+  - Les chassés dans le bâtiment sentent le scan (grondement sourd, lumières qui vacillent). Un chassé qui se fige n'apparaît pas.
+  - Limite proposée : une jauge de concentration de 8 s de scan, qui se recharge en 45 s, et qu'on ne peut pas lancer sous 25 % (Q-008).
 
 ### 6.4 Attracteurs et zones
 
 | Zone | Règle spéciale |
 |---|---|
-| Cité HLM (extérieur) | Vent qui masque les pas, alarmes de voiture, garage contaminant |
-| Hôpital | Vapeur et seringues contaminent, douche de décontamination |
+| Cité HLM (extérieur) | Vent qui masque les pas, alarmes de voiture, garage plein de leurres |
+| Hôpital | Ventilation qui couvre les petits bruits, moniteurs qui bipent, brancards et fauteuils roulants bruyants, nombreuses cachettes (lits, placards) |
 | Hall de gare | Écho énorme, annonces qui couvrent les bruits pendant 10 s |
 | Piscine | Bruit doublé, monstre ralenti |
 | Parking souterrain | Alarmes de voiture, leurres |
 
-**Contamination** : le chassé contaminé laisse une trace violette visible par le monstre pendant 25 s, ou jusqu'à la décontamination.
+**Ruse du chassé** : objets lancés, leurres sonores, portes fermées pour couper la vue, cachettes. Le but est de faire croire au monstre qu'on est ailleurs.
 
 ### 6.5 Boucle de partie
 
@@ -329,9 +330,9 @@ Chaque phase a un objectif, des livrables et une **définition de « terminé »
 > **Point de décision n°1** : le concept est-il amusant en gris, sans aucun graphisme ? Si non, on ajuste le game design avant d'aller plus loin.
 
 ### Phase 4 — Jouer le monstre (1 à 2 semaines)
-- Spec S-004 : shader sonar, cri et clic, affichage des bruits et des traces.
+- Spec S-004 : vue du monstre, affichage des bruits avec leur distance, scan de bâtiment et sa jauge.
 - Chassé contrôlé par une IA simple, pour tester seul.
-- **Terminé quand** : on arrive à traquer une proie IA uniquement au son.
+- **Terminé quand** : on arrive à traquer une proie IA grâce aux bruits et au scan.
 
 ### Phase 5 — Le style visuel (2 semaines)
 - Spec S-005 : rendu basse résolution, tremblement PS1, réduction des couleurs, brouillard, grain.
@@ -349,8 +350,8 @@ Chaque phase a un objectif, des livrables et une **définition de « terminé »
 
 > **Point de décision n°2** : version jouable à faire tester à 3 ou 5 personnes de confiance. On note les retours dans le journal.
 
-### Phase 8 — Contamination et attracteurs (1 à 2 semaines)
-- Spec S-008 : zone contaminante, trace, décontamination, objets de diversion, alarmes de voiture.
+### Phase 8 — Ruses et attracteurs (1 à 2 semaines)
+- Spec S-008 : objets de diversion, leurres sonores, cachettes, alarmes de voiture.
 - **Terminé quand** : chaque attracteur change réellement le comportement du monstre ou du joueur.
 
 ### Phase 9 — Personnages et animations (2 à 3 semaines)
@@ -465,7 +466,7 @@ Points vérifiés, et écarts éventuels à faire valider.
 | **Greybox** | Version d'une map en formes grises, pour tester le gameplay avant de faire du beau. |
 | **Asset** | Tout fichier de contenu : modèle 3D, texture, son, animation. |
 | **Low-poly** | Modèles avec peu de polygones, au style volontairement simple. |
-| **Shader** | Petit programme exécuté par la carte graphique pour dessiner les pixels. L'effet sonar en est un. |
+| **Shader** | Petit programme exécuté par la carte graphique pour dessiner les pixels. Le tremblement façon PS1 en est un. |
 | **Post-process** | Effets appliqués à l'image finale : grain, flou, couleurs. |
 | **Baking (précalcul)** | Calculer une fois l'éclairage et l'enregistrer dans une texture, au lieu de le recalculer à chaque image. |
 | **UV / UV2** | La façon dont une image 2D est « dépliée » sur un modèle 3D. UV2 sert à l'éclairage précalculé. |
@@ -486,13 +487,14 @@ Points vérifiés, et écarts éventuels à faire valider.
 
 | # | Date | Décision | Raison |
 |---|---|---|---|
-| D-001 | 25/10/2026 | Jeu asymétrique : monstre aveugle à écholocalisation contre chassés | Concept de départ |
+| D-001 | 25/10/2026 | Jeu asymétrique : monstre aveugle à écholocalisation contre chassés (remplacée par D-008) | Concept de départ |
 | D-002 | 25/10/2026 | Espaces liminaux réels plutôt que Backrooms officielles | Plus original, chaque lieu a sa règle sonore |
 | D-003 | 25/10/2026 | Style low-poly rétro inspiré de *Neyasnoe*, avec des maps extérieures et plus grandes | Choix artistique |
 | D-004 | 27/10/2026 | Godot plutôt que Three.js | Éditeur visuel, assets réels, export web et PC |
 | D-005 | 29/10/2026 | Méthode Spec Driven Development, assets créés avec Blender | Apprentissage du SDD, travail structuré avec l'IA |
 | D-006 | 29/10/2026 | Prototype solo contre IA avant tout multijoueur | Valider le fun avant la partie la plus difficile |
 | D-007 | 30/10/2026 | Priorité à un jeu léger et très optimisé : le budget de 60 Mo s'applique à la taille **non compressée** du build Web (le moteur seul en pèse déjà 38), et la CI bloque toute PR qui le dépasse | Aucune lourdeur, chargement rapide dans le navigateur, sur la machine de référence comme ailleurs |
+| D-008 | 03/11/2026 | Le monstre voit normalement. Son atout : les bruits lui donnent la position et la distance des chassés, et il peut scanner un bâtiment pour en entendre tous les bruits en direct. Le chassé n'a que sa ruse et l'environnement. La contamination est supprimée, l'hôpital reste un lieu prévu. | Rôle du monstre plus agréable et moins lassant que l'écran noir à sonar ; jeu plus lisible pour les deux camps |
 
 ### 10.2 Questions ouvertes
 
@@ -503,3 +505,4 @@ Points vérifiés, et écarts éventuels à faire valider.
 - [ ] **Q-005** : Multijoueur entre amis seulement, ou matchmaking public ?
 - [ ] **Q-006** : Le PC de développement est fourni par l'employeur. Faut-il un PC personnel pour ce projet ?
 - [ ] **Q-007** : Projet gratuit ou payant à terme (itch.io, Steam) ? Lien avec la structure envisagée pour publier des applications.
+- [ ] **Q-008** : Limite du scan de bâtiment : jauge de concentration (proposée) ou nombre de scans par partie ?
