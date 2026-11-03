@@ -277,6 +277,7 @@ Modificateurs : un **mur** divise l'intensité par deux, l'**eau** la double, la
 - **Scan de bâtiment (focus)** : il vise un bâtiment et maintient une touche. Après 1 s de concentration, il entend en direct tous les bruits de ce bâtiment, même ceux trop faibles pour lui parvenir normalement. Pendant le scan, il est immobile.
   - Les chassés dans le bâtiment sentent le scan (grondement sourd, lumières qui vacillent). Un chassé qui se fige n'apparaît pas.
   - Limite proposée : une jauge de concentration de 8 s de scan, qui se recharge en 45 s, et qu'on ne peut pas lancer sous 25 % (Q-008).
+- **Discrétion (proposée, Q-009)** : le monstre suit le même système de bruit que le chassé, mais en plus discret. Il est inaudible quand il rôde lentement, s'entend de près quand il marche (environ 3 m), et de loin quand il court (environ 12 m). Son souffle s'entend à moins de 2 m. Le chassé n'est donc jamais prévenu de loin d'un monstre patient, mais un monstre pressé se trahit.
 
 ### 6.4 Attracteurs et zones
 
@@ -506,3 +507,4 @@ Points vérifiés, et écarts éventuels à faire valider.
 - [ ] **Q-006** : Le PC de développement est fourni par l'employeur. Faut-il un PC personnel pour ce projet ?
 - [ ] **Q-007** : Projet gratuit ou payant à terme (itch.io, Steam) ? Lien avec la structure envisagée pour publier des applications.
 - [ ] **Q-008** : Limite du scan de bâtiment : jauge de concentration (proposée) ou nombre de scans par partie ?
+- [ ] **Q-009** : Discrétion du monstre : portées de ses propres bruits, et le scan doit-il prévenir les chassés ?
