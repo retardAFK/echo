@@ -1,6 +1,6 @@
 # S-001 — Déplacement du joueur en vue subjective
 
-**Statut** : validée (31/10/2026)
+**Statut** : livrée (03/11/2026)
 **Piliers servis** : P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : 1 — Le joueur dans une boîte grise
 
@@ -50,4 +50,4 @@ Le 31/10/2026, Maxime a demandé de continuer sans corriger les propositions : e
 - Q6 : Appliquer dès maintenant la résolution interne de 640 × 360 de la constitution (2.2) ? → Proposition : oui, c'est un simple réglage du projet, ça aide les performances et ça évite de régler les vitesses de souris sur une image qui changera en phase 5. → R : retenu (31/10/2026).
 
 ## Notes de playtest
-- (à remplir)
+- (03/11/2026) Maxime : « ça m'a l'air pas mal ». Compteur F3 à 60 images/s. Critère de fin de phase 1 atteint. Piste notée : rendre la course plus perceptible ou lui ajouter une endurance (à décider plus tard).
