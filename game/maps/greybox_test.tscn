@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" path="res://game/ui/debug_overlay.tscn" id="2_overlay"]
 [ext_resource type="PackedScene" path="res://game/ui/noise_debug.tscn" id="3_noise_debug"]
 [ext_resource type="PackedScene" path="res://game/entities/noise_probe/noise_probe.tscn" id="4_probe"]
+[ext_resource type="PackedScene" path="res://game/ui/noise_gauge.tscn" id="5_gauge"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_floor"]
 albedo_color = Color(0.22, 0.22, 0.23, 1)
@@ -430,4 +431,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, -12)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
 
 [node name="DebugOverlay" parent="." node_paths=PackedStringArray("player") instance=ExtResource("2_overlay")]
+player = NodePath("../Player")
+
+[node name="NoiseGauge" parent="." node_paths=PackedStringArray("player") instance=ExtResource("5_gauge")]
 player = NodePath("../Player")

@@ -15,7 +15,7 @@
 - [x] T-011 — Debug des bruits et micros de test
   - Résultat vérifiable : F4 affiche les anneaux, 3 micros dans la greybox qui s'allument selon les critères de la spec, murs de la greybox sur la couche « murs »
   - Dépend de : T-010
-- [ ] T-012 — Jauge de bruit dans le HUD
+- [x] T-012 — Jauge de bruit dans le HUD
   - Résultat vérifiable : jauge orange 0-10 en bas à gauche, libellé traduit, monte et redescend selon la spec, tests GUT ; 60 images/s dans Chrome vérifié par Maxime
   - Dépend de : T-010
 
@@ -25,3 +25,4 @@
 - T-009 (03/11/2026) : autoload `NoiseBus` (`emit_noise`, signal `noise_emitted`, `walls_between`, `perceived_range`, `can_hear`), couches physiques nommées (monde, murs, joueur), 6 tests GUT avec de vrais murs, PR #11.
 - T-010 (03/11/2026) : `FootstepEmitter` dans la scène joueur, un bruit par foulée selon l'allure (1 / 4 / 14 m), rien à l'arrêt ni en l'air, 5 tests GUT, PR #12.
 - T-011 (03/11/2026) : debug F4 (anneaux de portée qui s'estompent, 8 max), `NoiseProbe` et 3 micros dans la greybox (dégagé, derrière un mur, couloir), murs de la greybox sur la couche « murs », joueur sur la couche « joueur », tests GUT, PR #13.
+- T-012 (03/11/2026) : jauge `NoiseGauge` orange en bas à gauche (monte au niveau du dernier pas du joueur, redescend en 2 s), premier fichier de traduction `game/i18n/strings.csv` (clé `HUD_NOISE` = « Bruit »), 8 tests GUT, PR #16. Reste à vérifier : 60 images/s dans Chrome par Maxime.

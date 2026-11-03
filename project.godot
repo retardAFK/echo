@@ -87,3 +87,8 @@ toggle_noise_debug={
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://game/i18n/strings.fr.translation")
+locale/fallback="fr"
