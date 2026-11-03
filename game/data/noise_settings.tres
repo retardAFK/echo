@@ -15,4 +15,6 @@ max_walls_counted = 4
 gauge_full_range = 15.0
 gauge_decay_time = 2.0
 debug_ring_lifetime = 3.0
+debug_probe_flash_time = 1.0
+noise_color = Color(1, 0.55, 0.1, 1)
 emit_height = 0.3

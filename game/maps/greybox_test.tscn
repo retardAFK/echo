@@ -2,6 +2,8 @@
 
 [ext_resource type="PackedScene" path="res://game/entities/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://game/ui/debug_overlay.tscn" id="2_overlay"]
+[ext_resource type="PackedScene" path="res://game/ui/noise_debug.tscn" id="3_noise_debug"]
+[ext_resource type="PackedScene" path="res://game/entities/noise_probe/noise_probe.tscn" id="4_probe"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_floor"]
 albedo_color = Color(0.22, 0.22, 0.23, 1)
@@ -166,6 +168,13 @@ size = Vector3(0.5, 3, 0.5)
 material = SubResource("Mat_wall")
 size = Vector3(0.5, 3, 0.5)
 
+[sub_resource type="BoxShape3D" id="Shape_NoiseWall"]
+size = Vector3(8, 3, 0.2)
+
+[sub_resource type="BoxMesh" id="Mesh_NoiseWall"]
+material = SubResource("Mat_wall")
+size = Vector3(8, 3, 0.2)
+
 [sub_resource type="Environment" id="Environment_greybox"]
 background_mode = 1
 background_color = Color(0.08, 0.08, 0.09, 1)
@@ -192,6 +201,7 @@ shape = SubResource("Shape_Floor")
 mesh = SubResource("Mesh_Floor")
 
 [node name="WallNorth" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -20.2)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/WallNorth"]
@@ -201,6 +211,7 @@ shape = SubResource("Shape_WallNorth")
 mesh = SubResource("Mesh_WallNorth")
 
 [node name="WallSouth" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 20.2)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/WallSouth"]
@@ -210,6 +221,7 @@ shape = SubResource("Shape_WallSouth")
 mesh = SubResource("Mesh_WallSouth")
 
 [node name="WallEast" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.2, 1.5, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/WallEast"]
@@ -219,6 +231,7 @@ shape = SubResource("Shape_WallEast")
 mesh = SubResource("Mesh_WallEast")
 
 [node name="WallWest" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.2, 1.5, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/WallWest"]
@@ -282,6 +295,7 @@ shape = SubResource("Shape_LowWall60cm")
 mesh = SubResource("Mesh_LowWall60cm")
 
 [node name="LowPassageLeft" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.65, 0.75, -8)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/LowPassageLeft"]
@@ -291,6 +305,7 @@ shape = SubResource("Shape_LowPassageLeft")
 mesh = SubResource("Mesh_LowPassageLeft")
 
 [node name="LowPassageRight" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.65, 0.75, -8)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/LowPassageRight"]
@@ -309,6 +324,7 @@ shape = SubResource("Shape_LowPassageCeiling")
 mesh = SubResource("Mesh_LowPassageCeiling")
 
 [node name="CorridorLeft" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.75, 1.5, -8)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/CorridorLeft"]
@@ -318,6 +334,7 @@ shape = SubResource("Shape_CorridorLeft")
 mesh = SubResource("Mesh_CorridorLeft")
 
 [node name="CorridorRight" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.25, 1.5, -8)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/CorridorRight"]
@@ -327,6 +344,7 @@ shape = SubResource("Shape_CorridorRight")
 mesh = SubResource("Mesh_CorridorRight")
 
 [node name="CornerA" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, 12)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/CornerA"]
@@ -336,6 +354,7 @@ shape = SubResource("Shape_CornerA")
 mesh = SubResource("Mesh_CornerA")
 
 [node name="CornerB" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 1.5, 9)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/CornerB"]
@@ -345,6 +364,7 @@ shape = SubResource("Shape_CornerB")
 mesh = SubResource("Mesh_CornerB")
 
 [node name="Pillar1" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.5, 6)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/Pillar1"]
@@ -354,6 +374,7 @@ shape = SubResource("Shape_Pillar1")
 mesh = SubResource("Mesh_Pillar1")
 
 [node name="Pillar2" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, 6)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/Pillar2"]
@@ -363,6 +384,7 @@ shape = SubResource("Shape_Pillar2")
 mesh = SubResource("Mesh_Pillar2")
 
 [node name="Pillar3" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, -12)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/Pillar3"]
@@ -372,6 +394,7 @@ shape = SubResource("Shape_Pillar3")
 mesh = SubResource("Mesh_Pillar3")
 
 [node name="Pillar4" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.5, -14)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/Pillar4"]
@@ -379,6 +402,29 @@ shape = SubResource("Shape_Pillar4")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/Pillar4"]
 mesh = SubResource("Mesh_Pillar4")
+
+[node name="NoiseWall" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 14)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/NoiseWall"]
+shape = SubResource("Shape_NoiseWall")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/NoiseWall"]
+mesh = SubResource("Mesh_NoiseWall")
+
+[node name="Probes" type="Node3D" parent="."]
+
+[node name="ProbeOpen" parent="Probes" instance=ExtResource("4_probe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1, 8)
+
+[node name="ProbeBehindWall" parent="Probes" instance=ExtResource("4_probe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 19.5)
+
+[node name="ProbeCorridor" parent="Probes" instance=ExtResource("4_probe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, -12)
+
+[node name="NoiseDebug" parent="." instance=ExtResource("3_noise_debug")]
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)

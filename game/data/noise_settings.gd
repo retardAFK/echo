@@ -34,5 +34,9 @@ extends Resource
 @export_group("Debug")
 ## How long a noise ring stays on screen, in seconds.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var debug_ring_lifetime: float = 3.0
+## How long a test probe stays lit after hearing a noise, in seconds.
+@export_range(0.1, 5.0, 0.1, "suffix:s") var debug_probe_flash_time: float = 1.0
+## Colour of noise in every debug and HUD element. Orange is reserved for noise (2.3).
+@export var noise_color: Color = Color(1.0, 0.55, 0.1)
 ## Height of the noise origin above the feet, in meters.
 @export_range(0.0, 2.0, 0.05, "suffix:m") var emit_height: float = 0.3
