@@ -15,7 +15,7 @@
 - [x] T-024 — Lumières qui vacillent
   - Résultat vérifiable : deux lumières dans le bâtiment, qui vacillent pendant un scan sans message à l'écran, tests GUT
   - Dépend de : T-023
-- [ ] T-025 — Proie IA
+- [x] T-025 — Proie IA
   - Résultat vérifiable : `PreyBrain` (promenade, fuite, cachette, figée), scène de la proie, pas dans `NoiseBus`, elle entend et voit le monstre, tests GUT
   - Dépend de : T-022
 - [ ] T-026 — Souffle, réaction au scan, capture et debug
@@ -31,3 +31,4 @@
 - T-022 (04/11/2026) : `NoiseMarkers` (couche d'interface) : chaque bruit d'un autre qui atteint les oreilles du monstre jouable, murs compris, devient un rond orange à l'écran, visible à travers les murs, avec sa distance (`HUD_DISTANCE`, « 11 m »), effacé en 3 s. 12 repères recyclés, réglages dans `monster_settings.tres`, `show_noise()` prêt pour le scan, 6 tests GUT.
 - T-023 (04/11/2026) : `ScanGauge` (8 s de scan, recharge en 45 s, refus sous 25 %, concentration de 1 s, vidée pendant la concentration aussi), `Building` (volume sur la nouvelle couche physique 5 « scan ») autour du bâtiment de la greybox, clic droit (action `scan`) pour scanner le bâtiment visé à moins de 30 m, monstre immobile pendant le scan, bruits du bâtiment affichés quelle que soit leur portée, jauge pâle `ScanBar` en bas de l'écran, 13 tests GUT.
 - T-024 (04/11/2026) : deux lumières sans ombre dans le bâtiment de la greybox (une par pièce), qui vacillent pendant un scan (8 fois par seconde, entre 15 % et 100 % de leur intensité) et reviennent à la normale à la fin, sans aucun message à l'écran, 4 tests GUT. À noter : dans la greybox éclairée par le soleil, le vacillement reste très discret. Il sera bien plus visible de nuit, avec le style visuel (phase 5).
+- T-025 (04/11/2026) : `PreyBrain` (promenade avec pause, fuite vers la cachette la plus éloignée du monstre, cachette accroupie de 20 s prolongée s'il l'entend encore, figée par l'alerte, essoufflée 10 s après une course, abandon d'une cible bloquée) et `PreySettings`, scène `Prey` (capsule pâle, vitesses et pas du chassé via `FootstepEmitter` généralisé), elle entend le monstre par `NoiseBus` et le voit à moins de 15 m dans un champ de 120°. Greybox : 8 points de promenade et 4 cachettes, maillage de navigation recalculé (rayon 0,375 m, cellules de 0,125 m) pour que les portes de 1,2 m du bâtiment laissent passer le monstre et la proie. Vérifié sur 110 s simulées : la proie se promène dedans et dehors sans se coincer, fuit un monstre qui court et se cache. 16 tests GUT.

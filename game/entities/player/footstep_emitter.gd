@@ -1,6 +1,7 @@
 class_name FootstepEmitter
 extends Node
-## Emits one noise per footstep of its parent Player (spec S-002, T-010).
+## Emits one noise per footstep of its parent (spec S-002, T-010): the hunted
+## Player, or the AI prey (S-004), any body with get_gait().
 ## Footsteps are counted on horizontal distance walked on the floor.
 
 @export var settings: NoiseSettings
@@ -8,7 +9,7 @@ extends Node
 var _distance := 0.0
 var _last_position := Vector3.ZERO
 
-@onready var _player: Player = get_parent()
+@onready var _player: CharacterBody3D = get_parent()
 
 
 func _ready() -> void:
@@ -22,7 +23,7 @@ func _physics_process(_delta: float) -> void:
 	if not _player.is_on_floor():
 		return  # No footsteps in the air.
 	_distance += moved
-	var gait := _player.get_gait()
+	var gait: PlayerMotion.Gait = _player.call("get_gait")
 	var stride := NoiseMath.stride_for_gait(settings, gait)
 	if _distance < stride:
 		return
