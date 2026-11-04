@@ -264,9 +264,6 @@ background_color = Color(0.08, 0.08, 0.09, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.45, 0.45, 0.48, 1)
 
-[sub_resource type="BoxShape3D" id="Shape_BuildingVolume"]
-size = Vector3(8.4, 3.2, 6.4)
-
 [node name="GreyboxTest" type="Node3D"]
 script = ExtResource("8_map")
 
@@ -659,9 +656,7 @@ player = NodePath("../Player")
 
 [node name="Building" parent="." instance=ExtResource("10_building")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.5, 13)
-
-[node name="CollisionShape3D" parent="Building" index="0"]
-shape = SubResource("Shape_BuildingVolume")
+size = Vector3(8.4, 3.2, 6.4)
 
 [node name="LightWest" type="OmniLight3D" parent="Building"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.1, 0)

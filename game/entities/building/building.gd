@@ -10,6 +10,10 @@ signal scan_changed(is_scanned: bool)
 const SCAN_LAYER := 1 << 4
 
 @export var settings: MonsterSettings
+## Size of the box volume, in meters. Set on each building of a map: the shape
+## is built from it at load, because an override of an instanced child's shape
+## is lost in the exported game (T-028).
+@export var size := Vector3.ONE
 
 var scanned := false:
 	set(value):
@@ -29,6 +33,9 @@ var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	var box := BoxShape3D.new()
+	box.size = size
+	_shape.shape = box
 	for child in get_children():
 		if child is Light3D:
 			_lights.append(child)
