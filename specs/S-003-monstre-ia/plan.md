@@ -1,6 +1,6 @@
 # Plan — S-003
 
-**Statut** : brouillon (04/11/2026), à valider avec la spec
+**Statut** : validé (04/11/2026)
 
 ## Approche technique
 - **`MonsterBrain`** (`game/entities/monster/monster_brain.gd`, `RefCounted`, sans scène) : la machine à états, entièrement testable avec GUT.
