@@ -1,0 +1,43 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/monster/monster_avatar.gd" id="1_avatar"]
+[ext_resource type="Resource" path="res://game/data/monster_settings.tres" id="2_settings"]
+[ext_resource type="Resource" path="res://game/data/player_settings.tres" id="3_controls"]
+[ext_resource type="Script" path="res://game/entities/player/player_ears.gd" id="4_ears"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_body"]
+radius = 0.35
+height = 2.2
+
+[sub_resource type="StandardMaterial3D" id="Mat_body"]
+albedo_color = Color(0.03, 0.03, 0.035, 1)
+roughness = 1.0
+
+[sub_resource type="CapsuleMesh" id="Mesh_body"]
+material = SubResource("Mat_body")
+radius = 0.35
+height = 2.2
+
+[node name="MonsterAvatar" type="CharacterBody3D"]
+collision_layer = 8
+collision_mask = 3
+script = ExtResource("1_avatar")
+settings = ExtResource("2_settings")
+controls = ExtResource("3_controls")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("Shape_body")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+mesh = SubResource("Mesh_body")
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Head"]
+near = 0.05
+
+[node name="PlayerEars" type="Node3D" parent="."]
+script = ExtResource("4_ears")

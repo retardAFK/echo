@@ -2,7 +2,9 @@ class_name PlayerEars
 extends Node3D
 ## What the player hears (spec S-003, D-009): every noise made by someone else
 ## that NoiseBus says reaches the player's ears is played where it happened.
-## Beyond its range, walls included, a noise stays silent.
+## Beyond its range, walls included, a noise stays silent. The parent is the
+## listener: the hunted Player or the playable monster (S-004), anything with
+## get_eye_position().
 
 const VOICES := 4
 
@@ -12,7 +14,7 @@ var _sounds := {}
 var _voices: Array[AudioStreamPlayer3D] = []
 var _next_voice := 0
 
-@onready var _player: Player = get_parent()
+@onready var _listener: Node3D = get_parent()
 
 
 func _ready() -> void:
@@ -27,9 +29,9 @@ func _ready() -> void:
 
 
 func _on_noise_emitted(event: NoiseEvent) -> void:
-	if event.source == _player or event.noise_range <= 0.0:
+	if event.source == _listener or event.noise_range <= 0.0:
 		return
-	if not NoiseBus.can_hear(event, _player.get_eye_position()):
+	if not NoiseBus.can_hear(event, _listener.get_eye_position()):
 		return
 	heard_count += 1
 	var voice := _voices[_next_voice]

@@ -19,7 +19,7 @@ func test_main_scene_instantiates() -> void:
 		return
 	var root := packed.instantiate()
 	add_child_autofree(root)
-	assert_true(root is Node3D, "Main scene root must be a Node3D")
+	assert_true(root is StartMenu, "Main scene must be the start menu (S-004)")
 
 
 func test_movement_actions_use_physical_keys() -> void:
