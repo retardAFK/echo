@@ -8,8 +8,10 @@ extends Node3D
 
 const MENU_SCENE := "res://game/ui/start_menu.tscn"
 const AVATAR_SCENE := preload("res://game/entities/monster/monster_avatar.tscn")
+const MARKERS_SCENE := preload("res://game/ui/noise_markers.tscn")
 
 var avatar: MonsterAvatar
+var markers: NoiseMarkers
 
 @onready var _player: Player = $Player
 @onready var _monster: Monster = $Monster
@@ -38,6 +40,9 @@ func _setup_monster_role() -> void:
 	avatar = AVATAR_SCENE.instantiate()
 	add_child(avatar)
 	avatar.global_transform = _monster.global_transform
+	markers = MARKERS_SCENE.instantiate()
+	markers.monster = avatar
+	add_child(markers)
 	_overlay.player = null
 	_overlay.monster = null
 	_gauge.visible = false

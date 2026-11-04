@@ -59,6 +59,14 @@ extends Resource
 ## Height of the ears and eyes above the feet, in meters.
 @export_range(0.1, 5.0, 0.05, "suffix:m") var ear_height: float = 2.0
 
+@export_group("Noise markers (S-004)")
+## Time for a noise marker to fade out, in seconds (D-008).
+@export_range(0.1, 10.0, 0.1, "suffix:s") var marker_fade_time: float = 3.0
+## Markers shown at once; the oldest is reused when they are all taken.
+@export_range(1, 64) var marker_count: int = 12
+## Radius of a marker ring on screen, in pixels of the 640 x 360 view.
+@export_range(1.0, 40.0, 0.5, "suffix:px") var marker_radius: float = 5.0
+
 @export_group("Debug")
 ## Colour of the field of view outline shown with F4. Never orange (reserved for noise).
 @export var debug_cone_color: Color = Color(0.8, 0.85, 0.9)
