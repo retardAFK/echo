@@ -11,6 +11,8 @@
 [ext_resource type="PackedScene" path="res://game/ui/caught_screen.tscn" id="9_caught"]
 [ext_resource type="PackedScene" path="res://game/entities/building/building.tscn" id="10_building"]
 [ext_resource type="PackedScene" path="res://game/entities/props/lamppost.tscn" id="11_lamppost"]
+[ext_resource type="PackedScene" path="res://game/entities/props/bench_dirty.tscn" id="12_bench_dirty"]
+[ext_resource type="PackedScene" path="res://game/entities/props/bench_broken.tscn" id="13_bench_broken"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_floor"]
 albedo_color = Color(0.22, 0.22, 0.23, 1)
@@ -709,10 +711,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -1)
 [node name="Spot4" type="Marker3D" parent="HidingSpots"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -14)
 
-[node name="Props" type="Node3D" parent="."]
+[node name="Props" type="Node3D" parent="." groups=["navigation_source"]]
 
 [node name="LamppostBuilding" parent="Props" instance=ExtResource("11_lamppost")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0, 18)
 
 [node name="LamppostCourt" parent="Props" instance=ExtResource("11_lamppost")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 5, 0, 4)
+
+[node name="BenchDirty" parent="Props" instance=ExtResource("12_bench_dirty")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 19.4)
+
+[node name="BenchBroken" parent="Props" instance=ExtResource("13_bench_broken")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 8, 0, -19.3)
