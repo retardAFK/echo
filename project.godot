@@ -90,6 +90,10 @@ scan={
 3d_physics/layer_4="monster"
 3d_physics/layer_5="scan"
 
+[navigation]
+
+3d/default_cell_size=0.125
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

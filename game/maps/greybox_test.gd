@@ -3,16 +3,19 @@ extends Node3D
 ## Hunted role: wires the AI monster to the player and handles a catch (Q4 of
 ## S-003): "caught" screen, player back to the start, monster back on patrol.
 ## Monster role (S-004): the AI monster and the hunted player are replaced by
-## the playable monster, standing where the AI monster starts.
+## the playable monster, standing where the AI monster starts, and an AI prey
+## starting where the hunted does.
 ## Escape frees the mouse; Escape again goes back to the start menu.
 
 const MENU_SCENE := "res://game/ui/start_menu.tscn"
 const AVATAR_SCENE := preload("res://game/entities/monster/monster_avatar.tscn")
 const MARKERS_SCENE := preload("res://game/ui/noise_markers.tscn")
 const SCAN_BAR_SCENE := preload("res://game/ui/scan_bar.tscn")
+const PREY_SCENE := preload("res://game/entities/prey/prey.tscn")
 
 var avatar: MonsterAvatar
 var markers: NoiseMarkers
+var prey: Prey
 
 @onready var _player: Player = $Player
 @onready var _monster: Monster = $Monster
@@ -47,6 +50,12 @@ func _setup_monster_role() -> void:
 	var scan_bar: ScanBar = SCAN_BAR_SCENE.instantiate()
 	scan_bar.monster = avatar
 	add_child(scan_bar)
+	prey = PREY_SCENE.instantiate()
+	prey.wander_route = $PreyRoute
+	prey.hiding_spots = $HidingSpots
+	prey.monster = avatar
+	prey.position = _spawn  # Before entering the tree, so no first footstep jump.
+	add_child(prey)
 	_overlay.player = null
 	_overlay.monster = null
 	_gauge.visible = false
