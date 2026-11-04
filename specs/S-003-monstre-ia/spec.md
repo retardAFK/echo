@@ -1,6 +1,6 @@
 # S-003 — Le monstre IA
 
-**Statut** : validée (04/11/2026)
+**Statut** : livrée (04/11/2026)
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : 3 — Le monstre IA
 
@@ -51,4 +51,4 @@ Le 04/11/2026, Maxime a retenu les propositions Q1 à Q6 pour tester, quitte à 
 - Q6 : La map de test suffit-elle ? → Proposition : on ajoute un petit bâtiment de deux pièces avec deux portes ouvertes et une fenêtre, et un circuit de ronde de 4 points autour. C'est le minimum pour tester « casser la ligne de vue » et « se cacher dans la pièce d'à côté ». → R : retenu (04/11/2026).
 
 ## Notes de playtest
-- (à remplir)
+- 04/11/2026 (Maxime, build web de main, Chrome) : 60 images/s avec le monstre. Le monstre est « assez dur » dans la greybox. Le fun ne peut pas encore se juger sur une map de test aussi petite : il faut une map plus grande. Décision : on garde les réglages actuels et on les revoit sur la première vraie map (hôpital).
