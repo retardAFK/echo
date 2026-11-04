@@ -1,0 +1,40 @@
+class_name PlayerEars
+extends Node3D
+## What the player hears (spec S-003, D-009): every noise made by someone else
+## that NoiseBus says reaches the player's ears is played where it happened.
+## Beyond its range, walls included, a noise stays silent.
+
+const VOICES := 4
+
+var heard_count := 0
+
+var _sounds := {}
+var _voices: Array[AudioStreamPlayer3D] = []
+var _next_voice := 0
+
+@onready var _player: Player = get_parent()
+
+
+func _ready() -> void:
+	_sounds[NoiseEvent.Type.FOOTSTEP] = PlaceholderSounds.step()
+	_sounds[NoiseEvent.Type.BREATH] = PlaceholderSounds.breath()
+	for i in VOICES:
+		var voice := AudioStreamPlayer3D.new()
+		voice.top_level = true
+		add_child(voice)
+		_voices.append(voice)
+	NoiseBus.noise_emitted.connect(_on_noise_emitted)
+
+
+func _on_noise_emitted(event: NoiseEvent) -> void:
+	if event.source == _player or event.noise_range <= 0.0:
+		return
+	if not NoiseBus.can_hear(event, _player.get_eye_position()):
+		return
+	heard_count += 1
+	var voice := _voices[_next_voice]
+	_next_voice = (_next_voice + 1) % _voices.size()
+	voice.stream = _sounds.get(event.type, _sounds[NoiseEvent.Type.FOOTSTEP])
+	voice.max_distance = event.noise_range
+	voice.global_position = event.position
+	voice.play()

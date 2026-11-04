@@ -18,6 +18,8 @@ extends Resource
 @export_range(0.0, 50.0, 0.1, "suffix:m") var walk_range: float = 3.0
 ## Footstep range while running, in meters.
 @export_range(0.0, 50.0, 0.1, "suffix:m") var run_range: float = 12.0
+## Distance between two footsteps, in meters.
+@export_range(0.1, 5.0, 0.05, "suffix:m") var stride: float = 1.1
 ## Breath range, in meters.
 @export_range(0.0, 50.0, 0.1, "suffix:m") var breath_range: float = 2.0
 ## Time between two breaths, in seconds.
@@ -56,3 +58,7 @@ extends Resource
 @export_group("Body")
 ## Height of the ears and eyes above the feet, in meters.
 @export_range(0.1, 5.0, 0.05, "suffix:m") var ear_height: float = 2.0
+
+@export_group("Debug")
+## Colour of the field of view outline shown with F4. Never orange (reserved for noise).
+@export var debug_cone_color: Color = Color(0.8, 0.85, 0.9)

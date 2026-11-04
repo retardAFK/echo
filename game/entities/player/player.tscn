@@ -1,9 +1,10 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/entities/player/player.gd" id="1_player"]
 [ext_resource type="Resource" path="res://game/data/player_settings.tres" id="2_settings"]
 [ext_resource type="Script" path="res://game/entities/player/footstep_emitter.gd" id="3_footsteps"]
 [ext_resource type="Resource" path="res://game/data/noise_settings.tres" id="4_noise"]
+[ext_resource type="Script" path="res://game/entities/player/player_ears.gd" id="5_ears"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.3
@@ -31,3 +32,6 @@ max_results = 1
 [node name="FootstepEmitter" type="Node" parent="."]
 script = ExtResource("3_footsteps")
 settings = ExtResource("4_noise")
+
+[node name="PlayerEars" type="Node3D" parent="."]
+script = ExtResource("5_ears")
