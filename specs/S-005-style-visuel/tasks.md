@@ -18,7 +18,7 @@
 - [x] T-034 — Banc
   - Résultat vérifiable : modèle validé par Maxime sur rendu, `.glb` dans la greybox
   - Dépend de : T-033
-- [ ] T-035 — Arbre nu
+- [x] T-035 — Arbre nu
   - Résultat vérifiable : modèle validé par Maxime sur rendu, `.glb` dans la greybox
   - Dépend de : T-034
 - [ ] T-036 — Module de façade
@@ -32,3 +32,4 @@
 - T-029 (04/11/2026) : spec, plan et tâches de S-005, maquettes d'ambiance A, B et C rendues dans la greybox. Maxime : « Parfait », ambiance A et propositions Q1 à Q6 retenues.
 - T-033 (04/11/2026) : lampadaire au sodium (mât hexagonal de 5 m, bras courbé, tête « cobra », 88 triangles, une texture de 64 × 64 px), validé par Maxime sur rendu (« Parfait »). Script `tools/blender/lamppost.py`, source `assets/blender/lamppost_sodium.blend` et modèle `assets/models/lamppost_sodium.glb` en Git LFS, scène `Lamppost` avec sa lumière ocre sans ombre, `RetroProp` force les pixels nets. Deux lampadaires dans la greybox. Les `.blend` sont ignorés par Godot (`.gdignore`). 3 tests GUT.
 - T-034 (04/11/2026) : deux bancs tout en béton, à la demande de Maxime (« en béton ça me semble plus effrayant », « beaucoup mieux ») : un sale mais intact (72 triangles) et un crade et cassé (144 triangles, assise brisée, pied arraché, fers rouillés), tachés, moussus et tagués en couleurs ternes (jamais d'orange), texture de 128 × 128 px pour 2 m. Modélisés en direct dans le Blender de Maxime (addon Blender Lab), script `tools/blender/bench.py`. Les bancs et les lampadaires ont maintenant une collision et découpent le maillage de navigation (recalculé, 229 polygones). 4 tests GUT pour tous les objets.
+- T-035 (04/11/2026) : arbre nu d'hiver (tronc penché de 2,6 m, 4 branches et des rameaux tordus, 300 triangles, écorce de 64 × 64 px), modélisé dans le Blender de Maxime, validé (« parfait pour l'arbre »). Deux arbres dans la greybox avec une collision sur le tronc, maillage de navigation recalculé (244 polygones).

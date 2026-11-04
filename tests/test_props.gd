@@ -1,11 +1,12 @@
 extends GutTest
-## Blender props in the game (spec S-005, T-033, T-034).
+## Blender props in the game (spec S-005, T-033 to T-035).
 
 const LAMPPOST := preload("res://game/entities/props/lamppost.tscn")
 const PROPS: Array[PackedScene] = [
 	LAMPPOST,
 	preload("res://game/entities/props/bench_dirty.tscn"),
 	preload("res://game/entities/props/bench_broken.tscn"),
+	preload("res://game/entities/props/tree_bare.tscn"),
 ]
 ## Decorative object budget (constitution 2.3).
 const MAX_PROP_TRIANGLES := 500
