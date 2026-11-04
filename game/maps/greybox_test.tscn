@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://game/ui/noise_gauge.tscn" id="5_gauge"]
 [ext_resource type="PackedScene" path="res://game/entities/monster/monster.tscn" id="6_monster"]
 [ext_resource type="NavigationMesh" path="res://game/maps/greybox_test_navmesh.tres" id="7_navmesh"]
+[ext_resource type="Script" path="res://game/maps/greybox_test.gd" id="8_map"]
+[ext_resource type="PackedScene" path="res://game/ui/caught_screen.tscn" id="9_caught"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_floor"]
 albedo_color = Color(0.22, 0.22, 0.23, 1)
@@ -262,6 +264,7 @@ ambient_light_source = 2
 ambient_light_color = Color(0.45, 0.45, 0.48, 1)
 
 [node name="GreyboxTest" type="Node3D"]
+script = ExtResource("8_map")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_greybox")
@@ -646,3 +649,5 @@ player = NodePath("../Player")
 
 [node name="NoiseGauge" parent="." node_paths=PackedStringArray("player") instance=ExtResource("5_gauge")]
 player = NodePath("../Player")
+
+[node name="CaughtScreen" parent="." instance=ExtResource("9_caught")]

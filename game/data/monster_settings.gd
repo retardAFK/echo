@@ -36,6 +36,8 @@ extends Resource
 @export_range(0.05, 1.0, 0.05) var crouch_spot_factor: float = 0.5
 ## Time for a full spotting gauge to empty once the player is out of sight, in seconds.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var spot_decay_time: float = 2.0
+## Time between two line of sight checks, in seconds.
+@export_range(0.0, 1.0, 0.01, "suffix:s") var vision_interval: float = 0.1
 
 @export_group("Behaviour")
 ## Time spent looking around where a noise came from, in seconds.
