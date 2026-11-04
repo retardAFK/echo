@@ -9,7 +9,7 @@
 - [x] T-022 — Affichage des bruits avec leur distance
   - Résultat vérifiable : repères orange avec distance, visibles à travers les murs, effacés en 3 s, seulement pour les bruits entendus, tests GUT
   - Dépend de : T-021
-- [ ] T-023 — Jauge et scan de bâtiment
+- [x] T-023 — Jauge et scan de bâtiment
   - Résultat vérifiable : `ScanGauge` (8 s, 45 s, 25 %, concentration 1 s), bâtiment scannable dans la greybox, bruits du bâtiment affichés en direct, monstre immobile, jauge pâle à l'écran, tests GUT
   - Dépend de : T-022
 - [ ] T-024 — Lumières qui vacillent
@@ -29,3 +29,4 @@
 - T-020 (04/11/2026) : S-003 close (PR #23), spec, plan et tâches de S-004 rédigés (PR #24), propositions Q1 à Q6 retenues (Maxime : « Peux-tu tester toi-même ? »).
 - T-021 (04/11/2026) : écran de démarrage `StartMenu` (scène principale, boutons traduits), rôle gardé dans `GameSession`, la greybox remplace le chassé et le monstre IA par `MonsterAvatar` en rôle monstre, monstre à la première personne (marcher, Maj pour courir, C pour rôder), bruits partagés avec le monstre IA dans `MonsterNoise`, `PlayerEars` réutilisé pour que le monstre entende la proie, deuxième Échap pour revenir au menu, 10 tests GUT. Écart : rôder se fait avec C (la touche d'accroupissement) plutôt que Ctrl, qui ferme l'onglet avec W dans le navigateur.
 - T-022 (04/11/2026) : `NoiseMarkers` (couche d'interface) : chaque bruit d'un autre qui atteint les oreilles du monstre jouable, murs compris, devient un rond orange à l'écran, visible à travers les murs, avec sa distance (`HUD_DISTANCE`, « 11 m »), effacé en 3 s. 12 repères recyclés, réglages dans `monster_settings.tres`, `show_noise()` prêt pour le scan, 6 tests GUT.
+- T-023 (04/11/2026) : `ScanGauge` (8 s de scan, recharge en 45 s, refus sous 25 %, concentration de 1 s, vidée pendant la concentration aussi), `Building` (volume sur la nouvelle couche physique 5 « scan ») autour du bâtiment de la greybox, clic droit (action `scan`) pour scanner le bâtiment visé à moins de 30 m, monstre immobile pendant le scan, bruits du bâtiment affichés quelle que soit leur portée, jauge pâle `ScanBar` en bas de l'écran, 13 tests GUT.

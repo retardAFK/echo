@@ -9,6 +9,7 @@ extends Node3D
 const MENU_SCENE := "res://game/ui/start_menu.tscn"
 const AVATAR_SCENE := preload("res://game/entities/monster/monster_avatar.tscn")
 const MARKERS_SCENE := preload("res://game/ui/noise_markers.tscn")
+const SCAN_BAR_SCENE := preload("res://game/ui/scan_bar.tscn")
 
 var avatar: MonsterAvatar
 var markers: NoiseMarkers
@@ -43,6 +44,9 @@ func _setup_monster_role() -> void:
 	markers = MARKERS_SCENE.instantiate()
 	markers.monster = avatar
 	add_child(markers)
+	var scan_bar: ScanBar = SCAN_BAR_SCENE.instantiate()
+	scan_bar.monster = avatar
+	add_child(scan_bar)
 	_overlay.player = null
 	_overlay.monster = null
 	_gauge.visible = false

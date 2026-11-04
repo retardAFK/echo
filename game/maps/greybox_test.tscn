@@ -9,6 +9,7 @@
 [ext_resource type="NavigationMesh" path="res://game/maps/greybox_test_navmesh.tres" id="7_navmesh"]
 [ext_resource type="Script" path="res://game/maps/greybox_test.gd" id="8_map"]
 [ext_resource type="PackedScene" path="res://game/ui/caught_screen.tscn" id="9_caught"]
+[ext_resource type="PackedScene" path="res://game/entities/building/building.tscn" id="10_building"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_floor"]
 albedo_color = Color(0.22, 0.22, 0.23, 1)
@@ -262,6 +263,9 @@ background_mode = 1
 background_color = Color(0.08, 0.08, 0.09, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.45, 0.45, 0.48, 1)
+
+[sub_resource type="BoxShape3D" id="Shape_BuildingVolume"]
+size = Vector3(8.4, 3.2, 6.4)
 
 [node name="GreyboxTest" type="Node3D"]
 script = ExtResource("8_map")
@@ -652,3 +656,9 @@ monster = NodePath("../Monster")
 player = NodePath("../Player")
 
 [node name="CaughtScreen" parent="." instance=ExtResource("9_caught")]
+
+[node name="Building" parent="." instance=ExtResource("10_building")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.5, 13)
+
+[node name="CollisionShape3D" parent="Building" index="0"]
+shape = SubResource("Shape_BuildingVolume")

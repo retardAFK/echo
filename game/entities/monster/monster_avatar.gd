@@ -4,12 +4,21 @@ extends CharacterBody3D
 ## mouse and ZQSD like the hunted. Walks by default, runs with the sprint key,
 ## prowls without a sound with the crouch key (toggle). Its footsteps and
 ## breath go through NoiseBus exactly like the AI monster's (D-009).
+## Holding the scan button while aiming at a building scans it (Q3): the
+## monster stands still and, after a short concentration, hears every noise
+## inside, whatever its range, until the gauge runs out or the button is released.
+
+signal scan_started(building: Building)
+signal scan_ended(building: Building)
 
 @export var settings: MonsterSettings
 ## Mouse sensitivity, look limit and acceleration are shared with the hunted.
 @export var controls: PlayerSettings
 
 var catch_count := 0
+var scan: ScanGauge
+## Building being scanned, or null.
+var scan_target: Building
 
 var _pace := MonsterBrain.Pace.WALK
 var _prowling := false
@@ -31,6 +40,7 @@ static func resolve_pace(prowling: bool, sprinting: bool, moving: bool) -> Monst
 
 func _ready() -> void:
 	_noise = MonsterNoise.new(settings)
+	scan = ScanGauge.new(settings)
 	_head.position.y = settings.ear_height
 	_camera.current = true
 
@@ -48,6 +58,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	update_scan(delta, Input.is_action_pressed("scan"))
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	move(input, Input.is_action_pressed("sprint"), delta)
 
@@ -56,6 +67,8 @@ func _physics_process(delta: float) -> void:
 func move(input: Vector2, sprinting: bool, delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
+	if scan.active:
+		input = Vector2.ZERO  # The monster stands still while it scans.
 	_pace = resolve_pace(_prowling, sprinting, not input.is_zero_approx())
 	var target := PlayerMotion.wish_direction(input, rotation.y) * get_speed()
 	var horizontal := PlayerMotion.approach_velocity(
@@ -75,6 +88,45 @@ func look(relative: Vector2) -> void:
 	rotate_y(-relative.x * sensitivity)
 	_pitch = PlayerMotion.clamp_pitch(_pitch - relative.y * sensitivity, controls)
 	_head.rotation.x = _pitch
+
+
+## Starts, keeps or stops the scan from the scan button, and drains or recharges the gauge.
+func update_scan(delta: float, holding: bool) -> void:
+	if holding and not scan.active:
+		var building := aim_building()
+		if building != null and scan.start():
+			scan_target = building
+			building.scanned = true
+			scan_started.emit(building)
+	elif not holding and scan.active:
+		scan.stop()
+	scan.update(delta)
+	if not scan.active and scan_target != null:
+		var building := scan_target
+		scan_target = null
+		building.scanned = false
+		scan_ended.emit(building)
+
+
+## The building in the middle of the view, within scan range, or null.
+func aim_building() -> Building:
+	var from := _camera.global_position
+	var to := from - _camera.global_basis.z * settings.scan_max_distance
+	var query := PhysicsRayQueryParameters3D.create(from, to, Building.SCAN_LAYER)
+	query.collide_with_areas = true
+	query.collide_with_bodies = false
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	return hit.get("collider") as Building
+
+
+## True if the scan reveals this noise: listening, and it comes from inside the building.
+func scan_reveals(event: NoiseEvent) -> bool:
+	return (
+		scan.is_listening()
+		and scan_target != null
+		and event.source != self
+		and scan_target.contains(event.position)
+	)
 
 
 func toggle_prowl() -> void:
