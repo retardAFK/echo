@@ -1,6 +1,6 @@
 # Plan — S-005
 
-**Statut** : en attente de validation de la spec
+**Statut** : validé (04/11/2026)
 
 ## Approche technique
 - **Réglages** (`game/data/visual_settings.gd` + `visual_settings.tres`) : couleurs de la nuit et du brouillard, densité du brouillard, niveaux de couleur, force du tramage et du grain, grille du tremblement, rendu du scan. Aucun chiffre dans les shaders.

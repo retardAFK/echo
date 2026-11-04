@@ -1,6 +1,6 @@
 # Tâches — S-005
 
-- [ ] T-029 — Rédiger la spec, le plan et les tâches de S-005
+- [x] T-029 — Rédiger la spec, le plan et les tâches de S-005
   - Résultat vérifiable : spec S-005 validée par Maxime, clarifications Q1 à Q6 répondues, maquettes A, B et C postées
   - Dépend de : —
 - [ ] T-030 — Nuit, brouillard et textures pixelisées
@@ -29,3 +29,4 @@
   - Dépend de : T-032, T-036
 
 ## Compte rendu
+- T-029 (04/11/2026) : spec, plan et tâches de S-005, maquettes d'ambiance A, B et C rendues dans la greybox. Maxime : « Parfait », ambiance A et propositions Q1 à Q6 retenues.

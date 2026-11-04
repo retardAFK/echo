@@ -1,6 +1,6 @@
 # S-005 — Le style visuel
 
-**Statut** : en attente de validation
+**Statut** : validée (04/11/2026)
 **Piliers servis** : P3 (l'inquiétante familiarité), P4 (le rétro qui dérange)
 **Phase** : 5 — Le style visuel
 
@@ -16,14 +16,16 @@ Je lance une partie. C'est la nuit. Le brouillard avale le fond de la cour, à u
 - Un menu d'options graphiques (intensité du tremblement, du grain) : plus tard, mais les réglages sont déjà dans un fichier `.tres`.
 
 ## Clarifications
+Le 04/11/2026, Maxime a répondu « Parfait » aux maquettes, aux propositions et au premier lampadaire : ambiance A et propositions Q1 à Q6 retenues.
+
 Maquettes d'ambiance A, B et C : rendus de la greybox avec une première version du filtre, postées dans le fil le 04/11/2026 (copies dans les fichiers du projet, `echo-captures/s005-ambiance-*.png`).
 
-- Q1 : Quelle ambiance ? → Proposition : **A**, nuit bleutée, brouillard moyen (on voit à environ 25 m), 24 niveaux par couleur. B (nuit noire, 12 niveaux, très PS1) est plus marquée mais on y lit mal les murs, ce qui gêne le chassé comme le monstre. C (brouillard sodium épais) est très belle pour un lieu précis, je la garderais comme variante de map (le parking, la gare). → R :
-- Q2 : Quelle force pour le tremblement des sommets ? → Proposition : léger, sommets accrochés à une grille de 320 × 180 (la moitié de la résolution interne). Assez pour qu'on le sente en tournant la tête, sans donner mal au cœur. Réglable dans `visual_settings.tres`. → R :
-- Q3 : Faut-il la déformation des textures de la PS1 (textures qui « glissent » en biais) ? → Proposition : non. Sur les grands sols et les grands murs d'une cité, elle devient vite laide et fatigante. Le tremblement et les gros pixels suffisent à faire PS1. → R :
-- Q4 : Tramage et grain ? → Proposition : tramage ordonné 4 × 4 dans les dégradés, grain léger qui change 12 fois par seconde (pas à chaque image, pour un effet pellicule plutôt que neige). → R :
-- Q5 : À quoi ressemble le scan, en plus stylé ? → Proposition : pendant le scan, tout l'écran hors du bâtiment visé s'assombrit et se décolore. Les arêtes du bâtiment s'allument en blanc pâle, et une onde pâle part du bâtiment chaque seconde. Les bruits révélés restent orange, seule couleur vive à l'écran. La jauge devient un fin trait pâle sous le viseur. → R :
-- Q6 : Quels assets, et dans quel ordre ? → Proposition, chacun validé sur rendu dans le fil avant le suivant : 1) lampadaire au sodium (une tête, mât de 5 m, environ 150 triangles), 2) banc en béton et bois (environ 120 triangles), 3) arbre nu d'hiver (environ 400 triangles, sans feuilles : moins cher et plus inquiétant), 4) module de façade HLM de 3 × 3 m avec une fenêtre, qu'on répète pour faire un immeuble (environ 200 triangles). Textures de 64 à 256 px, filtrage Nearest, environ 64 px par mètre (2.3). → R :
+- Q1 : Quelle ambiance ? → Proposition : **A**, nuit bleutée, brouillard moyen (on voit à environ 25 m), 24 niveaux par couleur. B (nuit noire, 12 niveaux, très PS1) est plus marquée mais on y lit mal les murs, ce qui gêne le chassé comme le monstre. C (brouillard sodium épais) est très belle pour un lieu précis, je la garderais comme variante de map (le parking, la gare). → R : retenu (04/11/2026).
+- Q2 : Quelle force pour le tremblement des sommets ? → Proposition : léger, sommets accrochés à une grille de 320 × 180 (la moitié de la résolution interne). Assez pour qu'on le sente en tournant la tête, sans donner mal au cœur. Réglable dans `visual_settings.tres`. → R : retenu (04/11/2026).
+- Q3 : Faut-il la déformation des textures de la PS1 (textures qui « glissent » en biais) ? → Proposition : non. Sur les grands sols et les grands murs d'une cité, elle devient vite laide et fatigante. Le tremblement et les gros pixels suffisent à faire PS1. → R : retenu (04/11/2026).
+- Q4 : Tramage et grain ? → Proposition : tramage ordonné 4 × 4 dans les dégradés, grain léger qui change 12 fois par seconde (pas à chaque image, pour un effet pellicule plutôt que neige). → R : retenu (04/11/2026).
+- Q5 : À quoi ressemble le scan, en plus stylé ? → Proposition : pendant le scan, tout l'écran hors du bâtiment visé s'assombrit et se décolore. Les arêtes du bâtiment s'allument en blanc pâle, et une onde pâle part du bâtiment chaque seconde. Les bruits révélés restent orange, seule couleur vive à l'écran. La jauge devient un fin trait pâle sous le viseur. → R : retenu (04/11/2026).
+- Q6 : Quels assets, et dans quel ordre ? → Proposition, chacun validé sur rendu dans le fil avant le suivant : 1) lampadaire au sodium (une tête, mât de 5 m, environ 150 triangles), 2) banc en béton et bois (environ 120 triangles), 3) arbre nu d'hiver (environ 400 triangles, sans feuilles : moins cher et plus inquiétant), 4) module de façade HLM de 3 × 3 m avec une fenêtre, qu'on répète pour faire un immeuble (environ 200 triangles). Textures de 64 à 256 px, filtrage Nearest, environ 64 px par mètre (2.3). → R : retenu (04/11/2026).
 
 ## Notes de playtest
 - (à remplir)
