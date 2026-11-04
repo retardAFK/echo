@@ -77,7 +77,9 @@ func _settings() -> MonsterSettings:
 
 
 func _on_noise_emitted(event: NoiseEvent) -> void:
-	if monster == null or event.source == monster or event.noise_range <= 0.0:
+	if monster == null or event.source == monster:
 		return
-	if NoiseBus.can_hear(event, monster.get_ear_position()):
+	if monster.has_method("scan_reveals") and monster.scan_reveals(event):
+		show_noise(event)  # The scan hears it, however faint (S-004, Q3).
+	elif event.noise_range > 0.0 and NoiseBus.can_hear(event, monster.get_ear_position()):
 		show_noise(event)

@@ -67,6 +67,20 @@ extends Resource
 ## Radius of a marker ring on screen, in pixels of the 640 x 360 view.
 @export_range(1.0, 40.0, 0.5, "suffix:px") var marker_radius: float = 5.0
 
+@export_group("Building scan (D-009)")
+## Total scan time when the gauge is full, in seconds.
+@export_range(0.5, 60.0, 0.5, "suffix:s") var scan_capacity: float = 8.0
+## Time for an empty gauge to fill up again, in seconds.
+@export_range(1.0, 300.0, 1.0, "suffix:s") var scan_recharge_time: float = 45.0
+## Lowest gauge level a scan can start from (0.25 = 25 %).
+@export_range(0.0, 1.0, 0.05) var scan_min_start: float = 0.25
+## Concentration before the building can be heard, in seconds.
+@export_range(0.0, 10.0, 0.1, "suffix:s") var scan_focus_time: float = 1.0
+## Farthest building that can be aimed at, in meters.
+@export_range(1.0, 200.0, 1.0, "suffix:m") var scan_max_distance: float = 30.0
+## Colour of the scan gauge. Pale, never orange (reserved for noise).
+@export var scan_bar_color: Color = Color(0.85, 0.88, 0.9)
+
 @export_group("Debug")
 ## Colour of the field of view outline shown with F4. Never orange (reserved for noise).
 @export var debug_cone_color: Color = Color(0.8, 0.85, 0.9)
