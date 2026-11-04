@@ -1,6 +1,6 @@
 # S-003 — Le monstre IA
 
-**Statut** : brouillon (04/11/2026), en attente des réponses de Maxime
+**Statut** : validée (04/11/2026)
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : 3 — Le monstre IA
 
@@ -41,14 +41,14 @@ Je suis dans la map de test. Une grande silhouette noire fait sa ronde, lentemen
 - Les portes qui s'ouvrent, les objets lancés et les cachettes interactives (placards, lits) : phase 8.
 
 ## Clarifications
-Questions posées à Maxime le 04/11/2026, chacune avec une proposition.
+Le 04/11/2026, Maxime a retenu les propositions Q1 à Q6 pour tester, quitte à y revenir après le playtest.
 
-- Q1 : Quelles vitesses ? → Proposition : rôder 1,5 m/s, marcher 3,5 m/s, courir 6 m/s. La course du chassé est à 5,5 m/s : le monstre gagne en ligne droite, le chassé doit casser la ligne de vue. → R : (à remplir)
-- Q2 : Comment voit-il ? → Proposition : un champ de vision de 100° sur 25 m, bloqué par les murs. Une jauge de repérage se remplit quand il voit le joueur : en 0,4 s tout près, en 1,5 s à 25 m, deux fois plus lentement si le joueur est accroupi. Pleine, il poursuit. → R : (à remplir)
-- Q3 : Que fait-il quand il entend un bruit ? → Proposition : il marche (et fait donc un peu de bruit) vers l'endroit du bruit, fouille 6 s en regardant autour de lui, puis reprend sa ronde. Un bruit plus récent et entendu pendant l'enquête la remplace. → R : (à remplir)
-- Q4 : Que se passe-t-il quand il attrape le joueur ? → Proposition : « Attrapé » s'affiche 2 s, le joueur reprend au départ et le monstre repart dans sa ronde, au point le plus éloigné du joueur. Un compteur de captures s'affiche avec F3. La vraie fin de partie viendra en phase 7. → R : (à remplir)
-- Q5 : Faut-il déjà des sons ? → Proposition : oui, des sons provisoires générés par le code (un pas sourd, un souffle), sans fichier audio. Sans eux, on ne peut pas tester la discrétion du monstre (D-009), qui est au cœur de la peur. → R : (à remplir)
-- Q6 : La map de test suffit-elle ? → Proposition : on ajoute un petit bâtiment de deux pièces avec deux portes ouvertes et une fenêtre, et un circuit de ronde de 4 points autour. C'est le minimum pour tester « casser la ligne de vue » et « se cacher dans la pièce d'à côté ». → R : (à remplir)
+- Q1 : Quelles vitesses ? → Proposition : rôder 1,5 m/s, marcher 3,5 m/s, courir 6 m/s. La course du chassé est à 5,5 m/s : le monstre gagne en ligne droite, le chassé doit casser la ligne de vue. → R : retenu (04/11/2026).
+- Q2 : Comment voit-il ? → Proposition : un champ de vision de 100° sur 25 m, bloqué par les murs. Une jauge de repérage se remplit quand il voit le joueur : en 0,4 s tout près, en 1,5 s à 25 m, deux fois plus lentement si le joueur est accroupi. Pleine, il poursuit. → R : retenu (04/11/2026).
+- Q3 : Que fait-il quand il entend un bruit ? → Proposition : il marche (et fait donc un peu de bruit) vers l'endroit du bruit, fouille 6 s en regardant autour de lui, puis reprend sa ronde. Un bruit plus récent et entendu pendant l'enquête la remplace. → R : retenu (04/11/2026).
+- Q4 : Que se passe-t-il quand il attrape le joueur ? → Proposition : « Attrapé » s'affiche 2 s, le joueur reprend au départ et le monstre repart dans sa ronde, au point le plus éloigné du joueur. Un compteur de captures s'affiche avec F3. La vraie fin de partie viendra en phase 7. → R : retenu (04/11/2026).
+- Q5 : Faut-il déjà des sons ? → Proposition : oui, des sons provisoires générés par le code (un pas sourd, un souffle), sans fichier audio. Sans eux, on ne peut pas tester la discrétion du monstre (D-009), qui est au cœur de la peur. → R : retenu (04/11/2026).
+- Q6 : La map de test suffit-elle ? → Proposition : on ajoute un petit bâtiment de deux pièces avec deux portes ouvertes et une fenêtre, et un circuit de ronde de 4 points autour. C'est le minimum pour tester « casser la ligne de vue » et « se cacher dans la pièce d'à côté ». → R : retenu (04/11/2026).
 
 ## Notes de playtest
 - (à remplir)

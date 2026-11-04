@@ -1,9 +1,9 @@
 # Tâches — S-003
 
-- [ ] T-013 — Clore S-002 et rédiger la spec, le plan et les tâches de S-003
+- [x] T-013 — Clore S-002 et rédiger la spec, le plan et les tâches de S-003
   - Résultat vérifiable : S-002 marquée livrée, spec S-003 validée par Maxime, clarifications répondues
   - Dépend de : —
-- [ ] T-014 — Réglages et cerveau du monstre
+- [x] T-014 — Réglages et cerveau du monstre
   - Résultat vérifiable : `MonsterSettings` + `monster_settings.tres`, `MonsterBrain` (ronde, enquête, poursuite, recherche), tests GUT de chaque transition
   - Dépend de : T-013
 - [ ] T-015 — Scène du monstre, bâtiment de test et ronde
@@ -23,4 +23,5 @@
   - Dépend de : T-018
 
 ## Compte rendu
-- (à remplir)
+- T-013 (04/11/2026) : S-002 marquée livrée (60 images/s confirmé par Maxime), spec, plan et tâches de S-003 rédigés (PR #17), propositions Q1 à Q6 validées par Maxime.
+- T-014 (04/11/2026) : `MonsterSettings` + `monster_settings.tres` (valeurs Q1 à Q4 et D-009), `MonsterBrain` (ronde, enquête, poursuite, recherche, jauge de repérage, signal `state_changed`), 16 tests GUT, PR #18.
