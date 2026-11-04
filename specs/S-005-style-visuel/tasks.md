@@ -12,7 +12,7 @@
 - [ ] T-032 — Nouveau rendu du scan
   - Résultat vérifiable : assombrissement hors du bâtiment, arêtes pâles, onde, jauge sous le viseur, tests GUT, vérifié dans Chrome
   - Dépend de : T-031
-- [ ] T-033 — Lampadaire au sodium
+- [x] T-033 — Lampadaire au sodium
   - Résultat vérifiable : modèle validé par Maxime sur rendu, `.glb` dans la greybox avec sa lumière
   - Dépend de : T-029
 - [ ] T-034 — Banc
@@ -30,3 +30,4 @@
 
 ## Compte rendu
 - T-029 (04/11/2026) : spec, plan et tâches de S-005, maquettes d'ambiance A, B et C rendues dans la greybox. Maxime : « Parfait », ambiance A et propositions Q1 à Q6 retenues.
+- T-033 (04/11/2026) : lampadaire au sodium (mât hexagonal de 5 m, bras courbé, tête « cobra », 88 triangles, une texture de 64 × 64 px), validé par Maxime sur rendu (« Parfait »). Script `tools/blender/lamppost.py`, source `assets/blender/lamppost_sodium.blend` et modèle `assets/models/lamppost_sodium.glb` en Git LFS, scène `Lamppost` avec sa lumière ocre sans ombre, `RetroProp` force les pixels nets. Deux lampadaires dans la greybox. Les `.blend` sont ignorés par Godot (`.gdignore`). 3 tests GUT.
