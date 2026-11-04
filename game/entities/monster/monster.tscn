@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/monster/monster.gd" id="1_monster"]
+[ext_resource type="Resource" path="res://game/data/monster_settings.tres" id="2_settings"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_body"]
+radius = 0.35
+height = 2.2
+
+[sub_resource type="StandardMaterial3D" id="Mat_body"]
+albedo_color = Color(0.03, 0.03, 0.035, 1)
+roughness = 1.0
+
+[sub_resource type="CapsuleMesh" id="Mesh_body"]
+material = SubResource("Mat_body")
+radius = 0.35
+height = 2.2
+
+[sub_resource type="StandardMaterial3D" id="Mat_eye"]
+shading_mode = 0
+albedo_color = Color(0.85, 0.88, 0.8, 1)
+
+[sub_resource type="SphereMesh" id="Mesh_eye"]
+material = SubResource("Mat_eye")
+radius = 0.04
+height = 0.08
+
+[node name="Monster" type="CharacterBody3D"]
+collision_layer = 8
+collision_mask = 3
+script = ExtResource("1_monster")
+settings = ExtResource("2_settings")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("Shape_body")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+mesh = SubResource("Mesh_body")
+
+[node name="EyeLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 1.95, -0.31)
+mesh = SubResource("Mesh_eye")
+
+[node name="EyeRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 1.95, -0.31)
+mesh = SubResource("Mesh_eye")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.5
+target_desired_distance = 0.6
+height = 2.2
+radius = 0.4

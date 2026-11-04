@@ -35,6 +35,16 @@ static func spot_time(distance: float, crouched: bool, p_settings: MonsterSettin
 	return base / p_settings.crouch_spot_factor if crouched else base
 
 
+## Movement speed for a pace, in meters per second.
+static func speed_for(pace: Pace, p_settings: MonsterSettings) -> float:
+	match pace:
+		Pace.WALK:
+			return p_settings.walk_speed
+		Pace.RUN:
+			return p_settings.run_speed
+	return p_settings.prowl_speed
+
+
 ## Index of the patrol point farthest from a position (used after a catch).
 static func farthest_index(points: Array[Vector3], from: Vector3) -> int:
 	var best := 0
