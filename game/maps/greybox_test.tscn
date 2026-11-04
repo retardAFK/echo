@@ -5,6 +5,8 @@
 [ext_resource type="PackedScene" path="res://game/ui/noise_debug.tscn" id="3_noise_debug"]
 [ext_resource type="PackedScene" path="res://game/entities/noise_probe/noise_probe.tscn" id="4_probe"]
 [ext_resource type="PackedScene" path="res://game/ui/noise_gauge.tscn" id="5_gauge"]
+[ext_resource type="PackedScene" path="res://game/entities/monster/monster.tscn" id="6_monster"]
+[ext_resource type="NavigationMesh" path="res://game/maps/greybox_test_navmesh.tres" id="7_navmesh"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_floor"]
 albedo_color = Color(0.22, 0.22, 0.23, 1)
@@ -176,6 +178,83 @@ size = Vector3(8, 3, 0.2)
 material = SubResource("Mat_wall")
 size = Vector3(8, 3, 0.2)
 
+[sub_resource type="BoxShape3D" id="Shape_BuildingNorthA"]
+size = Vector3(5.4, 3, 0.2)
+
+[sub_resource type="BoxMesh" id="Mesh_BuildingNorthA"]
+material = SubResource("Mat_wall")
+size = Vector3(5.4, 3, 0.2)
+
+[sub_resource type="BoxShape3D" id="Shape_BuildingNorthB"]
+size = Vector3(1.4, 3, 0.2)
+
+[sub_resource type="BoxMesh" id="Mesh_BuildingNorthB"]
+material = SubResource("Mat_wall")
+size = Vector3(1.4, 3, 0.2)
+
+[sub_resource type="BoxShape3D" id="Shape_BuildingSouthA"]
+size = Vector3(1.4, 3, 0.2)
+
+[sub_resource type="BoxMesh" id="Mesh_BuildingSouthA"]
+material = SubResource("Mat_wall")
+size = Vector3(1.4, 3, 0.2)
+
+[sub_resource type="BoxShape3D" id="Shape_BuildingSouthB"]
+size = Vector3(5.4, 3, 0.2)
+
+[sub_resource type="BoxMesh" id="Mesh_BuildingSouthB"]
+material = SubResource("Mat_wall")
+size = Vector3(5.4, 3, 0.2)
+
+[sub_resource type="BoxShape3D" id="Shape_BuildingEast"]
+size = Vector3(0.2, 3, 6)
+
+[sub_resource type="BoxMesh" id="Mesh_BuildingEast"]
+material = SubResource("Mat_wall")
+size = Vector3(0.2, 3, 6)
+
+[sub_resource type="BoxShape3D" id="Shape_BuildingWestA"]
+size = Vector3(0.2, 3, 2.4)
+
+[sub_resource type="BoxMesh" id="Mesh_BuildingWestA"]
+material = SubResource("Mat_wall")
+size = Vector3(0.2, 3, 2.4)
+
+[sub_resource type="BoxShape3D" id="Shape_BuildingWestB"]
+size = Vector3(0.2, 3, 2.4)
+
+[sub_resource type="BoxMesh" id="Mesh_BuildingWestB"]
+material = SubResource("Mat_wall")
+size = Vector3(0.2, 3, 2.4)
+
+[sub_resource type="BoxShape3D" id="Shape_BuildingWindowSill"]
+size = Vector3(0.2, 1, 1.2)
+
+[sub_resource type="BoxMesh" id="Mesh_BuildingWindowSill"]
+material = SubResource("Mat_wall")
+size = Vector3(0.2, 1, 1.2)
+
+[sub_resource type="BoxShape3D" id="Shape_BuildingWindowTop"]
+size = Vector3(0.2, 1, 1.2)
+
+[sub_resource type="BoxMesh" id="Mesh_BuildingWindowTop"]
+material = SubResource("Mat_wall")
+size = Vector3(0.2, 1, 1.2)
+
+[sub_resource type="BoxShape3D" id="Shape_BuildingDividerA"]
+size = Vector3(0.2, 3, 2.4)
+
+[sub_resource type="BoxMesh" id="Mesh_BuildingDividerA"]
+material = SubResource("Mat_wall")
+size = Vector3(0.2, 3, 2.4)
+
+[sub_resource type="BoxShape3D" id="Shape_BuildingDividerB"]
+size = Vector3(0.2, 3, 2.4)
+
+[sub_resource type="BoxMesh" id="Mesh_BuildingDividerB"]
+material = SubResource("Mat_wall")
+size = Vector3(0.2, 3, 2.4)
+
 [sub_resource type="Environment" id="Environment_greybox"]
 background_mode = 1
 background_color = Color(0.08, 0.08, 0.09, 1)
@@ -190,7 +269,7 @@ environment = SubResource("Environment_greybox")
 [node name="Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 10, 0)
 
-[node name="Blocks" type="Node3D" parent="."]
+[node name="Blocks" type="Node3D" parent="." groups=["navigation_source"]]
 
 [node name="Floor" type="StaticBody3D" parent="Blocks"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
@@ -413,6 +492,138 @@ shape = SubResource("Shape_NoiseWall")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/NoiseWall"]
 mesh = SubResource("Mesh_NoiseWall")
+
+[node name="BuildingNorthA" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.3, 1.5, 10)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/BuildingNorthA"]
+shape = SubResource("Shape_BuildingNorthA")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/BuildingNorthA"]
+mesh = SubResource("Mesh_BuildingNorthA")
+
+[node name="BuildingNorthB" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.7, 1.5, 10)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/BuildingNorthB"]
+shape = SubResource("Shape_BuildingNorthB")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/BuildingNorthB"]
+mesh = SubResource("Mesh_BuildingNorthB")
+
+[node name="BuildingSouthA" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.3, 1.5, 16)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/BuildingSouthA"]
+shape = SubResource("Shape_BuildingSouthA")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/BuildingSouthA"]
+mesh = SubResource("Mesh_BuildingSouthA")
+
+[node name="BuildingSouthB" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.7, 1.5, 16)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/BuildingSouthB"]
+shape = SubResource("Shape_BuildingSouthB")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/BuildingSouthB"]
+mesh = SubResource("Mesh_BuildingSouthB")
+
+[node name="BuildingEast" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.5, 13)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/BuildingEast"]
+shape = SubResource("Shape_BuildingEast")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/BuildingEast"]
+mesh = SubResource("Mesh_BuildingEast")
+
+[node name="BuildingWestA" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 1.5, 11.2)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/BuildingWestA"]
+shape = SubResource("Shape_BuildingWestA")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/BuildingWestA"]
+mesh = SubResource("Mesh_BuildingWestA")
+
+[node name="BuildingWestB" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 1.5, 14.8)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/BuildingWestB"]
+shape = SubResource("Shape_BuildingWestB")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/BuildingWestB"]
+mesh = SubResource("Mesh_BuildingWestB")
+
+[node name="BuildingWindowSill" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 0.5, 13)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/BuildingWindowSill"]
+shape = SubResource("Shape_BuildingWindowSill")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/BuildingWindowSill"]
+mesh = SubResource("Mesh_BuildingWindowSill")
+
+[node name="BuildingWindowTop" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 2.5, 13)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/BuildingWindowTop"]
+shape = SubResource("Shape_BuildingWindowTop")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/BuildingWindowTop"]
+mesh = SubResource("Mesh_BuildingWindowTop")
+
+[node name="BuildingDividerA" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.5, 11.2)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/BuildingDividerA"]
+shape = SubResource("Shape_BuildingDividerA")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/BuildingDividerA"]
+mesh = SubResource("Mesh_BuildingDividerA")
+
+[node name="BuildingDividerB" type="StaticBody3D" parent="Blocks"]
+collision_layer = 2
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.5, 14.8)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Blocks/BuildingDividerB"]
+shape = SubResource("Shape_BuildingDividerB")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Blocks/BuildingDividerB"]
+mesh = SubResource("Mesh_BuildingDividerB")
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = ExtResource("7_navmesh")
+
+[node name="PatrolRoute" type="Node3D" parent="."]
+
+[node name="Point1" type="Marker3D" parent="PatrolRoute"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 18)
+
+[node name="Point2" type="Marker3D" parent="PatrolRoute"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0, 18)
+
+[node name="Point3" type="Marker3D" parent="PatrolRoute"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0, 7)
+
+[node name="Point4" type="Marker3D" parent="PatrolRoute"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 4)
+
+[node name="Monster" parent="." node_paths=PackedStringArray("patrol_route") instance=ExtResource("6_monster")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0, 18)
+patrol_route = NodePath("../PatrolRoute")
+start_index = 2
 
 [node name="Probes" type="Node3D" parent="."]
 
