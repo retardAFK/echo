@@ -99,6 +99,11 @@ func get_height() -> float:
 	return _height
 
 
+## World position of the eyes, what the monster tries to see (S-003).
+func get_eye_position() -> Vector3:
+	return _head.global_position
+
+
 func _set_gait(gait: PlayerMotion.Gait) -> void:
 	if gait == _gait:
 		return

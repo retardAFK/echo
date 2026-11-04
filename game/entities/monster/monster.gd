@@ -2,16 +2,26 @@ class_name Monster
 extends CharacterBody3D
 ## The AI monster (spec S-003): a MonsterBrain decides, this body moves.
 ## Follows its patrol route on the navigation mesh at the brain's pace, and
-## walks to the noises it hears (NoiseBus, walls included).
+## walks to the noises it hears (NoiseBus, walls included), chases the player
+## once spotted and catches them on contact.
 
 signal state_changed(state: MonsterBrain.State)
+signal player_caught
+
+## Distance the chase target must move before the path is recomputed, in meters.
+const RETARGET_DISTANCE := 0.5
 
 @export var settings: MonsterSettings
 ## Node whose Marker3D children are the patrol points, in order.
 @export var patrol_route: Node3D
 @export var start_index := 0
+@export var player: Player
 
 var brain: MonsterBrain
+var catch_count := 0
+var sees_player := false
+
+var _vision_timer := 0.0
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 
@@ -43,12 +53,52 @@ func get_state() -> MonsterBrain.State:
 	return brain.state
 
 
+## Sends the monster back on patrol, at the point farthest from a position.
+func reset_to_patrol(away_from: Vector3) -> void:
+	var points := get_patrol_points()
+	var index := MonsterBrain.farthest_index(points, away_from)
+	global_position = points[index]
+	velocity = Vector3.ZERO
+	brain.spot_level = 0.0
+	sees_player = false
+	brain.set_patrol(points, index)
+	_agent.target_position = brain.target
+
+
 func _physics_process(delta: float) -> void:
 	var arrived := _agent.is_navigation_finished()
-	brain.update(delta, false, Vector3.ZERO, 0.0, false, arrived)
-	if not _agent.target_position.is_equal_approx(brain.target):
+	var player_position := Vector3.ZERO
+	var distance := 0.0
+	var crouched := false
+	if player != null:
+		player_position = player.global_position
+		distance = global_position.distance_to(player_position)
+		crouched = player.get_gait() == PlayerMotion.Gait.CROUCH
+		_update_sight(delta)
+	brain.update(delta, sees_player, player_position, distance, crouched, arrived)
+	if _agent.target_position.distance_to(brain.target) > RETARGET_DISTANCE:
 		_agent.target_position = brain.target
 	_move(delta)
+	if player != null and brain.is_catch_distance(_flat_distance(player_position)):
+		catch_count += 1
+		player_caught.emit()
+
+
+func _update_sight(delta: float) -> void:
+	_vision_timer -= delta
+	if _vision_timer > 0.0:
+		return
+	_vision_timer = settings.vision_interval
+	var eye := get_ear_position()
+	var target := player.get_eye_position()
+	sees_player = (
+		MonsterVision.in_view_cone(eye, -global_basis.z, target, settings)
+		and MonsterVision.has_line_of_sight(get_world_3d().direct_space_state, eye, target)
+	)
+
+
+func _flat_distance(point: Vector3) -> float:
+	return Vector2(point.x - global_position.x, point.z - global_position.z).length()
 
 
 func _on_noise_emitted(event: NoiseEvent) -> void:
