@@ -18,7 +18,7 @@
 - [x] T-018 — Bruits et sons du monstre, debug
   - Résultat vérifiable : foulées et souffle du monstre dans `NoiseBus`, sons provisoires générés par le code et coupés au-delà de leur portée, état et jauge dans F3, cône dans F4, tests GUT
   - Dépend de : T-017
-- [ ] T-019 — Playtest « est-ce amusant ? » (point de décision n°1)
+- [x] T-019 — Playtest « est-ce amusant ? » (point de décision n°1)
   - Résultat vérifiable : Maxime joue 10 minutes, notes de playtest remplies, réglages ajustés, 60 images/s dans Chrome
   - Dépend de : T-018
 
@@ -29,3 +29,4 @@
 - T-016 (04/11/2026) : le monstre écoute `NoiseBus` à hauteur d'oreille (2 m), ignore ses propres bruits, marche vers ce qu'il entend (murs compris), tourne sur lui-même en fouillant (`look_around_speed`), 6 tests GUT, PR #20.
 - T-017 (04/11/2026) : vue du monstre (`MonsterVision` : cône de 100° sur 25 m puis un rayon sur les couches monde et murs, 10 fois par seconde), jauge de repérage branchée sur le joueur (accroupi compris), poursuite et recherche, capture à 1,2 m avec écran « Attrapé » traduit, joueur remis au départ et monstre au point de ronde le plus éloigné, 8 tests GUT, PR #21. Écart avec le plan : la vue est une aide statique plutôt qu'un nœud enfant, plus simple à tester.
 - T-018 (04/11/2026) : foulées du monstre dans `NoiseBus` (0 / 3 / 12 m selon l'allure, une tous les 1,1 m) et souffle de 2 m chaque seconde (nouveau type `BREATH`), `PlayerEars` joue les bruits des autres seulement quand `NoiseBus` dit qu'ils atteignent le joueur, sons provisoires générés par le code (`PlaceholderSounds`), état, jauge et captures du monstre dans F3, cône de vision dans F4, 9 tests GUT, PR #22.
+- T-019 (04/11/2026) : playtest de Maxime sur le build web de main : 60 images/s, monstre « assez dur », fun à juger sur une map plus grande. Réglages gardés tels quels, S-003 marquée livrée.
