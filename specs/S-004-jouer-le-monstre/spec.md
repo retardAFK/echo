@@ -1,6 +1,6 @@
 # S-004 — Jouer le monstre
 
-**Statut** : validée (04/11/2026)
+**Statut** : livrée (04/11/2026)
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent)
 **Phase** : 4 — Jouer le monstre
 
@@ -25,14 +25,16 @@ Le 04/11/2026, Maxime a laissé Claude retenir les propositions Q1 à Q6 et test
 - Q6 : Comment le monstre attrape-t-il la proie ? → Proposition : au contact, à moins de 1,2 m, comme le monstre IA. « Attrapée » s'affiche 2 s, la proie réapparaît au point le plus éloigné du monstre, et un compteur de captures s'affiche avec F3. Les commandes sont celles du chassé : marcher par défaut (3,5 m/s), Maj pour courir (6 m/s), C (la touche pour s'accroupir) pour rôder sans bruit (1,5 m/s). → R : retenu (04/11/2026).
 
 ## Notes de playtest
-- (à remplir)
+- 04/11/2026 (Claude, tests GUT, simulations et build web dans Chrome) : 300 s simulées avec un monstre automatique qui ne suit que les repères et scanne le bâtiment : 1 capture, 6 fuites, 4 scans. La proie ne se coince pas. Les images par seconde du build web sont les mêmes qu'en phase 3.
+- 04/11/2026 (Maxime, build web de main) : « ça a un potentiel pour être amusant ». Le clic droit ne scannait rien dans le build web (volume du bâtiment perdu à l'export), corrigé par T-028 (PR #31). Après la correction : « Le scan semble fonctionner en greybox, mais pour la suite on designera un truc plus stylé ».
+- Décision : réglages gardés. Le rendu du scan (lumières, repères, jauge) sera repensé avec le style visuel (phase 5). Les 60 images/s en monstre restent à confirmer sur la machine de Maxime.
 
 ## Critères d'acceptation (vérifiables à la main)
-- [ ] Depuis l'écran de démarrage, je peux lancer le chassé ou le monstre, dans l'éditeur comme dans le build web.
-- [ ] En monstre, chaque bruit de la proie que j'entends s'affiche en orange à sa position avec sa distance, et s'efface en 3 s. Un bruit trop loin ou étouffé par les murs ne s'affiche pas.
-- [ ] Je peux scanner le bâtiment : immobile, j'y vois tous les bruits en direct, la jauge se vide en 8 s, se recharge en 45 s et refuse de démarrer sous 25 %.
-- [ ] Pendant un scan, les lumières du bâtiment scanné vacillent, sans aucun message à l'écran.
-- [ ] Le scan révèle le souffle d'une proie cachée qui vient de courir, mais pas celui d'une proie reposée.
-- [ ] En rôdant, je peux m'approcher de la proie sans qu'elle m'entende. En courant, elle m'entend de loin et s'enfuit.
-- [ ] Je peux traquer et attraper la proie grâce aux bruits et au scan.
+- [x] Depuis l'écran de démarrage, je peux lancer le chassé ou le monstre, dans l'éditeur comme dans le build web.
+- [x] En monstre, chaque bruit de la proie que j'entends s'affiche en orange à sa position avec sa distance, et s'efface en 3 s. Un bruit trop loin ou étouffé par les murs ne s'affiche pas.
+- [x] Je peux scanner le bâtiment : immobile, j'y vois tous les bruits en direct, la jauge se vide en 8 s, se recharge en 45 s et refuse de démarrer sous 25 %.
+- [x] Pendant un scan, les lumières du bâtiment scanné vacillent, sans aucun message à l'écran.
+- [x] Le scan révèle le souffle d'une proie cachée qui vient de courir, mais pas celui d'une proie reposée.
+- [x] En rôdant, je peux m'approcher de la proie sans qu'elle m'entende. En courant, elle m'entend de loin et s'enfuit.
+- [x] Je peux traquer et attraper la proie grâce aux bruits et au scan.
 - [ ] 60 images par seconde dans Chrome en jouant le monstre.
