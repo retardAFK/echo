@@ -16,6 +16,8 @@ func before_each() -> void:
 	add_child_autofree(_map)
 	_debug = _map.get_node("NoiseDebug")
 	_settings = NoiseBus.settings
+	# The monster breathes every second: keep it still so only test noises count.
+	_map.get_node("Monster").process_mode = Node.PROCESS_MODE_DISABLED
 	await wait_physics_frames(2)
 
 

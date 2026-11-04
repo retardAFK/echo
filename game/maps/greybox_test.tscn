@@ -644,8 +644,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, -12)
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
 
-[node name="DebugOverlay" parent="." node_paths=PackedStringArray("player") instance=ExtResource("2_overlay")]
+[node name="DebugOverlay" parent="." node_paths=PackedStringArray("player", "monster") instance=ExtResource("2_overlay")]
 player = NodePath("../Player")
+monster = NodePath("../Monster")
 
 [node name="NoiseGauge" parent="." node_paths=PackedStringArray("player") instance=ExtResource("5_gauge")]
 player = NodePath("../Player")

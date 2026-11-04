@@ -45,6 +45,16 @@ static func speed_for(pace: Pace, p_settings: MonsterSettings) -> float:
 	return p_settings.prowl_speed
 
 
+## Footstep noise range for a pace, in meters (D-009).
+static func noise_range_for(pace: Pace, p_settings: MonsterSettings) -> float:
+	match pace:
+		Pace.WALK:
+			return p_settings.walk_range
+		Pace.RUN:
+			return p_settings.run_range
+	return p_settings.prowl_range
+
+
 ## Index of the patrol point farthest from a position (used after a catch).
 static func farthest_index(points: Array[Vector3], from: Vector3) -> int:
 	var best := 0

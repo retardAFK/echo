@@ -10,6 +10,9 @@ signal player_caught
 
 ## Distance the chase target must move before the path is recomputed, in meters.
 const RETARGET_DISTANCE := 0.5
+const CONE_SEGMENTS := 16
+## Lift above the floor so the debug cone does not flicker against it.
+const CONE_GROUND_OFFSET := 0.05
 
 @export var settings: MonsterSettings
 ## Node whose Marker3D children are the patrol points, in order.
@@ -22,6 +25,8 @@ var catch_count := 0
 var sees_player := false
 
 var _vision_timer := 0.0
+var _step_distance := 0.0
+var _breath_timer := 0.0
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 
@@ -32,6 +37,7 @@ func _ready() -> void:
 	brain.set_patrol(get_patrol_points(), start_index)
 	_agent.target_position = brain.target
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
+	_build_vision_cone()
 
 
 ## Position of the monster's ears, where it hears noises from.
@@ -78,10 +84,26 @@ func _physics_process(delta: float) -> void:
 	brain.update(delta, sees_player, player_position, distance, crouched, arrived)
 	if _agent.target_position.distance_to(brain.target) > RETARGET_DISTANCE:
 		_agent.target_position = brain.target
+	var before := global_position
 	_move(delta)
+	_make_noise(delta, before)
 	if player != null and brain.is_catch_distance(_flat_distance(player_position)):
 		catch_count += 1
 		player_caught.emit()
+
+
+## Footsteps by distance walked, at the pace's range, and a short-range breath.
+func _make_noise(delta: float, before: Vector3) -> void:
+	_step_distance += Vector2(global_position.x - before.x, global_position.z - before.z).length()
+	if _step_distance >= settings.stride:
+		_step_distance = fmod(_step_distance, settings.stride)
+		var step_range := MonsterBrain.noise_range_for(brain.get_pace(), settings)
+		if step_range > 0.0:
+			NoiseBus.emit_noise(NoiseEvent.Type.FOOTSTEP, global_position, step_range, self)
+	_breath_timer += delta
+	if _breath_timer >= settings.breath_interval:
+		_breath_timer = 0.0
+		NoiseBus.emit_noise(NoiseEvent.Type.BREATH, get_ear_position(), settings.breath_range, self)
 
 
 func _update_sight(delta: float) -> void:
@@ -127,3 +149,27 @@ func _move(delta: float) -> void:
 	else:
 		velocity += get_gravity() * delta
 	move_and_slide()
+
+
+## Outline of the field of view on the ground, shown with F4 (noise debug).
+func _build_vision_cone() -> void:
+	var half := deg_to_rad(settings.vision_angle / 2.0)
+	var mesh := ImmediateMesh.new()
+	mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
+	mesh.surface_add_vertex(Vector3.ZERO)
+	for i in CONE_SEGMENTS + 1:
+		var angle := lerpf(-half, half, float(i) / CONE_SEGMENTS)
+		mesh.surface_add_vertex(Vector3(sin(angle), 0.0, -cos(angle)) * settings.vision_range)
+	mesh.surface_add_vertex(Vector3.ZERO)
+	mesh.surface_end()
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = settings.debug_cone_color
+	var cone := MeshInstance3D.new()
+	cone.name = "VisionCone"
+	cone.mesh = mesh
+	cone.material_override = material
+	cone.position.y = CONE_GROUND_OFFSET
+	cone.visible = false
+	cone.add_to_group(NoiseDebug.DEBUG_GROUP)
+	add_child(cone)
