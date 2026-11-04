@@ -662,3 +662,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.5, 13)
 
 [node name="CollisionShape3D" parent="Building" index="0"]
 shape = SubResource("Shape_BuildingVolume")
+
+[node name="LightWest" type="OmniLight3D" parent="Building"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.1, 0)
+light_color = Color(1, 0.96, 0.88, 1)
+omni_range = 4.5
+
+[node name="LightEast" type="OmniLight3D" parent="Building"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.1, 0)
+light_color = Color(1, 0.96, 0.88, 1)
+omni_range = 4.5

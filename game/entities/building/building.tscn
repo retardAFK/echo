@@ -1,11 +1,13 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/entities/building/building.gd" id="1_building"]
+[ext_resource type="Resource" path="res://game/data/monster_settings.tres" id="2_settings"]
 
 [node name="Building" type="Area3D"]
 collision_layer = 16
 collision_mask = 0
 monitoring = false
 script = ExtResource("1_building")
+settings = ExtResource("2_settings")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

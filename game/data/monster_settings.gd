@@ -78,6 +78,10 @@ extends Resource
 @export_range(0.0, 10.0, 0.1, "suffix:s") var scan_focus_time: float = 1.0
 ## Farthest building that can be aimed at, in meters.
 @export_range(1.0, 200.0, 1.0, "suffix:m") var scan_max_distance: float = 30.0
+## Light flickers per second in a scanned building, the hunted's discreet warning.
+@export_range(0.5, 30.0, 0.5, "suffix:/s") var light_flicker_rate: float = 8.0
+## Dimmest a flickering light gets, as a share of its normal energy.
+@export_range(0.0, 1.0, 0.05) var light_flicker_min: float = 0.15
 ## Colour of the scan gauge. Pale, never orange (reserved for noise).
 @export var scan_bar_color: Color = Color(0.85, 0.88, 0.9)
 
