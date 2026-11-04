@@ -19,6 +19,7 @@ spot_time_far = 1.5
 crouch_spot_factor = 0.5
 spot_decay_time = 2.0
 investigate_time = 6.0
+look_around_speed = 90.0
 lose_sight_time = 3.0
 search_time = 8.0
 catch_distance = 1.2

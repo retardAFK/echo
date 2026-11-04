@@ -40,6 +40,8 @@ extends Resource
 @export_group("Behaviour")
 ## Time spent looking around where a noise came from, in seconds.
 @export_range(0.0, 60.0, 0.5, "suffix:s") var investigate_time: float = 6.0
+## Turning speed while looking around after reaching a noise or a last seen spot.
+@export_range(0.0, 720.0, 5.0, "suffix:°/s") var look_around_speed: float = 90.0
 ## Time without seeing the player before a chase turns into a search, in seconds.
 @export_range(0.1, 30.0, 0.1, "suffix:s") var lose_sight_time: float = 3.0
 ## Time spent looking around where the player was last seen, in seconds.
