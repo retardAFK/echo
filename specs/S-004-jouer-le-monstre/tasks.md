@@ -1,6 +1,6 @@
 # Tâches — S-004
 
-- [ ] T-020 — Clore S-003 et rédiger la spec, le plan et les tâches de S-004
+- [x] T-020 — Clore S-003 et rédiger la spec, le plan et les tâches de S-004
   - Résultat vérifiable : spec S-004 validée par Maxime, clarifications Q1 à Q6 répondues
   - Dépend de : —
 - [ ] T-021 — Écran de démarrage et monstre jouable
@@ -26,3 +26,4 @@
   - Dépend de : T-026
 
 ## Compte rendu
+- T-020 (04/11/2026) : S-003 close (PR #23), spec, plan et tâches de S-004 rédigés (PR #24), propositions Q1 à Q6 retenues (Maxime : « Peux-tu tester toi-même ? »).

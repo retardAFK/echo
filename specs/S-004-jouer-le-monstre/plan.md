@@ -1,6 +1,6 @@
 # Plan — S-004
 
-**Statut** : brouillon (04/11/2026), à valider avec la spec
+**Statut** : validé (04/11/2026)
 
 ## Approche technique
 - **Écran de démarrage** (`game/ui/start_menu.tscn` + `.gd`, Q1) : deux boutons traduits (`MENU_PLAY_HUNTED`, `MENU_PLAY_MONSTER`). Il devient la scène principale. Il charge la greybox et lui dit quel rôle donner au joueur. Échap revient au menu.

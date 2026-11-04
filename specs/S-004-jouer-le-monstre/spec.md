@@ -1,6 +1,6 @@
 # S-004 — Jouer le monstre
 
-**Statut** : brouillon (04/11/2026), en attente des réponses de Maxime
+**Statut** : validée (04/11/2026)
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent)
 **Phase** : 4 — Jouer le monstre
 
@@ -15,12 +15,14 @@ Au lancement, je choisis « Chassé » ou « Monstre ». Je prends le monstre. J
 - La vraie map (l'hôpital) : plus tard. On reste dans la greybox.
 
 ## Clarifications
-- Q1 : Comment choisir son rôle ? → Proposition : un petit écran de démarrage avec deux boutons, « Chassé » et « Monstre ». Il fonctionne dans le build web, où on ne peut pas changer de scène autrement. Échap revient à cet écran. → R : en attente.
-- Q2 : Comment s'affichent les bruits ? → Proposition : chaque bruit que le monstre entend (portées de 6.2, murs compris) apparaît comme un rond orange à sa position, visible à travers les murs, avec sa distance en mètres arrondie (« 11 m »). Il s'efface en 3 s. Les bruits du monstre lui-même ne s'affichent pas. → R : en attente.
-- Q3 : Comment marche le scan ? → Proposition : je vise un bâtiment à moins de 30 m et je maintiens le clic droit. Je ne peux plus bouger, mais je peux encore tourner la tête. Après 1 s, tous les bruits du bâtiment s'affichent, même trop faibles pour m'arriver. La jauge (8 s de scan, recharge complète en 45 s, impossible sous 25 %) est une barre pâle en bas de l'écran, pas orange, car l'orange est réservé au bruit. → R : en attente.
-- Q4 : Comment se comporte la proie ? → Proposition : elle se promène en marchant entre des points, dedans et dehors (bruits de 4 m). Si elle entend le monstre (3 m en marchant, 12 m en courant, D-009) ou le voit à moins de 15 m, elle court vers la cachette la plus éloignée de lui (bruits de 14 m), puis s'accroupit et se tait 20 s. Après une course, elle est essoufflée 10 s : son souffle n'est audible que par le scan. → R : en attente.
-- Q5 : Que fait la proie quand les lumières vacillent (alerte du scan) ? → Proposition : si elle est dans le bâtiment scanné et qu'elle marche, elle se fige et se tait jusqu'à la fin du scan. Elle ne remarque l'alerte qu'une fois sur deux, comme un humain qui regarde ailleurs. → R : en attente.
-- Q6 : Comment le monstre attrape-t-il la proie ? → Proposition : au contact, à moins de 1,2 m, comme le monstre IA. « Attrapée » s'affiche 2 s, la proie réapparaît au point le plus éloigné du monstre, et un compteur de captures s'affiche avec F3. Les commandes sont celles du chassé : marcher par défaut (3,5 m/s), Maj pour courir (6 m/s), Ctrl pour rôder sans bruit (1,5 m/s). → R : en attente.
+Le 04/11/2026, Maxime a laissé Claude retenir les propositions Q1 à Q6 et tester lui-même, quitte à y revenir après le playtest.
+
+- Q1 : Comment choisir son rôle ? → Proposition : un petit écran de démarrage avec deux boutons, « Chassé » et « Monstre ». Il fonctionne dans le build web, où on ne peut pas changer de scène autrement. Échap revient à cet écran. → R : retenu (04/11/2026).
+- Q2 : Comment s'affichent les bruits ? → Proposition : chaque bruit que le monstre entend (portées de 6.2, murs compris) apparaît comme un rond orange à sa position, visible à travers les murs, avec sa distance en mètres arrondie (« 11 m »). Il s'efface en 3 s. Les bruits du monstre lui-même ne s'affichent pas. → R : retenu (04/11/2026).
+- Q3 : Comment marche le scan ? → Proposition : je vise un bâtiment à moins de 30 m et je maintiens le clic droit. Je ne peux plus bouger, mais je peux encore tourner la tête. Après 1 s, tous les bruits du bâtiment s'affichent, même trop faibles pour m'arriver. La jauge (8 s de scan, recharge complète en 45 s, impossible sous 25 %) est une barre pâle en bas de l'écran, pas orange, car l'orange est réservé au bruit. → R : retenu (04/11/2026).
+- Q4 : Comment se comporte la proie ? → Proposition : elle se promène en marchant entre des points, dedans et dehors (bruits de 4 m). Si elle entend le monstre (3 m en marchant, 12 m en courant, D-009) ou le voit à moins de 15 m, elle court vers la cachette la plus éloignée de lui (bruits de 14 m), puis s'accroupit et se tait 20 s. Après une course, elle est essoufflée 10 s : son souffle n'est audible que par le scan. → R : retenu (04/11/2026).
+- Q5 : Que fait la proie quand les lumières vacillent (alerte du scan) ? → Proposition : si elle est dans le bâtiment scanné et qu'elle marche, elle se fige et se tait jusqu'à la fin du scan. Elle ne remarque l'alerte qu'une fois sur deux, comme un humain qui regarde ailleurs. → R : retenu (04/11/2026).
+- Q6 : Comment le monstre attrape-t-il la proie ? → Proposition : au contact, à moins de 1,2 m, comme le monstre IA. « Attrapée » s'affiche 2 s, la proie réapparaît au point le plus éloigné du monstre, et un compteur de captures s'affiche avec F3. Les commandes sont celles du chassé : marcher par défaut (3,5 m/s), Maj pour courir (6 m/s), Ctrl pour rôder sans bruit (1,5 m/s). → R : retenu (04/11/2026).
 
 ## Notes de playtest
 - (à remplir)
