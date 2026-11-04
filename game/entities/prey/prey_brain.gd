@@ -117,6 +117,7 @@ func _flee(threat: Vector3) -> void:
 	if _hiding_spots.is_empty():
 		return
 	target = _hiding_spots[MonsterBrain.farthest_index(_hiding_spots, threat)]
+	_breath_left = _settings.breathless_time
 	_set_state(State.FLEE)
 
 
