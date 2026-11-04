@@ -25,14 +25,14 @@ var catch_count := 0
 var sees_player := false
 
 var _vision_timer := 0.0
-var _step_distance := 0.0
-var _breath_timer := 0.0
+var _noise: MonsterNoise
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 
 
 func _ready() -> void:
 	brain = MonsterBrain.new(settings)
+	_noise = MonsterNoise.new(settings)
 	brain.state_changed.connect(state_changed.emit)
 	brain.set_patrol(get_patrol_points(), start_index)
 	_agent.target_position = brain.target
@@ -94,16 +94,8 @@ func _physics_process(delta: float) -> void:
 
 ## Footsteps by distance walked, at the pace's range, and a short-range breath.
 func _make_noise(delta: float, before: Vector3) -> void:
-	_step_distance += Vector2(global_position.x - before.x, global_position.z - before.z).length()
-	if _step_distance >= settings.stride:
-		_step_distance = fmod(_step_distance, settings.stride)
-		var step_range := MonsterBrain.noise_range_for(brain.get_pace(), settings)
-		if step_range > 0.0:
-			NoiseBus.emit_noise(NoiseEvent.Type.FOOTSTEP, global_position, step_range, self)
-	_breath_timer += delta
-	if _breath_timer >= settings.breath_interval:
-		_breath_timer = 0.0
-		NoiseBus.emit_noise(NoiseEvent.Type.BREATH, get_ear_position(), settings.breath_range, self)
+	var moved := Vector2(global_position.x - before.x, global_position.z - before.z).length()
+	_noise.update(delta, moved, brain.get_pace(), global_position, get_ear_position(), self)
 
 
 func _update_sight(delta: float) -> void:

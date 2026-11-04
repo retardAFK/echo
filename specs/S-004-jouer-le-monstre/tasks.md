@@ -3,7 +3,7 @@
 - [x] T-020 — Clore S-003 et rédiger la spec, le plan et les tâches de S-004
   - Résultat vérifiable : spec S-004 validée par Maxime, clarifications Q1 à Q6 répondues
   - Dépend de : —
-- [ ] T-021 — Écran de démarrage et monstre jouable
+- [x] T-021 — Écran de démarrage et monstre jouable
   - Résultat vérifiable : choix du rôle (éditeur et web), monstre à la première personne avec rôder, marcher et courir, ses pas et son souffle dans `NoiseBus`, tests GUT
   - Dépend de : T-020
 - [ ] T-022 — Affichage des bruits avec leur distance
@@ -27,3 +27,4 @@
 
 ## Compte rendu
 - T-020 (04/11/2026) : S-003 close (PR #23), spec, plan et tâches de S-004 rédigés (PR #24), propositions Q1 à Q6 retenues (Maxime : « Peux-tu tester toi-même ? »).
+- T-021 (04/11/2026) : écran de démarrage `StartMenu` (scène principale, boutons traduits), rôle gardé dans `GameSession`, la greybox remplace le chassé et le monstre IA par `MonsterAvatar` en rôle monstre, monstre à la première personne (marcher, Maj pour courir, C pour rôder), bruits partagés avec le monstre IA dans `MonsterNoise`, `PlayerEars` réutilisé pour que le monstre entende la proie, deuxième Échap pour revenir au menu, 10 tests GUT. Écart : rôder se fait avec C (la touche d'accroupissement) plutôt que Ctrl, qui ferme l'onglet avec W dans le navigateur.
