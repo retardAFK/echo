@@ -3,7 +3,10 @@ extends CharacterBody3D
 ## The AI prey the monster hunts in solo tests (spec S-004, Q4): a PreyBrain
 ## decides, this body moves on the navigation mesh at the hunted's speeds and
 ## makes the hunted's footstep noises (FootstepEmitter). It hears the monster
-## through NoiseBus and sees it within its sight range.
+## through NoiseBus and sees it within its sight range. Out of breath after a
+## run, it pants faintly (only the scan reveals it). When a building it is in
+## is scanned, it notices the flickering lights one time out of two and
+## freezes until the scan ends (Q5).
 
 signal state_changed(state: PreyBrain.State)
 
@@ -19,6 +22,8 @@ const RETARGET_DISTANCE := 0.5
 @export var hiding_spots: Node3D
 ## The playable monster, with get_eye_position().
 @export var monster: Node3D
+## Buildings whose scans the prey may notice.
+@export var buildings: Array[Building] = []
 
 var brain: PreyBrain
 var sees_monster := false
@@ -26,16 +31,23 @@ var sees_monster := false
 var _heard_monster := false
 var _vision_timer := 0.0
 var _stuck_left := 0.0
+var _breath_timer := 0.0
+## Building whose scan the prey noticed, or null.
+var _warned_by: Building
+var _rng := RandomNumberGenerator.new()
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 
 
 func _ready() -> void:
-	brain = PreyBrain.new(settings, hash(name))
+	_rng.seed = hash(name)
+	brain = PreyBrain.new(settings, _rng.randi())
 	brain.state_changed.connect(state_changed.emit)
 	brain.set_points(markers_of(wander_route), markers_of(hiding_spots))
 	_agent.target_position = brain.target
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
+	for building in buildings:
+		building.scan_changed.connect(_on_scan_changed.bind(building))
 
 
 static func markers_of(parent: Node3D) -> Array[Vector3]:
@@ -68,13 +80,49 @@ func _physics_process(delta: float) -> void:
 	var alarm := sees_monster or _heard_monster
 	_heard_monster = false
 	var arrived := _agent.is_navigation_finished()
-	brain.update(delta, alarm, threat, arrived, false)
+	brain.update(delta, alarm, threat, arrived, is_warned())
 	if _agent.target_position.distance_to(brain.target) > RETARGET_DISTANCE:
 		_agent.target_position = brain.target
 		_stuck_left = settings.stuck_time
 	var before := global_position
 	_move(delta)
 	_check_stuck(delta, before)
+	_pant(delta)
+
+
+## True while the prey noticed a scan and the scan is still on.
+func is_warned() -> bool:
+	return _warned_by != null
+
+
+## Back to wandering from a wander point, rested (after a catch).
+func respawn(at: Vector3, index: int) -> void:
+	global_position = at
+	velocity = Vector3.ZERO
+	_warned_by = null
+	_breath_timer = 0.0
+	brain.reset(index)
+	_agent.target_position = brain.target
+
+
+## The faint panting of an out of breath prey, at its mouth.
+func _pant(delta: float) -> void:
+	if not brain.is_breathless():
+		_breath_timer = 0.0
+		return
+	_breath_timer += delta
+	if _breath_timer >= settings.breath_interval:
+		_breath_timer = 0.0
+		NoiseBus.emit_noise(NoiseEvent.Type.BREATH, get_eye_position(), settings.breath_range, self)
+
+
+func _on_scan_changed(is_scanned: bool, building: Building) -> void:
+	if not is_scanned:
+		if building == _warned_by:
+			_warned_by = null
+		return
+	if building.contains(get_eye_position()) and _rng.randf() < settings.scan_notice_chance:
+		_warned_by = building
 
 
 ## Gives up a target it cannot reach: blocked against a wall, or off the mesh.
