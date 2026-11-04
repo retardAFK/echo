@@ -1,7 +1,7 @@
 # S-002 — Le système de bruit
 
-**Statut** : validée (03/11/2026)
-**Piliers servis** : P1 (le son est la vision), P2 (le dilemme permanent)
+**Statut** : livrée (04/11/2026)
+**Piliers servis** : P1 (le son trahit, D-008), P2 (le dilemme permanent)
 **Phase** : 2 — Le système de bruit
 
 ## Pourquoi
@@ -19,16 +19,16 @@ En appuyant sur F4, je vois les bruits : chaque pas dessine au sol un cercle ora
 - En tant que futur monstre (S-003), je veux recevoir chaque bruit avec sa position et sa portée afin de réagir à ce que j'entends.
 
 ## Critères d'acceptation (vérifiables à la main)
-- [ ] Immobile, je ne fais aucun bruit : la jauge reste à zéro.
-- [ ] À chaque pas, un bruit part de mes pieds. Sa portée est de 1 m accroupi, 4 m en marchant et 14 m en courant (valeurs de la section 6.2, réglables).
-- [ ] En courant, la jauge monte à 9 sur 10 ; en marchant à environ 3 ; accroupi à 1 au plus.
-- [ ] La jauge redescend à zéro en 2 s environ après mon dernier pas.
-- [ ] F4 affiche et cache les cercles de bruit. Chaque cercle a le rayon de la portée du bruit et s'efface en 3 s.
-- [ ] Un micro de test à 10 m en terrain dégagé s'allume quand je cours, pas quand je marche.
-- [ ] Un micro de test à 6 m derrière un mur s'allume quand je cours tout près du mur, pas quand je marche.
-- [ ] Toutes les portées, la règle des murs et les réglages de la jauge sont dans des fichiers de réglage, pas dans le code.
-- [ ] Les tests GUT du calcul de bruit passent.
-- [ ] La map de test tient toujours 60 images/s dans Chrome, cercles affichés.
+- [x] Immobile, je ne fais aucun bruit : la jauge reste à zéro.
+- [x] À chaque pas, un bruit part de mes pieds. Sa portée est de 1 m accroupi, 4 m en marchant et 14 m en courant (valeurs de la section 6.2, réglables).
+- [x] En courant, la jauge monte à 9 sur 10 ; en marchant à environ 3 ; accroupi à 1 au plus.
+- [x] La jauge redescend à zéro en 2 s environ après mon dernier pas.
+- [x] F4 affiche et cache les cercles de bruit. Chaque cercle a le rayon de la portée du bruit et s'efface en 3 s.
+- [x] Un micro de test à 10 m en terrain dégagé s'allume quand je cours, pas quand je marche.
+- [x] Un micro de test à 6 m derrière un mur s'allume quand je cours tout près du mur, pas quand je marche.
+- [x] Toutes les portées, la règle des murs et les réglages de la jauge sont dans des fichiers de réglage, pas dans le code.
+- [x] Les tests GUT du calcul de bruit passent.
+- [x] La map de test tient toujours 60 images/s dans Chrome, cercles affichés.
 
 ## Hors périmètre
 - Le monstre et sa réaction au bruit (S-003).
@@ -49,4 +49,4 @@ Le 03/11/2026, Maxime a validé la gestion des bruits proposée : les propositio
 - Q6 (ajout du 03/11/2026) : chaque bruit porte un **type** (pas, porte, objet…) pour que le monstre puisse plus tard réagir selon ce qu'il entend. En S-002, seul le type « pas » existe. → R : retenu, sans objection de Maxime à la proposition.
 
 ## Notes de playtest
-- (à remplir)
+- (04/11/2026) Maxime : 60 images/s sur le dernier build. Mesure côté Claude dans Chrome sans carte graphique : aucune différence avec le build de fin de phase 1. Critère de fin de phase 2 atteint.
