@@ -14,6 +14,11 @@
 [ext_resource type="PackedScene" path="res://game/entities/props/bench_dirty.tscn" id="12_bench_dirty"]
 [ext_resource type="PackedScene" path="res://game/entities/props/bench_broken.tscn" id="13_bench_broken"]
 [ext_resource type="PackedScene" path="res://game/entities/props/tree_bare.tscn" id="14_tree"]
+[ext_resource type="PackedScene" path="res://game/entities/props/facade_hlm_plain.tscn" id="15_facade_plain"]
+[ext_resource type="PackedScene" path="res://game/entities/props/facade_hlm_lit.tscn" id="16_facade_lit"]
+[ext_resource type="PackedScene" path="res://game/entities/props/facade_hlm_balcony.tscn" id="17_facade_balcony"]
+[ext_resource type="PackedScene" path="res://game/entities/props/facade_hlm_walled.tscn" id="18_facade_walled"]
+[ext_resource type="PackedScene" path="res://game/entities/props/facade_hlm_door.tscn" id="19_facade_door"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_floor"]
 albedo_color = Color(0.22, 0.22, 0.23, 1)
@@ -731,3 +736,33 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 15)
 
 [node name="TreeNorth" parent="Props" instance=ExtResource("14_tree")]
 transform = Transform3D(0.5, 0, 0.866, 0, 1, 0, -0.866, 0, 0.5, 4, 0, -17)
+
+[node name="BlockNorth" type="Node3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, -19.8)
+
+[node name="Panel00" parent="Props/BlockNorth" instance=ExtResource("18_facade_walled")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Panel01" parent="Props/BlockNorth" instance=ExtResource("19_facade_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0)
+
+[node name="Panel02" parent="Props/BlockNorth" instance=ExtResource("18_facade_walled")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+
+[node name="Panel10" parent="Props/BlockNorth" instance=ExtResource("15_facade_plain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+
+[node name="Panel11" parent="Props/BlockNorth" instance=ExtResource("16_facade_lit")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0)
+
+[node name="Panel12" parent="Props/BlockNorth" instance=ExtResource("17_facade_balcony")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 3, 0)
+
+[node name="Panel20" parent="Props/BlockNorth" instance=ExtResource("17_facade_balcony")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+
+[node name="Panel21" parent="Props/BlockNorth" instance=ExtResource("15_facade_plain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 6, 0)
+
+[node name="Panel22" parent="Props/BlockNorth" instance=ExtResource("16_facade_lit")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 6, 0)

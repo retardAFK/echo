@@ -21,7 +21,7 @@
 - [x] T-035 — Arbre nu
   - Résultat vérifiable : modèle validé par Maxime sur rendu, `.glb` dans la greybox
   - Dépend de : T-034
-- [ ] T-036 — Module de façade
+- [x] T-036 — Module de façade
   - Résultat vérifiable : modèle validé par Maxime sur rendu, façade répétée dans la greybox
   - Dépend de : T-035
 - [ ] T-037 — Playtest « ça ressemble au jeu »
@@ -33,3 +33,4 @@
 - T-033 (04/11/2026) : lampadaire au sodium (mât hexagonal de 5 m, bras courbé, tête « cobra », 88 triangles, une texture de 64 × 64 px), validé par Maxime sur rendu (« Parfait »). Script `tools/blender/lamppost.py`, source `assets/blender/lamppost_sodium.blend` et modèle `assets/models/lamppost_sodium.glb` en Git LFS, scène `Lamppost` avec sa lumière ocre sans ombre, `RetroProp` force les pixels nets. Deux lampadaires dans la greybox. Les `.blend` sont ignorés par Godot (`.gdignore`). 3 tests GUT.
 - T-034 (04/11/2026) : deux bancs tout en béton, à la demande de Maxime (« en béton ça me semble plus effrayant », « beaucoup mieux ») : un sale mais intact (72 triangles) et un crade et cassé (144 triangles, assise brisée, pied arraché, fers rouillés), tachés, moussus et tagués en couleurs ternes (jamais d'orange), texture de 128 × 128 px pour 2 m. Modélisés en direct dans le Blender de Maxime (addon Blender Lab), script `tools/blender/bench.py`. Les bancs et les lampadaires ont maintenant une collision et découpent le maillage de navigation (recalculé, 229 polygones). 4 tests GUT pour tous les objets.
 - T-035 (04/11/2026) : arbre nu d'hiver (tronc penché de 2,6 m, 4 branches et des rameaux tordus, 300 triangles, écorce de 64 × 64 px), modélisé dans le Blender de Maxime, validé (« parfait pour l'arbre »). Deux arbres dans la greybox avec une collision sur le tronc, maillage de navigation recalculé (244 polygones).
+- T-036 (05/11/2026) : module de façade HLM de 3 × 3 m en cinq variantes sales (salissures, coulures, tags ternes), validées par Maxime (« oui parfait ») : fenêtre simple (132 triangles), fenêtre allumée d'une lueur de télé bleutée (132), balcon (240), fenêtre murée en parpaings (72) et porte d'entrée (60). Textures de 256 × 256 px pour 4 m, script `tools/blender/facade.py`. Un petit immeuble de 3 × 3 modules contre le mur nord de la greybox (porte et fenêtres murées au rez-de-chaussée), avec une collision par module, maillage de navigation recalculé (244 polygones). Façades ajoutées aux tests GUT des objets.

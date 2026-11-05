@@ -1,5 +1,5 @@
 extends GutTest
-## Blender props in the game (spec S-005, T-033 to T-035).
+## Blender props in the game (spec S-005, T-033 to T-036).
 
 const LAMPPOST := preload("res://game/entities/props/lamppost.tscn")
 const PROPS: Array[PackedScene] = [
@@ -7,6 +7,11 @@ const PROPS: Array[PackedScene] = [
 	preload("res://game/entities/props/bench_dirty.tscn"),
 	preload("res://game/entities/props/bench_broken.tscn"),
 	preload("res://game/entities/props/tree_bare.tscn"),
+	preload("res://game/entities/props/facade_hlm_plain.tscn"),
+	preload("res://game/entities/props/facade_hlm_lit.tscn"),
+	preload("res://game/entities/props/facade_hlm_balcony.tscn"),
+	preload("res://game/entities/props/facade_hlm_walled.tscn"),
+	preload("res://game/entities/props/facade_hlm_door.tscn"),
 ]
 ## Decorative object budget (constitution 2.3).
 const MAX_PROP_TRIANGLES := 500
