@@ -10,267 +10,287 @@
 [ext_resource type="Script" path="res://game/maps/greybox_test.gd" id="8_map"]
 [ext_resource type="PackedScene" path="res://game/ui/caught_screen.tscn" id="9_caught"]
 [ext_resource type="PackedScene" path="res://game/entities/building/building.tscn" id="10_building"]
-
-[sub_resource type="StandardMaterial3D" id="Mat_floor"]
-albedo_color = Color(0.22, 0.22, 0.23, 1)
-
-[sub_resource type="StandardMaterial3D" id="Mat_wall"]
-albedo_color = Color(0.5, 0.5, 0.5, 1)
-
-[sub_resource type="StandardMaterial3D" id="Mat_obstacle"]
-albedo_color = Color(0.36, 0.36, 0.38, 1)
+[ext_resource type="PackedScene" path="res://game/entities/props/lamppost.tscn" id="11_lamppost"]
+[ext_resource type="PackedScene" path="res://game/entities/props/bench_dirty.tscn" id="12_bench_dirty"]
+[ext_resource type="PackedScene" path="res://game/entities/props/bench_broken.tscn" id="13_bench_broken"]
+[ext_resource type="PackedScene" path="res://game/entities/props/tree_bare.tscn" id="14_tree"]
+[ext_resource type="PackedScene" path="res://game/entities/props/facade_hlm_plain.tscn" id="15_facade_plain"]
+[ext_resource type="PackedScene" path="res://game/entities/props/facade_hlm_lit.tscn" id="16_facade_lit"]
+[ext_resource type="PackedScene" path="res://game/entities/props/facade_hlm_balcony.tscn" id="17_facade_balcony"]
+[ext_resource type="PackedScene" path="res://game/entities/props/facade_hlm_walled.tscn" id="18_facade_walled"]
+[ext_resource type="PackedScene" path="res://game/entities/props/facade_hlm_door.tscn" id="19_facade_door"]
+[ext_resource type="Material" path="res://game/fx/materials/asphalt_floor.tres" id="20_mat_floor"]
+[ext_resource type="Material" path="res://game/fx/materials/concrete_wall.tres" id="21_mat_wall"]
+[ext_resource type="Material" path="res://game/fx/materials/concrete_obstacle.tres" id="22_mat_obstacle"]
+[ext_resource type="Script" path="res://game/fx/night_environment.gd" id="23_night"]
+[ext_resource type="PackedScene" path="res://game/fx/retro_post.tscn" id="24_retro_post"]
+[ext_resource type="Script" path="res://game/fx/retro_world.gd" id="25_retro_world"]
 
 [sub_resource type="BoxShape3D" id="Shape_Floor"]
 size = Vector3(40, 0.2, 40)
 
 [sub_resource type="BoxMesh" id="Mesh_Floor"]
-material = SubResource("Mat_floor")
+material = ExtResource("20_mat_floor")
 size = Vector3(40, 0.2, 40)
 
 [sub_resource type="BoxShape3D" id="Shape_WallNorth"]
 size = Vector3(40, 3, 0.4)
 
 [sub_resource type="BoxMesh" id="Mesh_WallNorth"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(40, 3, 0.4)
 
 [sub_resource type="BoxShape3D" id="Shape_WallSouth"]
 size = Vector3(40, 3, 0.4)
 
 [sub_resource type="BoxMesh" id="Mesh_WallSouth"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(40, 3, 0.4)
 
 [sub_resource type="BoxShape3D" id="Shape_WallEast"]
 size = Vector3(0.4, 3, 40)
 
 [sub_resource type="BoxMesh" id="Mesh_WallEast"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.4, 3, 40)
 
 [sub_resource type="BoxShape3D" id="Shape_WallWest"]
 size = Vector3(0.4, 3, 40)
 
 [sub_resource type="BoxMesh" id="Mesh_WallWest"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.4, 3, 40)
 
 [sub_resource type="BoxShape3D" id="Shape_Stair1"]
 size = Vector3(3, 0.25, 1)
 
 [sub_resource type="BoxMesh" id="Mesh_Stair1"]
-material = SubResource("Mat_obstacle")
+material = ExtResource("22_mat_obstacle")
 size = Vector3(3, 0.25, 1)
 
 [sub_resource type="BoxShape3D" id="Shape_Stair2"]
 size = Vector3(3, 0.5, 1)
 
 [sub_resource type="BoxMesh" id="Mesh_Stair2"]
-material = SubResource("Mat_obstacle")
+material = ExtResource("22_mat_obstacle")
 size = Vector3(3, 0.5, 1)
 
 [sub_resource type="BoxShape3D" id="Shape_Stair3"]
 size = Vector3(3, 0.75, 1)
 
 [sub_resource type="BoxMesh" id="Mesh_Stair3"]
-material = SubResource("Mat_obstacle")
+material = ExtResource("22_mat_obstacle")
 size = Vector3(3, 0.75, 1)
 
 [sub_resource type="BoxShape3D" id="Shape_Stair4"]
 size = Vector3(3, 1, 2)
 
 [sub_resource type="BoxMesh" id="Mesh_Stair4"]
-material = SubResource("Mat_obstacle")
+material = ExtResource("22_mat_obstacle")
 size = Vector3(3, 1, 2)
 
 [sub_resource type="BoxShape3D" id="Shape_Step25cm"]
 size = Vector3(3, 0.25, 3)
 
 [sub_resource type="BoxMesh" id="Mesh_Step25cm"]
-material = SubResource("Mat_obstacle")
+material = ExtResource("22_mat_obstacle")
 size = Vector3(3, 0.25, 3)
 
 [sub_resource type="BoxShape3D" id="Shape_LowWall60cm"]
 size = Vector3(3, 0.6, 0.3)
 
 [sub_resource type="BoxMesh" id="Mesh_LowWall60cm"]
-material = SubResource("Mat_obstacle")
+material = ExtResource("22_mat_obstacle")
 size = Vector3(3, 0.6, 0.3)
 
 [sub_resource type="BoxShape3D" id="Shape_LowPassageLeft"]
 size = Vector3(0.3, 1.5, 4)
 
 [sub_resource type="BoxMesh" id="Mesh_LowPassageLeft"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.3, 1.5, 4)
 
 [sub_resource type="BoxShape3D" id="Shape_LowPassageRight"]
 size = Vector3(0.3, 1.5, 4)
 
 [sub_resource type="BoxMesh" id="Mesh_LowPassageRight"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.3, 1.5, 4)
 
 [sub_resource type="BoxShape3D" id="Shape_LowPassageCeiling"]
 size = Vector3(3.6, 0.3, 4)
 
 [sub_resource type="BoxMesh" id="Mesh_LowPassageCeiling"]
-material = SubResource("Mat_obstacle")
+material = ExtResource("22_mat_obstacle")
 size = Vector3(3.6, 0.3, 4)
 
 [sub_resource type="BoxShape3D" id="Shape_CorridorLeft"]
 size = Vector3(0.2, 3, 12)
 
 [sub_resource type="BoxMesh" id="Mesh_CorridorLeft"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.2, 3, 12)
 
 [sub_resource type="BoxShape3D" id="Shape_CorridorRight"]
 size = Vector3(0.2, 3, 12)
 
 [sub_resource type="BoxMesh" id="Mesh_CorridorRight"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.2, 3, 12)
 
 [sub_resource type="BoxShape3D" id="Shape_CornerA"]
 size = Vector3(6, 3, 0.3)
 
 [sub_resource type="BoxMesh" id="Mesh_CornerA"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(6, 3, 0.3)
 
 [sub_resource type="BoxShape3D" id="Shape_CornerB"]
 size = Vector3(0.3, 3, 6)
 
 [sub_resource type="BoxMesh" id="Mesh_CornerB"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.3, 3, 6)
 
 [sub_resource type="BoxShape3D" id="Shape_Pillar1"]
 size = Vector3(0.5, 3, 0.5)
 
 [sub_resource type="BoxMesh" id="Mesh_Pillar1"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.5, 3, 0.5)
 
 [sub_resource type="BoxShape3D" id="Shape_Pillar2"]
 size = Vector3(0.5, 3, 0.5)
 
 [sub_resource type="BoxMesh" id="Mesh_Pillar2"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.5, 3, 0.5)
 
 [sub_resource type="BoxShape3D" id="Shape_Pillar3"]
 size = Vector3(0.5, 3, 0.5)
 
 [sub_resource type="BoxMesh" id="Mesh_Pillar3"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.5, 3, 0.5)
 
 [sub_resource type="BoxShape3D" id="Shape_Pillar4"]
 size = Vector3(0.5, 3, 0.5)
 
 [sub_resource type="BoxMesh" id="Mesh_Pillar4"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.5, 3, 0.5)
 
 [sub_resource type="BoxShape3D" id="Shape_NoiseWall"]
 size = Vector3(8, 3, 0.2)
 
 [sub_resource type="BoxMesh" id="Mesh_NoiseWall"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(8, 3, 0.2)
 
 [sub_resource type="BoxShape3D" id="Shape_BuildingNorthA"]
 size = Vector3(5.4, 3, 0.2)
 
 [sub_resource type="BoxMesh" id="Mesh_BuildingNorthA"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(5.4, 3, 0.2)
 
 [sub_resource type="BoxShape3D" id="Shape_BuildingNorthB"]
 size = Vector3(1.4, 3, 0.2)
 
 [sub_resource type="BoxMesh" id="Mesh_BuildingNorthB"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(1.4, 3, 0.2)
 
 [sub_resource type="BoxShape3D" id="Shape_BuildingSouthA"]
 size = Vector3(1.4, 3, 0.2)
 
 [sub_resource type="BoxMesh" id="Mesh_BuildingSouthA"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(1.4, 3, 0.2)
 
 [sub_resource type="BoxShape3D" id="Shape_BuildingSouthB"]
 size = Vector3(5.4, 3, 0.2)
 
 [sub_resource type="BoxMesh" id="Mesh_BuildingSouthB"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(5.4, 3, 0.2)
 
 [sub_resource type="BoxShape3D" id="Shape_BuildingEast"]
 size = Vector3(0.2, 3, 6)
 
 [sub_resource type="BoxMesh" id="Mesh_BuildingEast"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.2, 3, 6)
 
 [sub_resource type="BoxShape3D" id="Shape_BuildingWestA"]
 size = Vector3(0.2, 3, 2.4)
 
 [sub_resource type="BoxMesh" id="Mesh_BuildingWestA"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.2, 3, 2.4)
 
 [sub_resource type="BoxShape3D" id="Shape_BuildingWestB"]
 size = Vector3(0.2, 3, 2.4)
 
 [sub_resource type="BoxMesh" id="Mesh_BuildingWestB"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.2, 3, 2.4)
 
 [sub_resource type="BoxShape3D" id="Shape_BuildingWindowSill"]
 size = Vector3(0.2, 1, 1.2)
 
 [sub_resource type="BoxMesh" id="Mesh_BuildingWindowSill"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.2, 1, 1.2)
 
 [sub_resource type="BoxShape3D" id="Shape_BuildingWindowTop"]
 size = Vector3(0.2, 1, 1.2)
 
 [sub_resource type="BoxMesh" id="Mesh_BuildingWindowTop"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.2, 1, 1.2)
 
 [sub_resource type="BoxShape3D" id="Shape_BuildingDividerA"]
 size = Vector3(0.2, 3, 2.4)
 
 [sub_resource type="BoxMesh" id="Mesh_BuildingDividerA"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.2, 3, 2.4)
 
 [sub_resource type="BoxShape3D" id="Shape_BuildingDividerB"]
 size = Vector3(0.2, 3, 2.4)
 
 [sub_resource type="BoxMesh" id="Mesh_BuildingDividerB"]
-material = SubResource("Mat_wall")
+material = ExtResource("21_mat_wall")
 size = Vector3(0.2, 3, 2.4)
 
 [sub_resource type="Environment" id="Environment_greybox"]
 background_mode = 1
-background_color = Color(0.08, 0.08, 0.09, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.45, 0.45, 0.48, 1)
+fog_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_sign"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.95, 0.5, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_sign"]
+material = SubResource("Mat_sign")
+size = Vector3(1.2, 0.35, 0.08)
 
 [node name="GreyboxTest" type="Node3D"]
 script = ExtResource("8_map")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." node_paths=PackedStringArray("moon")]
 environment = SubResource("Environment_greybox")
+script = ExtResource("23_night")
+moon = NodePath("../Moon")
 
-[node name="Sun" type="DirectionalLight3D" parent="."]
+[node name="RetroWorld" type="Node" parent="."]
+script = ExtResource("25_retro_world")
+
+[node name="RetroPost" parent="." instance=ExtResource("24_retro_post")]
+
+[node name="Moon" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 10, 0)
 
 [node name="Blocks" type="Node3D" parent="." groups=["navigation_source"]]
@@ -707,3 +727,63 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -1)
 
 [node name="Spot4" type="Marker3D" parent="HidingSpots"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -14)
+
+[node name="Props" type="Node3D" parent="." groups=["navigation_source"]]
+
+[node name="LamppostBuilding" parent="Props" instance=ExtResource("11_lamppost")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0, 18)
+
+[node name="LamppostCourt" parent="Props" instance=ExtResource("11_lamppost")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 5, 0, 4)
+
+[node name="BenchDirty" parent="Props" instance=ExtResource("12_bench_dirty")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 19.4)
+
+[node name="BenchBroken" parent="Props" instance=ExtResource("13_bench_broken")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 8, 0, -19.3)
+
+[node name="TreeCourt" parent="Props" instance=ExtResource("14_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 15)
+
+[node name="TreeNorth" parent="Props" instance=ExtResource("14_tree")]
+transform = Transform3D(0.5, 0, 0.866, 0, 1, 0, -0.866, 0, 0.5, 4, 0, -17)
+
+[node name="BlockNorth" type="Node3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, -19.8)
+
+[node name="Panel00" parent="Props/BlockNorth" instance=ExtResource("18_facade_walled")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Panel01" parent="Props/BlockNorth" instance=ExtResource("19_facade_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0)
+
+[node name="Panel02" parent="Props/BlockNorth" instance=ExtResource("18_facade_walled")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+
+[node name="Panel10" parent="Props/BlockNorth" instance=ExtResource("15_facade_plain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+
+[node name="Panel11" parent="Props/BlockNorth" instance=ExtResource("16_facade_lit")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0)
+
+[node name="Panel12" parent="Props/BlockNorth" instance=ExtResource("17_facade_balcony")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 3, 0)
+
+[node name="Panel20" parent="Props/BlockNorth" instance=ExtResource("17_facade_balcony")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+
+[node name="Panel21" parent="Props/BlockNorth" instance=ExtResource("15_facade_plain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 6, 0)
+
+[node name="Panel22" parent="Props/BlockNorth" instance=ExtResource("16_facade_lit")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 6, 0)
+
+[node name="HospitalSign" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 2.6, 16.15)
+mesh = SubResource("Mesh_sign")
+
+[node name="Glow" type="OmniLight3D" parent="HospitalSign"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.45)
+light_color = Color(0.35, 1, 0.55, 1)
+light_energy = 1.2
+omni_range = 3.0

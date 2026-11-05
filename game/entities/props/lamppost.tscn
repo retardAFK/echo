@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/props/retro_prop.gd" id="1_prop"]
+[ext_resource type="PackedScene" path="res://assets/models/lamppost_sodium.glb" id="2_model"]
+
+[sub_resource type="CylinderShape3D" id="Shape_pole"]
+height = 5.0
+radius = 0.16
+
+[node name="Lamppost" type="Node3D"]
+script = ExtResource("1_prop")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+
+[node name="SodiumLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.8, -1.45)
+light_color = Color(1, 0.62, 0.26, 1)
+light_energy = 2.2
+omni_range = 8.0
+omni_attenuation = 1.4
+
+[node name="Body" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+shape = SubResource("Shape_pole")
