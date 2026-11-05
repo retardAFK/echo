@@ -1,7 +1,8 @@
 class_name ScanBar
 extends CanvasLayer
-## The monster's scan gauge on screen (spec S-004, Q3): a pale bar at the
-## bottom, dimmed while it is too low to start a scan. Never orange.
+## The monster's scan gauge on screen (spec S-004, Q3): since S-005 (Q5) a thin
+## pale line just under the center of the view, dimmed while it is too low to
+## start a scan. Never orange.
 
 ## Dimming of the bar while the gauge is below the minimum to start a scan.
 const LOW_ALPHA := 0.35

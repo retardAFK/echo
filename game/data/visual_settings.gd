@@ -31,3 +31,21 @@ extends Resource
 ## Screen grid the vertices snap to, half the internal resolution.
 ## (0, 0) turns the wobble off, for players who feel sick.
 @export var vertex_snap := Vector2(320, 180)
+
+@export_group("Scan")
+## How much darker everything outside the scanned building gets (0.7 = 70 %).
+@export_range(0.0, 1.0, 0.05) var scan_dim: float = 0.7
+## How much color everything outside the scanned building loses.
+@export_range(0.0, 1.0, 0.05) var scan_desaturation: float = 0.8
+## Pale color of the building's edges and of the wave. Never orange.
+@export var scan_edge_color := Color(0.8, 0.84, 0.88)
+## Width of the glowing edges of the building, in meters.
+@export_range(0.05, 1.0, 0.05, "suffix:m") var scan_edge_width: float = 0.15
+## Time between two waves leaving the building.
+@export_range(0.2, 5.0, 0.1, "suffix:s") var scan_wave_interval: float = 1.0
+## Distance a wave travels from the building before it fades out.
+@export_range(1.0, 50.0, 0.5, "suffix:m") var scan_wave_reach: float = 12.0
+## Thickness of the wave, in meters.
+@export_range(0.1, 3.0, 0.05, "suffix:m") var scan_wave_width: float = 0.4
+## Time for the scan look to fade in or out.
+@export_range(0.0, 2.0, 0.05, "suffix:s") var scan_fade_time: float = 0.3

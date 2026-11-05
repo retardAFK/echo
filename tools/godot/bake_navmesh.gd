@@ -6,7 +6,6 @@ extends SceneTree
 const MAP_PATH := "res://game/maps/greybox_test.tscn"
 const NAVMESH_PATH := "res://game/maps/greybox_test_navmesh.tres"
 
-
 var _map: Node
 
 

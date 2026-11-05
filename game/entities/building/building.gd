@@ -62,6 +62,11 @@ func get_base_energy(index: int) -> float:
 	return _energies[index]
 
 
+## World transform of the box volume (its center and orientation).
+func get_box_transform() -> Transform3D:
+	return _shape.global_transform
+
+
 ## True if a world position lies inside the building's volume.
 func contains(point: Vector3) -> bool:
 	var box: BoxShape3D = _shape.shape

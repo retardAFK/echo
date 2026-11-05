@@ -63,9 +63,10 @@ func test_lit_window_keeps_its_glow() -> void:
 	assert_true(glows)
 
 
-func test_unshaded_sign_is_left_alone() -> void:
+func test_unshaded_sign_glows_with_its_color() -> void:
 	var sign: MeshInstance3D = _map.get_node("HospitalSign")
-	assert_null(sign.get_surface_override_material(0))
+	var material: ShaderMaterial = sign.get_surface_override_material(0)
+	assert_true(material.get_shader_parameter("unshaded"), "dimmed by the scan like the rest")
 
 
 func test_filter_sits_between_world_and_hud() -> void:

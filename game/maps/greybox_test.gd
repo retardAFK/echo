@@ -53,6 +53,10 @@ func _setup_monster_role() -> void:
 	var scan_bar: ScanBar = SCAN_BAR_SCENE.instantiate()
 	scan_bar.monster = avatar
 	add_child(scan_bar)
+	var scan_look := ScanLook.new()
+	scan_look.monster = avatar
+	scan_look.night = $WorldEnvironment
+	add_child(scan_look)
 	prey = PREY_SCENE.instantiate()
 	prey.wander_route = $PreyRoute
 	prey.hiding_spots = $HidingSpots

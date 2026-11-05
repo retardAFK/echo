@@ -28,3 +28,11 @@ func apply() -> void:
 		moon.light_color = settings.moon_color
 		moon.light_energy = settings.moon_energy
 		moon.shadow_enabled = false
+
+
+## Darkens the sky and the fog while the monster scans a building (T-032),
+## like everything else outside the building. 0 is the normal night.
+func set_scan_amount(amount: float) -> void:
+	var color := settings.fog_color.darkened(settings.scan_dim * amount)
+	environment.background_color = color
+	environment.fog_light_color = color
