@@ -11,7 +11,7 @@ extends Node3D
 const MENU_SCENE := "res://game/ui/start_menu.tscn"
 const AVATAR_SCENE := preload("res://game/entities/monster/monster_avatar.tscn")
 const MARKERS_SCENE := preload("res://game/ui/noise_markers.tscn")
-const SCAN_BAR_SCENE := preload("res://game/ui/scan_bar.tscn")
+const SCAN_RETICLE_SCENE := preload("res://game/ui/scan_reticle.tscn")
 const PREY_SCENE := preload("res://game/entities/prey/prey.tscn")
 ## Size of the F4 markers for the prey's wander points and hiding spots, in meters.
 const POINT_MARKER_SIZE := 0.3
@@ -50,9 +50,9 @@ func _setup_monster_role() -> void:
 	markers = MARKERS_SCENE.instantiate()
 	markers.monster = avatar
 	add_child(markers)
-	var scan_bar: ScanBar = SCAN_BAR_SCENE.instantiate()
-	scan_bar.monster = avatar
-	add_child(scan_bar)
+	var reticle: ScanReticle = SCAN_RETICLE_SCENE.instantiate()
+	reticle.monster = avatar
+	add_child(reticle)
 	var scan_look := ScanLook.new()
 	scan_look.monster = avatar
 	scan_look.night = $WorldEnvironment

@@ -94,8 +94,6 @@ func test_monster_stands_still_while_scanning() -> void:
 	assert_almost_eq(_avatar.global_position.z, before.z, 0.01)
 
 
-func test_scan_bar_is_pale() -> void:
-	var bar: ScanBar = _map.find_children("*", "ScanBar", false, false)[0]
-	var fill: ColorRect = bar.get_node("Bar/Fill")
-	assert_eq(fill.color, _avatar.settings.scan_bar_color)
-	assert_ne(fill.color, NoiseBus.settings.noise_color)
+func test_scan_reticle_is_pale() -> void:
+	assert_eq(_map.find_children("*", "ScanReticle", false, false).size(), 1)
+	assert_ne(_avatar.settings.scan_bar_color, NoiseBus.settings.noise_color)

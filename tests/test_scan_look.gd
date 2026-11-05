@@ -89,8 +89,31 @@ func test_look_fades_out_after_the_scan() -> void:
 	assert_eq(_wall.get_shader_parameter("scan_amount"), 0.0)
 
 
-func test_gauge_is_a_thin_line_under_the_center() -> void:
-	var bar: ColorRect = _map.find_children("*", "ScanBar", false, false)[0].get_node("Bar")
-	assert_eq(bar.anchor_top, 0.5)
-	assert_gt(bar.offset_top, 0.0, "just under the center of the view")
-	assert_lte(bar.size.y, 2.0)
+func test_reticle_frames_the_scanned_building() -> void:
+	var reticle: ScanReticle = _map.find_children("*", "ScanReticle", false, false)[0]
+	_scan(0.2)
+	var frame := ScanReticle.frame_rect(_avatar.get_camera(), _avatar.scan_target)
+	assert_true(frame.has_area())
+	var canvas: Control = reticle.get_node("Canvas")
+	var center := canvas.size / 2.0
+	assert_true(frame.has_point(center), "the building is aimed at, so it is around the center")
+
+
+func test_frame_is_empty_behind_the_camera() -> void:
+	_avatar.look_at(AIM_SPOT * 2.0 - INSIDE, Vector3.UP)
+	_avatar.rotation.x = 0.0
+	var building: Building = _map.get_node("Building")
+	await wait_process_frames(1)
+	assert_false(ScanReticle.frame_rect(_avatar.get_camera(), building).has_area())
+
+
+func test_meter_jumps_with_noises_inside_the_building() -> void:
+	var reticle: ScanReticle = _map.find_children("*", "ScanReticle", false, false)[0]
+	reticle.set_process(false)
+	_scan(_avatar.settings.scan_focus_time + 0.2)
+	NoiseBus.emit_noise(NoiseEvent.Type.FOOTSTEP, INSIDE, NoiseBus.settings.gauge_full_range)
+	assert_almost_eq(reticle.level, 1.0, 0.01)
+	reticle.update_meter(1.0 / ScanReticle.METER_RATE)
+	assert_almost_eq(reticle.meter.back(), reticle.level, 0.01)
+	reticle.update_meter(1.0)
+	assert_eq(reticle.level, 0.0, "fades out")
