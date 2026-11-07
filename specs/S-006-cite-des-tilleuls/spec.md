@@ -1,6 +1,6 @@
 # S-006 — La cité des Tilleuls
 
-**Statut** : en clarification
+**Statut** : validée (07/11/2026)
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : 6 — Première vraie map
 
@@ -19,7 +19,7 @@ Jusqu'ici on joue dans une greybox de 40 × 40 m. C'est trop petit pour qu'un br
 - En tant que monstre, je veux une map assez grande pour qu'un bruit lointain soit un pari, afin que mes choix comptent.
 - En tant que monstre, je veux savoir quels bâtiments valent un scan, afin de dépenser ma jauge à bon escient.
 
-## Plan sur papier (proposition)
+## Plan sur papier
 Voir `plan-map.svg` dans ce dossier. 1 unité = 1 m, le nord est en haut.
 
 - **Limites** : voie ferrée sur remblai au nord, autoroute avec mur antibruit à l'est, boulevard barré par des grillages de chantier au sud, friche grillagée à l'ouest. On ne sort jamais de la map sans le savoir.
@@ -28,14 +28,15 @@ Voir `plan-map.svg` dans ce dossier. 1 unité = 1 m, le nord est en haut.
 - **Lieux extérieurs** : l'aire de jeux avec sa balançoire, le city stade, une rangée de boxes de garages (leurres, alarmes), 6 voitures à alarme, le transformateur, et la sortie par le tunnel sous la voie ferrée.
 
 ## Clarifications
+Le 07/11/2026, Maxime a répondu « Parfait » au plan et aux propositions Q2 à Q8.
 - Q1 : Quelle taille ? → R : 220 × 220 m, une douzaine de bâtiments dont 4 visitables (Maxime, 07/11/2026, D-010).
-- Q2 : Le plan ci-dessus te convient-il (limites, emplacement des bâtiments, sortie au nord, monstre au sud-est) ? → Proposition : oui, à ajuster après le premier test en greybox. → R : (en attente)
-- Q3 : Quels 4 bâtiments visitables ? → Proposition : la tour (cage d'escalier étroite, très bruyante), le centre social (grandes salles, peu de cachettes), la galerie commerciale (rideaux métalliques bruyants, une laverie dont les machines couvrent les petits bruits) et le parking souterrain (écho, alarmes, leurres). Ces quatre lieux jouent chacun différemment avec le bruit. → R : (en attente)
-- Q4 : Jusqu'où visite-t-on la tour ? → Proposition : le rez-de-chaussée et 4 étages, avec 2 appartements ouverts par palier. Plus haut, l'escalier est condamné par une grille. Le scan entend alors toute la tour, et grimper reste un pari. → R : (en attente)
-- Q5 : Où sont les fusibles ? → Proposition : à chaque partie, 3 des 4 bâtiments visitables reçoivent un fusible, sur un des 4 emplacements prévus dans chaque bâtiment. Le placement réel vient avec la boucle de partie (S-007) : ici, on prévoit seulement les emplacements. → R : (en attente)
-- Q6 : Que peut-on scanner ? → Proposition : les 4 bâtiments visitables et la rangée de boxes de garages. Les façades ne se scannent pas, puisque personne ne peut y entrer. → R : (en attente)
-- Q7 : Comment éviter les temps morts sur une si grande map ? → Proposition : 6 voitures à alarme réparties sur la map, des rues qui ramènent toujours vers le centre, et un équilibrage prévu pour 4 chassés (Q-002). En solo contre l'IA, on testera avec plusieurs proies IA. → R : (en attente)
-- Q8 : Dans quel ordre on travaille ? → Proposition : 1) greybox en cubes de toute la map, jouable, et premier test ; 2) ajustements ; 3) habillage avec les assets de S-005 et les nouveaux (tour, galerie, rampe de parking, boxes, transformateur, voitures), chacun validé sur rendu ; 4) éclairage précalculé et sons d'ambiance. → R : (en attente)
+- Q2 : Le plan ci-dessus te convient-il (limites, emplacement des bâtiments, sortie au nord, monstre au sud-est) ? → Proposition : oui, à ajuster après le premier test en greybox. → R : retenu (07/11/2026).
+- Q3 : Quels 4 bâtiments visitables ? → Proposition : la tour (cage d'escalier étroite, très bruyante), le centre social (grandes salles, peu de cachettes), la galerie commerciale (rideaux métalliques bruyants, une laverie dont les machines couvrent les petits bruits) et le parking souterrain (écho, alarmes, leurres). Ces quatre lieux jouent chacun différemment avec le bruit. → R : retenu (07/11/2026).
+- Q4 : Jusqu'où visite-t-on la tour ? → Proposition : le rez-de-chaussée et 4 étages, avec 2 appartements ouverts par palier. Plus haut, l'escalier est condamné par une grille. Le scan entend alors toute la tour, et grimper reste un pari. → R : retenu (07/11/2026).
+- Q5 : Où sont les fusibles ? → Proposition : à chaque partie, 3 des 4 bâtiments visitables reçoivent un fusible, sur un des 4 emplacements prévus dans chaque bâtiment. Le placement réel vient avec la boucle de partie (S-007) : ici, on prévoit seulement les emplacements. → R : retenu (07/11/2026).
+- Q6 : Que peut-on scanner ? → Proposition : les 4 bâtiments visitables et la rangée de boxes de garages. Les façades ne se scannent pas, puisque personne ne peut y entrer. → R : retenu (07/11/2026).
+- Q7 : Comment éviter les temps morts sur une si grande map ? → Proposition : 6 voitures à alarme réparties sur la map, des rues qui ramènent toujours vers le centre, et un équilibrage prévu pour 4 chassés (Q-002). En solo contre l'IA, on testera avec plusieurs proies IA. → R : retenu (07/11/2026).
+- Q8 : Dans quel ordre on travaille ? → Proposition : 1) greybox en cubes de toute la map, jouable, et premier test ; 2) ajustements ; 3) habillage avec les assets de S-005 et les nouveaux (tour, galerie, rampe de parking, boxes, transformateur, voitures), chacun validé sur rendu ; 4) éclairage précalculé et sons d'ambiance. → R : retenu (07/11/2026).
 
 ## Critères d'acceptation (vérifiables à la main)
 - [ ] La map fait 220 × 220 m, ses limites sont claires et on ne peut pas en sortir.

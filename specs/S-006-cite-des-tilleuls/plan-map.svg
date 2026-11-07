@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -14 240 262" width="960" height="1048" font-family="Helvetica, Arial, sans-serif">
-  <!-- 1 unit = 1 m. North is up. Proposal for S-006, not final. -->
+  <!-- 1 unit = 1 m. North is up. Validated plan for S-006 (07/11/2026). -->
   <rect x="-10" y="-14" width="240" height="262" fill="#1b1d22"/>
   <rect x="0" y="0" width="220" height="220" fill="#2b2e35" stroke="#8a8f99" stroke-width="0.8"/>
   <!-- grid every 20 m -->
@@ -80,7 +80,7 @@
   <text x="190" y="191.3" font-size="3.4" fill="#ff8080" text-anchor="middle">M</text>
   <!-- legend -->
   <g font-size="3.6" fill="#d6d9de">
-    <text x="0" y="-6" font-size="5" font-weight="bold" fill="#ffffff">S-006 · Cité des Tilleuls · 220 × 220 m (proposition)</text>
+    <text x="0" y="-6" font-size="5" font-weight="bold" fill="#ffffff">S-006 · Cité des Tilleuls · 220 × 220 m</text>
     <rect x="0" y="226" width="5" height="4" fill="#7a5a2a" stroke="#f0c070" stroke-width="0.5"/><text x="7" y="229.5">Bâtiment visitable (fusible possible)</text>
     <rect x="80" y="226" width="5" height="4" fill="#5d626d"/><text x="87" y="229.5">Façade non visitable</text>
     <circle cx="140" cy="228" r="1.6" fill="#e08a2e"/><text x="144" y="229.5">Voiture à alarme</text>
