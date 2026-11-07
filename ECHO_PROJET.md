@@ -343,6 +343,7 @@ Chaque phase a un objectif, des livrables et une **définition de « terminé »
 
 ### Phase 6 — Première vraie map : la cité des Tilleuls (3 à 4 semaines)
 - Spec S-006 : plan de la map sur papier, puis greybox, test, et enfin habillage.
+- Taille et bâtiments : 220 × 220 m, une douzaine de bâtiments dont 4 visitables (D-010).
 - Éclairage précalculé, sons d'ambiance, lieux horrifiques (balançoire, tunnel, garage).
 - **Terminé quand** : la map est jouable du début à la fin, sous le budget de perf.
 
@@ -498,6 +499,7 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-007 | 30/10/2026 | Priorité à un jeu léger et très optimisé : le budget de 60 Mo s'applique à la taille **non compressée** du build Web (le moteur seul en pèse déjà 38), et la CI bloque toute PR qui le dépasse | Aucune lourdeur, chargement rapide dans le navigateur, sur la machine de référence comme ailleurs |
 | D-008 | 03/11/2026 | Le monstre voit normalement. Son atout : les bruits lui donnent la position et la distance des chassés, et il peut scanner un bâtiment pour en entendre tous les bruits en direct. Le chassé n'a que sa ruse et l'environnement. La contamination est supprimée, l'hôpital reste un lieu prévu. | Rôle du monstre plus agréable et moins lassant que l'écran noir à sonar ; jeu plus lisible pour les deux camps |
 | D-009 | 03/11/2026 | Scan de bâtiment limité par une jauge (8 s, recharge 45 s, seuil 25 %), alerte discrète par les lumières, se figer a un prix (souffle après une course, progression de quête perdue). Monstre discret : inaudible en rôdant, 3 m en marche, 12 m en course, souffle à 2 m | Le scan doit être un pari et non une victoire automatique, et se figer ne doit pas suffire |
+| D-010 | 07/11/2026 | Cité des Tilleuls : zone jouable de 220 × 220 m, une douzaine de bâtiments dont 4 visitables, les autres en façades. Un fusible se trouve toujours dans un bâtiment visitable. L'hôpital sera une map séparée, plus petite et sur plusieurs niveaux | Une map assez grande pour qu'un bruit lointain reste un pari pour le monstre, avec des bâtiments visitables qui obligent les chassés à entrer là où le scan les menace |
 
 ### 10.2 Questions ouvertes
 
