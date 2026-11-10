@@ -119,7 +119,7 @@ func _setup_game_loop() -> void:
 	game_loop.ended.connect(_on_game_ended)
 	game_loop.exit_opened.connect(_on_exit_opened)
 	if prey != null:
-		prey.start_loop(game_loop, boxes)
+		prey.start_loop(game_loop, boxes, _rng.randi() | 1)
 	if avatar == null:
 		var hud: LoopHud = LOOP_HUD_SCENE.instantiate()
 		hud.game_loop = game_loop

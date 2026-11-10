@@ -45,6 +45,11 @@ func _init(settings: PreySettings, rng_seed := 0) -> void:
 	_rng.seed = rng_seed
 
 
+## Draws its next choices from another seed.
+func reseed(rng_seed: int) -> void:
+	_rng.seed = rng_seed
+
+
 func set_points(wander_points: Array[Vector3], hiding_spots: Array[Vector3]) -> void:
 	_wander_points = wander_points
 	_hiding_spots = hiding_spots
@@ -179,6 +184,16 @@ func reset(at_index: int) -> void:
 	_set_state(State.WANDER)
 
 
+## Where the current goal of the loop is.
+func _goal_point() -> Vector3:
+	match goal:
+		Goal.REPAIR:
+			return _transformer_point
+		Goal.EXIT:
+			return _exit_point
+	return _slots[slot_index] if not _slots.is_empty() else target
+
+
 ## Back to what it was doing: wandering, or the current goal of the loop.
 func _resume() -> void:
 	if not _loop:
@@ -197,10 +212,21 @@ func _resume() -> void:
 			_set_state(State.ESCAPE)
 
 
+## Runs to the hiding spot farthest from the monster. In the game loop, to the
+## one nearest its goal among those far enough from the monster (T-060): out of
+## reach, but not across the whole map.
 func _flee(threat: Vector3) -> void:
 	if _hiding_spots.is_empty():
 		return
 	target = _hiding_spots[MonsterBrain.farthest_index(_hiding_spots, threat)]
+	if _loop:
+		var goal_at := _goal_point()
+		var best := INF
+		for spot in _hiding_spots:
+			var distance := spot.distance_to(goal_at)
+			if spot.distance_to(threat) >= _settings.safe_distance and distance < best:
+				best = distance
+				target = spot
 	_breath_left = _settings.breathless_time
 	_set_state(State.FLEE)
 

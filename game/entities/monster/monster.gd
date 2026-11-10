@@ -18,7 +18,9 @@ const CONE_GROUND_OFFSET := 0.05
 ## Node whose Marker3D children are the patrol points, in order.
 @export var patrol_route: Node3D
 @export var start_index := 0
-@export var player: Player
+## The hunted it chases: the player, or the AI prey in simulated games
+## (S-007, T-060). Anything with get_gait() and get_eye_position().
+@export var player: Node3D
 ## Buildings whose noises it remembers (S-007, Q10).
 @export var buildings: Array[Building] = []
 
@@ -45,6 +47,11 @@ func _ready() -> void:
 ## Position of the monster's ears, where it hears noises from.
 func get_ear_position() -> Vector3:
 	return global_position + Vector3.UP * settings.ear_height
+
+
+## Where it sees from: its eyes are at its ears' height.
+func get_eye_position() -> Vector3:
+	return get_ear_position()
 
 
 func get_patrol_points() -> Array[Vector3]:
@@ -106,7 +113,7 @@ func _update_sight(delta: float) -> void:
 		return
 	_vision_timer = settings.vision_interval
 	var eye := get_ear_position()
-	var target := player.get_eye_position()
+	var target: Vector3 = player.get_eye_position()
 	sees_player = (
 		MonsterVision.in_view_cone(eye, -global_basis.z, target, settings)
 		and MonsterVision.has_line_of_sight(get_world_3d().direct_space_state, eye, target)

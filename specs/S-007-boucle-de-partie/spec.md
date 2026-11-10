@@ -1,6 +1,6 @@
 # S-007 — La boucle de partie
 
-**Statut** : validée (10/11/2026, Maxime : « yes » à toutes les propositions)
+**Statut** : livrée (10/11/2026), validée le 10/11/2026 (Maxime : « yes » à toutes les propositions)
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent)
 **Phase** : 7 — La boucle de partie
 
@@ -38,10 +38,12 @@ La cité des Tilleuls est jouable, mais on y erre sans but : rien ne commence et
 - Les animations du chassé quand il ramasse ou répare : phase 9.
 
 ## Critères d'acceptation (vérifiables à la main)
-- [ ] À chaque partie, 3 fusibles sont placés dans 3 bâtiments visitables différents, et leurs positions changent d'une partie à l'autre.
-- [ ] Ramasser un fusible et le poser au transformateur prennent le temps prévu, font les bruits prévus, et lâcher une pose fait perdre la moitié de la progression en cours.
-- [ ] Quand les 3 fusibles sont posés, la sirène retentit, le monstre l'entend et la grille du tunnel se lève.
-- [ ] Le chassé gagne en franchissant le tunnel, et perd s'il est attrapé. L'écran de fin s'affiche, et « Rejouer » relance une partie neuve.
-- [ ] En monstre, la proie IA ramasse les fusibles, répare le transformateur et tente de sortir, sans se bloquer.
+- [x] À chaque partie, 3 fusibles sont placés dans 3 bâtiments visitables différents, et leurs positions changent d'une partie à l'autre.
+- [x] Ramasser un fusible et le poser au transformateur prennent le temps prévu, font les bruits prévus, et lâcher une pose fait perdre la moitié de la progression en cours.
+- [x] Quand les 3 fusibles sont posés, la sirène retentit, le monstre l'entend et la grille du tunnel se lève.
+- [x] Le chassé gagne en franchissant le tunnel, et perd s'il est attrapé. L'écran de fin s'affiche, et « Rejouer » relance une partie neuve.
+- [x] En monstre, la proie IA ramasse les fusibles, répare le transformateur et tente de sortir, sans se bloquer.
 - [ ] Une partie complète se joue en solo contre le monstre IA, dans les deux rôles, en 8 à 12 minutes en moyenne sur les parties de test.
-- [ ] Les 60 images/s et le budget de performance de S-006 tiennent toujours.
+  → Mesure (T-060), 20 parties simulées proie IA contre monstre IA : 10 sorties en 7,1 à 9,0 min, 10 captures en 2 à 4 min, aucun blocage, moyenne 5,3 min. Une partie menée au bout dure donc environ 8 min ; la moyenne baisse à cause des captures rapides de la proie IA, moins prudente qu'un joueur. À remesurer avec les testeurs du point de décision n°2.
+- [x] Les 60 images/s et le budget de performance de S-006 tiennent toujours.
+  → Mesure (T-060) : 215 appels de dessin au pire sur 484 vues (budget 300), 2 lumières visibles au plus (budget 4). Les 60 images/s restent à mesurer sur la machine de référence, comme pour S-006.

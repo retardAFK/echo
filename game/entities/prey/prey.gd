@@ -68,9 +68,13 @@ static func markers_of(parent: Node3D) -> Array[Vector3]:
 
 
 ## Plays the game loop: visits the buildings one by one, nearest first, and the
-## boxes of each building nearest first (S-007, Q7).
-func start_loop(loop: GameLoop, boxes: Array[FuseBox]) -> void:
+## boxes of each building nearest first (S-007, Q7). A seed other than 0 makes
+## its choices differ from one game to the next.
+func start_loop(loop: GameLoop, boxes: Array[FuseBox], rng_seed := 0) -> void:
 	game_loop = loop
+	if rng_seed != 0:
+		_rng.seed = rng_seed
+		brain.reseed(_rng.randi())
 	_boxes = order_boxes(boxes, global_position)
 	var slots: Array[Vector3] = []
 	for box in _boxes:

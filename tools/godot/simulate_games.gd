@@ -6,6 +6,7 @@ extends Node
 ## stuck). With one, the AI prey plays against the AI monster.
 
 const MAP_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
+const MONSTER_SCENE := preload("res://game/entities/monster/monster.tscn")
 ## Longest game, in game seconds, before it counts as stuck.
 const TIME_LIMIT := 1800.0
 
@@ -27,14 +28,21 @@ func _ready() -> void:
 	var results := []
 	for i in _games:
 		results.append(await _play(i))
+	var outcome := {}
+	for r: Dictionary in results:
+		outcome[r.result] = outcome.get(r.result, 0) + 1
 	var durations := results.map(func(r: Dictionary) -> float: return r.duration)
 	var wins := results.filter(func(r: Dictionary) -> bool: return r.result == "out").size()
 	var stuck := results.filter(func(r: Dictionary) -> bool: return r.result == "stuck").size()
 	var mean := 0.0
 	for d: float in durations:
 		mean += d / durations.size()
-	print("SUMMARY games %d, prey out %d, caught %d, stuck %d, mean %.1f min" % [
-		_games, wins, _games - wins - stuck, stuck, mean / 60.0])
+	print(
+		(
+			"SUMMARY games %d, prey out %d, caught %d, stuck %d, mean %.1f min"
+			% [_games, wins, _games - wins - stuck, stuck, mean / 60.0]
+		)
+	)
 	get_tree().quit()
 
 
@@ -61,21 +69,69 @@ func _play(index: int) -> Dictionary:
 		var game_time := loop.get_duration() * _speed
 		if game_time - last_report >= 60.0:
 			last_report = game_time
-			print("  game %d  %3d s  %s goal %s  found %d placed %d  at %s" % [
-				index, game_time, PreyBrain.State.keys()[map.prey.get_state()],
-				PreyBrain.Goal.keys()[map.prey.brain.goal], loop.rules.found(),
-				loop.rules.placed, map.prey.global_position])
+			print(
+				(
+					"  game %d  %3d s  %s goal %s  found %d placed %d  at %s"
+					% [
+						index,
+						game_time,
+						PreyBrain.State.keys()[map.prey.get_state()],
+						PreyBrain.Goal.keys()[map.prey.brain.goal],
+						loop.rules.found(),
+						loop.rules.placed,
+						map.prey.global_position
+					]
+				)
+			)
+			if OS.has_environment("SIM_DEBUG"):
+				var m := map.get_children().filter(func(n: Node) -> bool: return n is Monster)
+				var agent: NavigationAgent3D = map.prey.get_node("NavigationAgent3D")
+				print(
+					(
+						"    dbg target %s fin %s next %s vel %s monster %s"
+						% [
+							map.prey.brain.target,
+							agent.is_navigation_finished(),
+							agent.get_next_path_position(),
+							map.prey.velocity,
+							m[0].global_position if not m.is_empty() else Vector3.ZERO
+						]
+					)
+				)
 	var duration := loop.get_duration() * _speed
-	print("GAME %d: %s after %.1f min (fuses %d placed %d, noises %d, real %d s)" % [
-		index, result, duration / 60.0, loop.rules.found(), loop.rules.placed,
-		loop.noise_count, (Time.get_ticks_msec() - started) / 1000])
+	print(
+		(
+			"GAME %d: %s after %.1f min (fuses %d placed %d, noises %d, real %d s)"
+			% [
+				index,
+				result,
+				duration / 60.0,
+				loop.rules.found(),
+				loop.rules.placed,
+				loop.noise_count,
+				(Time.get_ticks_msec() - started) / 1000
+			]
+		)
+	)
 	get_tree().paused = false
 	map.queue_free()
 	await get_tree().process_frame
 	return {"result": result, "duration": duration}
 
 
-## The playable monster stays still; an AI monster hunts the AI prey instead.
+## The playable monster stays still, out of the way; an AI monster hunts the
+## AI prey instead, as it would hunt the player.
 func _replace_avatar_with_ai(map: GameMap) -> void:
+	var spawn: Node3D = map.get_node("MonsterSpawn").get_child(0)
 	map.avatar.process_mode = Node.PROCESS_MODE_DISABLED
 	map.avatar.global_position = Vector3(0, -50, 0)
+	var monster: Monster = MONSTER_SCENE.instantiate()
+	monster.patrol_route = map.get_node("PatrolRoute")
+	monster.buildings = map.get_buildings()
+	monster.player = map.prey
+	monster.position = spawn.global_position
+	map.add_child(monster)
+	map.prey.monster = monster
+	monster.player_caught.connect(map.game_loop.finish.bind(false))
+	var guard := Prey.markers_of(map.get_node("GuardPoints"))
+	map.game_loop.exit_opened.connect(monster.guard_exit.bind(guard))

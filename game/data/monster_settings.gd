@@ -56,6 +56,11 @@ extends Resource
 @export_range(0.0, 600.0, 5.0, "suffix:s") var lure_memory_time: float = 120.0
 ## Patrol points between two detours to that building.
 @export_range(1, 20) var lure_every: int = 3
+## How long it watches the open exit before a round of patrol, in seconds
+## (T-060); 0 watches for good.
+@export_range(0.0, 600.0, 5.0, "suffix:s") var guard_time: float = 60.0
+## How long that round of patrol lasts before it comes back to the exit, in seconds.
+@export_range(0.0, 600.0, 5.0, "suffix:s") var guard_break: float = 45.0
 ## Time the "caught" screen stays up, in seconds.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var caught_screen_time: float = 2.0
 
