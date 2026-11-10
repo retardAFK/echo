@@ -20,6 +20,7 @@ var _height := 0.0
 var _bob_phase := 0.0
 var _capsule: CapsuleShape3D
 var _headroom_sphere: SphereShape3D
+var _hold := HoldInteraction.new()
 
 @onready var _collision: CollisionShape3D = $CollisionShape3D
 @onready var _head: Node3D = $Head
@@ -78,6 +79,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_update_height(delta)
 	_update_head_bob(horizontal.length(), target_speed, delta)
+	_hold.update(self, get_interactable(), Input.is_action_pressed("interact"), delta)
 
 
 ## Turns the body (yaw) and the head (pitch) from a mouse movement in screen pixels.
@@ -88,7 +90,6 @@ func look(relative: Vector2) -> void:
 	_head.rotation.x = _pitch
 
 
-## Switches between crouching and standing (crouch key, toggle mode).
 ## The nearest thing in reach, in front of the crosshair, that the player can
 ## use (a car alarm, S-006), or null.
 func get_interactable() -> Node:
@@ -117,6 +118,13 @@ func interact() -> void:
 		target.interact(self)
 
 
+## Progress of what the player holds "interact" on (a fuse box, the
+## transformer, S-007), from 0 to 1.
+func get_hold_ratio() -> float:
+	return _hold.get_ratio()
+
+
+## Switches between crouching and standing (crouch key, toggle mode).
 func toggle_crouch() -> void:
 	_wants_crouch = not _wants_crouch
 

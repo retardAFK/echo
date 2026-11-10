@@ -7,3 +7,5 @@ HUD_DISTANCE,%d m
 HUD_PREY_CAUGHT,Attrapée
 HUD_SCAN_LISTENING,ÉCOUTE
 HUD_INTERACT_CAR_ALARM,E : déclencher l'alarme
+HUD_FUSES,Fusibles %d/%d
+HUD_INTERACT_FUSE_BOX,Maintenir E : prendre le fusible
