@@ -193,6 +193,8 @@ func build(root: Node) -> void:
 func _build_meshes(s: Structure, node: Node3D, root: Node) -> void:
 	var tools := {}
 	for block in s.blocks:
+		if block.material == null:
+			continue  # Collision only: a model dresses it (S-006, T-046).
 		if not tools.has(block.material):
 			var tool := SurfaceTool.new()
 			tool.begin(Mesh.PRIMITIVE_TRIANGLES)

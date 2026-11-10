@@ -107,3 +107,19 @@ func test_social_centre_has_window_frames_and_its_entrance() -> void:
 	assert_eq(centre.find_children("Window*", "", false, false).size(), 10)
 	assert_not_null(centre.get_node_or_null("Entrance"))
 	assert_eq(centre.find_children("*", "CollisionShape3D", true, false).size(), 0)
+
+
+func test_car_park_has_its_wrecks_pillars_and_sign() -> void:
+	var car_park := _map.get_node("CarParkDressing")
+	assert_eq(car_park.find_children("Wreck*", "", false, false).size(), 3)
+	assert_eq(car_park.find_children("Pillar*", "", false, false).size(), 8)
+	assert_not_null(car_park.get_node_or_null("SignP"))
+	assert_eq(car_park.find_children("*", "CollisionShape3D", true, false).size(), 0)
+
+
+func test_open_garages_have_open_doors() -> void:
+	var car_park := _map.get_node("CarParkDressing")
+	for i in 6:
+		var garage: Node3D = car_park.get_node("Garage%d" % (i + 1))
+		var open := garage.scene_file_path.ends_with("garage_open.glb")
+		assert_eq(open, i == 1 or i == 4, "garage %d" % (i + 1))
