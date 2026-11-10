@@ -1,0 +1,59 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/car_alarm/car_alarm.gd" id="1_alarm"]
+[ext_resource type="Resource" path="res://game/data/car_alarm_settings.tres" id="2_settings"]
+
+[sub_resource type="BoxShape3D" id="Shape_body"]
+size = Vector3(1.8, 1.45, 4.2)
+
+[sub_resource type="StandardMaterial3D" id="Mat_car"]
+albedo_color = Color(0.3, 0.32, 0.34, 1)
+roughness = 0.5
+
+[sub_resource type="BoxMesh" id="Mesh_lower"]
+material = SubResource("Mat_car")
+size = Vector3(1.8, 0.8, 4.2)
+
+[sub_resource type="BoxMesh" id="Mesh_cabin"]
+material = SubResource("Mat_car")
+size = Vector3(1.6, 0.65, 2.2)
+
+[sub_resource type="StandardMaterial3D" id="Mat_glass"]
+albedo_color = Color(0.08, 0.09, 0.11, 1)
+roughness = 0.2
+
+[sub_resource type="BoxMesh" id="Mesh_glass"]
+material = SubResource("Mat_glass")
+size = Vector3(1.62, 0.45, 2.0)
+
+[node name="CarAlarm" type="Node3D"]
+script = ExtResource("1_alarm")
+settings = ExtResource("2_settings")
+
+[node name="Lower" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("Mesh_lower")
+
+[node name="Cabin" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.12, 0.2)
+mesh = SubResource("Mesh_cabin")
+
+[node name="Glass" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 0.2)
+mesh = SubResource("Mesh_glass")
+
+[node name="HazardLeft" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 0.75, -2.15)
+light_color = Color(1, 0.95, 0.75, 1)
+omni_range = 4.0
+
+[node name="HazardRight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0.75, 2.15)
+light_color = Color(1, 0.95, 0.75, 1)
+omni_range = 4.0
+
+[node name="Body" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.725, 0)
+shape = SubResource("Shape_body")

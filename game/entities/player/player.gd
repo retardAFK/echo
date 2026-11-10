@@ -39,6 +39,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif event.is_action_pressed("crouch"):
 		toggle_crouch()
+	elif event.is_action_pressed("interact"):
+		interact()
 	elif event is InputEventMouseButton and event.pressed:
 		# Browsers only allow pointer capture right after a user gesture.
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -83,6 +85,27 @@ func look(relative: Vector2) -> void:
 
 
 ## Switches between crouching and standing (crouch key, toggle mode).
+## The nearest thing in reach the player can use (a car alarm, S-006), or null.
+func get_interactable() -> Node:
+	var best: Node = null
+	var best_distance := INF
+	for node in get_tree().get_nodes_in_group(CarAlarm.INTERACTABLE_GROUP):
+		if not node.can_interact(global_position):
+			continue
+		var distance: float = node.global_position.distance_to(global_position)
+		if distance < best_distance:
+			best = node
+			best_distance = distance
+	return best
+
+
+## Uses the nearest thing in reach, if any.
+func interact() -> void:
+	var target := get_interactable()
+	if target != null:
+		target.interact(self)
+
+
 func toggle_crouch() -> void:
 	_wants_crouch = not _wants_crouch
 

@@ -9,6 +9,10 @@ const STEP_CUTOFF := 0.08
 const BREATH_LENGTH := 0.7
 const BREATH_CUTOFF := 0.25
 const PEAK := 0.9
+const ALARM_LENGTH := 0.8
+const ALARM_LOW_HZ := 620.0
+const ALARM_HIGH_HZ := 880.0
+const ALARM_VOLUME := 0.5
 
 
 ## A dull thump: low-passed noise with a fast decay.
@@ -19,6 +23,20 @@ static func step() -> AudioStreamWAV:
 ## A breath: brighter noise that swells then fades.
 static func breath() -> AudioStreamWAV:
 	return _noise_burst(BREATH_LENGTH, BREATH_CUTOFF, true, 23)
+
+
+## A car alarm: two alternating square tones, one cycle per noise.
+static func alarm() -> AudioStreamWAV:
+	var count := int(ALARM_LENGTH * MIX_RATE)
+	var data := PackedByteArray()
+	data.resize(count * 2)
+	var phase := 0.0
+	for i in count:
+		var t := float(i) / count
+		phase += (ALARM_LOW_HZ if t < 0.5 else ALARM_HIGH_HZ) / MIX_RATE
+		var sample := ALARM_VOLUME * (1.0 if fmod(phase, 1.0) < 0.5 else -1.0)
+		data.encode_s16(i * 2, int(sample * 32767.0))
+	return _stream(data)
 
 
 static func _noise_burst(
@@ -36,6 +54,10 @@ static func _noise_burst(
 		var envelope := sin(PI * t) if swell else pow(1.0 - t, 3.0)
 		var sample := clampf(filtered * envelope * PEAK / smoothing * 0.25, -1.0, 1.0)
 		data.encode_s16(i * 2, int(sample * 32767.0))
+	return _stream(data)
+
+
+static func _stream(data: PackedByteArray) -> AudioStreamWAV:
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
 	stream.mix_rate = MIX_RATE
