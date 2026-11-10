@@ -2,6 +2,7 @@ class_name GameMap
 extends Node3D
 ## A playable map (specs S-001 to S-004, S-006): the greybox test map and the
 ## cité des Tilleuls share it.
+## With fuse boxes (the cité), it adds the game loop of S-007 (GameLoop).
 ## Hunted role: wires the AI monster to the player and handles a catch (Q4 of
 ## S-003): "caught" screen, player back to the start, monster back on patrol.
 ## Monster role (S-004): the AI monster and the hunted player are replaced by
@@ -18,12 +19,16 @@ const AVATAR_SCENE := preload("res://game/entities/monster/monster_avatar.tscn")
 const MARKERS_SCENE := preload("res://game/ui/noise_markers.tscn")
 const SCAN_RETICLE_SCENE := preload("res://game/ui/scan_reticle.tscn")
 const PREY_SCENE := preload("res://game/entities/prey/prey.tscn")
+const LOOP_SETTINGS := preload("res://game/data/loop_settings.tres")
+const LOOP_HUD_SCENE := preload("res://game/ui/loop_hud.tscn")
 ## Size of the F4 markers for the prey's wander points and hiding spots, in meters.
 const POINT_MARKER_SIZE := 0.3
 
 var avatar: MonsterAvatar
 var markers: NoiseMarkers
 var prey: Prey
+## The game loop (S-007), null on a map without fuse boxes.
+var game_loop: GameLoop
 
 var _rng := RandomNumberGenerator.new()
 
@@ -44,9 +49,10 @@ func _ready() -> void:
 		_player.rotation.y = _spawn_yaw
 	if GameSession.role == GameSession.Role.MONSTER:
 		_setup_monster_role()
-		return
-	_monster.player = _player
-	_monster.player_caught.connect(_on_player_caught)
+	else:
+		_monster.player = _player
+		_monster.player_caught.connect(_on_player_caught)
+	_setup_game_loop()
 
 
 func _input(event: InputEvent) -> void:
@@ -90,6 +96,32 @@ func _setup_monster_role() -> void:
 		node.queue_free()
 	_player = null
 	_monster = null
+
+
+## The fuses, the transformer and the exit (S-007), when the map has fuse boxes.
+func _setup_game_loop() -> void:
+	var boxes := get_fuse_boxes()
+	if boxes.is_empty():
+		return
+	game_loop = GameLoop.new()
+	game_loop.name = "GameLoop"
+	game_loop.settings = LOOP_SETTINGS
+	game_loop.hunted = prey if avatar != null else _player
+	add_child(game_loop)
+	game_loop.setup(boxes, get_buildings())
+	if avatar == null:
+		var hud: LoopHud = LOOP_HUD_SCENE.instantiate()
+		hud.game_loop = game_loop
+		add_child(hud)
+
+
+## Every fuse box of the map (S-007).
+func get_fuse_boxes() -> Array[FuseBox]:
+	var found: Array[FuseBox] = []
+	for node in find_children("*", "Node3D", true, false):
+		if node is FuseBox:
+			found.append(node)
+	return found
 
 
 func _physics_process(_delta: float) -> void:

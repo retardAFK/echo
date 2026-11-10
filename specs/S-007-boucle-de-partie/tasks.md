@@ -8,7 +8,7 @@ Maxime a demandé (10/11/2026) de ne pas être sollicité pour tester : chaque t
 - [x] T-053 — Plan et tâches de S-007
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-052
-- [ ] T-054 — Fusibles et action maintenue
+- [x] T-054 — Fusibles et action maintenue
   - Résultat vérifiable : `LoopRules`, `GameLoop`, `LoopSettings`, entité `FuseBox` sur les 16 emplacements, tirage de 3 fusibles dans 3 bâtiments différents, diode rouge, `HoldInteraction` (maintenir E 2 s, remise à zéro en lâchant), anneau de progression, bruit `FUSE` de 3 m, HUD « Fusibles n/3 » ; tests GUT
   - Dépend de : T-053
 - [ ] T-055 — Transformateur, sirène et sortie

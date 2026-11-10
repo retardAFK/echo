@@ -32,7 +32,10 @@ const MAT_OBSTACLE := preload("res://game/fx/materials/concrete_obstacle.tres")
 
 const PLAYER := preload("res://game/entities/player/player.tscn")
 const MONSTER := preload("res://game/entities/monster/monster.tscn")
+## How far a fuse box looks for a wall around its slot, in meters.
+const FUSE_BOX_WALL_SEARCH := 3.5
 const BUILDING := preload("res://game/entities/building/building.tscn")
+const FUSE_BOX := preload("res://game/entities/fuse_box/fuse_box.tscn")
 const OVERLAY := preload("res://game/ui/debug_overlay.tscn")
 const NOISE_DEBUG := preload("res://game/ui/noise_debug.tscn")
 const GAUGE := preload("res://game/ui/noise_gauge.tscn")
@@ -252,6 +255,7 @@ func _ready() -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	_bake_light()
+	_place_fuse_boxes()
 	var region: NavigationRegion3D = _root.get_node("NavigationRegion3D")
 	var started := Time.get_ticks_msec()
 	region.bake_navigation_mesh(false)
@@ -630,7 +634,7 @@ func _buildings() -> Dictionary:
 			[Vector3(95.5, 0, 108), Vector3(113, 6, 93), Vector3(96, 9, 109), Vector3(113, 12, 108)]],
 		"SocialCentre": [SOCIAL_CENTRE, 0.0, SOCIAL_CENTRE_HEIGHT,
 			[[Vector3(151, 3.4, 72), 9.0], [Vector3(161.5, 3.4, 72), 5.0]],
-			[Vector3(145, 0, 62), Vector3(176, 0, 62), Vector3(176, 0, 74), Vector3(170, 0, 82)]],
+			[Vector3(142, 0, 62), Vector3(176, 0, 62), Vector3(176, 0, 74), Vector3(170, 0, 82)]],
 		"Gallery": [GALLERY, 0.0, GALLERY_HEIGHT,
 			[[Vector3(58, 2.9, 143), 5.0], [Vector3(66, 2.8, 137), 6.0]],
 			[Vector3(55, 0, 141), Vector3(61, 0, 145), Vector3(76, 0, 142), Vector3(84, 0, 148)]],
@@ -684,6 +688,36 @@ func _add_buildings() -> void:
 			marker.add_to_group("fuse_slot", true)
 			slots.add_child(marker)
 			marker.owner = _root
+
+
+## A fuse box on the nearest wall of each fuse slot (S-007, Q1). The slot
+## marker stays in front of it: it is where the AI prey stands to use the box.
+func _place_fuse_boxes() -> void:
+	var space := _root.get_world_3d().direct_space_state
+	for marker: Node3D in _root.get_node("FuseSlots").find_children("Slot*", "Marker3D"):
+		var from := marker.global_position + Vector3.UP * 1.3
+		var best: Vector3
+		var best_distance := FUSE_BOX_WALL_SEARCH
+		var facing := Vector3.BACK
+		for direction: Vector3 in [Vector3.FORWARD, Vector3.BACK, Vector3.LEFT, Vector3.RIGHT]:
+			var query := PhysicsRayQueryParameters3D.create(
+				from, from + direction * FUSE_BOX_WALL_SEARCH, MapKit.WALLS_LAYER
+			)
+			var hit := space.intersect_ray(query)
+			if hit and from.distance_to(hit.position) < best_distance:
+				best_distance = from.distance_to(hit.position)
+				best = hit.position
+				facing = -direction
+		var box: Node3D = FUSE_BOX.instantiate()
+		box.name = "FuseBox"
+		box.set("building_name", String(marker.get_parent().name))
+		marker.add_child(box)
+		box.owner = _root
+		if best_distance < FUSE_BOX_WALL_SEARCH:
+			box.global_position = Vector3(best.x, marker.global_position.y, best.z) + facing * 0.01
+		else:
+			push_warning("No wall near %s" % marker.get_path())
+		box.global_rotation.y = atan2(facing.x, facing.z)
 
 
 func _add_props() -> void:

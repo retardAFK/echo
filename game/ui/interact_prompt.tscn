@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/ui/interact_prompt.gd" id="1_prompt"]
+[ext_resource type="Script" path="res://game/ui/hold_ring.gd" id="2_ring"]
 
 [node name="InteractPrompt" type="CanvasLayer"]
 layer = 10
@@ -30,3 +31,9 @@ offset_right = 2.0
 offset_bottom = 2.0
 mouse_filter = 2
 color = Color(1, 1, 1, 0.45)
+
+[node name="HoldRing" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("2_ring")
