@@ -48,7 +48,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 1.95, -0.31)
 mesh = SubResource("Mesh_eye")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
-path_desired_distance = 0.5
+path_desired_distance = 1.0
+path_postprocessing = 1
 target_desired_distance = 0.6
 height = 2.2
 radius = 0.4

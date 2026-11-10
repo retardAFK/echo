@@ -84,6 +84,7 @@ func _nav_map() -> RID:
 	# merged, that is until a spawn point lies on it.
 	var nav_map := _map.get_world_3d().navigation_map
 	var spawn: Vector3 = _map.get_spawn_points()[0]
+	await wait_until(func() -> bool: return NavigationServer3D.map_get_iteration_id(nav_map) > 0, 5)
 	await wait_until(
 		func() -> bool:
 			var closest := NavigationServer3D.map_get_closest_point(nav_map, spawn)
