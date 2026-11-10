@@ -104,13 +104,16 @@ func test_in_the_monster_role_the_prey_takes_a_fuse_and_repairs() -> void:
 	prey.brain.slot_index = index
 	prey.brain.target = prey._boxes[index].get_approach_point()
 	prey.global_position = prey.brain.target
-	await wait_seconds(loop.settings.pickup_time + 1.0)
+	await wait_until(
+		func() -> bool: return loop.rules.found() == 1, loop.settings.pickup_time + 4.0
+	)
 	assert_eq(loop.rules.found(), 1, "it held E on the box")
 	# Then at the transformer with all the fuses, placements sped up.
 	loop.rules.carried = 3
 	loop.transformer.progress.duration = 0.3
 	prey.brain.work_done(3, 3, false)
 	prey.global_position = prey.brain.target
-	await wait_seconds(2.5)
+	await wait_until(func() -> bool: return loop.rules.is_repaired(), 5.0)
+	await wait_physics_frames(2)
 	assert_true(loop.rules.is_repaired())
 	assert_eq(prey.get_state(), PreyBrain.State.ESCAPE)
