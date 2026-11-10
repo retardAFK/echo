@@ -6,7 +6,9 @@ to make a block of flats. Every variant is dirty (Maxime, 05/11/2026):
 - "lit": a window lit by the cold glow of a TV,
 - "balcony": a French window with a concrete balcony and a rusty railing,
 - "walled": a window bricked up with concrete blocks (ground floor, tagged),
-- "door": the metal entrance door of the stairwell (ground floor, tagged).
+- "door": the metal entrance door of the stairwell (ground floor, tagged),
+- "open": a window without glass, a real hole the players see through, in
+  front of the window openings of the visited storeys of the tower (S-006, T-045).
 Upper floor panels share one texture, ground floor panels another one, with
 tags in dull colors only (orange is the noise color, constitution 2.3).
 
@@ -26,7 +28,7 @@ import bmesh
 import bpy
 
 NAME = "facade_hlm"
-VARIANTS = ("plain", "lit", "balcony", "walled", "door")
+VARIANTS = ("plain", "lit", "balcony", "walled", "door", "open")
 GROUND_VARIANTS = ("walled", "door")
 TEX_SIZE = 256
 METERS_PER_TEXTURE = 4.0
@@ -218,12 +220,14 @@ def build(variant, offset_x=0.0):
     bm = bmesh.new()
     concrete = set()
     special = []  # (faces, region, rect, emissive)
-    if variant in ("plain", "lit", "walled"):
+    if variant in ("plain", "lit", "walled", "open"):
         concrete |= wall_with_hole(bm, WINDOW)
         x0, z0, x1, z1 = WINDOW
         concrete |= add_box(bm, x0 - 0.08, -0.08, z0 - 0.06, x1 + 0.08, 0.02, z0)  # Sill.
         if variant == "walled":
             special.append((add_box(bm, x0, 0.02, z0, x1, 0.1, z1), BLOCKS_REGION, WINDOW, False))
+        elif variant == "open":
+            special.append((window_frame(bm, WINDOW), FRAME_REGION, WINDOW, False))
         else:
             special.append((window_frame(bm, WINDOW), FRAME_REGION, WINDOW, False))
             glass = add_box(bm, x0, RECESS, z0, x1, RECESS + 0.02, z1)

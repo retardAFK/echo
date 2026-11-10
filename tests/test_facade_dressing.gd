@@ -1,0 +1,85 @@
+extends GutTest
+## Facade modules on the blocks of flats and the tower (spec S-006, T-045).
+
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const ORIGIN := Vector3(110, 0, 110)
+## Module order of FacadeDressing.models (build_tilleuls.gd).
+const DOOR := 4
+const OPEN := 5
+const TOWER := Rect2(92, 88, 24, 24)
+
+var _map: Node3D
+var _dressing: FacadeDressing
+
+
+func before_each() -> void:
+	_map = MAP_SCENE.instantiate()
+	add_child_autofree(_map)
+	_dressing = _map.get_node("FacadeDressing")
+
+
+func _plan(at: Vector3) -> Vector2:
+	return Vector2(at.x + ORIGIN.x, at.z + ORIGIN.z)
+
+
+func test_every_panel_is_drawn_by_a_multimesh() -> void:
+	await wait_process_frames(2)
+	var drawn := 0
+	for batch: MultiMeshInstance3D in _dressing.find_children(
+		"*", "MultiMeshInstance3D", true, false
+	):
+		drawn += batch.multimesh.instance_count
+	assert_gt(_dressing.panels.size(), 1000)
+	assert_eq(drawn, _dressing.panels.size())
+
+
+func test_panels_use_the_retro_surface() -> void:
+	await wait_process_frames(3)
+	var batch: MultiMeshInstance3D = (
+		_dressing.find_children("*", "MultiMeshInstance3D", true, false)[0]
+	)
+	assert_true(batch.multimesh.mesh.surface_get_material(0) is ShaderMaterial)
+
+
+func test_every_block_of_flats_is_dressed_on_its_four_sides() -> void:
+	# 7 blocks and the tower, four walls each.
+	var walls := {}
+	for wall in _dressing.walls:
+		walls[wall] = true
+	assert_eq(walls.size(), 32)
+
+
+func test_blocks_of_flats_have_entrance_doors() -> void:
+	assert_gt(_dressing.count_of(DOOR), 14, "about one door every 18 m")
+	for i in _dressing.panels.size():
+		if _dressing.variants[i] == DOOR:
+			assert_almost_eq(
+				_dressing.panels[i].origin.y, 0.0, 0.01, "doors are on the ground floor"
+			)
+
+
+func test_visited_storeys_of_the_tower_have_open_windows() -> void:
+	# 4 storeys above the hall, 8 modules on each of the 4 sides.
+	assert_eq(_dressing.count_of(OPEN), 128)
+	for i in _dressing.panels.size():
+		if _dressing.variants[i] != OPEN:
+			continue
+		var at := _dressing.panels[i].origin
+		assert_true(TOWER.grow(0.1).has_point(_plan(at)), "open window on the tower")
+		assert_between(at.y, 2.9, 12.1)
+
+
+func test_hall_entrances_of_the_tower_stay_free() -> void:
+	for i in _dressing.panels.size():
+		var panel := _dressing.panels[i]
+		if panel.origin.y > 0.1:
+			continue
+		# The middle of the panel, along its wall.
+		var mid := _plan(panel.origin + panel.basis.x * 1.5)
+		var north := absf(mid.y - TOWER.position.y) < 0.2 and mid.x > 106 and mid.x < 110
+		var south := absf(mid.y - TOWER.end.y) < 0.2 and mid.x > 102 and mid.x < 108
+		assert_false(north or south, "no panel in front of the hall at %s" % mid)
+
+
+func test_panels_have_no_collision() -> void:
+	assert_eq(_dressing.find_children("*", "CollisionShape3D", true, false).size(), 0)
