@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CarAlarmSettings" format=3]
+
+[ext_resource type="Script" path="res://game/data/car_alarm_settings.gd" id="1_settings"]
+
+[resource]
+script = ExtResource("1_settings")
+alarm_range = 30.0
+ring_time = 12.0
+noise_interval = 1.0
+rest_time = 45.0
+trigger_distance = 3.0
+flash_rate = 2.0
+flash_energy = 1.5

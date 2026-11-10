@@ -37,6 +37,8 @@ const OVERLAY := preload("res://game/ui/debug_overlay.tscn")
 const NOISE_DEBUG := preload("res://game/ui/noise_debug.tscn")
 const GAUGE := preload("res://game/ui/noise_gauge.tscn")
 const CAUGHT := preload("res://game/ui/caught_screen.tscn")
+const INTERACT_PROMPT := preload("res://game/ui/interact_prompt.tscn")
+const CAR_ALARM := preload("res://game/entities/car_alarm/car_alarm.tscn")
 const RETRO_POST := preload("res://game/fx/retro_post.tscn")
 const LAMPPOST := preload("res://game/entities/props/lamppost.tscn")
 const BENCH_DIRTY := preload("res://game/entities/props/bench_dirty.tscn")
@@ -134,6 +136,14 @@ const LAMPPOSTS := [
 	[Vector2(108, 75), Vector2.LEFT], [Vector2(135, 117), Vector2.DOWN],
 	[Vector2(168, 123), Vector2.UP], [Vector2(197, 150), Vector2.RIGHT],
 	[Vector2(203, 180), Vector2.LEFT], [Vector2(64, 74), Vector2.DOWN],
+]
+
+## The 6 cars with an alarm (Q7), parked along the streets: plan position and
+## the direction of their length.
+const CAR_ALARMS := [
+	[Vector2(36, 45), Vector2.RIGHT], [Vector2(120, 45), Vector2.RIGHT],
+	[Vector2(205, 140), Vector2.UP], [Vector2(85, 170), Vector2.RIGHT],
+	[Vector2(35, 120), Vector2.UP], [Vector2(186, 206), Vector2.RIGHT],
 ]
 
 ## Benches and trees: plan position and the direction they face.
@@ -632,6 +642,12 @@ func _add_props() -> void:
 		var turn := Vector2.from_angle(i * 1.7)
 		_place(props, TREE_BARE, "Tree%d" % (i + 1), TREES[i], turn)
 	_add_light(props, "TunnelLight", Vector2(155, 8), 3.2, Color(0.75, 0.85, 1.0), 1.2, 7.0)
+	var cars := Node3D.new()
+	cars.name = "CarAlarms"
+	_add(cars)
+	cars.add_to_group("navigation_source", true)
+	for i in CAR_ALARMS.size():
+		_place(cars, CAR_ALARM, "Car%d" % (i + 1), CAR_ALARMS[i][0], CAR_ALARMS[i][1])
 	_add_light(props, "TowerBeacon", Vector2(104, 100), TOWER_STOREYS * STOREY + 1.0, Color(1, 0.15, 0.1), 2.0, 6.0)
 	_add_light(props, "SocialCentreLamp", Vector2(161.5, 58.5), 3.0, Color(1, 0.9, 0.7), 1.0, 5.0)
 	_add_light(props, "LaundretteSign", Vector2(57.6, 137.5), 2.6, Color(0.7, 0.85, 1.0), 0.9, 5.0)
@@ -731,6 +747,9 @@ func _add_gameplay() -> void:
 	var gauge := _named(GAUGE.instantiate(), "NoiseGauge")
 	gauge.set("player", player)
 	_add(gauge)
+	var prompt := _named(INTERACT_PROMPT.instantiate(), "InteractPrompt")
+	prompt.set("player", player)
+	_add(prompt)
 	_add(_named(CAUGHT.instantiate(), "CaughtScreen"))
 
 
