@@ -123,3 +123,19 @@ func test_open_garages_have_open_doors() -> void:
 		var garage: Node3D = car_park.get_node("Garage%d" % (i + 1))
 		var open := garage.scene_file_path.ends_with("garage_open.glb")
 		assert_eq(open, i == 1 or i == 4, "garage %d" % (i + 1))
+
+
+func test_playground_transformer_and_city_stadium_are_dressed() -> void:
+	var outdoor := _map.get_node("OutdoorDressing")
+	for model_name in ["Transformer", "Swing", "ClimbingFrame", "GoalWest", "GoalEast"]:
+		assert_not_null(outdoor.get_node_or_null(model_name), model_name)
+	# 100 m of boards, less the openings of 6 and 4 m: 45 boards of 2 m.
+	var boards: FacadeDressing = outdoor.get_node("StadiumBoards")
+	assert_eq(boards.count_of(0), 45)
+	assert_eq(boards.get_child_count(), 6, "one MultiMesh per run of boards")
+	assert_eq(outdoor.find_children("*", "CollisionShape3D", true, false).size(), 0)
+
+
+func test_alarm_cars_wear_their_model() -> void:
+	for car in _map.get_node("CarAlarms").get_children():
+		assert_not_null(car.get_node_or_null("Model"), car.name)
