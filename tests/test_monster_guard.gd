@@ -1,6 +1,6 @@
 extends GutTest
 ## The AI monster in the game loop: drawn back to noisy buildings, guarding the
-## tunnel once the exit is open (spec S-007, T-057).
+## tunnel once the exit is open, for a while at a time (spec S-007, T-057, T-060).
 
 const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
 const LURE := Vector3(50, 0, 50)
@@ -64,6 +64,21 @@ func test_once_the_exit_opens_it_guards_the_tunnel() -> void:
 	assert_eq(_brain.target, _guard[1])
 	_step(true)
 	assert_eq(_brain.target, _guard[0], "to and fro")
+
+
+func test_its_watch_ends_with_a_round_of_patrol_then_it_comes_back() -> void:
+	assert_eq(_settings.guard_time, 60.0)
+	assert_eq(_settings.guard_break, 45.0)
+	_brain.guard(_guard)
+	_step(false, _settings.guard_time - 1.0)
+	assert_eq(_brain.state, MonsterBrain.State.GUARD)
+	_step(false, 1.5)
+	assert_eq(_brain.state, MonsterBrain.State.PATROL, "it leaves the tunnel")
+	assert_false(_brain.guarding)
+	assert_eq(_brain.target, _patrol[0], "back on its round")
+	_step(false, _settings.guard_break + 0.5)
+	assert_eq(_brain.state, MonsterBrain.State.GUARD, "and comes back")
+	assert_eq(_brain.target, _guard[0])
 
 
 func test_a_noise_or_a_chase_interrupts_the_guard_then_it_comes_back() -> void:

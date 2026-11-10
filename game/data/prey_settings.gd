@@ -28,3 +28,6 @@ extends Resource
 @export_range(0.1, 10.0, 0.1, "suffix:s") var stuck_time: float = 1.5
 ## Chance that the prey notices the flickering lights of a scan (0 to 1).
 @export_range(0.0, 1.0, 0.05) var scan_notice_chance: float = 0.5
+## In the game loop, how far from the monster a hiding spot must be for the
+## prey to run there rather than to the farthest one, in meters (T-060).
+@export_range(0.0, 200.0, 1.0, "suffix:m") var safe_distance: float = 40.0

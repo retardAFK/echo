@@ -605,11 +605,15 @@ func _build_landmarks() -> void:
 func _build_playground() -> void:
 	var s := kit.structure("Playground")
 	var low := MapKit.Kind.FLOOR
-	# Kerb around the sand.
-	kit.box(s, 50, 70, 72, 70.3, 0, 0.25, MAT_OBSTACLE, low)
-	kit.box(s, 50, 91.7, 72, 92, 0, 0.25, MAT_OBSTACLE, low)
-	kit.box(s, 50, 70.3, 50.3, 91.7, 0, 0.25, MAT_OBSTACLE, low)
-	kit.box(s, 71.7, 70.3, 72, 91.7, 0, 0.25, MAT_OBSTACLE, low)
+	# Low wall around the sand, with a way in on the north and the south sides.
+	# Too high for the navigation mesh to climb (T-060): a kerb the bodies cannot
+	# step over, but the mesh could, held the AI prey against it for good.
+	var kerb := 0.5
+	for y: Array in [[70.0, 70.3], [91.7, 92.0]]:
+		kit.box(s, 50, y[0], 60, y[1], 0, kerb, MAT_OBSTACLE, low)
+		kit.box(s, 61.6, y[0], 72, y[1], 0, kerb, MAT_OBSTACLE, low)
+	kit.box(s, 50, 70.3, 50.3, 91.7, 0, kerb, MAT_OBSTACLE, low)
+	kit.box(s, 71.7, 70.3, 72, 91.7, 0, kerb, MAT_OBSTACLE, low)
 	# Swing posts, climbing frame and slide: only their collisions, the models
 	# dress them (T-048).
 	for x: float in [57.0, 65.0]:

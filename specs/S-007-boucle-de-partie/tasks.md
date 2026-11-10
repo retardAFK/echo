@@ -26,6 +26,6 @@ Maxime a demandé (10/11/2026) de ne pas être sollicité pour tester : chaque t
 - [x] T-059 — Sons de la boucle
   - Résultat vérifiable : claquement de boîtier, étincelles, ronflement, sirène, faits par nous (`CREDITS.md`), montrés à Maxime
   - Dépend de : T-058
-- [ ] T-060 — Vérification finale de S-007
+- [x] T-060 — Vérification finale de S-007
   - Résultat vérifiable : simulation d'une vingtaine de parties (durées, victoires, blocages), parcours d'un bot dans le build web, mesure de performance, chaque critère d'acceptation coché, spec livrée
   - Dépend de : T-059

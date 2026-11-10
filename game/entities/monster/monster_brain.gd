@@ -19,6 +19,9 @@ var spot_level := 0.0
 var lingering := false
 ## Once the exit is open (S-007, Q4), it guards the tunnel instead of patrolling.
 var guarding := false
+## Seconds left before it leaves its watch at the tunnel for a round of patrol,
+## or before it comes back to it (0 when the exit is shut).
+var watch_left := 0.0
 ## Where it last heard a noise in a building (S-007, Q10), and how many
 ## seconds it still remembers it.
 var lure := Vector3.ZERO
@@ -31,6 +34,8 @@ var _patrol_index := 0
 var _timer := 0.0
 var _last_seen := Vector3.ZERO
 var _points_since_detour := 0
+var _route: Array[Vector3] = []
+var _guard_points: Array[Vector3] = []
 
 
 func _init(p_settings: MonsterSettings) -> void:
@@ -75,6 +80,7 @@ static func farthest_index(points: Array[Vector3], from: Vector3) -> int:
 
 func set_patrol(points: Array[Vector3], start_index := 0) -> void:
 	_patrol = points
+	_route = points
 	_patrol_index = clampi(start_index, 0, maxi(points.size() - 1, 0))
 	_enter(State.PATROL)
 	_update_patrol(false)
@@ -111,17 +117,47 @@ func remember(position: Vector3) -> void:
 
 
 ## The exit is open (S-007, Q4): from now on it walks between the guard points
-## at the tunnel instead of patrolling. A chase goes on first.
+## at the tunnel instead of patrolling. A chase goes on first. Its watch lasts
+## guard_time, then it patrols for guard_break and comes back (T-060).
 func guard(points: Array[Vector3]) -> void:
 	if points.is_empty():
 		return
+	_guard_points = points
+	_start_watch()
+
+
+func _start_watch() -> void:
 	guarding = true
-	_patrol = points
+	watch_left = settings.guard_time
+	_patrol = _guard_points
 	_patrol_index = 0
 	on_detour = false
 	if state != State.CHASE:
 		_enter(State.GUARD)
 		_update_patrol(false)
+
+
+## A round of patrol away from the tunnel, so that it can be slipped past.
+func _leave_watch() -> void:
+	guarding = false
+	watch_left = settings.guard_break
+	_patrol = _route if not _route.is_empty() else _guard_points
+	_patrol_index = 0
+	if state == State.GUARD:
+		_enter(State.PATROL)
+		_update_patrol(false)
+
+
+func _update_watch(delta: float) -> void:
+	if _guard_points.is_empty() or settings.guard_time <= 0.0:
+		return
+	watch_left -= delta
+	if watch_left > 0.0:
+		return
+	if guarding:
+		_leave_watch()
+	else:
+		_start_watch()
 
 
 ## Feeds one frame of perception. `arrived` is true when the monster reached its target.
@@ -134,6 +170,7 @@ func update(
 	arrived: bool
 ) -> void:
 	lure_left = maxf(lure_left - delta, 0.0)
+	_update_watch(delta)
 	_update_spotting(delta, sees_player, distance, crouched)
 	if sees_player:
 		_last_seen = player_position
