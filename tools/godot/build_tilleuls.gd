@@ -55,6 +55,14 @@ const CENTRE_WINDOW := preload("res://assets/models/centre_window.glb")
 const CENTRE_ENTRANCE := preload("res://assets/models/centre_entrance.glb")
 const FOLDING_TABLE := preload("res://assets/models/folding_table.glb")
 const CENTRE_WINDOW_WIDTH := 2.0
+## Models of the car park and the garages (T-047, tools/blender/car_park.py).
+const CAR_WRECK := preload("res://assets/models/car_wreck.glb")
+const CAR_PARK_SIGN := preload("res://assets/models/car_park_sign.glb")
+const CAR_PARK_PILLAR := preload("res://assets/models/car_park_pillar.glb")
+const NEON_FIXTURE := preload("res://assets/models/neon_fixture.glb")
+const GARAGE_CLOSED := preload("res://assets/models/garage_closed.glb")
+const GARAGE_OPEN := preload("res://assets/models/garage_open.glb")
+const CAR_PARK_WRECKS := [Vector2(146, 98.5), Vector2(160, 113.5), Vector2(176, 98.5)]
 ## Facade modules of S-005 (3 x 3 m, front toward +Z), in FacadeDressing order.
 const FACADE_MODELS := [
 	preload("res://assets/models/facade_hlm_plain.glb"),
@@ -218,6 +226,7 @@ func _ready() -> void:
 	_add_facade_dressing()
 	_add_gallery_dressing()
 	_add_social_centre_dressing()
+	_add_car_park_dressing()
 	get_tree().root.add_child.call_deferred(_root)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -448,9 +457,9 @@ func _build_social_centre() -> void:
 	# Few hiding places in the hall: a stage and four tables.
 	kit.box(s, 140.3, 64.0, 144.0, 80.0, 0, 0.6, MAT_OBSTACLE, MapKit.Kind.FLOOR)
 	for t: Vector2 in [Vector2(149, 66), Vector2(155, 66), Vector2(149, 77), Vector2(155, 77)]:
-		kit.box(s, t.x - 1.0, t.y - 0.5, t.x + 1.0, t.y + 0.5, 0, 0.75, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+		kit.box(s, t.x - 1.0, t.y - 0.5, t.x + 1.0, t.y + 0.5, 0, 0.75, null, MapKit.Kind.FLOOR)
 	for d: Vector2 in [Vector2(172, 64), Vector2(172, 72), Vector2(172, 80)]:
-		kit.box(s, d.x - 0.8, d.y - 0.4, d.x + 0.8, d.y + 0.4, 0, 0.75, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+		kit.box(s, d.x - 0.8, d.y - 0.4, d.x + 0.8, d.y + 0.4, 0, 0.75, null, MapKit.Kind.FLOOR)
 
 
 func _build_gallery() -> void:
@@ -484,7 +493,7 @@ func _build_gallery() -> void:
 	# Washing machines along the laundrette walls.
 	for i in 4:
 		var mx := laundrette + 1.0 + i * 1.6
-		kit.box(s, mx - 0.6, back - 1.0, mx + 0.6, back - 0.2, 0, 0.9, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+		kit.box(s, mx - 0.6, back - 1.0, mx + 0.6, back - 0.2, 0, 0.9, null, MapKit.Kind.FLOOR)
 
 
 func _build_car_park() -> void:
@@ -516,11 +525,10 @@ func _build_car_park() -> void:
 	kit.wall_x(s, stairs.position.x - WALL, stairs.end.x, stairs.end.y + WALL / 2, floor_h, PARAPET, WALL, MAT_CONCRETE)
 	kit.wall_y(s, stairs.position.y, stairs.end.y, stairs.position.x - WALL / 2, 0, PARAPET, WALL, MAT_CONCRETE)
 	# Parked wrecks to hide behind.
-	for c: Vector2 in [Vector2(146, 98.5), Vector2(160, 113.5), Vector2(176, 98.5)]:
-		kit.box(s, c.x - 1.0, c.y - 2.1, c.x + 1.0, c.y + 2.1, floor_h, floor_h + 1.4, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+	for c: Vector2 in CAR_PARK_WRECKS:
+		kit.box(s, c.x - 1.0, c.y - 2.1, c.x + 1.0, c.y + 2.1, floor_h, floor_h + 1.3, null, MapKit.Kind.FLOOR)
 	# "P" sign at the ramp.
 	kit.box(s, 126.6, 99.4, 126.8, 99.6, 0, 2.6, _material("metal"), MapKit.Kind.FLOOR)
-	kit.box(s, 126.2, 99.45, 127.2, 99.55, 2.6, 3.4, _material("sign_white"), MapKit.Kind.GHOST)
 
 
 func _build_garages() -> void:
@@ -757,6 +765,34 @@ func _add_social_centre_dressing() -> void:
 		_place_model(node, FOLDING_TABLE, "Desk%d" % (i + 1), Vector2(172, 64 + 8 * i), Vector2.UP, Vector3(0.8, 1, 0.8))
 
 
+## Wrecks, pillars, dead neons, the "P" sign and the garage doors (T-047).
+func _add_car_park_dressing() -> void:
+	var node := _group("CarParkDressing")
+	var r := CAR_PARK
+	var floor_h := -CAR_PARK_DEPTH
+	var ceiling := -GROUND_THICKNESS
+	for i in CAR_PARK_WRECKS.size():
+		var turn := Vector2.UP if i % 2 == 0 else Vector2.DOWN
+		_place_model(node, CAR_WRECK, "Wreck%d" % (i + 1), CAR_PARK_WRECKS[i], turn, Vector3.ONE, floor_h)
+	var n := 0
+	var px := r.position.x + CAR_PARK_PILLAR_STEP
+	while px < r.end.x - 1.0:
+		for py: float in [r.position.y + r.size.y / 3.0, r.position.y + 2.0 * r.size.y / 3.0]:
+			n += 1
+			_place_model(node, CAR_PARK_PILLAR, "Pillar%d" % n, Vector2(px, py), Vector2.UP, Vector3.ONE, floor_h)
+		var neon := Vector2(px - CAR_PARK_PILLAR_STEP / 2.0, r.get_center().y)
+		_place_model(node, NEON_FIXTURE, "Neon%d" % n, neon, Vector2.UP, Vector3.ONE, ceiling)
+		px += CAR_PARK_PILLAR_STEP
+	_place_model(node, CAR_PARK_SIGN, "SignP", Vector2(126.7, 99.5), Vector2.LEFT)
+	# Garage doors on the east wall of the boxes, seen from the east.
+	var g := GARAGES
+	var width := g.size.y / GARAGE_COUNT
+	for i in GARAGE_COUNT:
+		var south := g.position.y + (i + 1) * width - 0.5
+		var scene := GARAGE_OPEN if GARAGES_OPEN.has(i) else GARAGE_CLOSED
+		_place_model(node, scene, "Garage%d" % (i + 1), Vector2(g.end.x + FACADE_OFFSET, south), Vector2.RIGHT)
+
+
 func _group(node_name: String) -> Node3D:
 	var node := Node3D.new()
 	node.name = node_name
@@ -766,12 +802,12 @@ func _group(node_name: String) -> Node3D:
 
 ## Instances a model at a plan point, its front (+Z) toward normal, its +X
 ## running along the wall as for the facade modules.
-func _place_model(parent: Node3D, scene: PackedScene, node_name: String, at: Vector2, normal: Vector2, scale := Vector3.ONE) -> Node3D:
+func _place_model(parent: Node3D, scene: PackedScene, node_name: String, at: Vector2, normal: Vector2, scale := Vector3.ONE, h := 0.0) -> Node3D:
 	var model: Node3D = scene.instantiate()
 	model.name = node_name
 	var z_axis := Vector3(normal.x, 0, normal.y)
 	var x_axis := Vector3.UP.cross(z_axis)
-	model.transform = Transform3D(Basis(x_axis * scale.x, Vector3.UP * scale.y, z_axis * scale.z), kit.world(at.x, at.y))
+	model.transform = Transform3D(Basis(x_axis * scale.x, Vector3.UP * scale.y, z_axis * scale.z), kit.world(at.x, at.y, h))
 	parent.add_child(model)
 	model.owner = _root
 	return model
