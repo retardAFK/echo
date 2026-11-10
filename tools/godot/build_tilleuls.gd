@@ -36,6 +36,14 @@ const MONSTER := preload("res://game/entities/monster/monster.tscn")
 const FUSE_BOX_WALL_SEARCH := 3.5
 const BUILDING := preload("res://game/entities/building/building.tscn")
 const FUSE_BOX := preload("res://game/entities/fuse_box/fuse_box.tscn")
+const TRANSFORMER_NODE := preload("res://game/entities/transformer/transformer.tscn")
+const EXIT_GATE_SCRIPT := preload("res://game/entities/exit/exit_gate.gd")
+const EXIT_ZONE_SCRIPT := preload("res://game/entities/exit/exit_zone.gd")
+const LOOP_SETTINGS := preload("res://game/data/loop_settings.tres")
+## The grille of the exit tunnel, and the far end of the tunnel (plan, S-007).
+const EXIT_GATE := Rect2(150, 2.8, 10, 0.4)
+const EXIT_GATE_HEIGHT := 3.6
+const EXIT_ZONE := Rect2(150.5, 0, 9, 2.6)
 const OVERLAY := preload("res://game/ui/debug_overlay.tscn")
 const NOISE_DEBUG := preload("res://game/ui/noise_debug.tscn")
 const GAUGE := preload("res://game/ui/noise_gauge.tscn")
@@ -315,7 +323,10 @@ func _build_borders() -> void:
 	kit.box(tunnel, 149.5, 10, 150.5, 12, 0, 6, MAT_CONCRETE)
 	kit.box(tunnel, 159.5, 10, 160.5, 12, 0, 6, MAT_CONCRETE)
 	kit.box(tunnel, 150, 10, 160, 12, 3.6, 6, MAT_CONCRETE, MapKit.Kind.FLOOR)
-	kit.box(tunnel, 150, 2.8, 160, 3.2, 0, 3.6, _material("grille"))
+	# The grille closing the tunnel is the ExitGate, a node of its own (S-007).
+	# Past the north mouth, out of the cité: an invisible wall, the hunted who
+	# gets there is already out (ExitZone).
+	kit.box(tunnel, 150, -0.5, 160, 0, 0, 6, null)
 	# East: noise wall along the motorway.
 	var east := kit.structure("NoiseWall")
 	kit.box(east, 210, 10, 210.5, 220, 0, 5, MAT_CONCRETE)
@@ -688,6 +699,48 @@ func _add_buildings() -> void:
 			marker.add_to_group("fuse_slot", true)
 			slots.add_child(marker)
 			marker.owner = _root
+
+
+## The transformer, the grille of the exit and the far end of the tunnel (S-007).
+func _add_loop() -> void:
+	var transformer := TRANSFORMER_NODE.instantiate()
+	transformer.position = kit.world(100.5, 153.5)
+	_add(_named(transformer, "TransformerPanel"))
+	var gate := AnimatableBody3D.new()
+	gate.set_script(EXIT_GATE_SCRIPT)
+	gate.set("settings", LOOP_SETTINGS)
+	gate.set("rise", EXIT_GATE_HEIGHT)
+	var center := EXIT_GATE.get_center()
+	gate.position = kit.world(center.x, center.y)
+	_add(_named(gate, "ExitGate"))
+	var size := Vector3(EXIT_GATE.size.x, EXIT_GATE_HEIGHT, EXIT_GATE.size.y)
+	var mesh := MeshInstance3D.new()
+	mesh.name = "Mesh"
+	var box := BoxMesh.new()
+	box.size = size
+	box.material = _material("grille")
+	mesh.mesh = box
+	mesh.position.y = size.y / 2.0
+	gate.add_child(mesh)
+	mesh.owner = _root
+	var shape := CollisionShape3D.new()
+	shape.name = "CollisionShape3D"
+	shape.shape = BoxShape3D.new()
+	shape.shape.size = size
+	shape.position.y = size.y / 2.0
+	gate.add_child(shape)
+	shape.owner = _root
+	var zone := Area3D.new()
+	zone.set_script(EXIT_ZONE_SCRIPT)
+	center = EXIT_ZONE.get_center()
+	zone.position = kit.world(center.x, center.y, 2.0)
+	_add(_named(zone, "ExitZone"))
+	var zone_shape := CollisionShape3D.new()
+	zone_shape.name = "CollisionShape3D"
+	zone_shape.shape = BoxShape3D.new()
+	zone_shape.shape.size = Vector3(EXIT_ZONE.size.x, 4.0, EXIT_ZONE.size.y)
+	zone.add_child(zone_shape)
+	zone_shape.owner = _root
 
 
 ## A fuse box on the nearest wall of each fuse slot (S-007, Q1). The slot
@@ -1069,6 +1122,7 @@ func _add_navigation() -> void:
 
 func _add_gameplay() -> void:
 	_root.set_script(MAP_SCRIPT)
+	_add_loop()
 	var env := WorldEnvironment.new()
 	env.name = "WorldEnvironment"
 	var environment := Environment.new()

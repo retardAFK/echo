@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/transformer/transformer.gd" id="1_transformer"]
+[ext_resource type="Resource" path="res://game/data/loop_settings.tres" id="2_settings"]
+
+[node name="Transformer" type="Node3D"]
+script = ExtResource("1_transformer")
+settings = ExtResource("2_settings")
+
+[node name="WaitLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.2, 0)
+pixel_size = 0.008
+visibility_range_end = 14.0
+billboard = 1
+double_sided = false
+modulate = Color(0.75, 1, 0.8, 0.85)
+font_size = 32
+outline_size = 6

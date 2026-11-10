@@ -11,7 +11,7 @@ Maxime a demandé (10/11/2026) de ne pas être sollicité pour tester : chaque t
 - [x] T-054 — Fusibles et action maintenue
   - Résultat vérifiable : `LoopRules`, `GameLoop`, `LoopSettings`, entité `FuseBox` sur les 16 emplacements, tirage de 3 fusibles dans 3 bâtiments différents, diode rouge, `HoldInteraction` (maintenir E 2 s, remise à zéro en lâchant), anneau de progression, bruit `FUSE` de 3 m, HUD « Fusibles n/3 » ; tests GUT
   - Dépend de : T-053
-- [ ] T-055 — Transformateur, sirène et sortie
+- [x] T-055 — Transformateur, sirène et sortie
   - Résultat vérifiable : entité `Transformer` (4 s par fusible, bruit `REPAIR` de 8 m, moitié gardée en lâchant, texte « attend N fusibles »), sirène `SIREN` entendue par le monstre, `ExitGate` qui se lève, `ExitZone` au bout du tunnel ; tests GUT
   - Dépend de : T-054
 - [ ] T-056 — Fin de partie et écran de fin
