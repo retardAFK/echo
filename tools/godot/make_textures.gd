@@ -1,5 +1,5 @@
 extends SceneTree
-## Generates the greybox's pixel textures (spec S-005, T-030).
+## Generates the greybox's pixel textures (spec S-005, T-030; dead lawn: S-006, T-039).
 ## Run: godot --headless -s tools/godot/make_textures.gd
 ## Same seed, same pixels: the PNGs can be regenerated at any time.
 
@@ -14,6 +14,7 @@ const SEED := 7
 func _initialize() -> void:
 	_save(_concrete(), "concrete_wall.png")
 	_save(_asphalt(), "asphalt_floor.png")
+	_save(_dirt(), "ground_dirt.png")
 	quit()
 
 
@@ -60,4 +61,24 @@ func _asphalt() -> Image:
 			if absi(y - crack_y) < 1 and x > SIZE / 5:
 				v -= 0.22
 			img.set_pixel(x, y, Color(v, v, v * 1.02))
+	return img
+
+
+## Trampled dead lawn of the cité (S-006): dark earth, dry tufts, a few stones.
+func _dirt() -> Image:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = SEED + 2
+	var img := Image.create(SIZE, SIZE, false, Image.FORMAT_RGB8)
+	for y in SIZE:
+		for x in SIZE:
+			var v := 0.3 + rng.randf_range(-0.05, 0.05)
+			v += 0.04 * sin(x * 0.07 + 1.3) * cos(y * 0.06)
+			var tuft := rng.randf() < 0.08
+			var stone := rng.randf() < 0.01
+			var c := Color(v * 1.05, v, v * 0.82)
+			if tuft:
+				c = Color(v * 1.1, v * 1.15, v * 0.75)
+			elif stone:
+				c = Color(v + 0.2, v + 0.2, v + 0.19)
+			img.set_pixel(x, y, c)
 	return img

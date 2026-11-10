@@ -9,7 +9,7 @@ Maxime a demandé (10/11/2026) de ne pas être sollicité pour tester : chaque t
 - [x] T-038 — Plan et tâches de S-006
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-037
-- [ ] T-039 — Générateur de map et greybox extérieure
+- [x] T-039 — Générateur de map et greybox extérieure
   - Résultat vérifiable : `build_tilleuls.gd` produit la cité 220 × 220 m (sol, limites, 7 barres, chemins, repères extérieurs, sortie fermée, lampadaires) ; classe commune `GameMap` ; le menu lance la cité ; apparition au hasard du chassé, monstre au sud-est ; tests GUT (taille, limites fermées, sol partout) ; build web vérifié dans Chrome
   - Dépend de : T-038
 - [ ] T-040 — Les 4 bâtiments visitables et les boxes
@@ -52,3 +52,4 @@ Maxime a demandé (10/11/2026) de ne pas être sollicité pour tester : chaque t
 ## Compte rendu
 - T-037 (07/11/2026) : décision D-010 et spec S-006 validée par Maxime (« Parfait »), PR #35.
 - T-038 (10/11/2026) : plan et tâches de S-006. Maxime : « On peut passer aux tâches suivantes, j'aimerais ne pas être sollicité pour tester, je te fais confiance ».
+- T-039 (10/11/2026) : la cité est générée par `tools/godot/build_tilleuls.gd` (lancé par la scène `build_tilleuls.tscn`, pour que les autoloads soient chargés) avec les briques de `map_kit.gd` : sol de terre battue en carreaux de 40 m, chemins en asphalte, talus de la voie ferrée avec le tunnel de sortie fermé par une grille, mur antibruit, grillages de chantier et de la friche, barres A à G (B percée d'un porche pour le chemin de la sortie), aire de jeux avec sa balançoire, city stade, transformateur vert, 18 lampadaires, bancs et arbres de S-005. Chaque structure a un maillage fusionné par matériau et des boîtes de collision (murs sur la couche `walls`). Maillage de navigation limité à l'intérieur des grillages (709 polygones, 1,4 s de calcul). La logique de `greybox_test.gd` devient la classe commune `GameMap` : apparition au hasard parmi 6 points pour le chassé (et la proie IA), monstre au sud-est. Le menu lance la cité. Nouvelle texture de terre battue (`make_textures.gd`). `tools/` sort de l'export web. 9 tests GUT (220 au total). Vérifié : rendu OpenGL de 9 points de vue (`measure_map.gd`, 27 à 103 appels de dessin) et build web dans Chrome (le menu lance la cité, la course fait monter la jauge, aucune erreur).
