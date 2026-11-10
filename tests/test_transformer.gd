@@ -99,8 +99,9 @@ func test_three_fuses_sound_the_siren_and_open_the_exit() -> void:
 	var sirens := _of_type(NoiseEvent.Type.SIREN)
 	assert_eq(sirens.size(), 1)
 	assert_true(NoiseBus.can_hear(sirens[0], monster.get_ear_position()), "the monster hears it")
-	assert_eq(monster.get_state(), MonsterBrain.State.INVESTIGATE)
-	assert_lt(monster.brain.target.distance_to(_transformer.global_position), 3.0)
+	assert_eq(monster.get_state(), MonsterBrain.State.GUARD, "it leaves to guard the tunnel")
+	var tunnel: Vector3 = _map.get_node("GuardPoints").get_child(0).global_position
+	assert_lt(monster.brain.target.distance_to(tunnel), 0.5)
 	await wait_seconds(_loop.settings.gate_open_time + 0.3)
 	assert_almost_eq(gate.position.y, closed_y + 3.6, 0.01, "the grille is up")
 	assert_between(_of_type(NoiseEvent.Type.SIREN).size(), 2, 4, "a siren every 2 s")

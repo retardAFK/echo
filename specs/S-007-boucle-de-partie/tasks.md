@@ -17,7 +17,7 @@ Maxime a demandé (10/11/2026) de ne pas être sollicité pour tester : chaque t
 - [x] T-056 — Fin de partie et écran de fin
   - Résultat vérifiable : défaite à la capture, victoire à la sortie, dans les deux rôles ; `EndScreen` avec durée, fusibles, bruits, scans ; « Rejouer » relance un nouveau tirage, « Menu » revient au menu ; tests GUT
   - Dépend de : T-055
-- [ ] T-057 — Monstre IA : attirance et garde du tunnel
+- [x] T-057 — Monstre IA : attirance et garde du tunnel
   - Résultat vérifiable : souvenir du bâtiment bruyant, état `GUARD` après la sirène ; tests GUT
   - Dépend de : T-056
 - [ ] T-058 — Proie IA qui joue la boucle

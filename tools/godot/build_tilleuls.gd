@@ -1152,6 +1152,7 @@ func _add_gameplay() -> void:
 	var patrol := _markers("PatrolRoute", PATROL_ROUTE)
 	_markers("PreyRoute", PREY_ROUTE)
 	_markers("HidingSpots", HIDING_SPOTS)
+	_markers("GuardPoints", GUARD_POINTS)
 	var monster: Node3D = _named(MONSTER.instantiate(), "Monster")
 	monster.position = monster_spawn.get_child(0).position
 	monster.set("patrol_route", patrol)
@@ -1183,6 +1184,9 @@ const PATROL_ROUTE := [
 	Vector3(40, 0, 120), Vector3(61, 0, 81), Vector3(40, 0, 52), Vector3(100, 0, 52),
 	Vector3(120, 0, 140), Vector3(163, 0, 190),
 ]
+## Where the AI monster walks to and fro once the exit is open (S-007, Q4):
+## the south mouth of the tunnel and both sides of it.
+const GUARD_POINTS := [Vector3(155, 0, 14), Vector3(146, 0, 20), Vector3(164, 0, 20)]
 ## Wander points of the AI prey (monster role), outside and inside.
 const PREY_ROUTE := [
 	Vector3(45, 0, 44), Vector3(95, 0, 52), Vector3(155, 0, 40), Vector3(124, 0, 96),

@@ -6,7 +6,7 @@ extends RefCounted
 
 signal state_changed(state: State)
 
-enum State { PATROL, INVESTIGATE, CHASE, SEARCH }
+enum State { PATROL, INVESTIGATE, CHASE, SEARCH, GUARD }
 enum Pace { PROWL, WALK, RUN }
 
 var settings: MonsterSettings
@@ -17,11 +17,20 @@ var target := Vector3.ZERO
 var spot_level := 0.0
 ## Whether the monster reached its target and is looking around.
 var lingering := false
+## Once the exit is open (S-007, Q4), it guards the tunnel instead of patrolling.
+var guarding := false
+## Where it last heard a noise in a building (S-007, Q10), and how many
+## seconds it still remembers it.
+var lure := Vector3.ZERO
+var lure_left := 0.0
+## Whether it left its patrol to have a look at the lure.
+var on_detour := false
 
 var _patrol: Array[Vector3] = []
 var _patrol_index := 0
 var _timer := 0.0
 var _last_seen := Vector3.ZERO
+var _points_since_detour := 0
 
 
 func _init(p_settings: MonsterSettings) -> void:
@@ -75,7 +84,7 @@ func get_pace() -> Pace:
 	if lingering:
 		return Pace.PROWL
 	match state:
-		State.INVESTIGATE:
+		State.INVESTIGATE, State.GUARD:
 			return Pace.WALK
 		State.CHASE, State.SEARCH:
 			return Pace.RUN
@@ -94,6 +103,27 @@ func hear(position: Vector3) -> void:
 	target = position
 
 
+## A noise came from inside a building: the monster will come back and have a
+## look there now and then while it patrols (S-007, Q10).
+func remember(position: Vector3) -> void:
+	lure = position
+	lure_left = settings.lure_memory_time
+
+
+## The exit is open (S-007, Q4): from now on it walks between the guard points
+## at the tunnel instead of patrolling. A chase goes on first.
+func guard(points: Array[Vector3]) -> void:
+	if points.is_empty():
+		return
+	guarding = true
+	_patrol = points
+	_patrol_index = 0
+	on_detour = false
+	if state != State.CHASE:
+		_enter(State.GUARD)
+		_update_patrol(false)
+
+
 ## Feeds one frame of perception. `arrived` is true when the monster reached its target.
 func update(
 	delta: float,
@@ -103,13 +133,14 @@ func update(
 	crouched: bool,
 	arrived: bool
 ) -> void:
+	lure_left = maxf(lure_left - delta, 0.0)
 	_update_spotting(delta, sees_player, distance, crouched)
 	if sees_player:
 		_last_seen = player_position
 	if state != State.CHASE and spot_level >= 1.0:
 		_enter(State.CHASE)
 	match state:
-		State.PATROL:
+		State.PATROL, State.GUARD:
 			_update_patrol(arrived)
 		State.INVESTIGATE:
 			_linger_then_patrol(delta, arrived, settings.investigate_time)
@@ -127,12 +158,25 @@ func _update_spotting(delta: float, sees_player: bool, distance: float, crouched
 	spot_level = clampf(spot_level, 0.0, 1.0)
 
 
+## Walks from point to point. On patrol, every few points it makes a detour to
+## the building it last heard a noise in, while it remembers it.
 func _update_patrol(arrived: bool) -> void:
 	if _patrol.is_empty():
 		return
 	if arrived:
-		_patrol_index = (_patrol_index + 1) % _patrol.size()
-	target = _patrol[_patrol_index]
+		if on_detour:
+			on_detour = false
+		else:
+			_patrol_index = (_patrol_index + 1) % _patrol.size()
+			_points_since_detour += 1
+			if (
+				state == State.PATROL
+				and lure_left > 0.0
+				and _points_since_detour >= settings.lure_every
+			):
+				on_detour = true
+				_points_since_detour = 0
+	target = lure if on_detour else _patrol[_patrol_index]
 
 
 func _update_chase(delta: float, sees_player: bool) -> void:
@@ -153,7 +197,7 @@ func _linger_then_patrol(delta: float, arrived: bool, duration: float) -> void:
 		return
 	_timer += delta
 	if _timer >= duration:
-		_enter(State.PATROL)
+		_enter(State.GUARD if guarding else State.PATROL)
 		_update_patrol(false)
 
 

@@ -19,6 +19,8 @@ const CONE_GROUND_OFFSET := 0.05
 @export var patrol_route: Node3D
 @export var start_index := 0
 @export var player: Player
+## Buildings whose noises it remembers (S-007, Q10).
+@export var buildings: Array[Building] = []
 
 var brain: MonsterBrain
 var catch_count := 0
@@ -115,11 +117,24 @@ func _flat_distance(point: Vector3) -> float:
 	return Vector2(point.x - global_position.x, point.z - global_position.z).length()
 
 
+## Guards the exit tunnel from now on (S-007, Q4): the siren told it where the
+## hunted is going.
+func guard_exit(points: Array[Vector3]) -> void:
+	brain.guard(points)
+	_agent.target_position = brain.target
+
+
 func _on_noise_emitted(event: NoiseEvent) -> void:
 	if event.source == self:
 		return
+	if event.type == NoiseEvent.Type.SIREN and brain.guarding:
+		return  # Heard: it already left for the tunnel.
 	if NoiseBus.can_hear(event, get_ear_position()):
 		brain.hear(event.position)
+		for building in buildings:
+			if building.contains(event.position):
+				brain.remember(event.position)
+				break
 
 
 func _move(delta: float) -> void:

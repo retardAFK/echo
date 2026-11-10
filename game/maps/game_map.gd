@@ -55,6 +55,7 @@ func _ready() -> void:
 		_setup_monster_role()
 	else:
 		_monster.player = _player
+		_monster.buildings = get_buildings()
 		_monster.player_caught.connect(_on_player_caught)
 	_setup_game_loop()
 
@@ -116,6 +117,7 @@ func _setup_game_loop() -> void:
 	end_screen = END_SCREEN_SCENE.instantiate()
 	add_child(end_screen)
 	game_loop.ended.connect(_on_game_ended)
+	game_loop.exit_opened.connect(_on_exit_opened)
 	if avatar == null:
 		var hud: LoopHud = LOOP_HUD_SCENE.instantiate()
 		hud.game_loop = game_loop
@@ -137,6 +139,12 @@ func _physics_process(_delta: float) -> void:
 	var gap := prey.global_position - avatar.global_position
 	if Vector2(gap.x, gap.z).length() <= avatar.settings.catch_distance:
 		_on_prey_caught()
+
+
+## The AI monster goes to guard the tunnel (S-007, Q4).
+func _on_exit_opened() -> void:
+	if _monster != null:
+		_monster.guard_exit(Prey.markers_of(get_node_or_null("GuardPoints")))
 
 
 func _on_game_ended(_hunted_won: bool) -> void:
