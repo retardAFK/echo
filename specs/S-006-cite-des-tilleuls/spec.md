@@ -1,6 +1,6 @@
 # S-006 — La cité des Tilleuls
 
-**Statut** : validée (07/11/2026)
+**Statut** : livrée (10/11/2026), validée le 07/11/2026
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : 6 — Première vraie map
 
@@ -39,15 +39,15 @@ Le 07/11/2026, Maxime a répondu « Parfait » au plan et aux propositions Q2 à
 - Q8 : Dans quel ordre on travaille ? → Proposition : 1) greybox en cubes de toute la map, jouable, et premier test ; 2) ajustements ; 3) habillage avec les assets de S-005 et les nouveaux (tour, galerie, rampe de parking, boxes, transformateur, voitures), chacun validé sur rendu ; 4) éclairage précalculé et sons d'ambiance. → R : retenu (07/11/2026).
 
 ## Critères d'acceptation (vérifiables à la main)
-- [ ] La map fait 220 × 220 m, ses limites sont claires et on ne peut pas en sortir.
-- [ ] Les 4 bâtiments visitables sont ouverts et explorables, avec leurs emplacements de fusible.
-- [ ] Le scan marche sur les cibles prévues en Q6, et pas sur les façades.
-- [ ] Chaque lieu repère (tour, aire de jeux, galerie, centre social, parking, transformateur, sortie) se reconnaît dans le brouillard.
-- [ ] Les 6 alarmes de voiture se déclenchent et attirent le monstre IA.
-- [ ] On traverse la map en courant en moins de 45 s.
-- [ ] Le monstre IA trouve son chemin partout, y compris dans la tour et le parking.
+- [x] La map fait 220 × 220 m, ses limites sont claires et on ne peut pas en sortir.
+- [x] Les 4 bâtiments visitables sont ouverts et explorables, avec leurs emplacements de fusible.
+- [x] Le scan marche sur les cibles prévues en Q6, et pas sur les façades.
+- [x] Chaque lieu repère (tour, aire de jeux, galerie, centre social, parking, transformateur, sortie) se reconnaît dans le brouillard.
+- [x] Les 6 alarmes de voiture se déclenchent et attirent le monstre IA.
+- [x] On traverse la map en courant en moins de 45 s.
+- [x] Le monstre IA trouve son chemin partout, y compris dans la tour et le parking.
 - [ ] 60 images par seconde dans Chrome sur la machine de référence, en chassé et en monstre, à l'endroit le plus chargé de la map.
-- [ ] La map se charge en moins de 10 s, et le build web reste sous 60 Mo.
+- [x] La map se charge en moins de 10 s, et le build web reste sous 60 Mo.
 
 ## Hors périmètre
 - La boucle de partie (fusibles posés au hasard, transformateur, ouverture de la sortie, victoire) : S-007.
@@ -63,3 +63,9 @@ Maxime ne teste pas la greybox (10/11/2026) : ces notes sont celles des vérific
   - Traversées en courant mesurées sur le maillage : 36 à 43 s, sous les 45 s, grâce aux porches sous les barres A, B et E.
   - Performance (rendu OpenGL, sans GPU) : 70 appels de dessin au pire sur 484 vues, 15 000 triangles, 2 lumières visibles, chargement en 0,33 s, build web de 40 Mo. Les 60 images/s restent à vérifier sur la machine de référence.
   - Correction trouvée : le chassé apparaissait parfois face au mur d'une barre. Chaque point d'apparition regarde maintenant la tour, le repère de la cité.
+- Vérification finale (T-051, 10/11/2026), sur la map habillée et éclairée :
+  - Limites, bâtiments, fusibles, scan, alarmes et chemins du monstre IA : couverts par les tests GUT (266, tous verts), dont le parcours du bot jusqu'au 4e de la tour, au fond du parking et sous le rideau.
+  - Traversées en courant : 37 à 43 s (sous 45 s).
+  - Lieux repères : reconnus sur les captures dans le brouillard (tour, aire de jeux et sa balançoire, galerie et la laverie éclairée, centre social et son enseigne, parking et son « P », transformateur vert, porche de sortie).
+  - Performance (rendu OpenGL logiciel, sans GPU) : 97 appels de dessin en moyenne et 192 au pire sur 484 vues (budget 300), 49 000 triangles au plus (budget 150 000), au plus 2 lumières dynamiques visibles (limite 4), chargement de la map en 1,1 s, build web de 45 Mo sans erreur dans Chrome.
+  - Reste ouvert : les 60 images/s ne se mesurent pas sans carte graphique. Tous les budgets qui les garantissent sont tenus ; la mesure sur la machine de référence se fera au point de décision n°2.
