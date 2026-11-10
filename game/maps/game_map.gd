@@ -1,5 +1,7 @@
+class_name GameMap
 extends Node3D
-## Greybox test map (specs S-001 to S-004).
+## A playable map (specs S-001 to S-004, S-006): the greybox test map and the
+## cité des Tilleuls share it.
 ## Hunted role: wires the AI monster to the player and handles a catch (Q4 of
 ## S-003): "caught" screen, player back to the start, monster back on patrol.
 ## Monster role (S-004): the AI monster and the hunted player are replaced by
@@ -7,6 +9,9 @@ extends Node3D
 ## starting where the hunted does. Touching the prey catches it: "caught"
 ## screen, and the prey wanders again from the point farthest from the monster.
 ## Escape frees the mouse; Escape again goes back to the start menu.
+## If the map has a PlayerSpawns node, the hunted (or the AI prey) starts on one
+## of its Marker3D children, drawn at random (S-006). Scannable buildings are the
+## Building nodes of the map, wherever they are.
 
 const MENU_SCENE := "res://game/ui/start_menu.tscn"
 const AVATAR_SCENE := preload("res://game/entities/monster/monster_avatar.tscn")
@@ -20,6 +25,8 @@ var avatar: MonsterAvatar
 var markers: NoiseMarkers
 var prey: Prey
 
+var _rng := RandomNumberGenerator.new()
+
 @onready var _player: Player = $Player
 @onready var _monster: Monster = $Monster
 @onready var _caught_screen: CaughtScreen = $CaughtScreen
@@ -29,6 +36,10 @@ var prey: Prey
 
 
 func _ready() -> void:
+	_rng.randomize()
+	if not get_spawn_points().is_empty():
+		_spawn = _pick_spawn()
+		_player.global_position = _spawn
 	if GameSession.role == GameSession.Role.MONSTER:
 		_setup_monster_role()
 		return
@@ -61,7 +72,7 @@ func _setup_monster_role() -> void:
 	prey.wander_route = $PreyRoute
 	prey.hiding_spots = $HidingSpots
 	prey.monster = avatar
-	prey.buildings = [$Building]
+	prey.buildings = get_buildings()
 	prey.position = _spawn  # Before entering the tree, so no first footstep jump.
 	add_child(prey)
 	_overlay.player = null
@@ -111,8 +122,32 @@ func _add_point_markers(parent: Node3D) -> void:
 		point.add_child(marker)
 
 
+## Every scannable building of the map.
+func get_buildings() -> Array[Building]:
+	var found: Array[Building] = []
+	for node in find_children("*", "Area3D", true, false):
+		if node is Building:
+			found.append(node)
+	return found
+
+
+## Where the hunted may start, empty if the map has no PlayerSpawns node.
+func get_spawn_points() -> Array[Vector3]:
+	var spawns := get_node_or_null("PlayerSpawns") as Node3D
+	if spawns == null:
+		return []
+	return Prey.markers_of(spawns)
+
+
+func _pick_spawn() -> Vector3:
+	var points := get_spawn_points()
+	return points[_rng.randi_range(0, points.size() - 1)]
+
+
 func _on_player_caught() -> void:
 	_caught_screen.show_for(_monster.settings.caught_screen_time)
+	if not get_spawn_points().is_empty():
+		_spawn = _pick_spawn()
 	_player.global_position = _spawn
 	_player.velocity = Vector3.ZERO
 	_monster.reset_to_patrol(_spawn)

@@ -5,7 +5,7 @@ extends Control
 
 signal role_chosen(role: GameSession.Role)
 
-const MAP_SCENE := "res://game/maps/greybox_test.tscn"
+const MAP_SCENE := "res://game/maps/tilleuls/tilleuls.tscn"
 
 ## Tests turn this off to stay on the menu after a choice.
 @export var change_scene := true

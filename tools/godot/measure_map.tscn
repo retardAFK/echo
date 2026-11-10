@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/godot/measure_map.gd" id="1_measure"]
+
+[node name="MeasureMap" type="Node"]
+script = ExtResource("1_measure")
