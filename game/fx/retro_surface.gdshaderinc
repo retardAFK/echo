@@ -32,10 +32,14 @@ uniform float scan_wave_fade = 0.0;
 
 varying vec3 world_pos;
 varying vec3 world_normal;
+// Light baked in the vertices by the map generator (S-006, T-049); zero on
+// meshes without it.
+varying vec3 baked_light;
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	baked_light = CUSTOM0.rgb;
 	vec4 clip = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
 	if (snap_grid.x > 0.0 && clip.w > 0.0) {
 		// Clip space spans 2 units across the screen, hence the half grid.
@@ -70,6 +74,8 @@ void fragment() {
 	if (unshaded) {
 		emission = albedo;
 		albedo = vec3(0.0);
+	} else {
+		emission += albedo * baked_light;
 	}
 	if (scan_amount > 0.0) {
 		vec3 local = scan_rotation * (world_pos - scan_center);

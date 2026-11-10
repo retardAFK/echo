@@ -14,6 +14,18 @@ enum Kind { WALL, FLOOR, GHOST }
 
 const WORLD_LAYER := 1 << 0
 const WALLS_LAYER := 1 << 1
+## Render layer of the meshes whose light is baked (T-049): the baked lights
+## leave them out of their cull mask, so they are not lit twice.
+const BAKED_LAYER := 1 << 1
+## Size of the cells a face is cut in where a baked light reaches it, in meters.
+const BAKE_CELL := 1.0
+## The renderer's lights fall off more softly than their formula once drawn:
+## the baked intensity is raised to this power to look the same (measured
+## against a real light, T-049).
+const BAKE_GAMMA := 0.4
+const BAKE_SCALE := 0.82
+## Shadow rays start this far in front of the face.
+const BAKE_OFFSET := 0.05
 
 
 class Block:
@@ -27,6 +39,7 @@ class Structure:
 	var name: String
 	var blocks: Array[Block] = []
 	var parent_path := ""
+	var node: Node3D
 
 	func _init(p_name: String, p_parent := "Structures") -> void:
 		name = p_name
@@ -186,6 +199,7 @@ func build(root: Node) -> void:
 		node.name = s.name
 		parent.add_child(node)
 		node.owner = root
+		s.node = node
 		_build_meshes(s, node, root)
 		_build_bodies(s, node, root)
 
@@ -266,3 +280,144 @@ func _ensure_path(root: Node, path: String) -> Node:
 				child.add_to_group("navigation_source", true)
 		node = child
 	return node
+
+
+# --- Baked light (T-049) ------------------------------------------------------
+
+
+## Bakes the light of the given omni lights into the meshes of the structures,
+## as a per-vertex color (CUSTOM0, added by the retro surface shader). Faces are
+## cut in BAKE_CELL cells only where a light reaches them; shadows come from rays
+## against the collision shapes of space (mask). Every structure mesh moves to
+## BAKED_LAYER. Needs the structures in the tree, with their bodies in space.
+## Returns the number of baked vertices.
+func bake_light(lights: Array[OmniLight3D], space: PhysicsDirectSpaceState3D, mask: int) -> int:
+	var count := 0
+	for s in structures:
+		var instance := s.node.get_node_or_null("Mesh") as MeshInstance3D if s.node else null
+		if instance == null:
+			continue
+		instance.layers = BAKED_LAYER
+		var near: Array[OmniLight3D] = []
+		var bounds := instance.mesh.get_aabb()
+		for light in lights:
+			if bounds.grow(light.omni_range).has_point(light.global_position):
+				near.append(light)
+		if near.is_empty():
+			continue
+		var tools := {}
+		for block in s.blocks:
+			if block.material == null:
+				continue
+			if not tools.has(block.material):
+				var tool := SurfaceTool.new()
+				tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+				tool.set_custom_format(0, SurfaceTool.CUSTOM_RGB_FLOAT)
+				tools[block.material] = tool
+			for axis in 3:
+				for side: float in [-1.0, 1.0]:
+					count += _bake_face(tools[block.material], block, axis, side, near, space, mask)
+		var mesh := ArrayMesh.new()
+		for material: Material in tools:
+			var tool: SurfaceTool = tools[material]
+			tool.set_material(material)
+			tool.commit(mesh)
+		instance.mesh = mesh
+	return count
+
+
+## One face of a block, cut along the cells of the lights in front of it.
+func _bake_face(
+	tool: SurfaceTool, block: Block, axis: int, side: float, lights: Array[OmniLight3D],
+	space: PhysicsDirectSpaceState3D, mask: int
+) -> int:
+	var b := block.transform.basis
+	var normal := b[axis].normalized() * side
+	var u_axis := b[(axis + 1) % 3].normalized()
+	var v_axis := b[(axis + 2) % 3].normalized()
+	var u_len: float = block.size[(axis + 1) % 3]
+	var v_len: float = block.size[(axis + 2) % 3]
+	var corner := (
+		block.transform.origin + normal * block.size[axis] / 2.0
+		- u_axis * u_len / 2.0 - v_axis * v_len / 2.0
+	)
+	var us := PackedFloat32Array([0.0, u_len])
+	var vs := PackedFloat32Array([0.0, v_len])
+	var lit: Array[OmniLight3D] = []
+	for light in lights:
+		var to_light := light.global_position - corner
+		var depth := to_light.dot(normal)
+		var r := light.omni_range
+		var lu := to_light.dot(u_axis)
+		var lv := to_light.dot(v_axis)
+		if depth <= 0.0 or depth >= r or lu < -r or lu > u_len + r or lv < -r or lv > v_len + r:
+			continue
+		lit.append(light)
+		us = _add_cuts(us, lu - r, lu + r, u_len)
+		vs = _add_cuts(vs, lv - r, lv + r, v_len)
+	us.sort()
+	vs.sort()
+	var colors := []
+	for v in vs:
+		var row := []
+		for u in us:
+			var p := corner + u_axis * u + v_axis * v
+			row.append(_light_at(p, normal, lit, space, mask))
+		colors.append(row)
+	# Godot draws clockwise faces: flip the quads whose u x v points inward.
+	var flip := u_axis.cross(v_axis).dot(normal) > 0.0
+	tool.set_normal(normal)
+	for j in vs.size() - 1:
+		for i in us.size() - 1:
+			var quad := [Vector2i(i, j), Vector2i(i + 1, j), Vector2i(i + 1, j + 1), Vector2i(i, j + 1)]
+			if flip:
+				quad.reverse()
+			for k: int in [0, 1, 2, 0, 2, 3]:
+				var c: Vector2i = quad[k]
+				tool.set_custom(0, colors[c.y][c.x])
+				tool.add_vertex(corner + u_axis * us[c.x] + v_axis * vs[c.y])
+	return us.size() * vs.size()
+
+
+## Adds the cell lines from a to b (one per BAKE_CELL) inside (0, length).
+static func _add_cuts(
+	cuts: PackedFloat32Array, a: float, b: float, length: float
+) -> PackedFloat32Array:
+	var x := a
+	while x <= b + 0.0001:
+		if x > 0.0001 and x < length - 0.0001 and not _has_cut(cuts, x):
+			cuts.append(x)
+		x += BAKE_CELL
+	return cuts
+
+
+static func _has_cut(cuts: PackedFloat32Array, x: float) -> bool:
+	for c in cuts:
+		if absf(c - x) < 0.05:
+			return true
+	return false
+
+
+## Light received at a point of a face, as the renderer's omni lights would
+## give it (same falloff), with hard shadows from the collision shapes.
+static func _light_at(
+	p: Vector3, normal: Vector3, lights: Array[OmniLight3D], space: PhysicsDirectSpaceState3D,
+	mask: int
+) -> Color:
+	var sum := Color(0, 0, 0, 1)
+	for light in lights:
+		var to_light := light.global_position - p
+		var distance := to_light.length()
+		var facing := normal.dot(to_light / maxf(distance, 0.0001))
+		if distance >= light.omni_range or facing <= 0.0:
+			continue
+		var ray := PhysicsRayQueryParameters3D.create(p + normal * BAKE_OFFSET, light.global_position, mask)
+		if not space.intersect_ray(ray).is_empty():
+			continue
+		var nd := pow(distance / light.omni_range, 4.0)
+		var falloff := pow(maxf(1.0 - nd, 0.0), 2.0) * pow(maxf(distance, 0.0001), -light.omni_attenuation)
+		var strength := pow(falloff * facing * light.light_energy, BAKE_GAMMA) * BAKE_SCALE
+		sum.r += light.light_color.r * strength
+		sum.g += light.light_color.g * strength
+		sum.b += light.light_color.b * strength
+	return sum
