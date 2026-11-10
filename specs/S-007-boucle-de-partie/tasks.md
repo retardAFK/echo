@@ -20,7 +20,7 @@ Maxime a demandé (10/11/2026) de ne pas être sollicité pour tester : chaque t
 - [x] T-057 — Monstre IA : attirance et garde du tunnel
   - Résultat vérifiable : souvenir du bâtiment bruyant, état `GUARD` après la sirène ; tests GUT
   - Dépend de : T-056
-- [ ] T-058 — Proie IA qui joue la boucle
+- [x] T-058 — Proie IA qui joue la boucle
   - Résultat vérifiable : la proie IA cherche, ramasse, répare et fuit, avec ses réactions de S-004 ; tests GUT ; elle sort d'une partie sans monstre, sans se bloquer
   - Dépend de : T-057
 - [ ] T-059 — Sons de la boucle

@@ -17,8 +17,11 @@ const MAP_SIZE := 220.0
 ## Ground tiles: a light only touches the few tiles around it.
 const GROUND_TILE := 40.0
 const GROUND_THICKNESS := 0.2
-## Inside the fences, in plan meters: west fence to noise wall, exit gate to site fence.
-const FENCED := Rect2(6, 2.8, 204.5, 209.4)
+## Inside the fences, in plan meters: west fence to noise wall, far end of the
+## exit tunnel to site fence. The north edge stays a whole number of navigation
+## cells (0.125 m) from where it was before S-007, so the voxel grid, and the
+## mesh everywhere else, do not move.
+const FENCED := Rect2(6, 0.3, 204.5, 211.9)
 const NAV_BOTTOM := -5.24
 const PATH_WIDTH := 5.0
 const PATH_HEIGHT := 0.04

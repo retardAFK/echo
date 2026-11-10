@@ -7,7 +7,8 @@ const NAVMESH := preload("res://game/maps/tilleuls/tilleuls_navmesh.tres")
 const ORIGIN := Vector3(110, 0, 110)
 const MAP_SIZE := 220.0
 ## Inside the fences: west fence, exit gate, noise wall, site fence (plan meters).
-const FENCED := Rect2(6, 2.8, 204.5, 209.4)
+## Up to the far end of the exit tunnel, open once the transformer is repaired (S-007).
+const FENCED := Rect2(6, 0.3, 204.5, 211.9)
 
 var _map: GameMap
 
