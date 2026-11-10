@@ -52,6 +52,10 @@ extends Resource
 @export_range(0.0, 60.0, 0.5, "suffix:s") var search_time: float = 8.0
 ## Distance at which the monster catches the player, in meters.
 @export_range(0.1, 5.0, 0.1, "suffix:m") var catch_distance: float = 1.2
+## How long the monster remembers the building it heard a noise in, in seconds (S-007, Q10).
+@export_range(0.0, 600.0, 5.0, "suffix:s") var lure_memory_time: float = 120.0
+## Patrol points between two detours to that building.
+@export_range(1, 20) var lure_every: int = 3
 ## Time the "caught" screen stays up, in seconds.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var caught_screen_time: float = 2.0
 
