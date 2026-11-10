@@ -22,6 +22,9 @@ var progress: HoldProgress
 var _noise_left := 0.0
 
 @onready var _label: Label3D = $WaitLabel
+@onready var _sparks: AudioStreamPlayer3D = $Sparks
+@onready var _hum: AudioStreamPlayer3D = $Hum
+@onready var _siren: AudioStreamPlayer3D = $Siren
 
 
 func _ready() -> void:
@@ -72,6 +75,7 @@ func hold(user: Node, delta: float) -> void:
 	_noise_left -= delta
 	if _noise_left <= 0.0:
 		_noise_left = settings.repair_noise_interval
+		_sparks.play()
 		NoiseBus.emit_noise(
 			NoiseEvent.Type.REPAIR, global_position + Vector3.UP, settings.repair_noise_range, user
 		)
@@ -81,7 +85,17 @@ func hold(user: Node, delta: float) -> void:
 		update_label()
 		fuse_placed.emit()
 		if is_repaired():
+			_hum.play()
 			repaired.emit()
+
+
+## The siren over the whole cité, once repaired (Q4). GameLoop sends its noise.
+func start_siren() -> void:
+	_siren.play()
+
+
+func is_humming() -> bool:
+	return _hum.playing
 
 
 func release(_user: Node) -> void:

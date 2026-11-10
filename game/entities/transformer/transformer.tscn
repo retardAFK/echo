@@ -2,6 +2,9 @@
 
 [ext_resource type="Script" path="res://game/entities/transformer/transformer.gd" id="1_transformer"]
 [ext_resource type="Resource" path="res://game/data/loop_settings.tres" id="2_settings"]
+[ext_resource type="AudioStream" path="res://assets/audio/loop/repair_sparks.wav" id="3_sparks"]
+[ext_resource type="AudioStream" path="res://assets/audio/loop/transformer_hum.wav" id="4_hum"]
+[ext_resource type="AudioStream" path="res://assets/audio/loop/siren.wav" id="5_siren"]
 
 [node name="Transformer" type="Node3D"]
 script = ExtResource("1_transformer")
@@ -16,3 +19,22 @@ double_sided = false
 modulate = Color(0.75, 1, 0.8, 0.85)
 font_size = 32
 outline_size = 6
+
+[node name="Sparks" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+stream = ExtResource("3_sparks")
+unit_size = 4.0
+max_distance = 30.0
+
+[node name="Hum" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("4_hum")
+volume_db = -6.0
+unit_size = 3.0
+max_distance = 25.0
+
+[node name="Siren" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+stream = ExtResource("5_siren")
+unit_size = 40.0
+max_distance = 400.0
