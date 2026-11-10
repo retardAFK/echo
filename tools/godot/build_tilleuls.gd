@@ -174,6 +174,10 @@ const PLAYER_SPAWNS := [
 ]
 const MONSTER_SPAWN := Vector2(190, 190)
 
+## The lights fade out from this distance to the camera, over LIGHT_FADE_LENGTH
+## (T-049): farther, only their baked light shows. Same as lamppost.tscn.
+const LIGHT_FADE_BEGIN := 20.0
+const LIGHT_FADE_LENGTH := 5.0
 ## Lampposts: plan position and the direction the arm points to.
 const LAMPPOSTS := [
 	[Vector2(158, 20), Vector2.LEFT], [Vector2(158, 46), Vector2.LEFT],
@@ -238,6 +242,7 @@ func _ready() -> void:
 	get_tree().root.add_child.call_deferred(_root)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
+	_bake_light()
 	var region: NavigationRegion3D = _root.get_node("NavigationRegion3D")
 	var started := Time.get_ticks_msec()
 	region.bake_navigation_mesh(false)
@@ -693,7 +698,7 @@ func _add_props() -> void:
 	cars.add_to_group("navigation_source", true)
 	for i in CAR_ALARMS.size():
 		_place(cars, CAR_ALARM, "Car%d" % (i + 1), CAR_ALARMS[i][0], CAR_ALARMS[i][1])
-	_add_light(props, "TowerBeacon", Vector2(104, 100), TOWER_STOREYS * STOREY + 1.0, Color(1, 0.15, 0.1), 2.0, 6.0)
+	_add_light(props, "TowerBeacon", Vector2(104, 100), TOWER_STOREYS * STOREY + 1.0, Color(1, 0.15, 0.1), 2.0, 6.0, false)
 	_add_light(props, "SocialCentreLamp", Vector2(161.5, 58.5), 3.0, Color(1, 0.9, 0.7), 1.0, 5.0)
 	_add_light(props, "LaundretteSign", Vector2(57.6, 137.5), 2.6, Color(0.7, 0.85, 1.0), 0.9, 5.0)
 	_add_light(props, "CarParkSign", Vector2(127, 98.5), 3.0, Color(0.95, 0.95, 1.0), 0.8, 4.0)
@@ -921,17 +926,36 @@ func _place(parent: Node3D, scene: PackedScene, node_name: String, at: Vector2, 
 
 func _add_light(
 	parent: Node3D, node_name: String, at: Vector2, height: float, color: Color,
-	energy: float, light_range: float
+	energy: float, light_range: float, fade := true
 ) -> OmniLight3D:
 	var light := OmniLight3D.new()
 	light.name = node_name
 	light.light_color = color
 	light.light_energy = energy
 	light.omni_range = light_range
+	light.light_cull_mask = ~MapKit.BAKED_LAYER & 0xFFFFF
+	light.distance_fade_enabled = fade
+	light.distance_fade_begin = LIGHT_FADE_BEGIN
+	light.distance_fade_length = LIGHT_FADE_LENGTH
 	light.position = kit.world(at.x, at.y, height)
 	parent.add_child(light)
 	light.owner = _root
 	return light
+
+
+## Bakes the street lights and the landmark lights into the ground and the
+## walls (T-049, plan B: no GPU for LightmapGI). Their real lights now only
+## light the models, and fade out past LIGHT_FADE_BEGIN.
+func _bake_light() -> void:
+	var lights: Array[OmniLight3D] = []
+	lights.assign(_root.get_node("Props").find_children("*", "OmniLight3D", true, false))
+	var started := Time.get_ticks_msec()
+	var space := _root.get_world_3d().direct_space_state
+	var count := kit.bake_light(lights, space, MapKit.WORLD_LAYER | MapKit.WALLS_LAYER)
+	print(
+		"Baked %d lights in %d vertices in %d ms"
+		% [lights.size(), count, Time.get_ticks_msec() - started]
+	)
 
 
 func _add_navigation() -> void:

@@ -40,6 +40,8 @@ const VIEWS := [
 	["boxes", Vector3(26, 1.6, 172), Vector3(17, 1.2, 164)],
 	["balancoire", Vector3(66, 1.6, 90), Vector3(60, 1.2, 79)],
 	["voiture", Vector3(40, 1.6, 51), Vector3(36, 0.6, 45)],
+	["lampadaire", Vector3(126, 1.6, 58), Vector3(130, 0, 48)],
+	["lampadaire_loin", Vector3(122, 1.6, 82), Vector3(130, 0, 48)],
 ]
 
 ## Grid step of the sweep, in meters.
@@ -74,32 +76,44 @@ func _ready() -> void:
 			await get_tree().process_frame
 		var draws := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 		var prims := Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
-		var near := 0
-		var space := get_viewport().get_world_3d().direct_space_state
-		for light: Light3D in lights:
-			if not (light is OmniLight3D and light.is_visible_in_tree()):
-				continue
-			var at := light.global_position
-			if at.distance_to(eye) > LIGHT_VISIBLE_DISTANCE + light.omni_range:
-				continue
-			if not camera.is_position_in_frustum(at):
-				continue
-			var ray := PhysicsRayQueryParameters3D.create(eye, at, 3)
-			if space.intersect_ray(ray).is_empty():
-				near += 1
+		var near := _visible_lights(camera, eye, lights)
 		var image := get_viewport().get_texture().get_image()
 		image.save_png(out_dir.path_join("%s.png" % view[0]))
 		print("%-20s draw calls %4d  primitives %6d  visible lights %d" % [view[0], draws, prims, near])
 	if not OS.get_cmdline_user_args().has("--no-sweep"):
-		await _sweep(camera)
+		await _sweep(camera, lights)
 	get_tree().quit()
+
+
+## Lights that light something on screen: in view, not behind a wall, near
+## enough to be seen in the fog, and not faded out by distance (T-049).
+func _visible_lights(camera: Camera3D, eye: Vector3, lights: Array) -> int:
+	var near := 0
+	var space := get_viewport().get_world_3d().direct_space_state
+	for light: Light3D in lights:
+		if not (light is OmniLight3D and light.is_visible_in_tree()):
+			continue
+		var at := light.global_position
+		var distance := at.distance_to(eye)
+		if distance > LIGHT_VISIBLE_DISTANCE + light.omni_range:
+			continue
+		if light.distance_fade_enabled:
+			if distance > light.distance_fade_begin + light.distance_fade_length:
+				continue
+		if not camera.is_position_in_frustum(at):
+			continue
+		var ray := PhysicsRayQueryParameters3D.create(eye, at, 3)
+		if space.intersect_ray(ray).is_empty():
+			near += 1
+	return near
 
 
 ## Looks around from every node of a 20 m grid, at eye height, to find the
 ## busiest place of the map.
-func _sweep(camera: Camera3D) -> void:
+func _sweep(camera: Camera3D, lights: Array) -> void:
 	var worst := 0
 	var worst_at := ""
+	var most_lights := 0
 	var total := 0
 	var count := 0
 	for gx in range(SWEEP_STEP / 2, 220, SWEEP_STEP):
@@ -113,7 +127,9 @@ func _sweep(camera: Camera3D) -> void:
 				var draws := int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 				total += draws
 				count += 1
+				most_lights = maxi(most_lights, _visible_lights(camera, eye, lights))
 				if draws > worst:
 					worst = draws
 					worst_at = "(%d, %d) heading %d" % [gx, gy, heading * 90]
 	print("Sweep: %d views, mean %d draw calls, worst %d at %s" % [count, total / count, worst, worst_at])
+	print("Sweep: at most %d visible lights" % most_lights)
