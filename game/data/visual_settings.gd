@@ -11,6 +11,9 @@ extends Resource
 ## Farthest distance the cameras draw, in meters (S-006): the fog has already
 ## swallowed everything beyond, so nothing farther costs a draw call.
 @export_range(10.0, 500.0, 1.0, "suffix:m") var view_distance: float = 90.0
+## Nearest distance the cameras draw. Larger than Godot's 0.05 m so the depth
+## buffer stays precise far away: coplanar faces stop flickering (D-011).
+@export_range(0.01, 0.3, 0.01, "suffix:m") var near_clip: float = 0.1
 ## Color of the faint ambient light, a cold blue.
 @export var ambient_color := Color(0.5, 0.55, 0.7)
 ## Energy of the ambient light.

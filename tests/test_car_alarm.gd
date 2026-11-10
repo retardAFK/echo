@@ -90,6 +90,10 @@ func test_player_sets_off_the_nearest_car_and_sees_the_hint() -> void:
 	assert_false(prompt.get_node("Label").visible)
 	player.global_position = car.global_position + Vector3(1.5, 0, 0)
 	await wait_process_frames(2)
+	assert_null(player.get_interactable(), "in reach but behind the crosshair")
+	assert_true(prompt.get_node("Crosshair").visible)
+	player.rotation.y = PI / 2.0  # Looks toward -X, at the car.
+	await wait_process_frames(2)
 	assert_eq(player.get_interactable(), car)
 	assert_true(prompt.get_node("Label").visible)
 	assert_eq(prompt.get_node("Label").text, "HUD_INTERACT_CAR_ALARM")
