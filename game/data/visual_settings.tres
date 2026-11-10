@@ -6,6 +6,7 @@
 script = ExtResource("1_settings")
 fog_color = Color(0.1, 0.11, 0.13, 1)
 fog_density = 0.035
+view_distance = 90.0
 ambient_color = Color(0.5, 0.55, 0.7, 1)
 ambient_energy = 0.2
 moon_color = Color(0.55, 0.62, 0.85, 1)

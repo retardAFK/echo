@@ -128,3 +128,30 @@ func test_monster_role_starts_the_prey_on_a_spawn_point() -> void:
 	for point in map.get_spawn_points():
 		nearest = minf(nearest, point.distance_to(map.prey.global_position))
 	assert_lt(nearest, 0.01)
+
+
+func test_cameras_stop_at_the_view_distance() -> void:
+	# Everything beyond is lost in the fog: no draw call for it (T-043).
+	var settings: VisualSettings = load("res://game/data/visual_settings.tres")
+	await wait_process_frames(2)
+	var camera: Camera3D = _map.get_node("Player/Head/Camera3D")
+	assert_eq(camera.far, settings.view_distance)
+	var residue := exp(-settings.fog_density * settings.view_distance)
+	assert_lt(residue, 0.05, "less than 5 % of a far object shows through the fog")
+
+
+func test_landmarks_have_their_own_light() -> void:
+	# Never orange: orange is the noise (constitution 2.3).
+	for light_name in [
+		"TowerBeacon",
+		"SocialCentreLamp",
+		"LaundretteSign",
+		"CarParkSign",
+		"TransformerLight",
+		"TunnelLight"
+	]:
+		var light: OmniLight3D = _map.get_node("Props/%s" % light_name)
+		var hue := light.light_color.h * 360.0
+		assert_false(
+			hue > 15.0 and hue < 45.0 and light.light_color.s > 0.5, "%s is not orange" % light_name
+		)

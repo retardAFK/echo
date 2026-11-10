@@ -8,6 +8,9 @@ extends Resource
 @export var fog_color := Color(0.10, 0.11, 0.13)
 ## Depth fog density. 0.035 lets the player see about 25 m.
 @export_range(0.0, 0.2, 0.001) var fog_density: float = 0.035
+## Farthest distance the cameras draw, in meters (S-006): the fog has already
+## swallowed everything beyond, so nothing farther costs a draw call.
+@export_range(10.0, 500.0, 1.0, "suffix:m") var view_distance: float = 90.0
 ## Color of the faint ambient light, a cold blue.
 @export var ambient_color := Color(0.5, 0.55, 0.7)
 ## Energy of the ambient light.

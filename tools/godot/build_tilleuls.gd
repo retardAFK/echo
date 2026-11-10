@@ -135,7 +135,8 @@ const LAMPPOSTS := [
 	[Vector2(102, 160), Vector2.RIGHT], [Vector2(108, 135), Vector2.LEFT],
 	[Vector2(108, 75), Vector2.LEFT], [Vector2(135, 117), Vector2.DOWN],
 	[Vector2(168, 123), Vector2.UP], [Vector2(197, 150), Vector2.RIGHT],
-	[Vector2(203, 180), Vector2.LEFT], [Vector2(64, 74), Vector2.DOWN],
+	[Vector2(203, 180), Vector2.LEFT], [Vector2(61, 84.5), Vector2.UP],
+	[Vector2(163, 178), Vector2.DOWN],
 ]
 
 ## The 6 cars with an alarm (Q7), parked along the streets: plan position and
