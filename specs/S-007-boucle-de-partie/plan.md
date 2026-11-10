@@ -30,7 +30,7 @@ Nouvelle entité **`Transformer`** (`game/entities/transformer/`), posée sur le
 - maintenir E 4 s par fusible porté (Q3) ; un bruit `REPAIR` de 8 m au début de chaque pose puis toutes les 1,5 s pendant la pose ;
 - lâcher garde la moitié de la progression du fusible en cours (D-009) ; un fusible posé reste posé ;
 - un texte au-dessus, « Le transformateur attend N fusibles », visible de près seulement (Q8) ;
-- au troisième fusible : ronflement en boucle, sirène de 10 s dans toute la cité (bruit `SIREN` émis depuis le transformateur avec une portée qui couvre la map), puis `GameLoop` ouvre la sortie.
+- au troisième fusible : ronflement en boucle, sirène de 10 s dans toute la cité (bruit `SIREN` émis depuis le transformateur avec une portée qui couvre la map, murs compris), puis `GameLoop` ouvre la sortie.
 
 ### La sortie
 Le générateur sort la grille du tunnel de la structure `ExitTunnel` et en fait un nœud **`ExitGate`** à part (`AnimatableBody3D` + maillage), qui se lève de 3,6 m en 3 s quand la sortie s'ouvre. Un volume **`ExitZone`** (`Area3D`) au bout nord du tunnel déclare la victoire du chassé (ou de la proie IA) qui y entre. Avant l'ouverture, le maillage de navigation coupe le tunnel derrière la grille ; la proie IA n'a pas besoin d'y aller avant.
@@ -62,7 +62,7 @@ Les bruits du chassé se comptent en écoutant `NoiseBus` (les événements dont
 | Temps pour ramasser / bruit | `loop_settings.tres` | 2 s / 3 m |
 | Temps par pose au transformateur / bruit | `loop_settings.tres` | 4 s / 8 m, toutes les 1,5 s |
 | Progression gardée en lâchant une pose | `loop_settings.tres` | 50 % |
-| Durée de la sirène / portée | `loop_settings.tres` | 10 s / 300 m |
+| Durée de la sirène / portée | `loop_settings.tres` | 10 s / 5 000 m (310 m de coin à coin, divisés par 16 derrière 4 murs) |
 | Temps de levée de la grille | `loop_settings.tres` | 3 s |
 | Visibilité de la diode | `fuse_box.tscn` | environ 8 m dans le noir |
 | Souvenir d'un bâtiment bruyant | `monster_settings.tres` | 120 s |

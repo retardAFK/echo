@@ -9,3 +9,6 @@ HUD_SCAN_LISTENING,ÉCOUTE
 HUD_INTERACT_CAR_ALARM,E : déclencher l'alarme
 HUD_FUSES,Fusibles %d/%d
 HUD_INTERACT_FUSE_BOX,Maintenir E : prendre le fusible
+HUD_INTERACT_TRANSFORMER,Maintenir E : poser un fusible
+HUD_TRANSFORMER_WAITS,Le transformateur attend %d fusibles
+HUD_TRANSFORMER_WAITS_ONE,Le transformateur attend %d fusible

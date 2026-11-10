@@ -108,7 +108,7 @@ func _setup_game_loop() -> void:
 	game_loop.settings = LOOP_SETTINGS
 	game_loop.hunted = prey if avatar != null else _player
 	add_child(game_loop)
-	game_loop.setup(boxes, get_buildings())
+	game_loop.setup(self)
 	if avatar == null:
 		var hud: LoopHud = LOOP_HUD_SCENE.instantiate()
 		hud.game_loop = game_loop
