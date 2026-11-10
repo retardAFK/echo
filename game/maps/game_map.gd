@@ -33,13 +33,15 @@ var _rng := RandomNumberGenerator.new()
 @onready var _overlay: DebugOverlay = $DebugOverlay
 @onready var _gauge: NoiseGauge = $NoiseGauge
 @onready var _spawn: Vector3 = _player.global_position
+@onready var _spawn_yaw: float = _player.rotation.y
 
 
 func _ready() -> void:
 	_rng.randomize()
 	if not get_spawn_points().is_empty():
-		_spawn = _pick_spawn()
+		_pick_spawn()
 		_player.global_position = _spawn
+		_player.rotation.y = _spawn_yaw
 	if GameSession.role == GameSession.Role.MONSTER:
 		_setup_monster_role()
 		return
@@ -74,6 +76,7 @@ func _setup_monster_role() -> void:
 	prey.monster = avatar
 	prey.buildings = get_buildings()
 	prey.position = _spawn  # Before entering the tree, so no first footstep jump.
+	prey.rotation.y = _spawn_yaw
 	add_child(prey)
 	_overlay.player = null
 	_overlay.monster = null
@@ -139,15 +142,19 @@ func get_spawn_points() -> Array[Vector3]:
 	return Prey.markers_of(spawns)
 
 
-func _pick_spawn() -> Vector3:
-	var points := get_spawn_points()
-	return points[_rng.randi_range(0, points.size() - 1)]
+## Draws a spawn marker: the hunted starts there, facing where the marker faces.
+func _pick_spawn() -> void:
+	var markers := get_node("PlayerSpawns").get_children()
+	var marker: Node3D = markers[_rng.randi_range(0, markers.size() - 1)]
+	_spawn = marker.global_position
+	_spawn_yaw = marker.global_rotation.y
 
 
 func _on_player_caught() -> void:
 	_caught_screen.show_for(_monster.settings.caught_screen_time)
 	if not get_spawn_points().is_empty():
-		_spawn = _pick_spawn()
+		_pick_spawn()
 	_player.global_position = _spawn
+	_player.rotation.y = _spawn_yaw
 	_player.velocity = Vector3.ZERO
 	_monster.reset_to_patrol(_spawn)
