@@ -32,6 +32,11 @@ const VIEWS := [
 	["parking_dedans", Vector3(142, -1.4, 102), Vector3(178, -2, 108)],
 	["laverie", Vector3(56.6, 1.6, 136), Vector3(58, 1, 146)],
 	["salle_centre_social", Vector3(158, 1.6, 82), Vector3(142, 1, 64)],
+	["barre_c", Vector3(42, 1.6, 100), Vector3(27, 7, 92)],
+	["barre_b_porche", Vector3(162, 1.6, 52), Vector3(153, 5, 34)],
+	["tour_dehors", Vector3(128, 1.6, 128), Vector3(106, 18, 102)],
+	["barre_g", Vector3(160, 1.6, 132), Vector3(172, 5, 145)],
+	["tour_fenetre", Vector3(110, 7.6, 92), Vector3(110, 7, 80)],
 ]
 
 ## Grid step of the sweep, in meters.
@@ -82,7 +87,8 @@ func _ready() -> void:
 		var image := get_viewport().get_texture().get_image()
 		image.save_png(out_dir.path_join("%s.png" % view[0]))
 		print("%-20s draw calls %4d  primitives %6d  visible lights %d" % [view[0], draws, prims, near])
-	await _sweep(camera)
+	if not OS.get_cmdline_user_args().has("--no-sweep"):
+		await _sweep(camera)
 	get_tree().quit()
 
 

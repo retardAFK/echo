@@ -44,6 +44,28 @@ const LAMPPOST := preload("res://game/entities/props/lamppost.tscn")
 const BENCH_DIRTY := preload("res://game/entities/props/bench_dirty.tscn")
 const BENCH_BROKEN := preload("res://game/entities/props/bench_broken.tscn")
 const TREE_BARE := preload("res://game/entities/props/tree_bare.tscn")
+const FACADE_DRESSING := preload("res://game/maps/facade_dressing.gd")
+## Facade modules of S-005 (3 x 3 m, front toward +Z), in FacadeDressing order.
+const FACADE_MODELS := [
+	preload("res://assets/models/facade_hlm_plain.glb"),
+	preload("res://assets/models/facade_hlm_lit.glb"),
+	preload("res://assets/models/facade_hlm_balcony.glb"),
+	preload("res://assets/models/facade_hlm_walled.glb"),
+	preload("res://assets/models/facade_hlm_door.glb"),
+	preload("res://assets/models/facade_hlm_open.glb"),
+]
+## OPEN has a real hole: it dresses the visited storeys of the tower, in front
+## of their window openings.
+enum Module { PLAIN, LIT, BALCONY, WALLED, DOOR, OPEN }
+const MODULE_WIDTH := 3.0
+## Share of lit windows and of balcony columns on the upper storeys, and of
+## walled-up windows on the ground floor. A door every DOOR_SPACING meters.
+const LIT_SHARE := 0.15
+const BALCONY_SHARE := 0.35
+const WALLED_SHARE := 0.5
+const DOOR_SPACING := 18.0
+## The panels stand this far out of the greybox walls, so they never flicker.
+const FACADE_OFFSET := 0.02
 const MAP_SCRIPT := preload("res://game/maps/game_map.gd")
 const NIGHT_SCRIPT := preload("res://game/fx/night_environment.gd")
 const RETRO_WORLD_SCRIPT := preload("res://game/fx/retro_world.gd")
@@ -78,9 +100,11 @@ const SLAB := 0.3
 const DOOR_TOP := 2.4
 const DOOR_WIDTH := 1.2
 const WINDOW_SILL := 1.0
-const WINDOW_TOP := 2.2
+## Windows of the tower match the openings of the facade modules (T-045).
+const WINDOW_TOP := 2.4
 const WINDOW_WIDTH := 1.2
-const WINDOW_STEP := 4.0
+const WINDOW_STEP := 3.0
+const WINDOW_INSET := 0.9
 
 ## Tour des Tilleuls (Q3, Q4): footprint, visitable storeys, storeys seen from outside.
 const TOWER := Rect2(92, 88, 24, 24)
@@ -181,6 +205,7 @@ func _ready() -> void:
 	_add_buildings()
 	_add_props()
 	_add_navigation()
+	_add_facade_dressing()
 	get_tree().root.add_child.call_deferred(_root)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -289,13 +314,13 @@ func _build_tower() -> void:
 	kit.box(s, r.position.x, r.position.y, r.end.x, r.end.y, top, TOWER_STOREYS * STOREY, MAT_CONCRETE)
 	for level in TOWER_VISITED_STOREYS:
 		var h := level * STOREY
-		var windows: Array = [] if level == 0 else _windows(r.position.x + 2, r.end.x - 2, h)
+		var windows: Array = [] if level == 0 else _windows(r.position.x, r.end.x, h)
 		# Outer walls: entrances north and south on the ground floor.
 		var north_gaps: Array = [[106.0, 110.0, DOOR_TOP]] if level == 0 else windows
 		var south_gaps: Array = [[102.0, 108.0, DOOR_TOP]] if level == 0 else windows
 		kit.wall_x(s, r.position.x, r.end.x, r.position.y + WALL / 2, h, h + STOREY, WALL, MAT_CONCRETE, north_gaps)
 		kit.wall_x(s, r.position.x, r.end.x, r.end.y - WALL / 2, h, h + STOREY, WALL, MAT_CONCRETE, south_gaps)
-		var side: Array = [] if level == 0 else _windows(r.position.y + 2, r.end.y - 2, h)
+		var side: Array = [] if level == 0 else _windows(r.position.y, r.end.y, h)
 		kit.wall_y(s, r.position.y, r.end.y, r.position.x + WALL / 2, h, h + STOREY, WALL, MAT_CONCRETE, side)
 		kit.wall_y(s, r.position.y, r.end.y, r.end.x - WALL / 2, h, h + STOREY, WALL, MAT_CONCRETE, side)
 		# Floor: the ground floor stands on the ground, the others have a hole for the stairs.
@@ -383,7 +408,7 @@ func _tower_flats(s: MapKit.Structure, h: float, level: int) -> void:
 ## Window openings of a storey at height h, one every WINDOW_STEP meters.
 func _windows(from: float, to: float, h: float) -> Array:
 	var gaps: Array = []
-	var at := from
+	var at := from + WINDOW_INSET
 	while at + WINDOW_WIDTH <= to:
 		gaps.append([at, at + WINDOW_WIDTH, h + WINDOW_TOP, h + WINDOW_SILL])
 		at += WINDOW_STEP
@@ -654,6 +679,88 @@ func _add_props() -> void:
 	_add_light(props, "LaundretteSign", Vector2(57.6, 137.5), 2.6, Color(0.7, 0.85, 1.0), 0.9, 5.0)
 	_add_light(props, "CarParkSign", Vector2(127, 98.5), 3.0, Color(0.95, 0.95, 1.0), 0.8, 4.0)
 	_add_light(props, "TransformerLight", Vector2(100.5, 158.5), 2.4, Color(0.35, 1, 0.55), 0.8, 5.0)
+
+
+# --- Facade dressing (T-045) ------------------------------------------------
+
+
+## Lays the facade modules on the blocks of flats and on the upper mass of the
+## tower. The visited storeys of the tower keep their real windows.
+func _add_facade_dressing() -> void:
+	var dressing: FacadeDressing = FACADE_DRESSING.new()
+	dressing.name = "FacadeDressing"
+	dressing.models.assign(FACADE_MODELS)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1971  # Fixed: the cité looks the same after every generation.
+	var wall := 0
+	for facade_name: String in FACADES:
+		var rect: Rect2 = FACADES[facade_name][0]
+		var storeys: int = FACADES[facade_name][1]
+		var porch: Variant = FACADES[facade_name][2]
+		for side in _sides(rect):
+			_dress_wall(dressing, rng, wall, side, storeys, porch)
+			wall += 1
+	for side in _sides(TOWER):
+		_dress_wall(dressing, rng, wall, side, TOWER_STOREYS, null, true)
+		wall += 1
+	_add(dressing)
+
+
+## The four outer walls of a rectangle, each as [start, end, outward normal] in
+## plan coordinates, walked so that the module's +X runs from start to end.
+func _sides(r: Rect2) -> Array:
+	var nw := r.position
+	var ne := Vector2(r.end.x, r.position.y)
+	var se := r.end
+	var sw := Vector2(r.position.x, r.end.y)
+	return [
+		[ne, nw, Vector2.UP],  # North: faces -y, walked east to west.
+		[nw, sw, Vector2.LEFT],
+		[sw, se, Vector2.DOWN],
+		[se, ne, Vector2.RIGHT],
+	]
+
+
+func _dress_wall(
+	dressing: FacadeDressing, rng: RandomNumberGenerator, wall: int, side: Array, storeys: int, porch: Variant, tower := false
+) -> void:
+	var start: Vector2 = side[0]
+	var end: Vector2 = side[1]
+	var normal: Vector2 = side[2]
+	var length := start.distance_to(end)
+	var count := maxi(1, roundi(length / MODULE_WIDTH))
+	var width := length / count
+	var along := (end - start).normalized()
+	var x_axis := Vector3(along.x, 0, along.y) * (width / MODULE_WIDTH)
+	var z_axis := Vector3(normal.x, 0, normal.y)
+	var basis := Basis(x_axis, Vector3.UP, z_axis)
+	var door_every := maxi(1, roundi(DOOR_SPACING / width))
+	for column in count:
+		var at := start + along * (column * width) + normal * FACADE_OFFSET
+		var mid := start + along * ((column + 0.5) * width)
+		var under_porch: bool = porch != null and mid.x > porch.x and mid.x < porch.y and absf(normal.y) > 0.5
+		var balconies := rng.randf() < BALCONY_SHARE
+		# The hall entrances of the tower stay open (north and south, ground floor).
+		var entrance: bool = tower and absf(normal.y) > 0.5 and (mid.x > 103.0 and mid.x < 111.0 if normal.y < 0 else mid.x > 101.0 and mid.x < 109.0)
+		for storey in storeys:
+			if under_porch and storey * STOREY < PORCH_HEIGHT:
+				continue
+			if entrance and storey == 0:
+				continue
+			var module: int
+			if tower and storey > 0 and storey < TOWER_VISITED_STOREYS:
+				module = Module.OPEN
+			elif storey == 0:
+				var door := not tower and column % door_every == door_every / 2 and absf(normal.y) > 0.5
+				module = Module.DOOR if door else (Module.WALLED if rng.randf() < WALLED_SHARE else Module.PLAIN)
+			elif balconies:
+				module = Module.BALCONY
+			else:
+				module = Module.LIT if rng.randf() < LIT_SHARE else Module.PLAIN
+			var origin := kit.world(at.x, at.y) + Vector3.UP * (storey * STOREY)
+			dressing.panels.append(Transform3D(basis, origin))
+			dressing.variants.append(module)
+			dressing.walls.append(wall)
 
 
 ## Instances a prop at a plan point, its local -Z (front) turned toward facing.

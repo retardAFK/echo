@@ -10,12 +10,16 @@ const SHADER_DOUBLE := preload("res://game/fx/retro_surface_double.gdshader")
 
 ## One retro material per source material, so meshes keep sharing materials.
 static var _cache: Dictionary = {}
+## One retro copy per source mesh drawn by a MultiMesh.
+static var _mesh_cache: Dictionary = {}
 
 
 ## Gives every lit opaque surface under root its retro material.
 static func apply_to(root: Node, settings: VisualSettings) -> void:
 	for mesh: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
 		apply_to_mesh(mesh, settings)
+	for batch: MultiMeshInstance3D in root.find_children("*", "MultiMeshInstance3D", true, false):
+		apply_to_multimesh(batch, settings)
 
 
 static func apply_to_mesh(mesh: MeshInstance3D, settings: VisualSettings) -> void:
@@ -25,6 +29,26 @@ static func apply_to_mesh(mesh: MeshInstance3D, settings: VisualSettings) -> voi
 		var source := mesh.get_active_material(i) as BaseMaterial3D
 		if source != null and can_convert(source):
 			mesh.set_surface_override_material(i, make_material(source, settings))
+
+
+## A MultiMesh has no per-surface override: its mesh is copied once with the
+## retro materials, and the copy is shared by every batch of the same mesh.
+static func apply_to_multimesh(batch: MultiMeshInstance3D, settings: VisualSettings) -> void:
+	if batch.multimesh == null or batch.multimesh.mesh == null:
+		return
+	var source := batch.multimesh.mesh as ArrayMesh
+	if source == null or source.has_meta(&"retro"):
+		return
+	var key := [source, settings]
+	if not _mesh_cache.has(key):
+		var copy := source.duplicate() as ArrayMesh
+		copy.set_meta(&"retro", true)
+		for i in copy.get_surface_count():
+			var material := copy.surface_get_material(i) as BaseMaterial3D
+			if material != null and can_convert(material):
+				copy.surface_set_material(i, make_material(material, settings))
+		_mesh_cache[key] = copy
+	batch.multimesh.mesh = _mesh_cache[key]
 
 
 static func can_convert(source: BaseMaterial3D) -> bool:
