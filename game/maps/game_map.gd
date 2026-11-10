@@ -2,7 +2,8 @@ class_name GameMap
 extends Node3D
 ## A playable map (specs S-001 to S-004, S-006): the greybox test map and the
 ## cité des Tilleuls share it.
-## With fuse boxes (the cité), it adds the game loop of S-007 (GameLoop).
+## With fuse boxes (the cité), it adds the game loop of S-007 (GameLoop): a
+## catch then ends the game instead, and the end screen shows the result.
 ## Hunted role: wires the AI monster to the player and handles a catch (Q4 of
 ## S-003): "caught" screen, player back to the start, monster back on patrol.
 ## Monster role (S-004): the AI monster and the hunted player are replaced by
@@ -21,6 +22,7 @@ const SCAN_RETICLE_SCENE := preload("res://game/ui/scan_reticle.tscn")
 const PREY_SCENE := preload("res://game/entities/prey/prey.tscn")
 const LOOP_SETTINGS := preload("res://game/data/loop_settings.tres")
 const LOOP_HUD_SCENE := preload("res://game/ui/loop_hud.tscn")
+const END_SCREEN_SCENE := preload("res://game/ui/end_screen.tscn")
 ## Size of the F4 markers for the prey's wander points and hiding spots, in meters.
 const POINT_MARKER_SIZE := 0.3
 
@@ -29,6 +31,8 @@ var markers: NoiseMarkers
 var prey: Prey
 ## The game loop (S-007), null on a map without fuse boxes.
 var game_loop: GameLoop
+## Shown when the game loop ends (S-007, Q6).
+var end_screen: EndScreen
 
 var _rng := RandomNumberGenerator.new()
 
@@ -109,6 +113,9 @@ func _setup_game_loop() -> void:
 	game_loop.hunted = prey if avatar != null else _player
 	add_child(game_loop)
 	game_loop.setup(self)
+	end_screen = END_SCREEN_SCENE.instantiate()
+	add_child(end_screen)
+	game_loop.ended.connect(_on_game_ended)
 	if avatar == null:
 		var hud: LoopHud = LOOP_HUD_SCENE.instantiate()
 		hud.game_loop = game_loop
@@ -125,15 +132,22 @@ func get_fuse_boxes() -> Array[FuseBox]:
 
 
 func _physics_process(_delta: float) -> void:
-	if avatar == null or _caught_screen.visible:
+	if avatar == null or _caught_screen.visible or (game_loop != null and game_loop.is_over):
 		return
 	var gap := prey.global_position - avatar.global_position
 	if Vector2(gap.x, gap.z).length() <= avatar.settings.catch_distance:
 		_on_prey_caught()
 
 
+func _on_game_ended(_hunted_won: bool) -> void:
+	end_screen.show_result(GameSession.role, game_loop)
+
+
 func _on_prey_caught() -> void:
 	avatar.catch_count += 1
+	if game_loop != null:
+		game_loop.finish(false)  # The monster wins (S-007, Q7).
+		return
 	_caught_screen.show_for(avatar.settings.caught_screen_time, "HUD_PREY_CAUGHT")
 	var points := Prey.markers_of($PreyRoute)
 	var index := MonsterBrain.farthest_index(points, avatar.global_position)
@@ -183,6 +197,9 @@ func _pick_spawn() -> void:
 
 
 func _on_player_caught() -> void:
+	if game_loop != null:
+		game_loop.finish(false)  # No respawn in solo (S-007, Q5).
+		return
 	_caught_screen.show_for(_monster.settings.caught_screen_time)
 	if not get_spawn_points().is_empty():
 		_pick_spawn()

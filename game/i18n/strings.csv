@@ -12,3 +12,13 @@ HUD_INTERACT_FUSE_BOX,Maintenir E : prendre le fusible
 HUD_INTERACT_TRANSFORMER,Maintenir E : poser un fusible
 HUD_TRANSFORMER_WAITS,Le transformateur attend %d fusibles
 HUD_TRANSFORMER_WAITS_ONE,Le transformateur attend %d fusible
+END_ESCAPED,Vous êtes sorti
+END_CAUGHT,Attrapé
+END_PREY_ESCAPED,La proie s'est échappée
+END_PREY_CAUGHT,Proie attrapée
+END_DURATION,Durée : %s
+END_FUSES,Fusibles posés : %d/%d
+END_NOISES,Bruits du chassé : %d
+END_SCANS,Scans du monstre : %d
+END_REPLAY,Rejouer
+END_MENU,Menu
