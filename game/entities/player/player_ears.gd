@@ -30,7 +30,7 @@ func _ready() -> void:
 
 
 func _on_noise_emitted(event: NoiseEvent) -> void:
-	if event.source == _listener or event.noise_range <= 0.0:
+	if event.source == _listener or event.noise_range <= 0.0 or not is_inside_tree():
 		return
 	if not NoiseBus.can_hear(event, _listener.get_eye_position()):
 		return

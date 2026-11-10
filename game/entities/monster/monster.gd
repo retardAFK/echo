@@ -125,8 +125,8 @@ func guard_exit(points: Array[Vector3]) -> void:
 
 
 func _on_noise_emitted(event: NoiseEvent) -> void:
-	if event.source == self:
-		return
+	if event.source == self or not is_inside_tree():
+		return  # Its own noise, or removed from the map (monster role).
 	if event.type == NoiseEvent.Type.SIREN and brain.guarding:
 		return  # Heard: it already left for the tunnel.
 	if NoiseBus.can_hear(event, get_ear_position()):
