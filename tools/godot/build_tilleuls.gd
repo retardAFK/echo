@@ -45,6 +45,16 @@ const BENCH_DIRTY := preload("res://game/entities/props/bench_dirty.tscn")
 const BENCH_BROKEN := preload("res://game/entities/props/bench_broken.tscn")
 const TREE_BARE := preload("res://game/entities/props/tree_bare.tscn")
 const FACADE_DRESSING := preload("res://game/maps/facade_dressing.gd")
+## Models of the gallery and the social centre (T-046, tools/blender/gallery.py),
+## front toward +Z, origin at the bottom corner on the left seen from outside.
+const SHOP_SHUTTER := preload("res://assets/models/gallery_shop_shutter.glb")
+const SHOP_HALF := preload("res://assets/models/gallery_shop_half.glb")
+const LAUNDRETTE := preload("res://assets/models/gallery_laundrette.glb")
+const WASHERS := preload("res://assets/models/gallery_washers.glb")
+const CENTRE_WINDOW := preload("res://assets/models/centre_window.glb")
+const CENTRE_ENTRANCE := preload("res://assets/models/centre_entrance.glb")
+const FOLDING_TABLE := preload("res://assets/models/folding_table.glb")
+const CENTRE_WINDOW_WIDTH := 2.0
 ## Facade modules of S-005 (3 x 3 m, front toward +Z), in FacadeDressing order.
 const FACADE_MODELS := [
 	preload("res://assets/models/facade_hlm_plain.glb"),
@@ -206,6 +216,8 @@ func _ready() -> void:
 	_add_props()
 	_add_navigation()
 	_add_facade_dressing()
+	_add_gallery_dressing()
+	_add_social_centre_dressing()
 	get_tree().root.add_child.call_deferred(_root)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -439,7 +451,6 @@ func _build_social_centre() -> void:
 		kit.box(s, t.x - 1.0, t.y - 0.5, t.x + 1.0, t.y + 0.5, 0, 0.75, MAT_OBSTACLE, MapKit.Kind.FLOOR)
 	for d: Vector2 in [Vector2(172, 64), Vector2(172, 72), Vector2(172, 80)]:
 		kit.box(s, d.x - 0.8, d.y - 0.4, d.x + 0.8, d.y + 0.4, 0, 0.75, MAT_OBSTACLE, MapKit.Kind.FLOOR)
-	kit.box(s, 160.6, 60.05, 162.4, 60.15, 2.5, 2.9, _material("sign_warm"), MapKit.Kind.GHOST)
 
 
 func _build_gallery() -> void:
@@ -474,7 +485,6 @@ func _build_gallery() -> void:
 	for i in 4:
 		var mx := laundrette + 1.0 + i * 1.6
 		kit.box(s, mx - 0.6, back - 1.0, mx + 0.6, back - 0.2, 0, 0.9, MAT_OBSTACLE, MapKit.Kind.FLOOR)
-	kit.box(s, laundrette + 1.0, front - 0.3, laundrette + 7.4, front - 0.2, 2.5, 3.0, _material("sign_cold"), MapKit.Kind.GHOST)
 
 
 func _build_car_park() -> void:
@@ -704,6 +714,67 @@ func _add_facade_dressing() -> void:
 		_dress_wall(dressing, rng, wall, side, TOWER_STOREYS, null, true)
 		wall += 1
 	_add(dressing)
+
+
+## Shop fronts, the laundrette and its machines (T-046). The models only
+## dress the greybox walls, which keep the collisions.
+func _add_gallery_dressing() -> void:
+	var node := _group("GalleryDressing")
+	var r := GALLERY
+	var width := r.size.x / GALLERY_SHOPS
+	var front := r.position.y + GALLERY_ARCADE_DEPTH - WALL / 2 - FACADE_OFFSET
+	var scenes := [SHOP_SHUTTER, LAUNDRETTE, SHOP_SHUTTER, SHOP_HALF, SHOP_SHUTTER]
+	for i in GALLERY_SHOPS:
+		var east := r.position.x + (i + 1) * width
+		_place_model(node, scenes[i], "Shop%d" % (i + 1), Vector2(east, front), Vector2.UP)
+	var laundrette := r.position.x + width
+	var back := r.end.y - GALLERY_BACK_CORRIDOR
+	for i in 4:
+		var mx := laundrette + 1.0 + i * 1.6
+		_place_model(node, WASHERS, "Washers%d" % (i + 1), Vector2(mx + 0.61, back - 1.0), Vector2.UP)
+
+
+## Window frames, the entrance canopy and its sign, the tables (T-046).
+func _add_social_centre_dressing() -> void:
+	var node := _group("SocialCentreDressing")
+	var r := SOCIAL_CENTRE
+	var n := 0
+	for x: float in [146.0, 152.0, 168.0, 174.0]:  # North wall, seen from the north.
+		n += 1
+		_place_model(node, CENTRE_WINDOW, "Window%d" % n, Vector2(x, r.position.y - FACADE_OFFSET), Vector2.UP)
+	for x: float in [144.0, 152.0, 168.0]:  # South wall.
+		n += 1
+		_place_model(node, CENTRE_WINDOW, "Window%d" % n, Vector2(x, r.end.y + FACADE_OFFSET), Vector2.DOWN)
+	for y: float in [65.5, 73.5, 81.5]:  # East wall: narrower windows.
+		n += 1
+		var narrow := Vector3(1.5 / CENTRE_WINDOW_WIDTH, 1, 1)
+		_place_model(node, CENTRE_WINDOW, "Window%d" % n, Vector2(r.end.x + FACADE_OFFSET, y), Vector2.RIGHT, narrow)
+	_place_model(node, CENTRE_ENTRANCE, "Entrance", Vector2(162.6, r.position.y - FACADE_OFFSET), Vector2.UP)
+	var tables: Array = [Vector2(149, 66), Vector2(155, 66), Vector2(149, 77), Vector2(155, 77)]
+	for i in tables.size():
+		_place_model(node, FOLDING_TABLE, "Table%d" % (i + 1), tables[i], Vector2.UP)
+	for i in 3:  # Office desks, smaller.
+		_place_model(node, FOLDING_TABLE, "Desk%d" % (i + 1), Vector2(172, 64 + 8 * i), Vector2.UP, Vector3(0.8, 1, 0.8))
+
+
+func _group(node_name: String) -> Node3D:
+	var node := Node3D.new()
+	node.name = node_name
+	_add(node)
+	return node
+
+
+## Instances a model at a plan point, its front (+Z) toward normal, its +X
+## running along the wall as for the facade modules.
+func _place_model(parent: Node3D, scene: PackedScene, node_name: String, at: Vector2, normal: Vector2, scale := Vector3.ONE) -> Node3D:
+	var model: Node3D = scene.instantiate()
+	model.name = node_name
+	var z_axis := Vector3(normal.x, 0, normal.y)
+	var x_axis := Vector3.UP.cross(z_axis)
+	model.transform = Transform3D(Basis(x_axis * scale.x, Vector3.UP * scale.y, z_axis * scale.z), kit.world(at.x, at.y))
+	parent.add_child(model)
+	model.owner = _root
+	return model
 
 
 ## The four outer walls of a rectangle, each as [start, end, outward normal] in

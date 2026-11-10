@@ -83,3 +83,27 @@ func test_hall_entrances_of_the_tower_stay_free() -> void:
 
 func test_panels_have_no_collision() -> void:
 	assert_eq(_dressing.find_children("*", "CollisionShape3D", true, false).size(), 0)
+
+
+func test_gallery_has_its_shop_fronts_and_machines() -> void:
+	var gallery := _map.get_node("GalleryDressing")
+	assert_eq(gallery.find_children("Shop*", "", false, false).size(), 5)
+	assert_eq(gallery.find_children("Washers*", "", false, false).size(), 4)
+	assert_eq(gallery.find_children("*", "CollisionShape3D", true, false).size(), 0)
+
+
+func test_half_shutter_matches_the_opening_of_the_greybox() -> void:
+	# The 4th shop, its opening from 72.2 to 75.2 m on the plan (2 to 5 m from
+	# its west end); the model's opening is 3.4 to 6.4 m from its east end.
+	var shop: Node3D = _map.get_node("GalleryDressing/Shop4")
+	var west := _plan(shop.global_transform * Vector3(6.4, 0, 0)).x
+	var east := _plan(shop.global_transform * Vector3(3.4, 0, 0)).x
+	assert_almost_eq(west, 72.2, 0.01)
+	assert_almost_eq(east, 75.2, 0.01)
+
+
+func test_social_centre_has_window_frames_and_its_entrance() -> void:
+	var centre := _map.get_node("SocialCentreDressing")
+	assert_eq(centre.find_children("Window*", "", false, false).size(), 10)
+	assert_not_null(centre.get_node_or_null("Entrance"))
+	assert_eq(centre.find_children("*", "CollisionShape3D", true, false).size(), 0)
