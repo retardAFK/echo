@@ -19,12 +19,13 @@ const DOT_SIZE_TARGET := 4.0
 
 
 func _process(_delta: float) -> void:
-	var target: Node = null if not is_instance_valid(player) else player.get_interactable()
+	var present := is_instance_valid(player) and player.is_inside_tree()
+	var target: Node = player.get_interactable() if present else null
 	var prompt: String = "" if target == null else target.get_prompt()
 	_label.visible = prompt != ""
 	if _label.visible:
 		_label.text = prompt
-	_dot.visible = is_instance_valid(player) and player.is_inside_tree()
+	_dot.visible = present
 	var size := DOT_SIZE_TARGET if _label.visible else DOT_SIZE_IDLE
 	_dot.color = DOT_TARGET if _label.visible else DOT_IDLE
 	_dot.size = Vector2(size, size)

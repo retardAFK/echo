@@ -14,7 +14,7 @@ Maxime a demandé (10/11/2026) de ne pas être sollicité pour tester : chaque t
 - [x] T-055 — Transformateur, sirène et sortie
   - Résultat vérifiable : entité `Transformer` (4 s par fusible, bruit `REPAIR` de 8 m, moitié gardée en lâchant, texte « attend N fusibles »), sirène `SIREN` entendue par le monstre, `ExitGate` qui se lève, `ExitZone` au bout du tunnel ; tests GUT
   - Dépend de : T-054
-- [ ] T-056 — Fin de partie et écran de fin
+- [x] T-056 — Fin de partie et écran de fin
   - Résultat vérifiable : défaite à la capture, victoire à la sortie, dans les deux rôles ; `EndScreen` avec durée, fusibles, bruits, scans ; « Rejouer » relance un nouveau tirage, « Menu » revient au menu ; tests GUT
   - Dépend de : T-055
 - [ ] T-057 — Monstre IA : attirance et garde du tunnel
