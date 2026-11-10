@@ -19,6 +19,7 @@ const GROUND_TILE := 40.0
 const GROUND_THICKNESS := 0.2
 ## Inside the fences, in plan meters: west fence to noise wall, exit gate to site fence.
 const FENCED := Rect2(6, 2.8, 204.5, 209.4)
+const NAV_BOTTOM := -5.24
 const PATH_WIDTH := 5.0
 const PATH_HEIGHT := 0.02
 ## One storey of a block of flats, in meters.
@@ -53,15 +54,20 @@ const PATHS := [
 	[Vector2(40, 50), Vector2(40, 185)],
 ]
 
-## Blocks of flats seen from outside only (plan A to G): rectangle and storeys.
+## Blocks of flats seen from outside only (plan A to G): rectangle, storeys,
+## and the porch through it, if any (x range under the block, 4 m high).
+## B's porch carries the path to the exit; the porches of A and E keep a run
+## across the map under 45 s (T-041).
 const FACADES := {
-	"BarreA": [Rect2(15, 22, 70, 12), 5],
-	"BarreC": [Rect2(15, 60, 12, 70), 5],
-	"BarreD": [Rect2(185, 55, 12, 55), 5],
-	"BarreE": [Rect2(45, 192, 55, 12), 5],
-	"BarreF": [Rect2(125, 160, 12, 40), 4],
-	"BarreG": [Rect2(150, 145, 45, 10), 4],
+	"BarreA": [Rect2(15, 22, 70, 12), 5, Vector2(47, 53)],
+	"BarreB": [Rect2(125, 22, 70, 12), 5, Vector2(150, 160)],
+	"BarreC": [Rect2(15, 60, 12, 70), 5, null],
+	"BarreD": [Rect2(185, 55, 12, 55), 5, null],
+	"BarreE": [Rect2(45, 192, 55, 12), 5, Vector2(70, 76)],
+	"BarreF": [Rect2(125, 160, 12, 40), 4, null],
+	"BarreG": [Rect2(150, 145, 45, 10), 4, null],
 }
+const PORCH_HEIGHT := 4.0
 
 ## Walls of the visitable buildings, in meters.
 const WALL := 0.3
@@ -244,14 +250,16 @@ func _build_facades() -> void:
 	for facade_name: String in FACADES:
 		var rect: Rect2 = FACADES[facade_name][0]
 		var height: float = FACADES[facade_name][1] * STOREY
+		var porch: Variant = FACADES[facade_name][2]
 		var s := kit.structure(facade_name)
-		kit.box(s, rect.position.x, rect.position.y, rect.end.x, rect.end.y, 0, height, MAT_CONCRETE)
-	# Barre B: the path to the exit goes under a porch through it.
-	var b := kit.structure("BarreB")
-	var top := 5 * STOREY
-	kit.box(b, 125, 22, 150, 34, 0, top, MAT_CONCRETE)
-	kit.box(b, 160, 22, 195, 34, 0, top, MAT_CONCRETE)
-	kit.box(b, 150, 22, 160, 34, 4, top, MAT_CONCRETE, MapKit.Kind.FLOOR)
+		var y0 := rect.position.y
+		var y1 := rect.end.y
+		if porch == null:
+			kit.box(s, rect.position.x, y0, rect.end.x, y1, 0, height, MAT_CONCRETE)
+			continue
+		kit.box(s, rect.position.x, y0, porch.x, y1, 0, height, MAT_CONCRETE)
+		kit.box(s, porch.y, y0, rect.end.x, y1, 0, height, MAT_CONCRETE)
+		kit.box(s, porch.x, y0, porch.y, y1, PORCH_HEIGHT, height, MAT_CONCRETE, MapKit.Kind.FLOOR)
 
 
 # --- Visitable buildings (Q3) -----------------------------------------------
@@ -529,9 +537,9 @@ func _build_city_stadium() -> void:
 	var boards := _material("metal")
 	var h := 1.1
 	# Boards with an opening on the west and the north sides.
-	kit.wall_x(s, 148, 178, 180, 0, h, 0.15, boards, [[160, 166, 0]])
+	kit.wall_x(s, 148, 178, 180, 0, h, 0.15, boards, [[160, 166, h]])
 	kit.wall_x(s, 148, 178, 200, 0, h, 0.15, boards)
-	kit.wall_y(s, 180, 200, 148, 0, h, 0.15, boards, [[188, 192, 0]])
+	kit.wall_y(s, 180, 200, 148, 0, h, 0.15, boards, [[188, 192, h]])
 	kit.wall_y(s, 180, 200, 178, 0, h, 0.15, boards)
 	# Goals at both ends.
 	for x: float in [149.5, 176.5]:
@@ -670,7 +678,10 @@ func _add_navigation() -> void:
 	mesh.agent_height = 2.0
 	mesh.agent_radius = 0.375
 	# Only inside the fences: no useless islands on the motorway or the wasteland.
-	var lo := kit.world(FENCED.position.x, FENCED.position.y, -5)
+	# The bottom sits just under a multiple of the cell height (0.25 m), so the
+	# mesh lies about 0.26 m above floors at whole storeys: closer than the AI
+	# agents' path_desired_distance (0.5 m), or they would never pass a path point.
+	var lo := kit.world(FENCED.position.x, FENCED.position.y, NAV_BOTTOM)
 	var hi := kit.world(FENCED.end.x, FENCED.end.y, 20)
 	mesh.filter_baking_aabb = AABB(lo, hi - lo)
 	region.navigation_mesh = mesh
@@ -723,22 +734,26 @@ func _add_gameplay() -> void:
 	_add(_named(CAUGHT.instantiate(), "CaughtScreen"))
 
 
-## Patrol of the AI monster: the main streets, from its corner (T-041 adds the
-## inside of the buildings).
+## Patrol of the AI monster, as plan points (x, height, y): every street and
+## the inside of each scannable building, from its corner (T-041).
 const PATROL_ROUTE := [
-	Vector2(190, 190), Vector2(200, 122), Vector2(150, 122), Vector2(105, 130),
-	Vector2(105, 185), Vector2(40, 185), Vector2(40, 120), Vector2(40, 52),
-	Vector2(100, 52), Vector2(155, 45), Vector2(160, 90), Vector2(200, 130),
+	Vector3(190, 0, 190), Vector3(200, 0, 125), Vector3(160, -3, 106), Vector3(150, 0, 122),
+	Vector3(161.5, 0, 72), Vector3(155, 0, 45), Vector3(104, 0, 92), Vector3(108, 12, 100),
+	Vector3(66, 0, 137), Vector3(84, 0, 148), Vector3(40, 0, 150), Vector3(14, 0, 158.5),
+	Vector3(40, 0, 120), Vector3(61, 0, 81), Vector3(40, 0, 52), Vector3(100, 0, 52),
+	Vector3(120, 0, 140), Vector3(163, 0, 190),
 ]
-## Wander points of the AI prey (monster role).
+## Wander points of the AI prey (monster role), outside and inside.
 const PREY_ROUTE := [
-	Vector2(45, 44), Vector2(95, 52), Vector2(155, 40), Vector2(124, 96),
-	Vector2(105, 140), Vector2(61, 80), Vector2(40, 150), Vector2(72, 112),
+	Vector3(45, 0, 44), Vector3(95, 0, 52), Vector3(155, 0, 40), Vector3(124, 0, 96),
+	Vector3(96, 6, 100), Vector3(105, 0, 140), Vector3(61, 0, 80), Vector3(40, 0, 150),
+	Vector3(56, 0, 143), Vector3(72, 0, 112), Vector3(150, 0, 72), Vector3(160, -3, 110),
 ]
-## Hiding spots of the AI prey: in the lee of a block or a landmark.
+## Hiding spots of the AI prey: in the lee of a block, or inside a building.
 const HIDING_SPOTS := [
-	Vector2(29, 95), Vector2(88, 36), Vector2(183, 80), Vector2(139, 180),
-	Vector2(98, 159), Vector2(70, 206),
+	Vector3(29, 0, 95), Vector3(88, 0, 36), Vector3(183, 0, 80), Vector3(139, 0, 180),
+	Vector3(98, 0, 159), Vector3(70, 0, 208), Vector3(95, 9, 109), Vector3(160, -3, 111),
+	Vector3(13, 0, 176), Vector3(54.5, 0, 145.5),
 ]
 
 
@@ -749,7 +764,11 @@ func _markers(node_name: String, points: Array) -> Node3D:
 	for i in points.size():
 		var marker := Marker3D.new()
 		marker.name = "Point%d" % (i + 1)
-		marker.position = kit.world(points[i].x, points[i].y)
+		var at: Variant = points[i]
+		if at is Vector3:
+			marker.position = kit.world(at.x, at.z, at.y)
+		else:
+			marker.position = kit.world(at.x, at.y)
 		parent.add_child(marker)
 		marker.owner = _root
 	return parent
