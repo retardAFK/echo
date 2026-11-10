@@ -7,6 +7,9 @@ extends Node3D
 ## get_eye_position().
 
 const VOICES := 4
+## Noises whose maker plays its own sound where it is (S-007): the fuse boxes,
+## the transformer and its siren. The ears add nothing.
+const SELF_VOICED := [NoiseEvent.Type.FUSE, NoiseEvent.Type.REPAIR, NoiseEvent.Type.SIREN]
 
 var heard_count := 0
 
@@ -31,6 +34,8 @@ func _ready() -> void:
 
 func _on_noise_emitted(event: NoiseEvent) -> void:
 	if event.source == _listener or event.noise_range <= 0.0 or not is_inside_tree():
+		return
+	if event.type in SELF_VOICED:
 		return
 	if not NoiseBus.can_hear(event, _listener.get_eye_position()):
 		return

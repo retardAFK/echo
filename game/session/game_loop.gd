@@ -125,6 +125,7 @@ func _open_exit() -> void:
 	if transformer != null:
 		siren_left = settings.siren_time
 		_siren_noise_left = 0.0
+		transformer.start_siren()
 	if gate != null:
 		gate.open()
 	exit_opened.emit()

@@ -18,6 +18,7 @@ var has_fuse := false
 var progress: HoldProgress
 
 @onready var _led: MeshInstance3D = $Led
+@onready var _sound: AudioStreamPlayer3D = $Clank
 
 
 func _ready() -> void:
@@ -76,4 +77,5 @@ func get_hold_ratio() -> float:
 
 ## The metal of the box, heard as made by the hunted holding it.
 func _clank(user: Node) -> void:
+	_sound.play()
 	NoiseBus.emit_noise(NoiseEvent.Type.FUSE, global_position, settings.fuse_noise_range, user)

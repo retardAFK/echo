@@ -12,6 +12,7 @@ Seuls les assets faits par nous ou sous licence **CC0** sont acceptés.
 | Asset | Fabrication | Utilisé dans |
 |---|---|---|
 | Sons d'ambiance (vent, autoroute, train, balançoire), `assets/audio/ambience/` | Bruit filtré, synthétisé par `tools/audio/ambience.py` | Cité des Tilleuls (S-006, T-050) |
+| Sons de la boucle de partie (boîtier à fusible, étincelles, ronflement du transformateur, sirène), `assets/audio/loop/` | Bruit filtré et oscillateurs, synthétisés par `tools/audio/loop_sounds.py` | Boucle de partie (S-007, T-059) |
 
 ## Outils de développement
 
