@@ -56,4 +56,10 @@ Le 07/11/2026, Maxime a répondu « Parfait » au plan et aux propositions Q2 à
 - Le multijoueur : phase 12.
 
 ## Notes de playtest
-- (à remplir)
+Maxime ne teste pas la greybox (10/11/2026) : ces notes sont celles des vérifications de Claude.
+- Greybox (T-039 à T-044, 10/11/2026) :
+  - Limites : sol partout à l'intérieur des grillages, aucun trou vers l'extérieur, la sortie est fermée par une grille (tests GUT).
+  - Bâtiments : un bot pilote le vrai contrôleur du chassé (touches avancer et courir, physique) jusqu'au 4e de la tour, au fond du parking par l'escalier de secours, et sous le rideau de la boutique en s'accroupissant ; debout, le rideau l'arrête. Le monstre IA marche avec la physique jusqu'aux mêmes endroits et dans un bureau du centre social.
+  - Traversées en courant mesurées sur le maillage : 36 à 43 s, sous les 45 s, grâce aux porches sous les barres A, B et E.
+  - Performance (rendu OpenGL, sans GPU) : 70 appels de dessin au pire sur 484 vues, 15 000 triangles, 2 lumières visibles, chargement en 0,33 s, build web de 40 Mo. Les 60 images/s restent à vérifier sur la machine de référence.
+  - Correction trouvée : le chassé apparaissait parfois face au mur d'une barre. Chaque point d'apparition regarde maintenant la tour, le repère de la cité.

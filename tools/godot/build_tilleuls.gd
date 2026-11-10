@@ -728,6 +728,11 @@ func _add_gameplay() -> void:
 	_add(retro_world)
 	_add(_named(RETRO_POST.instantiate(), "RetroPost"))
 	var spawns := _markers("PlayerSpawns", PLAYER_SPAWNS)
+	# Each hunted starts facing the tower, the landmark of the cité.
+	var tower_center := kit.world(TOWER.get_center().x, TOWER.get_center().y)
+	for marker: Node3D in spawns.get_children():
+		var to := tower_center - marker.position
+		marker.rotation.y = atan2(-to.x, -to.z)
 	var monster_spawn := _markers("MonsterSpawn", [MONSTER_SPAWN])
 	var patrol := _markers("PatrolRoute", PATROL_ROUTE)
 	_markers("PreyRoute", PREY_ROUTE)
@@ -739,7 +744,7 @@ func _add_gameplay() -> void:
 	_add(monster)
 	_add(_named(NOISE_DEBUG.instantiate(), "NoiseDebug"))
 	var player: Node3D = _named(PLAYER.instantiate(), "Player")
-	player.position = spawns.get_child(0).position
+	player.transform = spawns.get_child(0).transform
 	_add(player)
 	var overlay := _named(OVERLAY.instantiate(), "DebugOverlay")
 	overlay.set("player", player)
