@@ -24,6 +24,12 @@ const VIEWS := [
 	["transformateur", Vector3(112, 1.6, 168), Vector3(100, 1, 153)],
 	["city_stade", Vector3(160, 1.6, 172), Vector3(163, 1, 190)],
 	["vue_haute", Vector3(60, 40, 230), Vector3(110, 0, 110)],
+	["tour_hall", Vector3(105, 1.6, 110), Vector3(103, 1.5, 96)],
+	["tour_escalier", Vector3(102, 1.6, 100.5), Vector3(102, 3, 94)],
+	["tour_palier_4", Vector3(94, 13.6, 100), Vector3(115, 13, 100)],
+	["parking_dedans", Vector3(142, -1.4, 102), Vector3(178, -2, 108)],
+	["laverie", Vector3(56.6, 1.6, 136), Vector3(58, 1, 146)],
+	["salle_centre_social", Vector3(158, 1.6, 82), Vector3(142, 1, 64)],
 ]
 
 var _origin := Vector3(110, 0, 110)

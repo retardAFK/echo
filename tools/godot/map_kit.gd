@@ -88,7 +88,8 @@ func ramp(
 
 
 ## A wall along x at plan y, from x0 to x1, with openings.
-## Each gap is [from_x, to_x, top]: open from the floor h0 up to top, wall above.
+## Each gap is [from_x, to_x, top] (a door: open from the floor h0 up to top,
+## wall above) or [from_x, to_x, top, sill] (a window: wall below sill too).
 func wall_x(
 	s: Structure, x0: float, x1: float, y: float, h0: float, h1: float, thickness: float,
 	material: Material, gaps: Array = []
@@ -99,11 +100,13 @@ func wall_x(
 	for gap: Array in _sorted(gaps):
 		box(s, cursor, y - thickness / 2.0, gap[0], y + thickness / 2.0, h0, h1, material)
 		box(s, gap[0], y - thickness / 2.0, gap[1], y + thickness / 2.0, gap[2], h1, material)
+		if gap.size() > 3:
+			box(s, gap[0], y - thickness / 2.0, gap[1], y + thickness / 2.0, h0, gap[3], material)
 		cursor = gap[1]
 	box(s, cursor, y - thickness / 2.0, b, y + thickness / 2.0, h0, h1, material)
 
 
-## A wall along y at plan x, from y0 to y1, with openings [from_y, to_y, top].
+## A wall along y at plan x, from y0 to y1, with openings [from_y, to_y, top(, sill)].
 func wall_y(
 	s: Structure, y0: float, y1: float, x: float, h0: float, h1: float, thickness: float,
 	material: Material, gaps: Array = []
@@ -114,11 +117,13 @@ func wall_y(
 	for gap: Array in _sorted(gaps):
 		box(s, x - thickness / 2.0, cursor, x + thickness / 2.0, gap[0], h0, h1, material)
 		box(s, x - thickness / 2.0, gap[0], x + thickness / 2.0, gap[1], gap[2], h1, material)
+		if gap.size() > 3:
+			box(s, x - thickness / 2.0, gap[0], x + thickness / 2.0, gap[1], h0, gap[3], material)
 		cursor = gap[1]
 	box(s, x - thickness / 2.0, cursor, x + thickness / 2.0, b, h0, h1, material)
 
 
-## A horizontal slab covering a rectangle minus holes ([x0, y0, x1, y1] each),
+## A horizontal slab covering a rectangle minus holes (plan rectangles),
 ## cut in square tiles of tile meters, one structure per tile.
 func slab_tiles(
 	prefix: String, rect: Rect2, holes: Array[Rect2], h0: float, h1: float,

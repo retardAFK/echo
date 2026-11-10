@@ -80,9 +80,16 @@ func test_navigation_stays_inside_the_fences() -> void:
 
 ## Waits until the navigation server has merged the map's navigation mesh.
 func _nav_map() -> RID:
+	# The navigation map is shared by every test: wait until this map's mesh is
+	# merged, that is until a spawn point lies on it.
 	var nav_map := _map.get_world_3d().navigation_map
-	await wait_until(func() -> bool: return NavigationServer3D.map_get_iteration_id(nav_map) > 0, 5)
-	await wait_physics_frames(2)
+	var spawn: Vector3 = _map.get_spawn_points()[0]
+	await wait_until(
+		func() -> bool:
+			var closest := NavigationServer3D.map_get_closest_point(nav_map, spawn)
+			return Vector2(closest.x, closest.z).distance_to(Vector2(spawn.x, spawn.z)) < 0.1,
+		5
+	)
 	return nav_map
 
 
