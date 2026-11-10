@@ -5,14 +5,24 @@ extends RefCounted
 ## monster when it hears or sees it, hides crouched and silent for a while,
 ## and freezes when it notices the lights of a scan. After running, it stays
 ## out of breath for a few seconds.
+## In the game loop (S-007, Q7), it plays the hunted's loop instead of
+## wandering: SEARCH walks to the fuse slots one by one, then to the
+## transformer, WORK holds "interact" there, ESCAPE runs to the exit. Its
+## S-004 caution comes first: fleeing, hiding or freezing stops the work, then
+## it goes back to where it was going.
 
 signal state_changed(state: State)
 
-enum State { WANDER, FLEE, HIDE, FREEZE }
+enum State { WANDER, FLEE, HIDE, FREEZE, SEARCH, WORK, ESCAPE }
+## What the loop asks for now: fuses, the transformer, the exit.
+enum Goal { FUSES, REPAIR, EXIT }
 
 var state := State.WANDER
 ## Where the prey is heading.
 var target := Vector3.ZERO
+## Game loop (S-007): what it goes for, and the fuse slot it is heading to.
+var goal := Goal.FUSES
+var slot_index := 0
 
 var _settings: PreySettings
 var _wander_points: Array[Vector3] = []
@@ -22,6 +32,12 @@ var _pause_left := 0.0
 var _hide_left := 0.0
 var _breath_left := 0.0
 var _rng := RandomNumberGenerator.new()
+## Game loop (S-007): the fuse slots in visiting order, where to stand to
+## repair, where the exit is.
+var _loop := false
+var _slots: Array[Vector3] = []
+var _transformer_point := Vector3.ZERO
+var _exit_point := Vector3.ZERO
 
 
 func _init(settings: PreySettings, rng_seed := 0) -> void:
@@ -37,10 +53,51 @@ func set_points(wander_points: Array[Vector3], hiding_spots: Array[Vector3]) -> 
 		target = _wander_points[_wander_index]
 
 
+## Plays the game loop (S-007): slots in visiting order, the point beside the
+## transformer, the far end of the tunnel.
+func set_loop(slots: Array[Vector3], transformer_point: Vector3, exit_point: Vector3) -> void:
+	_loop = true
+	_slots = slots
+	_transformer_point = transformer_point
+	_exit_point = exit_point
+	goal = Goal.FUSES
+	slot_index = 0
+	_resume()
+
+
+func is_looping() -> bool:
+	return _loop
+
+
+## The slot it reached has no fuse: on to the next one (around again if needed).
+func next_slot() -> void:
+	if _slots.is_empty():
+		return
+	slot_index = (slot_index + 1) % _slots.size()
+	target = _slots[slot_index]
+
+
+## It reached a full box, or the transformer with fuses to place: it holds.
+func start_work() -> void:
+	_set_state(State.WORK)
+
+
+## The work in hand is done. found: fuses found so far; needed: fuses to find;
+## repaired: whether the transformer is repaired.
+func work_done(found: int, needed: int, repaired: bool) -> void:
+	if repaired:
+		goal = Goal.EXIT
+	elif found >= needed:
+		goal = Goal.REPAIR
+	elif goal == Goal.FUSES:
+		next_slot()
+	_resume()
+
+
 ## Gait the prey moves at: walks, runs away, crouches in hiding.
 func get_gait() -> PlayerMotion.Gait:
 	match state:
-		State.FLEE:
+		State.FLEE, State.ESCAPE:
 			return PlayerMotion.Gait.SPRINT
 		State.HIDE:
 			return PlayerMotion.Gait.CROUCH
@@ -49,7 +106,7 @@ func get_gait() -> PlayerMotion.Gait:
 
 ## True when the prey does not move at all (hiding, frozen, pausing).
 func is_still(arrived: bool) -> bool:
-	return state == State.HIDE or state == State.FREEZE or (state == State.WANDER and arrived)
+	return state in [State.HIDE, State.FREEZE, State.WORK] or (state == State.WANDER and arrived)
 
 
 func is_breathless() -> bool:
@@ -65,6 +122,11 @@ func update(delta: float, alarm: bool, threat: Vector3, arrived: bool, warning: 
 	else:
 		_breath_left = maxf(_breath_left - delta, 0.0)
 	match state:
+		State.SEARCH, State.WORK, State.ESCAPE:
+			if alarm:
+				_flee(threat)
+			elif warning and state != State.ESCAPE:
+				_set_state(State.FREEZE)
 		State.WANDER:
 			if alarm:
 				_flee(threat)
@@ -78,7 +140,7 @@ func update(delta: float, alarm: bool, threat: Vector3, arrived: bool, warning: 
 			if alarm:
 				_flee(threat)
 			elif not warning:
-				_set_state(State.WANDER)
+				_resume()
 		State.FLEE:
 			if arrived:
 				_hide_left = _settings.hide_time
@@ -88,8 +150,9 @@ func update(delta: float, alarm: bool, threat: Vector3, arrived: bool, warning: 
 				_hide_left = _settings.hide_time  # Still there: stay put longer.
 			_hide_left -= delta
 			if _hide_left <= 0.0:
-				_next_wander_point()
-				_set_state(State.WANDER)
+				if not _loop:
+					_next_wander_point()
+				_resume()
 
 
 ## The target cannot be reached: a fleeing prey hides where it is, a
@@ -101,6 +164,9 @@ func give_up() -> void:
 			_set_state(State.HIDE)
 		State.WANDER:
 			_next_wander_point()
+		State.SEARCH:
+			if goal == Goal.FUSES:
+				next_slot()
 
 
 ## Sends the prey to wander from scratch, at a position (after a catch).
@@ -111,6 +177,24 @@ func reset(at_index: int) -> void:
 	if not _wander_points.is_empty():
 		target = _wander_points[_wander_index]
 	_set_state(State.WANDER)
+
+
+## Back to what it was doing: wandering, or the current goal of the loop.
+func _resume() -> void:
+	if not _loop:
+		_set_state(State.WANDER)
+		return
+	match goal:
+		Goal.FUSES:
+			if not _slots.is_empty():
+				target = _slots[slot_index]
+			_set_state(State.SEARCH)
+		Goal.REPAIR:
+			target = _transformer_point
+			_set_state(State.SEARCH)
+		Goal.EXIT:
+			target = _exit_point
+			_set_state(State.ESCAPE)
 
 
 func _flee(threat: Vector3) -> void:
