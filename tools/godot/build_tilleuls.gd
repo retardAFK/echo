@@ -65,6 +65,14 @@ const GARAGE_OPEN := preload("res://assets/models/garage_open.glb")
 ## Outdoor models (T-048, tools/blender/outdoor.py).
 const TRANSFORMER := preload("res://assets/models/transformer.glb")
 const SWING := preload("res://assets/models/swing.glb")
+## Ambient sounds (T-050), made by tools/audio/ambience.py.
+const WIND_SOUND := preload("res://assets/audio/ambience/wind.wav")
+const MOTORWAY_SOUND := preload("res://assets/audio/ambience/motorway.wav")
+const TRAIN_SOUND := preload("res://assets/audio/ambience/train.wav")
+const SWING_SOUND := preload("res://assets/audio/ambience/swing_creak.wav")
+const AMBIENT_TRAIN := preload("res://game/audio/ambient_train.gd")
+## Where the motorway is heard from, along the east fence (plan y).
+const MOTORWAY_SOURCES := [40.0, 110.0, 180.0]
 const CLIMBING_FRAME := preload("res://assets/models/climbing_frame.glb")
 const STADIUM_BOARD := preload("res://assets/models/stadium_board.glb")
 const STADIUM_GOAL := preload("res://assets/models/stadium_goal.glb")
@@ -239,6 +247,7 @@ func _ready() -> void:
 	_add_social_centre_dressing()
 	_add_car_park_dressing()
 	_add_outdoor_dressing()
+	_add_ambience()
 	get_tree().root.add_child.call_deferred(_root)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -834,6 +843,48 @@ func _add_outdoor_dressing() -> void:
 			boards.walls.append(r)
 	node.add_child(boards)
 	boards.owner = _root
+
+
+## Wind everywhere, the motorway to the east, a train on the embankment now
+## and then, the swing creaking (T-050). Plain players: none of them goes
+## through NoiseBus, so they betray nobody.
+func _add_ambience() -> void:
+	var node := _group("Ambience")
+	var wind := AudioStreamPlayer.new()
+	wind.name = "Wind"
+	wind.stream = WIND_SOUND
+	wind.volume_db = -12.0
+	wind.autoplay = true
+	node.add_child(wind)
+	wind.owner = _root
+	for i in MOTORWAY_SOURCES.size():
+		var road := _sound(node, "Motorway%d" % (i + 1), MOTORWAY_SOUND, Vector2(216, MOTORWAY_SOURCES[i]), 1.0)
+		road.unit_size = 25.0
+		road.max_distance = 150.0
+		road.volume_db = -4.0
+	var train: AudioStreamPlayer3D = AMBIENT_TRAIN.new()
+	train.name = "Train"
+	train.stream = TRAIN_SOUND
+	train.unit_size = 40.0
+	train.max_distance = 220.0
+	train.track_start = kit.world(-40, 1, 7)
+	train.track_end = kit.world(260, 1, 7)
+	node.add_child(train)
+	train.owner = _root
+	var swing := _sound(node, "SwingCreak", SWING_SOUND, Vector2(61, 80.5), 2.0)
+	swing.unit_size = 3.0
+	swing.max_distance = 18.0
+
+
+func _sound(parent: Node3D, node_name: String, stream: AudioStream, at: Vector2, h: float) -> AudioStreamPlayer3D:
+	var player := AudioStreamPlayer3D.new()
+	player.name = node_name
+	player.stream = stream
+	player.autoplay = true
+	player.position = kit.world(at.x, at.y, h)
+	parent.add_child(player)
+	player.owner = _root
+	return player
 
 
 func _group(node_name: String) -> Node3D:

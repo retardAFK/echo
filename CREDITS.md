@@ -7,6 +7,12 @@ Seuls les assets faits par nous ou sous licence **CC0** sont acceptés.
 |---|---|---|---|---|
 | _(aucun pour l'instant)_ | | | | |
 
+## Assets faits par nous
+
+| Asset | Fabrication | Utilisé dans |
+|---|---|---|
+| Sons d'ambiance (vent, autoroute, train, balançoire), `assets/audio/ambience/` | Bruit filtré, synthétisé par `tools/audio/ambience.py` | Cité des Tilleuls (S-006, T-050) |
+
 ## Outils de développement
 
 Non inclus dans le jeu exporté.
