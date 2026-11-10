@@ -18,9 +18,9 @@ func _retro(mesh: MeshInstance3D) -> ShaderMaterial:
 
 
 func test_settings_hold_the_filter_values() -> void:
-	assert_eq(SETTINGS.color_levels, 24)
+	assert_eq(SETTINGS.color_levels, 256)
 	assert_eq(SETTINGS.grain_rate, 12.0)
-	assert_eq(SETTINGS.vertex_snap, Vector2(320, 180))
+	assert_eq(SETTINGS.vertex_snap, Vector2.ZERO)
 
 
 func test_blocks_wobble_with_world_textures() -> void:

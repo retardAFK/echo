@@ -70,7 +70,7 @@ La machine de référence est le portable de développement : Ryzen 5 PRO 215, R
 | Mesure | Budget |
 |---|---|
 | Images par seconde | **60 en visée, 30 au minimum absolu** dans Chrome |
-| Résolution interne de rendu | **640 × 360**, agrandie en pixels nets |
+| Résolution de rendu | 3D à la **résolution de l'écran**, textures en pixels nets ; interface dessinée sur une base de **640 × 360** agrandie (D-011) |
 | Triangles affichés à l'écran | 150 000 maximum |
 | Appels de dessin (draw calls) | 300 maximum |
 | Lumières dynamiques visibles | 4 maximum, le reste est précalculé |
@@ -500,6 +500,7 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-008 | 03/11/2026 | Le monstre voit normalement. Son atout : les bruits lui donnent la position et la distance des chassés, et il peut scanner un bâtiment pour en entendre tous les bruits en direct. Le chassé n'a que sa ruse et l'environnement. La contamination est supprimée, l'hôpital reste un lieu prévu. | Rôle du monstre plus agréable et moins lassant que l'écran noir à sonar ; jeu plus lisible pour les deux camps |
 | D-009 | 03/11/2026 | Scan de bâtiment limité par une jauge (8 s, recharge 45 s, seuil 25 %), alerte discrète par les lumières, se figer a un prix (souffle après une course, progression de quête perdue). Monstre discret : inaudible en rôdant, 3 m en marche, 12 m en course, souffle à 2 m | Le scan doit être un pari et non une victoire automatique, et se figer ne doit pas suffire |
 | D-010 | 07/11/2026 | Cité des Tilleuls : zone jouable de 220 × 220 m, une douzaine de bâtiments dont 4 visitables, les autres en façades. Un fusible se trouve toujours dans un bâtiment visitable. L'hôpital sera une map séparée, plus petite et sur plusieurs niveaux | Une map assez grande pour qu'un bruit lointain reste un pari pour le monstre, avec des bâtiments visitables qui obligent les chassés à entrer là où le scan les menace |
+| D-011 | 10/11/2026 | Rendu net : la 3D est rendue à la résolution de l'écran, sans réduction des couleurs, sans tramage ni tremblement des sommets, avec un grain à peine visible. Les textures restent en gros pixels nets et le brouillard reste | Le rendu basse résolution de S-005, avec son grain et son tramage, faisait mal aux yeux dans une scène de nuit (retour de Maxime sur la cité des Tilleuls) |
 
 ### 10.2 Questions ouvertes
 

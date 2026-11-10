@@ -33,9 +33,10 @@ func test_movement_actions_use_physical_keys() -> void:
 				assert_ne(event.physical_keycode, KEY_NONE, "%s must use a physical key" % action)
 
 
-func test_internal_resolution_is_640_by_360() -> void:
-	# Constitution 2.2: 640 x 360 internal resolution, scaled with sharp pixels.
+func test_ui_base_is_640_by_360_and_3d_renders_at_screen_size() -> void:
+	# Constitution 2.2 and D-011: the interface is laid out on 640 x 360 and
+	# scaled, the 3D is drawn at the screen resolution.
 	assert_eq(ProjectSettings.get_setting("display/window/size/viewport_width"), 640)
 	assert_eq(ProjectSettings.get_setting("display/window/size/viewport_height"), 360)
-	assert_eq(ProjectSettings.get_setting("display/window/stretch/mode"), "viewport")
+	assert_eq(ProjectSettings.get_setting("display/window/stretch/mode"), "canvas_items")
 	assert_eq(ProjectSettings.get_setting("display/window/stretch/scale_mode"), "integer")

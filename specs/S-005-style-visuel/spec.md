@@ -39,3 +39,6 @@ Maquettes d'ambiance A, B et C : rendus de la greybox avec une première version
 - [ ] Une capture d'écran « ressemble au jeu ».
 - [ ] 60 images par seconde dans Chrome sur la machine de référence, chassé et monstre.
 - [ ] Le build web reste sous 60 Mo.
+
+## Révision du 10/11/2026 (D-011)
+Sur la cité des Tilleuls, Maxime trouve que le rendu basse résolution, son grain et son tramage font mal aux yeux. Nouveau réglage, validé sur captures comparatives : la 3D est rendue à la résolution de l'écran (mode d'étirement `canvas_items`, l'interface garde sa base de 640 × 360), 256 niveaux de couleur, sans tramage ni tremblement des sommets, grain à 0,006. Les textures en gros pixels nets et le brouillard ne changent pas. Q2 et Q4 sont remplacées par ce réglage.
