@@ -16,3 +16,4 @@ func _apply() -> void:
 	RetroSurface.apply_to(get_parent(), settings)
 	for camera: Camera3D in get_parent().find_children("*", "Camera3D", true, false):
 		camera.far = settings.view_distance
+		camera.near = settings.near_clip

@@ -7,6 +7,10 @@ extends CharacterBody3D
 ## The noise system (S-002) listens to it.
 signal gait_changed(gait: PlayerMotion.Gait)
 
+## Something in reach is used only if it lies within this angle of the
+## crosshair, seen from above (radians).
+const AIM_ANGLE := deg_to_rad(35.0)
+
 @export var settings: PlayerSettings
 
 var _gait := PlayerMotion.Gait.WALK
@@ -85,13 +89,20 @@ func look(relative: Vector2) -> void:
 
 
 ## Switches between crouching and standing (crouch key, toggle mode).
-## The nearest thing in reach the player can use (a car alarm, S-006), or null.
+## The nearest thing in reach, in front of the crosshair, that the player can
+## use (a car alarm, S-006), or null.
 func get_interactable() -> Node:
 	var best: Node = null
 	var best_distance := INF
+	var forward := -_camera.global_basis.z
+	var aim := Vector2(forward.x, forward.z).normalized()
 	for node in get_tree().get_nodes_in_group(CarAlarm.INTERACTABLE_GROUP):
 		if not node.can_interact(global_position):
 			continue
+		var gap: Vector3 = node.global_position - global_position
+		var flat := Vector2(gap.x, gap.z)
+		if flat.length() > 0.01 and aim.dot(flat.normalized()) < cos(AIM_ANGLE):
+			continue  # In reach but not in front of the crosshair.
 		var distance: float = node.global_position.distance_to(global_position)
 		if distance < best_distance:
 			best = node
@@ -99,7 +110,7 @@ func get_interactable() -> Node:
 	return best
 
 
-## Uses the nearest thing in reach, if any.
+## Uses the nearest thing in reach in front of the crosshair, if any.
 func interact() -> void:
 	var target := get_interactable()
 	if target != null:

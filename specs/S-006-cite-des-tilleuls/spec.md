@@ -46,7 +46,7 @@ Le 07/11/2026, Maxime a répondu « Parfait » au plan et aux propositions Q2 à
 - [x] Les 6 alarmes de voiture se déclenchent et attirent le monstre IA.
 - [x] On traverse la map en courant en moins de 45 s.
 - [x] Le monstre IA trouve son chemin partout, y compris dans la tour et le parking.
-- [ ] 60 images par seconde dans Chrome sur la machine de référence, en chassé et en monstre, à l'endroit le plus chargé de la map.
+- [x] 60 images par seconde dans Chrome sur la machine de référence, en chassé et en monstre, à l'endroit le plus chargé de la map.
 - [x] La map se charge en moins de 10 s, et le build web reste sous 60 Mo.
 
 ## Hors périmètre
@@ -68,4 +68,4 @@ Maxime ne teste pas la greybox (10/11/2026) : ces notes sont celles des vérific
   - Traversées en courant : 37 à 43 s (sous 45 s).
   - Lieux repères : reconnus sur les captures dans le brouillard (tour, aire de jeux et sa balançoire, galerie et la laverie éclairée, centre social et son enseigne, parking et son « P », transformateur vert, porche de sortie).
   - Performance (rendu OpenGL logiciel, sans GPU) : 97 appels de dessin en moyenne et 192 au pire sur 484 vues (budget 300), 49 000 triangles au plus (budget 150 000), au plus 2 lumières dynamiques visibles (limite 4), chargement de la map en 1,1 s, build web de 45 Mo sans erreur dans Chrome.
-  - Reste ouvert : les 60 images/s ne se mesurent pas sans carte graphique. Tous les budgets qui les garantissent sont tenus ; la mesure sur la machine de référence se fera au point de décision n°2.
+  - 60 images/s mesurées par Maxime dans Chrome au point le plus chargé (10/11/2026, après le rendu net D-011). Corrigé ensuite : clignotement de quelques textures (faces trop proches, caméra à 0,1 m au plus près), point de visée du chassé.

@@ -21,7 +21,7 @@ const GROUND_THICKNESS := 0.2
 const FENCED := Rect2(6, 2.8, 204.5, 209.4)
 const NAV_BOTTOM := -5.24
 const PATH_WIDTH := 5.0
-const PATH_HEIGHT := 0.02
+const PATH_HEIGHT := 0.04
 ## One storey of a block of flats, in meters.
 const STOREY := 3.0
 
@@ -98,7 +98,7 @@ const BALCONY_SHARE := 0.35
 const WALLED_SHARE := 0.5
 const DOOR_SPACING := 18.0
 ## The panels stand this far out of the greybox walls, so they never flicker.
-const FACADE_OFFSET := 0.02
+const FACADE_OFFSET := 0.05
 const MAP_SCRIPT := preload("res://game/maps/game_map.gd")
 const NIGHT_SCRIPT := preload("res://game/fx/night_environment.gd")
 const RETRO_WORLD_SCRIPT := preload("res://game/fx/retro_world.gd")
