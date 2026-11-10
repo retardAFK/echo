@@ -62,6 +62,13 @@ const CAR_PARK_PILLAR := preload("res://assets/models/car_park_pillar.glb")
 const NEON_FIXTURE := preload("res://assets/models/neon_fixture.glb")
 const GARAGE_CLOSED := preload("res://assets/models/garage_closed.glb")
 const GARAGE_OPEN := preload("res://assets/models/garage_open.glb")
+## Outdoor models (T-048, tools/blender/outdoor.py).
+const TRANSFORMER := preload("res://assets/models/transformer.glb")
+const SWING := preload("res://assets/models/swing.glb")
+const CLIMBING_FRAME := preload("res://assets/models/climbing_frame.glb")
+const STADIUM_BOARD := preload("res://assets/models/stadium_board.glb")
+const STADIUM_GOAL := preload("res://assets/models/stadium_goal.glb")
+const STADIUM_BOARD_WIDTH := 2.0
 const CAR_PARK_WRECKS := [Vector2(146, 98.5), Vector2(160, 113.5), Vector2(176, 98.5)]
 ## Facade modules of S-005 (3 x 3 m, front toward +Z), in FacadeDressing order.
 const FACADE_MODELS := [
@@ -227,6 +234,7 @@ func _ready() -> void:
 	_add_gallery_dressing()
 	_add_social_centre_dressing()
 	_add_car_park_dressing()
+	_add_outdoor_dressing()
 	get_tree().root.add_child.call_deferred(_root)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -559,8 +567,7 @@ func _build_landmarks() -> void:
 	_build_playground()
 	_build_city_stadium()
 	var transformer := kit.structure("Transformer")
-	kit.box(transformer, 96, 150, 105, 157, 0, 2.6, _material("transformer"))
-	kit.box(transformer, 95.5, 149.5, 105.5, 157.5, 2.6, 2.8, MAT_OBSTACLE, MapKit.Kind.GHOST)
+	kit.box(transformer, 96, 150, 105, 157, 0, 2.6, null)  # Dressed by its model (T-048).
 
 
 func _build_playground() -> void:
@@ -571,24 +578,18 @@ func _build_playground() -> void:
 	kit.box(s, 50, 91.7, 72, 92, 0, 0.25, MAT_OBSTACLE, low)
 	kit.box(s, 50, 70.3, 50.3, 91.7, 0, 0.25, MAT_OBSTACLE, low)
 	kit.box(s, 71.7, 70.3, 72, 91.7, 0, 0.25, MAT_OBSTACLE, low)
-	# Swing: two posts at each end, a top bar, two seats on their chains.
-	var metal := _material("metal")
+	# Swing posts, climbing frame and slide: only their collisions, the models
+	# dress them (T-048).
 	for x: float in [57.0, 65.0]:
-		kit.box(s, x - 0.1, 79.0, x + 0.1, 79.2, 0, 2.4, metal, low)
-		kit.box(s, x - 0.1, 81.8, x + 0.1, 82.0, 0, 2.4, metal, low)
-	kit.box(s, 56.9, 80.4, 65.1, 80.6, 2.3, 2.5, metal, MapKit.Kind.GHOST)
-	for x: float in [59.5, 62.5]:
-		kit.box(s, x - 0.3, 80.3, x + 0.3, 80.7, 0.45, 0.5, metal, MapKit.Kind.GHOST)
-		kit.box(s, x - 0.28, 80.48, x - 0.26, 80.52, 0.5, 2.3, metal, MapKit.Kind.GHOST)
-		kit.box(s, x + 0.26, 80.48, x + 0.28, 80.52, 0.5, 2.3, metal, MapKit.Kind.GHOST)
-	# Climbing frame and slide.
-	kit.box(s, 53, 73, 56, 76, 0, 1.6, metal, low)
-	kit.ramp(s, 56, 74, 59.5, 75, 1.6, 0.2, true, metal, 0.1)
+		kit.box(s, x - 0.1, 79.0, x + 0.1, 79.2, 0, 2.4, null, low)
+		kit.box(s, x - 0.1, 81.8, x + 0.1, 82.0, 0, 2.4, null, low)
+	kit.box(s, 53, 73, 56, 76, 0, 1.6, null, low)
+	kit.ramp(s, 56, 74, 59.5, 75, 1.6, 0.2, true, null, 0.1)
 
 
 func _build_city_stadium() -> void:
 	var s := kit.structure("CityStadium")
-	var boards := _material("metal")
+	var boards: Material = null  # Only the collisions: the models dress them (T-048).
 	var h := 1.1
 	# Boards with an opening on the west and the north sides.
 	kit.wall_x(s, 148, 178, 180, 0, h, 0.15, boards, [[160, 166, h]])
@@ -791,6 +792,43 @@ func _add_car_park_dressing() -> void:
 		var south := g.position.y + (i + 1) * width - 0.5
 		var scene := GARAGE_OPEN if GARAGES_OPEN.has(i) else GARAGE_CLOSED
 		_place_model(node, scene, "Garage%d" % (i + 1), Vector2(g.end.x + FACADE_OFFSET, south), Vector2.RIGHT)
+
+
+## Transformer, playground and city stadium (T-048).
+func _add_outdoor_dressing() -> void:
+	var node := _group("OutdoorDressing")
+	_place_model(node, TRANSFORMER, "Transformer", Vector2(100.5, 153.5), Vector2.UP)
+	_place_model(node, SWING, "Swing", Vector2(61, 80.5), Vector2.UP)
+	_place_model(node, CLIMBING_FRAME, "ClimbingFrame", Vector2(54.5, 74.5), Vector2.UP)
+	_place_model(node, STADIUM_GOAL, "GoalWest", Vector2(149.5, 190), Vector2.RIGHT)
+	_place_model(node, STADIUM_GOAL, "GoalEast", Vector2(176.5, 190), Vector2.LEFT)
+	# Boards of the city stadium, facing out, around the openings (west, north).
+	var runs := [
+		[Vector2(160, 180), Vector2(148, 180), Vector2.UP],
+		[Vector2(178, 180), Vector2(166, 180), Vector2.UP],
+		[Vector2(148, 200), Vector2(178, 200), Vector2.DOWN],
+		[Vector2(148, 180), Vector2(148, 188), Vector2.LEFT],
+		[Vector2(148, 192), Vector2(148, 200), Vector2.LEFT],
+		[Vector2(178, 200), Vector2(178, 180), Vector2.RIGHT],
+	]
+	# One MultiMesh per run: 45 separate boards would cost 90 draw calls.
+	var boards: FacadeDressing = FACADE_DRESSING.new()
+	boards.name = "StadiumBoards"
+	boards.models.assign([STADIUM_BOARD])
+	for r in runs.size():
+		var from: Vector2 = runs[r][0]
+		var to: Vector2 = runs[r][1]
+		var normal: Vector2 = runs[r][2]
+		var along := (to - from).normalized()
+		var z_axis := Vector3(normal.x, 0, normal.y)
+		var basis := Basis(Vector3.UP.cross(z_axis), Vector3.UP, z_axis)
+		for i in roundi(from.distance_to(to) / STADIUM_BOARD_WIDTH):
+			var at := from + along * (i * STADIUM_BOARD_WIDTH)
+			boards.panels.append(Transform3D(basis, kit.world(at.x, at.y, 0.0)))
+			boards.variants.append(0)
+			boards.walls.append(r)
+	node.add_child(boards)
+	boards.owner = _root
 
 
 func _group(node_name: String) -> Node3D:

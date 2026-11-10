@@ -38,6 +38,8 @@ const VIEWS := [
 	["barre_g", Vector3(160, 1.6, 132), Vector3(172, 5, 145)],
 	["tour_fenetre", Vector3(110, 7.6, 92), Vector3(110, 7, 80)],
 	["boxes", Vector3(26, 1.6, 172), Vector3(17, 1.2, 164)],
+	["balancoire", Vector3(66, 1.6, 90), Vector3(60, 1.2, 79)],
+	["voiture", Vector3(40, 1.6, 51), Vector3(36, 0.6, 45)],
 ]
 
 ## Grid step of the sweep, in meters.
