@@ -10,8 +10,10 @@ extends Node
 const MAP_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
 ## Frames to wait at each viewpoint before measuring.
 const SETTLE_FRAMES := 8
-## Lights closer than this are counted as visible (the fog hides the rest).
+## Lights closer than this, in view and not behind a wall, count as visible
+## (the fog hides the rest; constitution 2.2 allows 4).
 const LIGHT_VISIBLE_DISTANCE := 25.0
+const VISUAL_SETTINGS := preload("res://game/data/visual_settings.tres")
 
 ## Viewpoints in plan coordinates: name, eye position (x, height, y), look-at point.
 const VIEWS := [
@@ -32,6 +34,9 @@ const VIEWS := [
 	["salle_centre_social", Vector3(158, 1.6, 82), Vector3(142, 1, 64)],
 ]
 
+## Grid step of the sweep, in meters.
+const SWEEP_STEP := 20
+
 var _origin := Vector3(110, 0, 110)
 
 
@@ -41,12 +46,14 @@ func _ready() -> void:
 	if args.size() > 0:
 		out_dir = args[0]
 	DirAccess.make_dir_recursive_absolute(out_dir)
+	var started := Time.get_ticks_usec()
 	var map: Node3D = load(MAP_PATH).instantiate()
 	add_child(map)
+	print("Map loaded and instanced in %d ms" % ((Time.get_ticks_usec() - started) / 1000))
 	var camera := Camera3D.new()
 	add_child(camera)
 	await get_tree().process_frame
-	camera.far = map.get_node("Player/Head/Camera3D").far
+	camera.far = VISUAL_SETTINGS.view_distance
 	camera.make_current()
 	var lights := map.find_children("*", "Light3D", true, false)
 	for view: Array in VIEWS:
@@ -60,10 +67,44 @@ func _ready() -> void:
 		var draws := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 		var prims := Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
 		var near := 0
+		var space := get_viewport().get_world_3d().direct_space_state
 		for light: Light3D in lights:
-			if light is OmniLight3D and light.global_position.distance_to(eye) < LIGHT_VISIBLE_DISTANCE:
+			if not (light is OmniLight3D and light.is_visible_in_tree()):
+				continue
+			var at := light.global_position
+			if at.distance_to(eye) > LIGHT_VISIBLE_DISTANCE + light.omni_range:
+				continue
+			if not camera.is_position_in_frustum(at):
+				continue
+			var ray := PhysicsRayQueryParameters3D.create(eye, at, 3)
+			if space.intersect_ray(ray).is_empty():
 				near += 1
 		var image := get_viewport().get_texture().get_image()
 		image.save_png(out_dir.path_join("%s.png" % view[0]))
-		print("%-16s draw calls %4d  primitives %6d  lights < 25 m %d" % [view[0], draws, prims, near])
+		print("%-20s draw calls %4d  primitives %6d  visible lights %d" % [view[0], draws, prims, near])
+	await _sweep(camera)
 	get_tree().quit()
+
+
+## Looks around from every node of a 20 m grid, at eye height, to find the
+## busiest place of the map.
+func _sweep(camera: Camera3D) -> void:
+	var worst := 0
+	var worst_at := ""
+	var total := 0
+	var count := 0
+	for gx in range(SWEEP_STEP / 2, 220, SWEEP_STEP):
+		for gy in range(SWEEP_STEP / 2, 220, SWEEP_STEP):
+			var eye := Vector3(gx, 1.6, gy) - Vector3(_origin.x, 0, _origin.z)
+			for heading in 4:
+				var target := eye + Vector3.FORWARD.rotated(Vector3.UP, heading * PI / 2.0)
+				camera.look_at_from_position(eye, target)
+				await get_tree().process_frame
+				await get_tree().process_frame
+				var draws := int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+				total += draws
+				count += 1
+				if draws > worst:
+					worst = draws
+					worst_at = "(%d, %d) heading %d" % [gx, gy, heading * 90]
+	print("Sweep: %d views, mean %d draw calls, worst %d at %s" % [count, total / count, worst, worst_at])
