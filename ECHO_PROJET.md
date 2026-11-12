@@ -351,35 +351,43 @@ Chaque phase a un objectif, des livrables et une **définition de « terminé »
 - Spec S-007 : fusibles, transformateur, sortie, victoire et défaite, écran de fin.
 - **Terminé quand** : une partie complète se joue en solo contre le monstre IA.
 
-> **Point de décision n°2** : version jouable à faire tester à 3 ou 5 personnes de confiance. On note les retours dans le journal.
+> **Point de décision n°2** : reporté à la phase 9, après les ruses (voir plus bas).
 
 ### Phase 8 — Ruses et attracteurs (1 à 2 semaines)
 - Spec S-008 : objets de diversion, leurres sonores, cachettes, alarmes de voiture.
 - **Terminé quand** : chaque attracteur change réellement le comportement du monstre ou du joueur.
 
-### Phase 9 — Personnages et animations (2 à 3 semaines)
-- Spec S-009 : modèles des chassés, monstre définitif ou provisoire amélioré, animations.
-- **Terminé quand** : plus aucune forme géométrique provisoire visible.
+> Le détail des phases 9 à 15 (specs prévues, tâches T-073 à T-221, dépendances) est dans [`specs/BACKLOG.md`](specs/BACKLOG.md). Le multijoueur passe avant les personnages, l'audio et les menus (D-013).
 
-### Phase 10 — Audio complet (1 à 2 semaines)
-- Spec S-010 : sons spatialisés en 3D, ambiances par zone, cri du monstre, musique minimale.
-- **Terminé quand** : le jeu se joue au casque et la direction des sons est claire.
+### Phase 9 — Préparer le test à plusieurs
+- Spec S-009 : build de test en ligne, mode banc d'essai, mesure des 60 images/s sur la machine de référence, scan du monstre IA, équilibre des IA, commandes et pause, recueil des retours.
+- **Terminé quand** : le lien de test est prêt, les 60 images/s sont mesurées, une partie simulée dure 8 à 12 minutes en moyenne.
 
-### Phase 11 — Interface et menus (1 semaine)
-- Spec S-011 : menu principal, choix du rôle, options (volume, sensibilité, qualité), pause.
+> **Point de décision n°2** : version jouable à faire tester à 3 ou 5 personnes de confiance. On note les retours dans le journal.
 
-### Phase 12 — Multijoueur en ligne (4 à 6 semaines, la phase la plus difficile)
-- Spec S-012 : architecture réseau. Pour le navigateur, Godot propose WebSocket et WebRTC. Choix à faire dans le plan.
-- Lobby, synchronisation des joueurs, du monstre et des bruits.
+> **Point de décision n°3** : faut-il un serveur payant ? Coûts et hébergement à étudier avant de commencer la phase 10.
+
+### Phase 10 — Multijoueur en ligne (la phase la plus difficile)
+- Spec S-010 : architecture réseau. Pour le navigateur, Godot propose WebSocket et WebRTC. Choix à faire dans le plan.
+- Lobby, synchronisation des joueurs, du monstre et des bruits, IA pour remplir les places vides.
 - **Terminé quand** : 1 monstre et 3 chassés jouent ensemble depuis 4 navigateurs différents.
 
-> **Point de décision n°3** : faut-il un serveur payant ? Coûts et hébergement à étudier avant de commencer cette phase.
+### Phase 11 — Personnages et animations
+- Spec S-011 : modèles des chassés, monstre définitif (à partir des maquettes du Boucher), animations.
+- **Terminé quand** : plus aucune forme géométrique provisoire visible.
 
-### Phase 13 — Deuxième map et contenu (variable)
-- Hôpital ou gare, en réutilisant toute la chaîne déjà construite.
+### Phase 12 — Audio complet
+- Spec S-012 : sons spatialisés en 3D, ambiances par zone, vent de la cité, voix du monstre, musique minimale.
+- **Terminé quand** : le jeu se joue au casque et la direction des sons est claire.
 
-### Phase 14 — Finition et publication (2 à 3 semaines)
-- Corrections, optimisation, page itch.io, captures, bande-annonce courte.
+### Phase 13 — Interface et menus
+- Spec S-013 : menu principal, choix du rôle, options (volume, sensibilité, qualité, touches), pause.
+
+### Phase 14 — Deuxième map : l'hôpital
+- Spec S-014 : hôpital sur plusieurs niveaux (D-010), portes mobiles, ventilation, brancards, en réutilisant toute la chaîne déjà construite.
+
+### Phase 15 — Finition et publication
+- Spec S-015 : corrections, optimisation, nom définitif, page itch.io, captures, bande-annonce courte.
 - **Terminé quand** : le jeu est en ligne et jouable par des inconnus.
 
 ---
@@ -502,6 +510,7 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-010 | 07/11/2026 | Cité des Tilleuls : zone jouable de 220 × 220 m, une douzaine de bâtiments dont 4 visitables, les autres en façades. Un fusible se trouve toujours dans un bâtiment visitable. L'hôpital sera une map séparée, plus petite et sur plusieurs niveaux | Une map assez grande pour qu'un bruit lointain reste un pari pour le monstre, avec des bâtiments visitables qui obligent les chassés à entrer là où le scan les menace |
 | D-011 | 10/11/2026 | Rendu net : la 3D est rendue à la résolution de l'écran, sans réduction des couleurs, sans tramage ni tremblement des sommets, avec un grain à peine visible. Les textures restent en gros pixels nets et le brouillard reste | Le rendu basse résolution de S-005, avec son grain et son tramage, faisait mal aux yeux dans une scène de nuit (retour de Maxime sur la cité des Tilleuls) |
 | D-012 | 12/11/2026 | Les maps sont séparées : une map par partie (clôt Q-004) | Suite logique de D-010, qui fait déjà de l'hôpital une map à part ; plus simple à construire et à charger dans le navigateur |
+| D-013 | 12/11/2026 | Après le test à plusieurs (phase 9), le multijoueur passe avant les personnages, l'audio et les menus. Nouvel ordre : 9 test à plusieurs, 10 multijoueur, 11 personnages, 12 audio, 13 menus, 14 hôpital, 15 sortie (détail dans `specs/BACKLOG.md`) | Ce qui est ajouté avant le réseau devrait sinon être repris pour être synchronisé, et on teste plus tôt à 4 vrais joueurs |
 
 ### 10.2 Questions ouvertes
 
@@ -514,3 +523,6 @@ Points vérifiés, et écarts éventuels à faire valider.
 - [ ] **Q-007** : Projet gratuit ou payant à terme (itch.io, Steam) ? Lien avec la structure envisagée pour publier des applications.
 - [x] **Q-008** : Limite du scan de bâtiment → jauge de concentration (D-009).
 - [x] **Q-009** : Discrétion du monstre et alerte du scan → voir D-009.
+- [ ] **Q-010** : Les chassés peuvent-ils se parler en jeu (voix de proximité qui fait du bruit), ou passent-ils par un outil externe ? À trancher dans S-010.
+- [ ] **Q-011** : Langues de sortie : français seul, ou aussi anglais ? À trancher dans S-015.
+- [ ] **Q-012** : Où héberger le build de test (GitHub Pages ou page itch.io non listée) ? À trancher dans le plan de S-009.
