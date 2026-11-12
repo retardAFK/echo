@@ -3,7 +3,8 @@ extends GutTest
 
 const MAP_SCENE := preload("res://game/maps/greybox_test.tscn")
 # Constitution 2.2 allows 300 draw calls; the test map must stay far below.
-const MAX_MESHES := 60
+# Raised from 60 for the bottles and alarm clocks of S-008 placed there.
+const MAX_MESHES := 70
 
 var _map: Node3D
 

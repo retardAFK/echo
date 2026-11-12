@@ -106,8 +106,11 @@ func test_player_picks_up_bottles_in_front_until_full() -> void:
 	player.interact()
 	await wait_process_frames(2)
 	assert_eq(player.inventory.count(Inventory.Kind.BOTTLE), 2)
-	var left := bottles.filter(func(b: Pickup) -> bool: return is_instance_valid(b))
-	assert_eq(left.size(), 1, "two bottles taken")
+	var left := 0
+	for bottle in bottles:
+		if is_instance_valid(bottle) and not bottle.is_queued_for_deletion():
+			left += 1
+	assert_eq(left, 1, "two bottles taken")
 	assert_null(player.get_interactable(), "no room left: the third one is not offered")
 	assert_eq(_noises.size(), 0, "picking up is silent (Q1)")
 
