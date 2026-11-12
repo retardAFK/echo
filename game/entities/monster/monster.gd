@@ -120,7 +120,7 @@ func _physics_process(delta: float) -> void:
 	if (
 		player != null
 		and not HidingSpot.is_hidden(player)
-		and brain.is_catch_distance(_flat_distance(player_position))
+		and brain.is_catch(player_position - global_position)
 	):
 		catch_count += 1
 		player_caught.emit()
@@ -148,10 +148,6 @@ func _update_sight(delta: float) -> void:
 		and MonsterVision.in_view_cone(eye, -global_basis.z, target, settings)
 		and MonsterVision.has_line_of_sight(get_world_3d().direct_space_state, eye, target)
 	)
-
-
-func _flat_distance(point: Vector3) -> float:
-	return Vector2(point.x - global_position.x, point.z - global_position.z).length()
 
 
 ## Goes to open a hiding spot and opens it (S-008, Q7).

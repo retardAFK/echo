@@ -113,6 +113,15 @@ func is_catch_distance(distance: float) -> bool:
 	return distance <= settings.catch_distance
 
 
+## Whether a hunted at this offset from the monster is caught: close on the
+## ground, and on the same floor (S-009, T-079).
+func is_catch(offset: Vector3) -> bool:
+	return (
+		is_catch_distance(Vector2(offset.x, offset.z).length())
+		and absf(offset.y) <= settings.catch_height
+	)
+
+
 ## A noise reached the monster's ears. Ignored during a chase, and while it
 ## goes to open a hiding spot (S-008): it knows where to look. A noise heard
 ## while it scans ends the scan.

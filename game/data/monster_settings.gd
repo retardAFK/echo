@@ -57,6 +57,9 @@ extends Resource
 @export_range(0.0, 1.0, 0.05) var search_open_chance: float = 0.5
 ## Distance at which the monster catches the player, in meters.
 @export_range(0.1, 5.0, 0.1, "suffix:m") var catch_distance: float = 1.2
+## Largest height gap for a catch, in meters (S-009, T-079): no catch through
+## a floor, like the car park ceiling under the street.
+@export_range(0.1, 5.0, 0.1, "suffix:m") var catch_height: float = 1.5
 ## How long the monster remembers the building it heard a noise in, in seconds (S-007, Q10).
 @export_range(0.0, 600.0, 5.0, "suffix:s") var lure_memory_time: float = 120.0
 ## Patrol points between two detours to that building.
