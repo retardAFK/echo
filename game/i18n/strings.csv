@@ -37,3 +37,22 @@ BENCH_DONE,Banc d'essai terminé
 BENCH_FPS,"Images/s : %.1f en moyenne, %.1f au pire, %.1f sur les 1 %% les plus lentes"
 BENCH_DRAWS,"Appels de dessin : %d au pire, triangles : %d au pire"
 BENCH_LOAD,Chargement : %.1f s
+MENU_PLAY,Jouer
+MENU_BACK,Retour
+CONTROLS_MOVE,ZQSD ou flèches : se déplacer
+CONTROLS_LOOK,Souris : regarder (cliquer pour capturer la souris)
+CONTROLS_SPRINT,Maj : courir (bruyant)
+CONTROLS_CROUCH,C : s'accroupir (presque silencieux)
+CONTROLS_INTERACT,"E : ramasser, interagir ; maintenir E : fusible, cachette"
+CONTROLS_THROW,Clic gauche : lancer une bouteille
+CONTROLS_DECOY,Clic droit : poser un réveil
+CONTROLS_PROWL,C : rôder (silencieux)
+CONTROLS_SCAN,Maintenir clic droit en visant un bâtiment : scanner
+CONTROLS_OPEN,Maintenir E : ouvrir une cachette
+CONTROLS_PAUSE,Échap : pause
+GOAL_HUNTED,"Trouvez 3 fusibles, posez-les dans le transformateur, puis fuyez par le tunnel. Chaque bruit trahit votre position au monstre."
+GOAL_MONSTER,"Les bruits de la proie s'affichent en orange, avec leur distance. Attrapez-la avant qu'elle ne s'enfuie."
+PAUSE_TITLE,Pause
+PAUSE_RESUME,Reprendre
+PAUSE_CONTROLS,Commandes
+PAUSE_MENU,Revenir au menu

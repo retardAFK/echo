@@ -32,6 +32,28 @@ func test_buttons_set_the_role() -> void:
 	assert_eq(GameSession.role, GameSession.Role.HUNTED)
 
 
+func test_choice_shows_goal_and_controls_of_the_role() -> void:
+	assert_false(_menu.get_node("%RolePanel").visible)
+	_menu.choose(GameSession.Role.MONSTER)
+	assert_true(_menu.get_node("%RolePanel").visible)
+	assert_false(_menu.get_node("%Buttons").visible)
+	var controls: String = _menu.get_node("%Controls").text
+	assert_string_contains(controls, tr("CONTROLS_SCAN"))
+	assert_false(controls.contains(tr("CONTROLS_THROW")), "no bottles for the monster")
+	assert_eq(_menu.get_node("%Goal").text, tr("GOAL_MONSTER"))
+	_menu.back()
+	assert_true(_menu.get_node("%Buttons").visible)
+	_menu.choose(GameSession.Role.HUNTED)
+	assert_string_contains(_menu.get_node("%Controls").text, tr("CONTROLS_THROW"))
+
+
+func test_every_control_line_is_translated() -> void:
+	for role in [GameSession.Role.HUNTED, GameSession.Role.MONSTER]:
+		for key in ControlsText.keys_for(role):
+			assert_ne(tr(key), key, key)
+		assert_ne(tr(ControlsText.goal_key(role)), ControlsText.goal_key(role))
+
+
 func test_hunted_role_keeps_the_ai_monster() -> void:
 	var map: Node3D = MAP_SCENE.instantiate()
 	add_child_autofree(map)
