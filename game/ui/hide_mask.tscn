@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/ui/hide_mask.gd" id="1_mask"]
+
+[node name="HideMask" type="CanvasLayer"]
+layer = 5
+visible = false
+script = ExtResource("1_mask")
+
+[node name="Top" type="ColorRect" parent="."]
+anchor_right = 1.0
+color = Color(0, 0, 0, 1)
+
+[node name="Bottom" type="ColorRect" parent="."]
+anchor_right = 1.0
+color = Color(0, 0, 0, 1)

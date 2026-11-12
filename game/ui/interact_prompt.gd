@@ -11,7 +11,9 @@ const DOT_TARGET := Color(1, 1, 1, 0.9)
 const DOT_SIZE_IDLE := 2.0
 const DOT_SIZE_TARGET := 4.0
 
-@export var player: Player
+## The hunted Player, or the playable monster (S-008): anything with
+## get_interactable() and get_hold_ratio().
+@export var player: Node3D
 
 @onready var _label: Label = $Label
 @onready var _dot: ColorRect = $Crosshair
@@ -21,7 +23,13 @@ const DOT_SIZE_TARGET := 4.0
 func _process(_delta: float) -> void:
 	var present := is_instance_valid(player) and player.is_inside_tree()
 	var target: Node = player.get_interactable() if present else null
-	var prompt: String = "" if target == null else target.get_prompt()
+	var prompt := ""
+	if target != null:
+		prompt = (
+			target.get_prompt_for(player)
+			if target.has_method("get_prompt_for")
+			else target.get_prompt()
+		)
 	_label.visible = prompt != ""
 	if _label.visible:
 		_label.text = prompt

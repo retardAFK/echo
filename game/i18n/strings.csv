@@ -27,3 +27,6 @@ HUD_INTERACT_PICKUP_DECOY,E : ramasser le réveil
 HUD_CARRY_BOTTLE,1 bouteille
 HUD_CARRY_BOTTLES,%d bouteilles
 HUD_CARRY_DECOY,Réveil
+HUD_INTERACT_HIDE,Maintenir E : se cacher
+HUD_INTERACT_LEAVE,Maintenir E : sortir
+HUD_INTERACT_OPEN,Maintenir E : ouvrir

@@ -4,6 +4,10 @@ extends Node
 ## Player, or the AI prey (S-004), any body with get_gait().
 ## Footsteps are counted on horizontal distance walked on the floor.
 
+## A move longer than this in one frame is a jump in or out of a hiding spot,
+## not a walk (S-008), in meters.
+const MAX_STEP_MOVE := 0.5
+
 @export var settings: NoiseSettings
 
 var _distance := 0.0
@@ -22,6 +26,9 @@ func _physics_process(_delta: float) -> void:
 	_last_position = position
 	if not _player.is_on_floor():
 		return  # No footsteps in the air.
+	if HidingSpot.is_hidden(_player) or moved > MAX_STEP_MOVE:
+		_distance = 0.0
+		return  # Hidden (S-008), or moved in or out of a hiding spot at once.
 	_distance += moved
 	var gait: PlayerMotion.Gait = _player.call("get_gait")
 	var stride := NoiseMath.stride_for_gait(settings, gait)

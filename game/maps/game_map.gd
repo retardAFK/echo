@@ -24,6 +24,8 @@ const LOOP_SETTINGS := preload("res://game/data/loop_settings.tres")
 const LOOP_HUD_SCENE := preload("res://game/ui/loop_hud.tscn")
 const END_SCREEN_SCENE := preload("res://game/ui/end_screen.tscn")
 const CARRY_HUD_SCENE := preload("res://game/ui/carry_hud.tscn")
+const HIDE_MASK_SCENE := preload("res://game/ui/hide_mask.tscn")
+const INTERACT_PROMPT_SCENE := preload("res://game/ui/interact_prompt.tscn")
 ## Size of the F4 markers for the prey's wander points and hiding spots, in meters.
 const POINT_MARKER_SIZE := 0.3
 
@@ -61,6 +63,11 @@ func _ready() -> void:
 		var carry: CarryHud = CARRY_HUD_SCENE.instantiate()
 		carry.player = _player
 		add_child(carry)
+		var mask: HideMask = HIDE_MASK_SCENE.instantiate()
+		mask.player = _player
+		add_child(mask)
+	for spot in get_hiding_spots():
+		spot.found.connect(_on_hidden_found)
 	_setup_game_loop()
 
 
@@ -85,6 +92,9 @@ func _setup_monster_role() -> void:
 	scan_look.monster = avatar
 	scan_look.night = $WorldEnvironment
 	add_child(scan_look)
+	var prompt: InteractPrompt = INTERACT_PROMPT_SCENE.instantiate()
+	prompt.player = avatar  # Opening hiding spots (S-008, Q7).
+	add_child(prompt)
 	prey = PREY_SCENE.instantiate()
 	prey.wander_route = $PreyRoute
 	prey.hiding_spots = $HidingSpots
@@ -183,6 +193,24 @@ func _add_point_markers(parent: Node3D) -> void:
 		marker.visible = false
 		marker.add_to_group(NoiseDebug.DEBUG_GROUP)
 		point.add_child(marker)
+
+
+## Every hiding spot of the map (S-008).
+func get_hiding_spots() -> Array[HidingSpot]:
+	var found: Array[HidingSpot] = []
+	for node in find_children("*", "Node3D", true, false):
+		if node is HidingSpot:
+			found.append(node)
+	return found
+
+
+## The monster opened a hiding spot with the hunted inside (S-008, Q7): a catch.
+func _on_hidden_found(_occupant: Node3D, _by: Node3D) -> void:
+	if avatar != null:
+		_on_prey_caught()
+	elif _monster != null:
+		_monster.catch_count += 1
+		_on_player_caught()
 
 
 ## Every scannable building of the map.

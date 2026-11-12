@@ -28,3 +28,32 @@ extends Resource
 @export_range(0.5, 20.0, 0.5, "suffix:s") var bottle_max_flight: float = 4.0
 ## How long the glass shards stay on the ground, in seconds.
 @export_range(0.0, 300.0, 1.0, "suffix:s") var shards_time: float = 30.0
+
+@export_group("Decoy")
+## Time between placing an alarm clock and its ringing, in seconds (Q3).
+@export_range(0.0, 120.0, 0.5, "suffix:s") var decoy_delay: float = 15.0
+## How long an alarm clock rings, in seconds (Q3).
+@export_range(0.5, 120.0, 0.5, "suffix:s") var decoy_ring_time: float = 10.0
+## Range of the ringing in open space, in meters (Q3).
+@export_range(0.5, 100.0, 0.5, "suffix:m") var decoy_range: float = 12.0
+## Time between two ringing noises, in seconds (Q3).
+@export_range(0.1, 10.0, 0.1, "suffix:s") var decoy_noise_interval: float = 1.0
+## How far in front of the hunted an alarm clock is placed, in meters.
+@export_range(0.0, 3.0, 0.1, "suffix:m") var decoy_place_distance: float = 0.8
+## The ticking and ringing are played this far for the ears, in meters: the
+## ticking only for the one who stands on it (Q3).
+@export_range(0.1, 10.0, 0.1, "suffix:m") var tick_sound_distance: float = 1.5
+@export_range(1.0, 100.0, 1.0, "suffix:m") var ring_sound_distance: float = 40.0
+
+@export_group("Hiding spots")
+## Seconds to hold "interact" to get in, get out, or open a hiding spot (Q5, Q7).
+@export_range(0.1, 10.0, 0.1, "suffix:s") var hide_time: float = 1.0
+## Range of the door or lid noise, in meters (Q5, Q7).
+@export_range(0.5, 50.0, 0.5, "suffix:m") var hide_noise_range: float = 3.0
+## Farthest distance from the front of a hiding spot to use it, in meters.
+@export_range(0.5, 5.0, 0.1, "suffix:m") var hide_reach: float = 1.6
+## How far the hidden one can turn their head from straight out, in degrees (Q6).
+@export_range(0.0, 180.0, 1.0, "suffix:°") var hidden_yaw_limit: float = 40.0
+@export_range(0.0, 89.0, 1.0, "suffix:°") var hidden_pitch_limit: float = 20.0
+## Share of the screen height left visible through the slit (Q6).
+@export_range(0.05, 1.0, 0.05) var slit_share: float = 0.3
