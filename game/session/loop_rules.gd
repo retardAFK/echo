@@ -30,6 +30,13 @@ static func draw_fuses(
 	return chosen
 
 
+## Draws count items among these (S-008: the alarm clocks of a game).
+static func draw(items: Array, count: int, rng: RandomNumberGenerator) -> Array:
+	var shuffled := items.duplicate()
+	_shuffle(shuffled, rng)
+	return shuffled.slice(0, count)
+
+
 ## Fuses found so far, carried or placed.
 func found() -> int:
 	return carried + placed

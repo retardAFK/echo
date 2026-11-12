@@ -68,6 +68,7 @@ func setup(map: Node, rng_seed := 0) -> void:
 	fused_boxes = LoopRules.draw_fuses(by_building, settings.fuse_count, _rng)
 	for box: FuseBox in fused_boxes:
 		box.set_fuse(true)
+	_draw_decoys(map)
 	for building: Building in _all(map, Building):
 		building.scan_changed.connect(_on_scan_changed)
 	var found: Array = _all(map, Transformer)
@@ -160,6 +161,22 @@ func _on_ruse_used(_kind: StringName) -> void:
 func _on_scan_changed(is_scanned: bool) -> void:
 	if is_scanned and not is_over:
 		scan_count += 1
+
+
+## Keeps decoys_per_game alarm clocks among their places, takes the others
+## away (S-008, Q3).
+func _draw_decoys(map: Node) -> void:
+	var decoys := _all(map, Pickup).filter(
+		func(pickup: Pickup) -> bool: return pickup.kind == Inventory.Kind.DECOY
+	)
+	if decoys.is_empty():
+		return
+	decoys.sort_custom(func(a: Node, b: Node) -> bool: return str(a.get_path()) < str(b.get_path()))
+	var kept := LoopRules.draw(decoys, decoys[0].settings.decoys_per_game, _rng)
+	for decoy: Pickup in decoys:
+		if decoy not in kept:
+			decoy.get_parent().remove_child(decoy)
+			decoy.queue_free()
 
 
 static func _all(map: Node, type: Variant) -> Array:

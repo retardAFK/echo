@@ -9,6 +9,8 @@ extends Resource
 @export_range(0, 10) var max_bottles: int = 2
 ## Most alarm clocks the hunted carries at once (Q3).
 @export_range(0, 5) var max_decoys: int = 1
+## Alarm clocks lying in the cité each game, drawn among their places (Q3).
+@export_range(0, 20) var decoys_per_game: int = 4
 ## Farthest distance from a pickup to take it, in meters.
 @export_range(0.5, 5.0, 0.1, "suffix:m") var pickup_reach: float = 1.8
 
