@@ -157,7 +157,10 @@ func _physics_process(_delta: float) -> void:
 	if HidingSpot.is_hidden(prey):
 		return  # Only opening the hiding spot catches it (S-008, Q7).
 	var gap := prey.global_position - avatar.global_position
-	if Vector2(gap.x, gap.z).length() <= avatar.settings.catch_distance:
+	if (
+		Vector2(gap.x, gap.z).length() <= avatar.settings.catch_distance
+		and absf(gap.y) <= avatar.settings.catch_height
+	):  # Not through a floor (T-079).
 		_on_prey_caught()
 
 

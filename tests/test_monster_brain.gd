@@ -157,3 +157,11 @@ func test_farthest_patrol_point() -> void:
 	assert_eq(MonsterBrain.farthest_index(_patrol, Vector3(0, 0, 1)), 2)
 	_brain.set_patrol(_patrol, 2)
 	assert_eq(_brain.target, _patrol[2])
+
+
+func test_no_catch_through_a_floor() -> void:
+	# S-009, T-079: the hunted in the car park, the monster on the street above.
+	assert_true(_brain.is_catch(Vector3(0.5, 0.0, 0.5)))
+	assert_true(_brain.is_catch(Vector3(0.5, -1.0, 0.0)), "a step or a slope")
+	assert_false(_brain.is_catch(Vector3(0.5, -3.0, 0.5)))
+	assert_false(_brain.is_catch(Vector3(2.0, 0.0, 0.0)), "too far")

@@ -42,7 +42,7 @@ Les phases 1 à 8 ont donné une partie complète dans la cité des Tilleuls, av
 - [ ] `?bench` joue le parcours de 60 s et affiche images/s moyennes, minimum, 1 % les plus lentes, appels de dessin, triangles et temps de chargement.
 - [ ] Les 60 images/s sont mesurées sur la machine de référence et notées dans S-006, S-007, S-008 et S-009 ; s'il en manque, des tâches d'optimisation sont ajoutées.
 - [ ] Le monstre IA scanne un bâtiment visitable quand il y perd la trace, en respectant la jauge ; les lumières du bâtiment vacillent ; la simulation compte les scans.
-- [ ] Sur 3 séries de 20 parties simulées, la proie IA sort 40 à 60 % du temps et une partie dure 8 à 12 min en moyenne, sans blocage.
+- [ ] Sur 3 séries de 20 parties simulées, la proie IA sort 40 à 60 % du temps et une partie dure 8 à 12 min en moyenne, sans blocage. → T-079 (12/11/2026) : 13, 15 et 13 sorties sur 20 (65 à 75 %), durée moyenne 5,9 à 6,4 min, aucun blocage. La capture répétée au parking venait d'une capture à travers le plafond (corrigée). Les sorties durent 6 à 9,5 min : la proie IA va droit aux fusibles, la durée réelle se mesurera avec les testeurs.
 - [ ] Après le choix du rôle, les commandes et le but de ce rôle sont affichés ; Échap met en pause et propose reprendre, commandes, revenir au menu.
 - [ ] L'écran de fin copie un résumé de la partie ; le questionnaire est prêt.
 - [ ] Le budget de performance de la section 2.2 tient toujours (taille du build, appels de dessin, chargement).
