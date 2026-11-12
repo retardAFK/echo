@@ -39,7 +39,6 @@ static func is_monster(user: Node) -> bool:
 func _ready() -> void:
 	add_to_group(Interactable.GROUP)
 	add_to_group(GROUP)
-	_creak.stream = PlaceholderSounds.creak()
 
 
 ## The hiding spot nearest to a position within a flat distance, or null.
