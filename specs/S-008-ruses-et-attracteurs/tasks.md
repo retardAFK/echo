@@ -2,10 +2,10 @@
 
 Comme pour S-007, chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, captures dans le rendu OpenGL et dans Chrome). Seuls les choix de style (modèles, sons) sont montrés à Maxime.
 
-- [ ] T-061 — Spec S-008
+- [x] T-061 — Spec S-008
   - Résultat vérifiable : spec validée
   - Dépend de : —
-- [ ] T-062 — Plan et tâches de S-008
+- [x] T-062 — Plan et tâches de S-008
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-061
 - [ ] T-063 — Ramasser et lancer une bouteille
@@ -37,3 +37,4 @@ Comme pour S-007, chaque tâche est vérifiée par Claude (tests GUT, lint, impo
   - Dépend de : T-068, T-070
 
 ## Compte rendu
+- T-061, T-062 (12/11/2026) : spec, plan et tâches écrits, validés par Maxime (« Tout valider »), Q-004 close.

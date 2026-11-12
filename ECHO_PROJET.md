@@ -501,13 +501,14 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-009 | 03/11/2026 | Scan de bâtiment limité par une jauge (8 s, recharge 45 s, seuil 25 %), alerte discrète par les lumières, se figer a un prix (souffle après une course, progression de quête perdue). Monstre discret : inaudible en rôdant, 3 m en marche, 12 m en course, souffle à 2 m | Le scan doit être un pari et non une victoire automatique, et se figer ne doit pas suffire |
 | D-010 | 07/11/2026 | Cité des Tilleuls : zone jouable de 220 × 220 m, une douzaine de bâtiments dont 4 visitables, les autres en façades. Un fusible se trouve toujours dans un bâtiment visitable. L'hôpital sera une map séparée, plus petite et sur plusieurs niveaux | Une map assez grande pour qu'un bruit lointain reste un pari pour le monstre, avec des bâtiments visitables qui obligent les chassés à entrer là où le scan les menace |
 | D-011 | 10/11/2026 | Rendu net : la 3D est rendue à la résolution de l'écran, sans réduction des couleurs, sans tramage ni tremblement des sommets, avec un grain à peine visible. Les textures restent en gros pixels nets et le brouillard reste | Le rendu basse résolution de S-005, avec son grain et son tramage, faisait mal aux yeux dans une scène de nuit (retour de Maxime sur la cité des Tilleuls) |
+| D-012 | 12/11/2026 | Les maps sont séparées : une map par partie (clôt Q-004) | Suite logique de D-010, qui fait déjà de l'hôpital une map à part ; plus simple à construire et à charger dans le navigateur |
 
 ### 10.2 Questions ouvertes
 
 - [ ] **Q-001** : Nom définitif du jeu (« Écho » est provisoire).
 - [ ] **Q-002** : Combien de chassés au final : 3 ou 4 ?
 - [ ] **Q-003** : Le chassé attrapé est-il éliminé, ou peut-il être sauvé par un coéquipier ?
-- [ ] **Q-004** : Les maps sont-elles reliées entre elles (une grande zone) ou séparées (une map par partie) ?
+- [x] **Q-004** : Les maps sont-elles reliées entre elles ou séparées ? → séparées, une map par partie (D-012).
 - [ ] **Q-005** : Multijoueur entre amis seulement, ou matchmaking public ?
 - [ ] **Q-006** : Le PC de développement est fourni par l'employeur. Faut-il un PC personnel pour ce projet ?
 - [ ] **Q-007** : Projet gratuit ou payant à terme (itch.io, Steam) ? Lien avec la structure envisagée pour publier des applications.

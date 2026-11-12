@@ -1,6 +1,6 @@
 # Plan — S-008
 
-**Statut** : proposé (12/11/2026), suit la spec en attente de validation
+**Statut** : validé (12/11/2026, Maxime : « Tout valider »)
 
 ## Approche technique
 
