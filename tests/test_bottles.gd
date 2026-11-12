@@ -215,7 +215,7 @@ func test_broken_glass_lies_on_the_ground_in_retro() -> void:
 	_add_floor()
 	var player := _make_player()
 	await wait_physics_frames(2)
-	var before := get_children()
+	var before := get_children()  # Shards of the other tests may lie around: theirs get renamed.
 	player.inventory.take(Inventory.Kind.BOTTLE)
 	var bottle := player.throw_bottle()
 	var bottle_meshes := bottle.find_children("*", "MeshInstance3D", true, false)
@@ -224,7 +224,7 @@ func test_broken_glass_lies_on_the_ground_in_retro() -> void:
 		assert_true(mesh.get_surface_override_material(0) is ShaderMaterial, "retro bottle")
 	await wait_seconds(2.0)
 	var shards := get_children().filter(
-		func(n: Node) -> bool: return n not in before and n.name.begins_with("Shards")
+		func(n: Node) -> bool: return n not in before and not n.is_queued_for_deletion()
 	)
 	assert_eq(shards.size(), 1, "shards left on the ground")
 	if shards.is_empty():
