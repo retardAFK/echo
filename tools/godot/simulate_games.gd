@@ -6,7 +6,6 @@ extends Node
 ## stuck). With one, the AI prey plays against the AI monster.
 
 const MAP_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
-const MONSTER_SCENE := preload("res://game/entities/monster/monster.tscn")
 ## Longest game, in game seconds, before it counts as stuck.
 const TIME_LIMIT := 1800.0
 
@@ -53,7 +52,7 @@ func _play(index: int) -> Dictionary:
 	map.end_screen.change_scene = false
 	var avatar := map.avatar
 	if _with_monster:
-		_replace_avatar_with_ai(map)
+		map.play_ai_against_ai()
 	else:
 		avatar.process_mode = Node.PROCESS_MODE_DISABLED
 		avatar.global_position = Vector3(0, -50, 0)  # Out of sight and hearing.
@@ -108,7 +107,11 @@ func _play(index: int) -> Dictionary:
 				% [
 					map.prey.global_position,
 					PreyBrain.State.keys()[map.prey.get_state()],
-					MonsterBrain.State.keys()[hunter[0].brain.state] if not hunter.is_empty() else "-"
+					(
+						MonsterBrain.State.keys()[hunter[0].brain.state]
+						if not hunter.is_empty()
+						else "-"
+					)
 				]
 			)
 		)
@@ -131,21 +134,3 @@ func _play(index: int) -> Dictionary:
 	map.queue_free()
 	await get_tree().process_frame
 	return {"result": result, "duration": duration, "ruses": ruses}
-
-
-## The playable monster stays still, out of the way; an AI monster hunts the
-## AI prey instead, as it would hunt the player.
-func _replace_avatar_with_ai(map: GameMap) -> void:
-	var spawn: Node3D = map.get_node("MonsterSpawn").get_child(0)
-	map.avatar.process_mode = Node.PROCESS_MODE_DISABLED
-	map.avatar.global_position = Vector3(0, -50, 0)
-	var monster: Monster = MONSTER_SCENE.instantiate()
-	monster.patrol_route = map.get_node("PatrolRoute")
-	monster.buildings = map.get_buildings()
-	monster.player = map.prey
-	monster.position = spawn.global_position
-	map.add_child(monster)
-	map.prey.monster = monster
-	monster.player_caught.connect(map.game_loop.finish.bind(false))
-	var guard := Prey.markers_of(map.get_node("GuardPoints"))
-	map.game_loop.exit_opened.connect(monster.guard_exit.bind(guard))

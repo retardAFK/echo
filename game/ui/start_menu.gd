@@ -6,6 +6,7 @@ extends Control
 signal role_chosen(role: GameSession.Role)
 
 const MAP_SCENE := "res://game/maps/tilleuls/tilleuls.tscn"
+const BENCH_SCENE := "res://game/bench/bench.tscn"
 
 ## Tests turn this off to stay on the menu after a choice.
 @export var change_scene := true
@@ -15,6 +16,10 @@ const MAP_SCENE := "res://game/maps/tilleuls/tilleuls.tscn"
 
 
 func _ready() -> void:
+	if change_scene and Bench.is_requested():
+		# Bench mode (S-009, T-075): straight to the camera tour, no menu.
+		get_tree().change_scene_to_file.call_deferred(BENCH_SCENE)
+		return
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_hunted_button.pressed.connect(choose.bind(GameSession.Role.HUNTED))
 	_monster_button.pressed.connect(choose.bind(GameSession.Role.MONSTER))

@@ -6,3 +6,7 @@ extends RefCounted
 enum Role { HUNTED, MONSTER }
 
 static var role := Role.HUNTED
+
+## Seed of the next game (spawn, fuses, decoys), 0 for a new draw each time.
+## The bench mode (S-009, T-075) fixes it so every run plays the same game.
+static var game_seed := 0

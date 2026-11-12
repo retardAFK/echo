@@ -19,6 +19,7 @@ const MENU_SCENE := "res://game/ui/start_menu.tscn"
 const AVATAR_SCENE := preload("res://game/entities/monster/monster_avatar.tscn")
 const MARKERS_SCENE := preload("res://game/ui/noise_markers.tscn")
 const SCAN_RETICLE_SCENE := preload("res://game/ui/scan_reticle.tscn")
+const MONSTER_SCENE := preload("res://game/entities/monster/monster.tscn")
 const PREY_SCENE := preload("res://game/entities/prey/prey.tscn")
 const LOOP_SETTINGS := preload("res://game/data/loop_settings.tres")
 const LOOP_HUD_SCENE := preload("res://game/ui/loop_hud.tscn")
@@ -49,7 +50,10 @@ var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
-	_rng.randomize()
+	if GameSession.game_seed != 0:
+		_rng.seed = GameSession.game_seed
+	else:
+		_rng.randomize()
 	if not get_spawn_points().is_empty():
 		_pick_spawn()
 		_player.global_position = _spawn
@@ -127,7 +131,7 @@ func _setup_game_loop() -> void:
 	game_loop.settings = LOOP_SETTINGS
 	game_loop.hunted = prey if avatar != null else _player
 	add_child(game_loop)
-	game_loop.setup(self)
+	game_loop.setup(self, GameSession.game_seed)
 	end_screen = END_SCREEN_SCENE.instantiate()
 	add_child(end_screen)
 	game_loop.ended.connect(_on_game_ended)
@@ -251,3 +255,22 @@ func _on_player_caught() -> void:
 	_player.rotation.y = _spawn_yaw
 	_player.velocity = Vector3.ZERO
 	_monster.reset_to_patrol(_spawn)
+
+
+## Monster role only: the playable monster is put away, out of sight and
+## hearing, and an AI monster hunts the AI prey instead, as it would hunt the
+## player. Used by the game simulation (S-007) and the bench mode (S-009).
+func play_ai_against_ai() -> Monster:
+	var spawn: Node3D = get_node("MonsterSpawn").get_child(0)
+	avatar.process_mode = Node.PROCESS_MODE_DISABLED
+	avatar.global_position = Vector3(0, -50, 0)
+	var monster: Monster = MONSTER_SCENE.instantiate()
+	monster.patrol_route = get_node("PatrolRoute")
+	monster.buildings = get_buildings()
+	monster.player = prey
+	monster.position = spawn.global_position
+	add_child(monster)
+	prey.monster = monster
+	monster.player_caught.connect(game_loop.finish.bind(false))
+	game_loop.exit_opened.connect(monster.guard_exit.bind(Prey.markers_of(get_node("GuardPoints"))))
+	return monster
