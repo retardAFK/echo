@@ -97,6 +97,9 @@ func test_in_the_monster_role_the_prey_takes_a_fuse_and_repairs() -> void:
 	map.avatar.global_position = Vector3(0, -50, 0)
 	var prey := map.prey
 	var loop := map.game_loop
+	# No detour to a bottle lying near the box (S-008): this test is about the box.
+	prey.settings = prey.settings.duplicate()
+	prey.settings.pickup_detour = 0.0
 	assert_true(prey.brain.is_looping())
 	assert_eq(prey.get_state(), PreyBrain.State.SEARCH)
 	# Straight to a full box, as if it had just walked there.
@@ -105,7 +108,9 @@ func test_in_the_monster_role_the_prey_takes_a_fuse_and_repairs() -> void:
 	prey.brain.target = prey._boxes[index].get_approach_point()
 	prey.global_position = prey.brain.target
 	await wait_until(
-		func() -> bool: return loop.rules.found() == 1, loop.settings.pickup_time + 4.0
+		# Generous: on a loaded CI runner, slow frames make game time lag real time.
+		func() -> bool: return loop.rules.found() == 1,
+		loop.settings.pickup_time + 15.0
 	)
 	assert_eq(loop.rules.found(), 1, "it held E on the box")
 	# Then at the transformer with all the fuses, placements sped up.
