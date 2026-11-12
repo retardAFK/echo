@@ -5,8 +5,10 @@ extends RefCounted
 ## back where to go and at which pace.
 
 signal state_changed(state: State)
+## The chase turned into a search: it lost sight of the hunted there (S-008).
+signal chase_lost(last_seen: Vector3)
 
-enum State { PATROL, INVESTIGATE, CHASE, SEARCH, GUARD }
+enum State { PATROL, INVESTIGATE, CHASE, SEARCH, GUARD, OPEN }
 enum Pace { PROWL, WALK, RUN }
 
 var settings: MonsterSettings
@@ -92,7 +94,7 @@ func get_pace() -> Pace:
 	match state:
 		State.INVESTIGATE, State.GUARD:
 			return Pace.WALK
-		State.CHASE, State.SEARCH:
+		State.CHASE, State.SEARCH, State.OPEN:
 			return Pace.RUN
 	return Pace.PROWL
 
@@ -101,12 +103,33 @@ func is_catch_distance(distance: float) -> bool:
 	return distance <= settings.catch_distance
 
 
-## A noise reached the monster's ears. Ignored during a chase.
+## A noise reached the monster's ears. Ignored during a chase, and while it
+## goes to open a hiding spot (S-008): it knows where to look.
 func hear(position: Vector3) -> void:
-	if state == State.CHASE:
+	if state == State.CHASE or state == State.OPEN:
 		return
 	_enter(State.INVESTIGATE)
 	target = position
+
+
+## Goes to open a hiding spot, standing at its front (S-008, Q7): it saw the
+## hunted get in, or lost a chase next to it.
+func go_open(front: Vector3) -> void:
+	_enter(State.OPEN)
+	target = front
+
+
+## It opened the hiding spot: whatever it found, it looks around there a while.
+func done_opening() -> void:
+	if state != State.OPEN:
+		return
+	_enter(State.SEARCH)
+	lingering = true
+
+
+## Whether it stands at the hiding spot it wants to open.
+func is_opening(arrived: bool) -> bool:
+	return state == State.OPEN and arrived
 
 
 ## A noise came from inside a building: the monster will come back and have a
@@ -225,6 +248,7 @@ func _update_chase(delta: float, sees_player: bool) -> void:
 	if _timer >= settings.lose_sight_time:
 		_enter(State.SEARCH)
 		target = _last_seen
+		chase_lost.emit(_last_seen)
 
 
 func _linger_then_patrol(delta: float, arrived: bool, duration: float) -> void:

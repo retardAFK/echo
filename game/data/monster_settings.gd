@@ -50,6 +50,11 @@ extends Resource
 @export_range(0.1, 30.0, 0.1, "suffix:s") var lose_sight_time: float = 3.0
 ## Time spent looking around where the player was last seen, in seconds.
 @export_range(0.0, 60.0, 0.5, "suffix:s") var search_time: float = 8.0
+## After losing a chase, it opens the hiding spot nearest to where it last saw
+## the hunted if one lies within this distance, in meters (S-008, Q7).
+@export_range(0.0, 50.0, 0.5, "suffix:m") var search_hide_radius: float = 8.0
+## Chance that it opens that hiding spot (S-008, Q7), from 0 to 1.
+@export_range(0.0, 1.0, 0.05) var search_open_chance: float = 0.5
 ## Distance at which the monster catches the player, in meters.
 @export_range(0.1, 5.0, 0.1, "suffix:m") var catch_distance: float = 1.2
 ## How long the monster remembers the building it heard a noise in, in seconds (S-007, Q10).
