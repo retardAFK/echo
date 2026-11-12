@@ -17,8 +17,8 @@
 - Version du jeu : la CI écrit le SHA court dans `game/build_version.txt` avant l'export (« dev » en local). Le résumé de fin et le banc d'essai l'affichent.
 
 ### Le monstre IA scanne (Q3)
-- `MonsterBrain` gagne un état **`SCAN`** et une méthode `want_scan(building_id, center)` appelée par `Monster` dans deux cas : à la fin d'une poursuite (`chase_lost`) ou d'une enquête sans résultat, si un bâtiment visitable est à moins de `ai_scan_radius` (15 m) ; et quand un bruit entendu est situé dans un bâtiment visitable (`Building.contains`). La décision est pure (jauge prête, bâtiment pas scanné depuis `ai_scan_cooldown` = 30 s) et testée.
-- En `SCAN`, le monstre s'arrête et fait comme le joueur monstre : `ScanGauge.start()`, puis le signal de scan du bâtiment (`Building` fait déjà vaciller ses lumières), écoute des bruits du bâtiment (`NoiseBus`, filtre du bâtiment comme pour `MonsterAvatar`), au plus `ai_scan_time` (4 s). Un bruit entendu → `hear()` → `INVESTIGATE`. Sinon → retour à `PATROL`.
+- `MonsterBrain` gagne un état **`SCAN`**, un signal `trace_lost(at)` (fin d'une enquête ou d'une recherche sans résultat, ou retour au bâtiment entendu) et `can_scan(building, gauge_ready)` : pas en poursuite, jauge prête, bâtiment pas scanné depuis `ai_scan_cooldown` (30 s). Décision pure et testée.
+- `Monster` a sa propre `ScanGauge`. Sur `trace_lost`, il cherche le bâtiment le plus proche à moins de `ai_scan_radius` (15 m, `Building.distance_to`), lance la jauge, met `building.scanned` (les lumières vacillent) et s'arrête, tourné vers lui, au plus `ai_scan_time` (4 s). Une fois la concentration passée, tout bruit du bâtiment est entendu, même trop faible (même règle que `MonsterAvatar.scan_reveals`). Un bruit entendu, une proie repérée ou la jauge vide finissent le scan.
 - `GameLoop` compte déjà les scans (`_on_scan_changed`) ; la simulation les affiche.
 
 ### Équilibre (Q4)
