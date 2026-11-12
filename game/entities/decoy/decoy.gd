@@ -36,6 +36,7 @@ static func crush_near(tree: SceneTree, at: Vector3, distance: float) -> int:
 
 func _ready() -> void:
 	add_to_group(GROUP)
+	RetroSurface.apply_to(self, RetroSurface.DEFAULT_SETTINGS)
 	timer = DecoyTimer.new(settings)
 	_tick.max_distance = settings.tick_sound_distance
 	_ring.max_distance = settings.ring_sound_distance
