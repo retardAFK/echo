@@ -525,4 +525,4 @@ Points vérifiés, et écarts éventuels à faire valider.
 - [x] **Q-009** : Discrétion du monstre et alerte du scan → voir D-009.
 - [ ] **Q-010** : Les chassés peuvent-ils se parler en jeu (voix de proximité qui fait du bruit), ou passent-ils par un outil externe ? À trancher dans S-010.
 - [ ] **Q-011** : Langues de sortie : français seul, ou aussi anglais ? À trancher dans S-015.
-- [ ] **Q-012** : Où héberger le build de test (GitHub Pages ou page itch.io non listée) ? À trancher dans le plan de S-009.
+- [x] **Q-012** : Où héberger le build de test ? → page itch.io en accès restreint, protégée par mot de passe (S-009, Q1, 12/11/2026).

@@ -35,15 +35,17 @@ var siren_left := 0.0
 var is_over := false
 var hunted_won := false
 
-var _started_msec := 0
-var _ended_msec := 0
+var _elapsed := 0.0
+## Frames drawn and their time during the game, for the average frames per
+## second of the summary (S-009, Q7).
+var _frames := 0
+var _frame_time := 0.0
 var _siren_noise_left := 0.0
 var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
 	rules = LoopRules.new(settings.fuse_count)
-	_started_msec = Time.get_ticks_msec()
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
 	if hunted != null and hunted.has_signal(&"ruse_used"):
 		hunted.ruse_used.connect(_on_ruse_used)
@@ -86,10 +88,10 @@ func setup(map: Node, rng_seed := 0) -> void:
 	fuses_changed.emit(rules.found(), rules.placed)
 
 
-## Seconds since the start of the game, frozen when it ends.
+## Game seconds since the start, frozen when it ends. Counted from the
+## physics frames, so a pause (S-009, Q6) does not count.
 func get_duration() -> float:
-	var now := _ended_msec if is_over else Time.get_ticks_msec()
-	return (now - _started_msec) / 1000.0
+	return _elapsed
 
 
 func is_exit_open() -> bool:
@@ -111,11 +113,23 @@ func finish(won: bool) -> void:
 		return
 	is_over = true
 	hunted_won = won
-	_ended_msec = Time.get_ticks_msec()
 	ended.emit(won)
 
 
+func _process(delta: float) -> void:
+	if not is_over:
+		_frames += 1
+		_frame_time += delta
+
+
+## Average frames per second during the game, 0 before the first frame.
+func get_average_fps() -> float:
+	return _frames / _frame_time if _frame_time > 0.0 else 0.0
+
+
 func _physics_process(delta: float) -> void:
+	if not is_over:
+		_elapsed += delta
 	if siren_left <= 0.0:
 		return
 	siren_left -= delta

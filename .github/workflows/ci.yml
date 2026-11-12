@@ -103,6 +103,12 @@ jobs:
           path: build/test-results/
           if-no-files-found: warn
 
+      - name: Stamp the game version
+        # Shown in the end-of-game summary (S-009, T-081): the commit it was built from.
+        run: |
+          sed -i '/^\[application\]/a config/version="'"${GITHUB_SHA::7}"'"' project.godot
+          grep -n "config/version" project.godot
+
       - name: Export web build
         run: |
           mkdir -p build/web
@@ -129,3 +135,23 @@ jobs:
           name: web-build
           path: build/web/
           retention-days: 14
+
+      # S-009, T-076 (Q1): every merge to main goes to the restricted itch.io
+      # page of the test build. Needs the secret BUTLER_API_KEY and the
+      # variable ITCH_TARGET ("user/game"); skipped without them.
+      - name: Publish test build to itch.io
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          ITCH_TARGET: ${{ vars.ITCH_TARGET }}
+        run: |
+          if [ -z "$BUTLER_API_KEY" ] || [ -z "$ITCH_TARGET" ]; then
+            echo "::notice::itch.io not set up (BUTLER_API_KEY, ITCH_TARGET): test build not published"
+            exit 0
+          fi
+          curl -fsSL -o /tmp/butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q /tmp/butler.zip -d ~/butler
+          chmod +x ~/butler/butler
+          ~/butler/butler -V
+          ~/butler/butler push build/web "${ITCH_TARGET}:html5" --userversion "${GITHUB_SHA::7}"
+          echo "Test build ${GITHUB_SHA::7} published to https://${ITCH_TARGET%%/*}.itch.io/${ITCH_TARGET#*/}" >> "$GITHUB_STEP_SUMMARY"

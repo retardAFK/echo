@@ -10,12 +10,12 @@ extends Node3D
 ## the playable monster, standing where the AI monster starts, and an AI prey
 ## starting where the hunted does. Touching the prey catches it: "caught"
 ## screen, and the prey wanders again from the point farthest from the monster.
-## Escape frees the mouse; Escape again goes back to the start menu.
+## Escape pauses the game (S-009, Q6): resume, read the controls, or go back
+## to the start menu.
 ## If the map has a PlayerSpawns node, the hunted (or the AI prey) starts on one
 ## of its Marker3D children, drawn at random (S-006). Scannable buildings are the
 ## Building nodes of the map, wherever they are.
 
-const MENU_SCENE := "res://game/ui/start_menu.tscn"
 const AVATAR_SCENE := preload("res://game/entities/monster/monster_avatar.tscn")
 const MARKERS_SCENE := preload("res://game/ui/noise_markers.tscn")
 const SCAN_RETICLE_SCENE := preload("res://game/ui/scan_reticle.tscn")
@@ -27,6 +27,7 @@ const END_SCREEN_SCENE := preload("res://game/ui/end_screen.tscn")
 const CARRY_HUD_SCENE := preload("res://game/ui/carry_hud.tscn")
 const HIDE_MASK_SCENE := preload("res://game/ui/hide_mask.tscn")
 const INTERACT_PROMPT_SCENE := preload("res://game/ui/interact_prompt.tscn")
+const PAUSE_MENU_SCENE := preload("res://game/ui/pause_menu.tscn")
 ## Size of the F4 markers for the prey's wander points and hiding spots, in meters.
 const POINT_MARKER_SIZE := 0.3
 
@@ -37,6 +38,8 @@ var prey: Prey
 var game_loop: GameLoop
 ## Shown when the game loop ends (S-007, Q6).
 var end_screen: EndScreen
+## Escape pauses the game (S-009, Q6).
+var pause_menu: PauseMenu
 
 var _rng := RandomNumberGenerator.new()
 
@@ -73,13 +76,8 @@ func _ready() -> void:
 	for spot in get_hiding_spots():
 		spot.found.connect(_on_hidden_found)
 	_setup_game_loop()
-
-
-func _input(event: InputEvent) -> void:
-	# _input runs before the player's _unhandled_input, so the first Escape
-	# only frees the mouse and the second one, mouse already free, opens the menu.
-	if event.is_action_pressed("release_mouse") and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-		get_tree().change_scene_to_file(MENU_SCENE)
+	pause_menu = PAUSE_MENU_SCENE.instantiate()
+	add_child(pause_menu)
 
 
 func _setup_monster_role() -> void:
