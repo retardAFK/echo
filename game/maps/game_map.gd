@@ -152,6 +152,8 @@ func get_fuse_boxes() -> Array[FuseBox]:
 func _physics_process(_delta: float) -> void:
 	if avatar == null or _caught_screen.visible or (game_loop != null and game_loop.is_over):
 		return
+	if HidingSpot.is_hidden(prey):
+		return  # Only opening the hiding spot catches it (S-008, Q7).
 	var gap := prey.global_position - avatar.global_position
 	if Vector2(gap.x, gap.z).length() <= avatar.settings.catch_distance:
 		_on_prey_caught()

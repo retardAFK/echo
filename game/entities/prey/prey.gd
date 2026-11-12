@@ -11,9 +11,13 @@ extends CharacterBody3D
 ## and runs for the exit, holding "interact" like the hunted (HoldInteraction).
 
 signal state_changed(state: PreyBrain.State)
+## It used a ruse (S-008): "bottle", "decoy", "hide" or "car_alarm".
+signal ruse_used(kind: StringName)
 
 ## Distance the target must move before the path is recomputed, in meters.
 const RETARGET_DISTANCE := 0.5
+const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
+const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
 
 @export var settings: PreySettings
 ## Speeds of the hunted (S-001).
@@ -22,6 +26,8 @@ const RETARGET_DISTANCE := 0.5
 @export var wander_route: Node3D
 ## Node whose Marker3D children are the hiding spots.
 @export var hiding_spots: Node3D
+## Values of the ruses it uses like the hunted (S-008).
+@export var ruse_settings: RuseSettings
 ## The playable monster, with get_eye_position().
 @export var monster: Node3D
 ## Buildings whose scans the prey may notice.
@@ -31,6 +37,12 @@ var brain: PreyBrain
 var sees_monster := false
 ## The game it plays (S-007), null outside the game loop.
 var game_loop: GameLoop
+## What it carries (S-008, Q9).
+var inventory: Inventory
+## The hiding spot it is in, or null.
+var hiding_in: HidingSpot
+## How many times it used each ruse, by kind (S-008).
+var ruse_counts := {}
 
 var _heard_monster := false
 var _vision_timer := 0.0
@@ -41,6 +53,14 @@ var _boxes: Array[FuseBox] = []
 var _hold := HoldInteraction.new()
 ## Building whose scan the prey noticed, or null.
 var _warned_by: Building
+## S-008: the pickup it is going for, the hiding spot it flees to or hides
+## in, the alarm clock it placed, and its own hold on the hiding spot.
+var _detour: Pickup
+var _hide_spot: HidingSpot
+var _decoy: Decoy
+var _hide_hold := HoldInteraction.new()
+var _pickup_look_left := 0.0
+var _was_fleeing := false
 var _rng := RandomNumberGenerator.new()
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
@@ -48,6 +68,7 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_rng.seed = hash(name)
+	inventory = Inventory.new(ruse_settings)
 	brain = PreyBrain.new(settings, _rng.randi())
 	brain.state_changed.connect(state_changed.emit)
 	brain.set_points(markers_of(wander_route), markers_of(hiding_spots))
@@ -143,15 +164,18 @@ func _physics_process(delta: float) -> void:
 	_heard_monster = false
 	var arrived := _agent.is_navigation_finished()
 	brain.update(delta, alarm, threat, arrived, is_warned())
+	_use_ruses(delta, threat)
 	if game_loop != null:
 		_play_loop(delta, arrived)
 	if _agent.target_position.distance_to(brain.target) > RETARGET_DISTANCE:
 		_agent.target_position = brain.target
 		_stuck_left = settings.stuck_time
+	_pant(delta)
+	if _update_hiding(delta):
+		return  # Inside a hiding spot, or getting out of it: no move.
 	var before := global_position
 	_move(delta)
 	_check_stuck(delta, before)
-	_pant(delta)
 
 
 ## The loop's part of a frame: decides at a box or the transformer, and holds
@@ -160,7 +184,11 @@ func _play_loop(delta: float, arrived: bool) -> void:
 	var work_on: Node = null
 	match brain.state:
 		PreyBrain.State.SEARCH:
-			if arrived and _agent.target_position.distance_to(brain.target) <= RETARGET_DISTANCE:
+			if (
+				_detour == null
+				and arrived
+				and _agent.target_position.distance_to(brain.target) <= RETARGET_DISTANCE
+			):
 				_arrive()
 		PreyBrain.State.WORK:
 			work_on = _work_target()
@@ -173,6 +201,9 @@ func _play_loop(delta: float, arrived: bool) -> void:
 ## It reached the slot or the transformer it was heading to.
 func _arrive() -> void:
 	if brain.goal == PreyBrain.Goal.REPAIR:
+		if _decoy != null and is_instance_valid(_decoy):
+			if _decoy.timer.state == DecoyTimer.State.TICKING:
+				return  # Waits for its alarm clock to draw the monster away (Q9).
 		brain.start_work()
 	elif _boxes[brain.slot_index].has_fuse:
 		brain.start_work()  # It sees the red LED.
@@ -192,6 +223,223 @@ func _work_finished() -> bool:
 	return not _boxes[brain.slot_index].has_fuse
 
 
+## The ruses of S-008 (Q9), each a simple rule: take what lies close on its
+## way, throw a bottle away from its goal and hide or set off an alarm when it
+## flees, place an alarm clock before repairing.
+func _use_ruses(delta: float, threat: Vector3) -> void:
+	var fleeing := brain.state == PreyBrain.State.FLEE
+	if fleeing and not _was_fleeing:
+		_on_flee_started(threat)
+	_was_fleeing = fleeing
+	if fleeing:
+		_set_off_car_alarms()
+	_update_detour(delta)
+	_maybe_place_decoy()
+
+
+func _on_flee_started(threat: Vector3) -> void:
+	_detour = null
+	if monster != null and global_position.distance_to(threat) >= settings.throw_safe_distance:
+		throw_bottle_away()
+	var spot := pick_hiding_spot(threat)
+	if spot != null:
+		_hide_spot = spot
+		brain.flee_to(spot.get_exit_point())
+
+
+## A free hiding spot close by that the monster cannot see, or null.
+func pick_hiding_spot(_threat: Vector3) -> HidingSpot:
+	var best: HidingSpot = null
+	var best_distance := settings.hide_search_radius
+	for node in get_tree().get_nodes_in_group(HidingSpot.GROUP):
+		var spot := node as HidingSpot
+		if not spot.is_free():
+			continue
+		var distance := global_position.distance_to(spot.get_exit_point())
+		if distance > best_distance:
+			continue
+		if monster != null:
+			var eye: Vector3 = monster.get_eye_position()
+			var at := spot.get_exit_point() + Vector3.UP
+			if (
+				eye.distance_to(at) <= settings.sight_range
+				and MonsterVision.has_line_of_sight(get_world_3d().direct_space_state, eye, at)
+			):
+				continue  # The monster would see it get in.
+		best = spot
+		best_distance = distance
+	return best
+
+
+## Throws a bottle 12 to 18 m away, opposite to where it is going (Q9).
+func throw_bottle_away() -> ThrownBottle:
+	if hiding_in != null or inventory.count(Inventory.Kind.BOTTLE) == 0:
+		return null
+	var away := global_position - brain.get_goal_point()
+	away.y = 0.0
+	if away.length_squared() < 0.01:
+		away = global_basis.z
+	var distance := _rng.randf_range(settings.throw_distance_min, settings.throw_distance_max)
+	return throw_bottle_to(global_position + away.normalized() * distance)
+
+
+## Throws a bottle so that it lands at this point on flat ground.
+func throw_bottle_to(point: Vector3) -> ThrownBottle:
+	if hiding_in != null or not inventory.use(Inventory.Kind.BOTTLE):
+		return null
+	var flat := Vector3(point.x - global_position.x, 0.0, point.z - global_position.z)
+	var direction := flat.normalized() if flat.length_squared() > 0.0001 else -global_basis.z
+	var lift := deg_to_rad(ruse_settings.throw_lift)
+	var axis := direction.cross(Vector3.UP).normalized()
+	var launch := direction.rotated(axis, lift)
+	var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+	var speed := ThrownBottle.speed_for_range(
+		flat.length(),
+		ruse_settings.throw_lift,
+		settings.ear_height,
+		gravity,
+		ruse_settings.throw_speed
+	)
+	var bottle: ThrownBottle = BOTTLE_SCENE.instantiate()
+	get_parent().add_child(bottle)
+	bottle.global_position = get_eye_position() + direction * ruse_settings.throw_hand_offset
+	bottle.linear_velocity = launch * speed
+	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	_count_ruse(&"bottle")
+	return bottle
+
+
+## Places an alarm clock where it stands (Q9).
+func place_decoy() -> Decoy:
+	if hiding_in != null or not inventory.use(Inventory.Kind.DECOY):
+		return null
+	var decoy: Decoy = DECOY_SCENE.instantiate()
+	get_parent().add_child(decoy)
+	decoy.global_position = global_position
+	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	_count_ruse(&"decoy")
+	_decoy = decoy
+	return decoy
+
+
+## On its way to repair, between 30 and 20 m from the transformer, it places
+## its alarm clock (Q9).
+func _maybe_place_decoy() -> void:
+	if (
+		game_loop == null
+		or _decoy != null
+		or brain.state != PreyBrain.State.SEARCH
+		or brain.goal != PreyBrain.Goal.REPAIR
+		or inventory.count(Inventory.Kind.DECOY) == 0
+	):
+		return
+	var distance := global_position.distance_to(brain.get_goal_point())
+	if distance <= settings.decoy_trigger_distance and distance >= settings.decoy_min_distance:
+		place_decoy()
+
+
+## Fleeing past a car whose alarm can ring, it sets it off (Q9).
+func _set_off_car_alarms() -> void:
+	for node in get_tree().get_nodes_in_group(Interactable.GROUP):
+		var car := node as CarAlarm
+		if car != null and car.can_interact(global_position):
+			car.interact(self)
+			_count_ruse(&"car_alarm")
+
+
+## Takes what lies close to its way while it searches calmly (Q9).
+func _update_detour(delta: float) -> void:
+	if _detour != null:
+		if (
+			not is_instance_valid(_detour)
+			or _detour.is_queued_for_deletion()
+			or brain.state != PreyBrain.State.SEARCH
+			or brain.target.distance_to(_detour.global_position) > RETARGET_DISTANCE
+		):
+			_end_detour()
+		elif _detour.can_interact(global_position):
+			_detour.interact(self)
+			_end_detour()
+		return
+	_pickup_look_left -= delta
+	if _pickup_look_left > 0.0 or brain.state != PreyBrain.State.SEARCH:
+		return
+	_pickup_look_left = settings.pickup_look_interval
+	var best: Pickup = null
+	var best_distance := settings.pickup_detour
+	for node in get_tree().get_nodes_in_group(Interactable.GROUP):
+		var pickup := node as Pickup
+		if pickup == null or pickup.is_queued_for_deletion() or not pickup.wanted_by(self):
+			continue
+		var distance := global_position.distance_to(pickup.global_position)
+		if distance <= best_distance:
+			best = pickup
+			best_distance = distance
+	if best != null and brain.detour_to(best.global_position):
+		_detour = best
+
+
+func _end_detour() -> void:
+	var had := _detour != null
+	_detour = null
+	if had:
+		brain.end_detour()
+
+
+## Gets into the hiding spot it fled to, stays while it hides, and gets out
+## when it goes back to its goal, holding "interact" each time like the hunted.
+## Returns true while it must not move.
+func _update_hiding(delta: float) -> bool:
+	if hiding_in != null and _hide_spot == null:
+		_hide_spot = hiding_in
+	if _hide_spot == null:
+		return false
+	var hiding := brain.state == PreyBrain.State.HIDE
+	var want := false
+	if hiding and hiding_in == null:
+		if not _hide_spot.wanted_by(self):
+			_hide_spot = null  # Taken meanwhile: it hides crouched where it is.
+			return false
+		want = _hide_spot.can_interact(global_position)
+	elif not hiding and brain.state != PreyBrain.State.FLEE and hiding_in != null:
+		want = true  # Back to its goal: out first.
+	elif not hiding and brain.state != PreyBrain.State.FLEE and hiding_in == null:
+		_hide_hold.update(self, null, false, delta)
+		_hide_spot = null
+		return false
+	_hide_hold.update(self, _hide_spot, want, delta)
+	return hiding_in != null or want
+
+
+## Gets into a hiding spot (S-008): still, out of reach, out of sight.
+func hide_in(spot: HidingSpot) -> void:
+	hiding_in = spot
+	velocity = Vector3.ZERO
+	$CollisionShape3D.disabled = true
+	$Body.visible = false
+	global_position = spot.global_position
+	_count_ruse(&"hide")
+
+
+func leave_hiding() -> void:
+	if hiding_in == null:
+		return
+	global_position = hiding_in.get_exit_point()
+	hiding_in = null
+	$CollisionShape3D.disabled = false
+	$Body.visible = true
+	velocity = Vector3.ZERO
+
+
+func is_hidden() -> bool:
+	return hiding_in != null
+
+
+func _count_ruse(kind: StringName) -> void:
+	ruse_counts[kind] = ruse_counts.get(kind, 0) + 1
+	ruse_used.emit(kind)
+
+
 ## True while the prey noticed a scan and the scan is still on.
 func is_warned() -> bool:
 	return _warned_by != null
@@ -199,6 +447,11 @@ func is_warned() -> bool:
 
 ## Back to wandering from a wander point, rested (after a catch).
 func respawn(at: Vector3, index: int) -> void:
+	if hiding_in != null:
+		hiding_in.occupant = null
+		leave_hiding()
+	_hide_spot = null
+	_detour = null
 	global_position = at
 	velocity = Vector3.ZERO
 	_warned_by = null

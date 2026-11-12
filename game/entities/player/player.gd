@@ -6,6 +6,8 @@ extends CharacterBody3D
 ## Emitted when the player switches between crouching, walking and sprinting.
 ## The noise system (S-002) listens to it.
 signal gait_changed(gait: PlayerMotion.Gait)
+## The player used a ruse (S-008): "bottle", "decoy", "hide" or "car_alarm".
+signal ruse_used(kind: StringName)
 
 ## Something in reach is used only if it lies within this angle of the
 ## crosshair, seen from above (radians).
@@ -150,8 +152,11 @@ func get_interactable() -> Node:
 ## Uses the nearest thing in reach in front of the crosshair, if any.
 func interact() -> void:
 	var target := get_interactable()
-	if target != null:
-		target.interact(self)
+	if target == null:
+		return
+	if target is CarAlarm and target.can_interact(global_position):
+		ruse_used.emit(&"car_alarm")
+	target.interact(self)
 
 
 ## Throws a bottle where the camera looks, a little upward (S-008, Q2), if the
@@ -167,6 +172,7 @@ func throw_bottle() -> ThrownBottle:
 	bottle.global_position = (_camera.global_position + forward * ruse_settings.throw_hand_offset)
 	bottle.linear_velocity = direction * ruse_settings.throw_speed
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	ruse_used.emit(&"bottle")
 	return bottle
 
 
@@ -191,6 +197,7 @@ func place_decoy() -> Decoy:
 	get_parent().add_child(decoy)
 	decoy.global_position = spot
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	ruse_used.emit(&"decoy")
 	return decoy
 
 
@@ -207,6 +214,7 @@ func hide_in(spot: HidingSpot) -> void:
 	_head.rotation.x = 0.0
 	_wants_crouch = spot.crouched
 	_set_gait(PlayerMotion.Gait.CROUCH if spot.crouched else PlayerMotion.Gait.WALK)
+	ruse_used.emit(&"hide")
 
 
 ## Gets out of the hiding spot, in front of it.

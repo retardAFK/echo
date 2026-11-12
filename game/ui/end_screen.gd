@@ -50,6 +50,7 @@ func show_result(role: GameSession.Role, game_loop: GameLoop) -> void:
 				tr("END_FUSES") % [game_loop.rules.placed, game_loop.rules.fuse_count],
 				tr("END_NOISES") % game_loop.noise_count,
 				tr("END_SCANS") % game_loop.scan_count,
+				tr("END_RUSES") % game_loop.ruse_count,
 			]
 		)
 	)

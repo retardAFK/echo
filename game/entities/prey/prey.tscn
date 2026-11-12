@@ -5,6 +5,7 @@
 [ext_resource type="Resource" path="res://game/data/player_settings.tres" id="3_motion"]
 [ext_resource type="Script" path="res://game/entities/player/footstep_emitter.gd" id="4_footsteps"]
 [ext_resource type="Resource" path="res://game/data/noise_settings.tres" id="5_noise"]
+[ext_resource type="Resource" path="res://game/data/ruse_settings.tres" id="6_ruses"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_body"]
 radius = 0.3
@@ -25,6 +26,7 @@ collision_mask = 3
 script = ExtResource("1_prey")
 settings = ExtResource("2_settings")
 motion = ExtResource("3_motion")
+ruse_settings = ExtResource("6_ruses")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)

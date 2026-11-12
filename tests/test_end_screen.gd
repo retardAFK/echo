@@ -36,7 +36,7 @@ func test_a_caught_hunted_loses_at_once() -> void:
 	assert_true(get_tree().paused, "the game stops behind the end screen")
 	assert_eq(map.end_screen.get_node("%Title").text, "END_CAUGHT")
 	var stats: String = map.end_screen.get_node("%Stats").text
-	assert_eq(stats.split("\n").size(), 4, "duration, fuses, noises, scans")
+	assert_eq(stats.split("\n").size(), 5, "duration, fuses, noises, scans, ruses (S-008)")
 	assert_string_contains(stats, "0/3")
 
 

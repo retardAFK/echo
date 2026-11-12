@@ -23,6 +23,8 @@ var rules: LoopRules
 var noise_count := 0
 ## Scans started by the monster since the start.
 var scan_count := 0
+## Ruses used by the hunted since the start (S-008, Q11).
+var ruse_count := 0
 ## The boxes that got a fuse this game.
 var fused_boxes: Array = []
 var transformer: Transformer
@@ -43,6 +45,8 @@ func _ready() -> void:
 	rules = LoopRules.new(settings.fuse_count)
 	_started_msec = Time.get_ticks_msec()
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
+	if hunted != null and hunted.has_signal(&"ruse_used"):
+		hunted.ruse_used.connect(_on_ruse_used)
 
 
 ## Starts the game on a map: draws the fuses among its boxes (Q1) and wires
@@ -146,6 +150,11 @@ func _on_fuse_taken(user: Node) -> void:
 func _on_noise_emitted(event: NoiseEvent) -> void:
 	if hunted != null and event.source == hunted and not is_over:
 		noise_count += 1
+
+
+func _on_ruse_used(_kind: StringName) -> void:
+	if not is_over:
+		ruse_count += 1
 
 
 func _on_scan_changed(is_scanned: bool) -> void:

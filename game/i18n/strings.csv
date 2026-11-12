@@ -20,6 +20,7 @@ END_DURATION,Durée : %s
 END_FUSES,Fusibles posés : %d/%d
 END_NOISES,Bruits du chassé : %d
 END_SCANS,Scans du monstre : %d
+END_RUSES,Ruses utilisées : %d
 END_REPLAY,Rejouer
 END_MENU,Menu
 HUD_INTERACT_PICKUP_BOTTLE,E : ramasser la bouteille
