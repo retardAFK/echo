@@ -33,13 +33,16 @@ func _ready() -> void:
 	var durations := results.map(func(r: Dictionary) -> float: return r.duration)
 	var wins := results.filter(func(r: Dictionary) -> bool: return r.result == "out").size()
 	var stuck := results.filter(func(r: Dictionary) -> bool: return r.result == "stuck").size()
+	var scans := 0
+	for r: Dictionary in results:
+		scans += r.scans
 	var mean := 0.0
 	for d: float in durations:
 		mean += d / durations.size()
 	print(
 		(
-			"SUMMARY games %d, prey out %d, caught %d, stuck %d, mean %.1f min"
-			% [_games, wins, _games - wins - stuck, stuck, mean / 60.0]
+			"SUMMARY games %d, prey out %d, caught %d, stuck %d, mean %.1f min, scans %d"
+			% [_games, wins, _games - wins - stuck, stuck, mean / 60.0, scans]
 		)
 	)
 	get_tree().quit()
@@ -117,7 +120,7 @@ func _play(index: int) -> Dictionary:
 		)
 	print(
 		(
-			"GAME %d: %s after %.1f min (fuses %d placed %d, noises %d, ruses %s, real %d s)"
+			"GAME %d: %s after %.1f min (fuses %d placed %d, noises %d, scans %d, ruses %s, real %d s)"
 			% [
 				index,
 				result,
@@ -125,6 +128,7 @@ func _play(index: int) -> Dictionary:
 				loop.rules.found(),
 				loop.rules.placed,
 				loop.noise_count,
+				loop.scan_count,
 				ruses,
 				(Time.get_ticks_msec() - started) / 1000
 			]
@@ -133,4 +137,4 @@ func _play(index: int) -> Dictionary:
 	get_tree().paused = false
 	map.queue_free()
 	await get_tree().process_frame
-	return {"result": result, "duration": duration, "ruses": ruses}
+	return {"result": result, "duration": duration, "ruses": ruses, "scans": loop.scan_count}
