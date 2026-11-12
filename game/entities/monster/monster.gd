@@ -27,8 +27,13 @@ const CONE_GROUND_OFFSET := 0.05
 var brain: MonsterBrain
 var catch_count := 0
 var sees_player := false
+## Rolls whether it opens a hiding spot after losing a chase (S-008, Q7).
+var rng := RandomNumberGenerator.new()
+## The hiding spot it is going to open, or null.
+var open_target: HidingSpot
 
 var _vision_timer := 0.0
+var _was_hidden := false
 var _noise: MonsterNoise
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
@@ -38,6 +43,8 @@ func _ready() -> void:
 	brain = MonsterBrain.new(settings)
 	_noise = MonsterNoise.new(settings)
 	brain.state_changed.connect(state_changed.emit)
+	brain.chase_lost.connect(_on_chase_lost)
+	rng.randomize()
 	brain.set_patrol(get_patrol_points(), start_index)
 	_agent.target_position = brain.target
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
@@ -91,6 +98,7 @@ func _physics_process(delta: float) -> void:
 		crouched = player.get_gait() == PlayerMotion.Gait.CROUCH
 		_update_sight(delta)
 	brain.update(delta, sees_player, player_position, distance, crouched, arrived)
+	_update_opening(delta, arrived)
 	if _agent.target_position.distance_to(brain.target) > RETARGET_DISTANCE:
 		_agent.target_position = brain.target
 	var before := global_position
@@ -119,6 +127,10 @@ func _update_sight(delta: float) -> void:
 	_vision_timer = settings.vision_interval
 	var eye := get_ear_position()
 	var target: Vector3 = player.get_eye_position()
+	var hidden := HidingSpot.is_hidden(player)
+	if hidden and not _was_hidden and sees_player:
+		go_open(player.get("hiding_in"))  # It saw the hunted get in (S-008, Q7).
+	_was_hidden = hidden
 	sees_player = (
 		not HidingSpot.is_hidden(player)  # Hidden: never seen (S-008, Q6).
 		and MonsterVision.in_view_cone(eye, -global_basis.z, target, settings)
@@ -128,6 +140,45 @@ func _update_sight(delta: float) -> void:
 
 func _flat_distance(point: Vector3) -> float:
 	return Vector2(point.x - global_position.x, point.z - global_position.z).length()
+
+
+## Goes to open a hiding spot and opens it (S-008, Q7).
+func go_open(spot: HidingSpot) -> void:
+	if spot == null:
+		return
+	open_target = spot
+	brain.go_open(spot.get_exit_point())
+	_agent.target_position = brain.target
+
+
+## At the hiding spot, it faces it and holds it open like a player would: the
+## same time, the same creak. Whoever is inside is caught.
+func _update_opening(delta: float, arrived: bool) -> void:
+	if open_target == null:
+		return
+	if brain.state != MonsterBrain.State.OPEN:
+		open_target.release(self)
+		open_target = null  # Something more urgent: a chase.
+		return
+	if not brain.is_opening(arrived):
+		return
+	var at := Vector3(
+		open_target.global_position.x, global_position.y, open_target.global_position.z
+	)
+	if at.distance_to(global_position) > 0.01:
+		look_at(at, Vector3.UP)
+	if open_target.hold(self, delta):
+		open_target.release(self)
+		open_target = null
+		brain.done_opening()
+
+
+## Lost the chase: it may open the hiding spot nearest to where it last saw
+## the hunted, one time out of two (S-008, Q7).
+func _on_chase_lost(last_seen: Vector3) -> void:
+	var spot := HidingSpot.nearest(get_tree(), last_seen, settings.search_hide_radius)
+	if spot != null and rng.randf() < settings.search_open_chance:
+		go_open(spot)
 
 
 ## Guards the exit tunnel from now on (S-007, Q4): the siren told it where the

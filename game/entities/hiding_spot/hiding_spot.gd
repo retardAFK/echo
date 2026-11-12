@@ -42,6 +42,20 @@ func _ready() -> void:
 	_creak.stream = PlaceholderSounds.creak()
 
 
+## The hiding spot nearest to a position within a flat distance, or null.
+static func nearest(tree: SceneTree, at: Vector3, radius: float) -> HidingSpot:
+	var best: HidingSpot = null
+	var best_distance := radius
+	for node in tree.get_nodes_in_group(GROUP):
+		var spot := node as HidingSpot
+		var gap := spot.global_position - at
+		var distance := Vector2(gap.x, gap.z).length()
+		if distance <= best_distance:
+			best = spot
+			best_distance = distance
+	return best
+
+
 ## Where the one who gets out stands, in front of it.
 func get_exit_point() -> Vector3:
 	return global_position + global_basis.z * (settings.hide_reach * 0.6)
@@ -86,18 +100,21 @@ func interact(_user: Node) -> void:
 	pass
 
 
-func hold(user: Node, delta: float) -> void:
+## One frame of holding "interact". Returns whether the hold just finished.
+func hold(user: Node, delta: float) -> bool:
 	if user != _holder:
 		_holder = user
 		_progress = 0.0
 		_wait_release = false
 	if _wait_release or not wanted_by(user):
-		return
+		return false
 	_progress += delta
-	if _progress >= settings.hide_time:
-		_progress = 0.0
-		_wait_release = true  # Holding on does not get straight back out.
-		_finish(user)
+	if _progress < settings.hide_time:
+		return false
+	_progress = 0.0
+	_wait_release = true  # Holding on does not get straight back out.
+	_finish(user)
+	return true
 
 
 func release(user: Node) -> void:
