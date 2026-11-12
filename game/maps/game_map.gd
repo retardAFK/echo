@@ -23,6 +23,7 @@ const PREY_SCENE := preload("res://game/entities/prey/prey.tscn")
 const LOOP_SETTINGS := preload("res://game/data/loop_settings.tres")
 const LOOP_HUD_SCENE := preload("res://game/ui/loop_hud.tscn")
 const END_SCREEN_SCENE := preload("res://game/ui/end_screen.tscn")
+const CARRY_HUD_SCENE := preload("res://game/ui/carry_hud.tscn")
 ## Size of the F4 markers for the prey's wander points and hiding spots, in meters.
 const POINT_MARKER_SIZE := 0.3
 
@@ -57,6 +58,9 @@ func _ready() -> void:
 		_monster.player = _player
 		_monster.buildings = get_buildings()
 		_monster.player_caught.connect(_on_player_caught)
+		var carry: CarryHud = CARRY_HUD_SCENE.instantiate()
+		carry.player = _player
+		add_child(carry)
 	_setup_game_loop()
 
 

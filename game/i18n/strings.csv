@@ -22,3 +22,8 @@ END_NOISES,Bruits du chassé : %d
 END_SCANS,Scans du monstre : %d
 END_REPLAY,Rejouer
 END_MENU,Menu
+HUD_INTERACT_PICKUP_BOTTLE,E : ramasser la bouteille
+HUD_INTERACT_PICKUP_DECOY,E : ramasser le réveil
+HUD_CARRY_BOTTLE,1 bouteille
+HUD_CARRY_BOTTLES,%d bouteilles
+HUD_CARRY_DECOY,Réveil

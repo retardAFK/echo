@@ -10,9 +10,6 @@ signal alarm_stopped
 
 enum State { IDLE, RINGING, RESTING }
 
-## Group of the things the hunted can use with the "interact" action.
-const INTERACTABLE_GROUP := &"interactable"
-
 @export var settings: CarAlarmSettings
 
 var state := State.IDLE
@@ -25,7 +22,7 @@ var _flash_timer := 0.0
 
 
 func _ready() -> void:
-	add_to_group(INTERACTABLE_GROUP)
+	add_to_group(Interactable.GROUP)
 	_set_lights(false)
 
 

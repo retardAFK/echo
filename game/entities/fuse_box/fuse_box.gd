@@ -22,7 +22,7 @@ var progress: HoldProgress
 
 
 func _ready() -> void:
-	add_to_group(CarAlarm.INTERACTABLE_GROUP)
+	add_to_group(Interactable.GROUP)
 	progress = HoldProgress.new(settings.pickup_time)
 	_led.visible = has_fuse
 

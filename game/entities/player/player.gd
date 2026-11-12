@@ -10,8 +10,14 @@ signal gait_changed(gait: PlayerMotion.Gait)
 ## Something in reach is used only if it lies within this angle of the
 ## crosshair, seen from above (radians).
 const AIM_ANGLE := deg_to_rad(35.0)
+const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 
 @export var settings: PlayerSettings
+## Values of the ruses: bottles, alarm clocks, hiding spots (S-008).
+@export var ruse_settings: RuseSettings
+
+## What the player carries (S-008).
+var inventory: Inventory
 
 var _gait := PlayerMotion.Gait.WALK
 var _wants_crouch := false
@@ -29,6 +35,7 @@ var _hold := HoldInteraction.new()
 
 
 func _ready() -> void:
+	inventory = Inventory.new(ruse_settings)
 	# Each player owns its capsule, so resizing it never touches another instance.
 	_capsule = _collision.shape.duplicate()
 	_collision.shape = _capsule
@@ -46,6 +53,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		toggle_crouch()
 	elif event.is_action_pressed("interact"):
 		interact()
+	elif event.is_action_pressed("throw") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		throw_bottle()
 	elif event is InputEventMouseButton and event.pressed:
 		# Browsers only allow pointer capture right after a user gesture.
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -91,14 +100,16 @@ func look(relative: Vector2) -> void:
 
 
 ## The nearest thing in reach, in front of the crosshair, that the player can
-## use (a car alarm, S-006), or null.
+## use (a car alarm, S-006), or null. A pickup it has no room for is skipped.
 func get_interactable() -> Node:
 	var best: Node = null
 	var best_distance := INF
 	var forward := -_camera.global_basis.z
 	var aim := Vector2(forward.x, forward.z).normalized()
-	for node in get_tree().get_nodes_in_group(CarAlarm.INTERACTABLE_GROUP):
+	for node in get_tree().get_nodes_in_group(Interactable.GROUP):
 		if not node.can_interact(global_position):
+			continue
+		if node.has_method("wanted_by") and not node.wanted_by(self):
 			continue
 		var gap: Vector3 = node.global_position - global_position
 		var flat := Vector2(gap.x, gap.z)
@@ -116,6 +127,22 @@ func interact() -> void:
 	var target := get_interactable()
 	if target != null:
 		target.interact(self)
+
+
+## Throws a bottle where the camera looks, a little upward (S-008, Q2), if the
+## player carries one. The gesture makes a faint noise.
+func throw_bottle() -> ThrownBottle:
+	if not inventory.use(Inventory.Kind.BOTTLE):
+		return null
+	var forward := -_camera.global_basis.z
+	var right := _camera.global_basis.x
+	var direction := forward.rotated(right, deg_to_rad(ruse_settings.throw_lift)).normalized()
+	var bottle: ThrownBottle = BOTTLE_SCENE.instantiate()
+	get_parent().add_child(bottle)
+	bottle.global_position = (_camera.global_position + forward * ruse_settings.throw_hand_offset)
+	bottle.linear_velocity = direction * ruse_settings.throw_speed
+	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	return bottle
 
 
 ## Progress of what the player holds "interact" on (a fuse box, the
