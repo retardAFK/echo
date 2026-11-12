@@ -60,6 +60,10 @@ var _hide_spot: HidingSpot
 var _decoy: Decoy
 var _hide_hold := HoldInteraction.new()
 var _pickup_look_left := 0.0
+var _hide_look_left := 0.0
+## A car alarm it swerves to while it flees, and where it was fleeing to.
+var _car_detour: CarAlarm
+var _flee_target := Vector3.ZERO
 var _was_fleeing := false
 var _rng := RandomNumberGenerator.new()
 
@@ -233,6 +237,9 @@ func _use_ruses(delta: float, threat: Vector3) -> void:
 	_was_fleeing = fleeing
 	if fleeing:
 		_set_off_car_alarms()
+		_look_for_hiding_spot(delta, threat)
+	else:
+		_car_detour = null
 	_update_detour(delta)
 	_maybe_place_decoy()
 
@@ -244,6 +251,25 @@ func _on_flee_started(threat: Vector3) -> void:
 	var spot := pick_hiding_spot(threat)
 	if spot != null:
 		_hide_spot = spot
+		brain.flee_to(spot.get_exit_point())
+
+
+## Keeps looking for a hiding spot along the way while it flees (Q9): one
+## may come within reach after the start, once the monster is far enough.
+func _look_for_hiding_spot(delta: float, threat: Vector3) -> void:
+	_hide_look_left -= delta
+	if _hide_spot != null or hiding_in != null or _hide_look_left > 0.0:
+		return
+	_hide_look_left = settings.pickup_look_interval
+	if global_position.distance_to(threat) < settings.hide_flee_distance:
+		return  # Too close behind: it would be caught at the door.
+	var hunter: MonsterBrain = monster.get("brain") if monster != null else null
+	if hunter != null and hunter.state == MonsterBrain.State.CHASE:
+		return  # Hunted down: it would be seen getting in.
+	var spot := pick_hiding_spot(threat)
+	if spot != null:
+		_hide_spot = spot
+		_car_detour = null
 		brain.flee_to(spot.get_exit_point())
 
 
@@ -345,6 +371,27 @@ func _set_off_car_alarms() -> void:
 		if car != null and car.can_interact(global_position):
 			car.interact(self)
 			_count_ruse(&"car_alarm")
+	if _car_detour != null and _car_detour.state != CarAlarm.State.IDLE:
+		_car_detour = null  # Set off: on to where it was fleeing.
+		brain.flee_to(_flee_target)
+	if _car_detour == null and _hide_spot == null:
+		_swerve_to_car_alarm()
+
+
+## A resting car alarm a few steps off its way: it swerves to set it off in
+## passing (Q9), the din covering its run.
+func _swerve_to_car_alarm() -> void:
+	for node in get_tree().get_nodes_in_group(Interactable.GROUP):
+		var car := node as CarAlarm
+		if (
+			car != null
+			and car.state == CarAlarm.State.IDLE
+			and global_position.distance_to(car.global_position) <= settings.car_alarm_detour
+		):
+			_car_detour = car
+			_flee_target = brain.target
+			brain.flee_to(car.global_position)
+			return
 
 
 ## Takes what lies close to its way while it searches calmly (Q9).

@@ -48,5 +48,11 @@ extends Resource
 ## When it flees, a free hiding spot this close and out of the monster's sight
 ## is where it runs to, in meters (Q9).
 @export_range(0.0, 50.0, 0.5, "suffix:m") var hide_search_radius: float = 10.0
+## While it flees, it only turns to a hiding spot found on the way once the
+## monster is at least this far, in meters (T-071).
+@export_range(0.0, 100.0, 1.0, "suffix:m") var hide_flee_distance: float = 20.0
+## While it flees, it swerves to a resting car alarm this close to set it
+## off in passing, in meters (Q9, T-071).
+@export_range(0.0, 50.0, 0.5, "suffix:m") var car_alarm_detour: float = 15.0
 ## Time between two looks for something to pick up, in seconds.
 @export_range(0.05, 5.0, 0.05, "suffix:s") var pickup_look_interval: float = 0.5
