@@ -37,11 +37,8 @@ static func crush_near(tree: SceneTree, at: Vector3, distance: float) -> int:
 func _ready() -> void:
 	add_to_group(GROUP)
 	timer = DecoyTimer.new(settings)
-	_tick.stream = PlaceholderSounds.tick()
 	_tick.max_distance = settings.tick_sound_distance
-	_ring.stream = PlaceholderSounds.ring()
 	_ring.max_distance = settings.ring_sound_distance
-	_crush.stream = PlaceholderSounds.crush()
 	_crush.max_distance = settings.ring_sound_distance
 	_tick.play()
 

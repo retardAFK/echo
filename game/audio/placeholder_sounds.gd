@@ -13,19 +13,6 @@ const ALARM_LENGTH := 0.8
 const ALARM_LOW_HZ := 620.0
 const ALARM_HIGH_HZ := 880.0
 const ALARM_VOLUME := 0.5
-const GLASS_LENGTH := 0.35
-const GLASS_CUTOFF := 0.85
-const TICK_LENGTH := 0.03
-const TICK_CUTOFF := 0.9
-const TICK_PERIOD := 0.5
-const CRUSH_LENGTH := 0.25
-const CRUSH_CUTOFF := 0.4
-const CREAK_LENGTH := 0.5
-const CREAK_CUTOFF := 0.06
-const RING_LENGTH := 1.0
-const RING_HZ := 2200.0
-const RING_STRIKES_HZ := 18.0
-const RING_VOLUME := 0.35
 
 
 ## A dull thump: low-passed noise with a fast decay.
@@ -36,50 +23,6 @@ static func step() -> AudioStreamWAV:
 ## A breath: brighter noise that swells then fades.
 static func breath() -> AudioStreamWAV:
 	return _noise_burst(BREATH_LENGTH, BREATH_CUTOFF, true, 23)
-
-
-## Breaking glass (S-008): a short, very bright crack that dies fast.
-static func glass() -> AudioStreamWAV:
-	return _noise_burst(GLASS_LENGTH, GLASS_CUTOFF, false, 37)
-
-
-## The ticking of an alarm clock (S-008): a tiny dry click every half second,
-## looped.
-static func tick() -> AudioStreamWAV:
-	var click := _noise_burst(TICK_LENGTH, TICK_CUTOFF, false, 41)
-	var data := click.data
-	var count := int(TICK_PERIOD * MIX_RATE)
-	data.resize(count * 2)  # The rest is silence (zeros).
-	var stream := _stream(data)
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_end = count
-	return stream
-
-
-## An alarm clock being crushed (S-008): a short metal crunch.
-static func crush() -> AudioStreamWAV:
-	return _noise_burst(CRUSH_LENGTH, CRUSH_CUTOFF, false, 43)
-
-
-## The door of a closet or the lid of a dumpster (S-008): a dull swelling creak.
-static func creak() -> AudioStreamWAV:
-	return _noise_burst(CREAK_LENGTH, CREAK_CUTOFF, true, 47)
-
-
-## An alarm clock ringing (S-008): a high bell struck fast, one second, looped.
-static func ring() -> AudioStreamWAV:
-	var count := int(RING_LENGTH * MIX_RATE)
-	var data := PackedByteArray()
-	data.resize(count * 2)
-	for i in count:
-		var time := float(i) / MIX_RATE
-		var strike := 1.0 - fmod(time * RING_STRIKES_HZ, 1.0)
-		var sample := RING_VOLUME * strike * sin(TAU * RING_HZ * time)
-		data.encode_s16(i * 2, int(sample * 32767.0))
-	var stream := _stream(data)
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_end = count
-	return stream
 
 
 ## A car alarm: two alternating square tones, one cycle per noise.

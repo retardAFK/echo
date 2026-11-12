@@ -13,6 +13,7 @@ Seuls les assets faits par nous ou sous licence **CC0** sont acceptés.
 |---|---|---|
 | Sons d'ambiance (vent, autoroute, train, balançoire), `assets/audio/ambience/` | Bruit filtré, synthétisé par `tools/audio/ambience.py` | Cité des Tilleuls (S-006, T-050) |
 | Sons de la boucle de partie (boîtier à fusible, étincelles, ronflement du transformateur, sirène), `assets/audio/loop/` | Bruit filtré et oscillateurs, synthétisés par `tools/audio/loop_sounds.py` | Boucle de partie (S-007, T-059) |
+| Sons des ruses (bouteille brisée, tic-tac et sonnerie du réveil, réveil écrasé, porte de casier, couvercle de benne), `assets/audio/ruses/` | Bruit filtré et oscillateurs, synthétisés par `tools/audio/ruse_sounds.py` | Ruses et attracteurs (S-008, T-070) |
 
 ## Outils de développement
 

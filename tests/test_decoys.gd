@@ -145,3 +145,16 @@ func test_a_ticking_decoy_is_not_crushed() -> void:
 	add_child_autofree(decoy)
 	assert_eq(Decoy.crush_near(get_tree(), decoy.global_position, 1.0), 0)
 	assert_eq(decoy.timer.state, DecoyTimer.State.TICKING)
+
+
+func test_the_alarm_clock_sounds_are_ours_and_loop() -> void:
+	# T-070: synthesised by tools/audio/ruse_sounds.py; ticking and ringing loop.
+	var decoy: Decoy = DECOY_SCENE.instantiate()
+	add_child_autofree(decoy)
+	for player_name in ["Tick", "Ring", "Crush"]:
+		var player: AudioStreamPlayer3D = decoy.get_node(player_name)
+		assert_true(player.stream.resource_path.begins_with("res://assets/audio/ruses/"))
+	var tick: AudioStreamWAV = decoy.get_node("Tick").stream
+	var ring: AudioStreamWAV = decoy.get_node("Ring").stream
+	assert_eq(tick.loop_mode, AudioStreamWAV.LOOP_FORWARD)
+	assert_eq(ring.loop_mode, AudioStreamWAV.LOOP_FORWARD)

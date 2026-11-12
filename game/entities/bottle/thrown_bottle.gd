@@ -11,6 +11,7 @@ signal shattered(at: Vector3)
 const SHARDS_DROP := 3.0
 ## The sound of the break carries this far for the ears, in meters.
 const SOUND_DISTANCE := 30.0
+const GLASS_SOUND := preload("res://assets/audio/ruses/glass_break.wav")
 
 @export var settings: RuseSettings
 
@@ -93,7 +94,7 @@ func _leave_shards(at: Vector3) -> void:
 	mesh.position.y = 0.01
 	shards.add_child(mesh)
 	var sound := AudioStreamPlayer3D.new()
-	sound.stream = PlaceholderSounds.glass()
+	sound.stream = GLASS_SOUND
 	sound.max_distance = SOUND_DISTANCE
 	shards.add_child(sound)
 	sound.play()
