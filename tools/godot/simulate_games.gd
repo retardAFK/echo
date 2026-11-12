@@ -60,12 +60,12 @@ func _play(index: int) -> Dictionary:
 	var started := Time.get_ticks_msec()
 	var last_report := 0.0
 	var result := "stuck"
-	while loop.get_duration() * _speed < TIME_LIMIT:
+	while loop.get_duration() < TIME_LIMIT:
 		await get_tree().physics_frame
 		if loop.is_over:
 			result = "out" if loop.hunted_won else "caught"
 			break
-		var game_time := loop.get_duration() * _speed
+		var game_time := loop.get_duration()
 		if game_time - last_report >= 60.0:
 			last_report = game_time
 			print(
@@ -97,7 +97,7 @@ func _play(index: int) -> Dictionary:
 						]
 					)
 				)
-	var duration := loop.get_duration() * _speed
+	var duration := loop.get_duration()
 	var ruses: Dictionary = map.prey.ruse_counts.duplicate()
 	if result == "caught":
 		var hunter := map.get_children().filter(func(n: Node) -> bool: return n is Monster)
