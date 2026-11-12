@@ -36,6 +36,10 @@ var is_over := false
 var hunted_won := false
 
 var _elapsed := 0.0
+## Frames drawn and their time during the game, for the average frames per
+## second of the summary (S-009, Q7).
+var _frames := 0
+var _frame_time := 0.0
 var _siren_noise_left := 0.0
 var _rng := RandomNumberGenerator.new()
 
@@ -110,6 +114,17 @@ func finish(won: bool) -> void:
 	is_over = true
 	hunted_won = won
 	ended.emit(won)
+
+
+func _process(delta: float) -> void:
+	if not is_over:
+		_frames += 1
+		_frame_time += delta
+
+
+## Average frames per second during the game, 0 before the first frame.
+func get_average_fps() -> float:
+	return _frames / _frame_time if _frame_time > 0.0 else 0.0
 
 
 func _physics_process(delta: float) -> void:

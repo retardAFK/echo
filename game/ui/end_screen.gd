@@ -13,10 +13,14 @@ const MENU_SCENE := "res://game/ui/start_menu.tscn"
 ## Tests turn this off to stay on the map after a choice.
 @export var change_scene := true
 
+## Text copied by "Copier le résumé" (S-009, Q7).
+var summary := ""
+
 @onready var _title: Label = %Title
 @onready var _stats: Label = %Stats
 @onready var _replay: Button = %ReplayButton
 @onready var _menu: Button = %MenuButton
+@onready var _copy: Button = %CopyButton
 
 
 func _ready() -> void:
@@ -24,6 +28,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_replay.pressed.connect(replay)
 	_menu.pressed.connect(go_to_menu)
+	_copy.pressed.connect(copy_summary)
 
 
 ## Title key for the end of a game, seen from the role the player played.
@@ -54,10 +59,18 @@ func show_result(role: GameSession.Role, game_loop: GameLoop) -> void:
 			]
 		)
 	)
+	summary = RunSummary.format(role, game_loop, game_loop.get_average_fps())
+	_copy.text = tr("END_COPY")
 	visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = true
 	_replay.grab_focus()
+
+
+## Copies the summary of the game, for the questionnaire (S-009, Q7).
+func copy_summary() -> void:
+	DisplayServer.clipboard_set(summary)
+	_copy.text = tr("END_COPIED")
 
 
 func replay() -> void:

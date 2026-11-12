@@ -56,3 +56,8 @@ PAUSE_TITLE,Pause
 PAUSE_RESUME,Reprendre
 PAUSE_CONTROLS,Commandes
 PAUSE_MENU,Revenir au menu
+SUMMARY_HEADER,Écho : résumé de partie (version %s)
+SUMMARY_ROLE,Rôle : %s
+SUMMARY_FPS,Images/s moyennes : %d
+END_COPY,Copier le résumé
+END_COPIED,Copié !
