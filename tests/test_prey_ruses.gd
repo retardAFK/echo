@@ -4,6 +4,7 @@ extends GutTest
 const MAP_SCENE := preload("res://game/maps/greybox_test.tscn")
 const FAR_AWAY := Vector3(18, 0, -18)
 const RUSES := preload("res://game/data/ruse_settings.tres")
+const CAR_SCENE := preload("res://game/entities/car_alarm/car_alarm.tscn")
 
 var _map: GameMap
 var _avatar: MonsterAvatar
@@ -121,3 +122,38 @@ func test_prey_does_not_hide_where_the_monster_looks() -> void:
 	assert_null(_prey.pick_hiding_spot(_avatar.global_position), "the monster would see it")
 	_avatar.global_position = FAR_AWAY
 	assert_eq(_prey.pick_hiding_spot(_avatar.global_position), closet)
+
+
+## T-071: a fleeing prey swerves to a resting car alarm a few steps away and
+## sets it off in passing.
+func test_fleeing_prey_swerves_to_set_off_a_car_alarm() -> void:
+	_map.get_node("Closet").free()  # No hiding spot to run to.
+	var car: CarAlarm = CAR_SCENE.instantiate()
+	_map.add_child(car)
+	car.global_position = _prey.global_position + Vector3(5, 0, 2)
+	await wait_physics_frames(2)
+	var near := _prey.global_position + Vector3(-9, 0, 0)
+	NoiseBus.emit_noise(NoiseEvent.Type.FOOTSTEP, near, _avatar.settings.run_range, _avatar)
+	await wait_physics_frames(2)
+	assert_eq(_prey.get_state(), PreyBrain.State.FLEE)
+	await wait_until(func() -> bool: return car.state != CarAlarm.State.IDLE, 5.0)
+	assert_ne(car.state, CarAlarm.State.IDLE, "set off")
+	assert_eq(_prey.ruse_counts.get(&"car_alarm", 0), 1)
+
+
+## T-071: a hiding spot that comes within reach while it flees is taken, unless
+## the monster is close behind.
+func test_fleeing_prey_hides_in_a_closet_met_on_the_way_when_far_enough() -> void:
+	var closet: HidingSpot = _map.get_node("Closet")
+	_prey.brain.state = PreyBrain.State.FLEE
+	var threat := _prey.global_position + Vector3(-30, 0, 0)
+	_prey.call("_look_for_hiding_spot", 1.0, threat)
+	assert_almost_eq(_prey.brain.target.x, closet.get_exit_point().x, 0.01, "turns to the closet")
+
+
+func test_fleeing_prey_ignores_a_closet_with_the_monster_close_behind() -> void:
+	_prey.brain.state = PreyBrain.State.FLEE
+	var target := _prey.brain.target
+	var threat := _prey.global_position + Vector3(-5, 0, 0)
+	_prey.call("_look_for_hiding_spot", 1.0, threat)
+	assert_eq(_prey.brain.target, target, "keeps running")

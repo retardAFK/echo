@@ -99,6 +99,19 @@ func _play(index: int) -> Dictionary:
 					)
 				)
 	var duration := loop.get_duration() * _speed
+	var ruses: Dictionary = map.prey.ruse_counts.duplicate()
+	if result == "caught":
+		var hunter := map.get_children().filter(func(n: Node) -> bool: return n is Monster)
+		print(
+			(
+				"    caught at %s, prey %s, monster %s"
+				% [
+					map.prey.global_position,
+					PreyBrain.State.keys()[map.prey.get_state()],
+					MonsterBrain.State.keys()[hunter[0].brain.state] if not hunter.is_empty() else "-"
+				]
+			)
+		)
 	print(
 		(
 			"GAME %d: %s after %.1f min (fuses %d placed %d, noises %d, ruses %s, real %d s)"
@@ -109,7 +122,7 @@ func _play(index: int) -> Dictionary:
 				loop.rules.found(),
 				loop.rules.placed,
 				loop.noise_count,
-				map.prey.ruse_counts,
+				ruses,
 				(Time.get_ticks_msec() - started) / 1000
 			]
 		)
@@ -117,7 +130,7 @@ func _play(index: int) -> Dictionary:
 	get_tree().paused = false
 	map.queue_free()
 	await get_tree().process_frame
-	return {"result": result, "duration": duration, "ruses": map.prey.ruse_counts.duplicate()}
+	return {"result": result, "duration": duration, "ruses": ruses}
 
 
 ## The playable monster stays still, out of the way; an AI monster hunts the

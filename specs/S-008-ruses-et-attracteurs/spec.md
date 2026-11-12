@@ -1,6 +1,6 @@
 # S-008 — Ruses et attracteurs
 
-**Statut** : validée (12/11/2026, Maxime : « Tout valider »)
+**Statut** : livrée (12/11/2026), validée le 12/11/2026 (Maxime : « Tout valider »)
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent)
 **Phase** : 8 — Ruses et attracteurs
 
@@ -40,9 +40,9 @@ Depuis S-007, une partie complète se joue, mais le chassé n'a que deux armes :
 - Les animations de lancer et de cachette : phase 9.
 
 ## Critères d'acceptation (vérifiables à la main)
-- [ ] Une bouteille lancée se brise là où elle tombe, fait un bruit de 8 m, et le monstre IA qui l'entend va enquêter à cet endroit.
-- [ ] Un réveil posé sonne 15 s plus tard pendant 10 s, attire le monstre IA, et cesse quand le monstre l'écrase.
-- [ ] Un chassé caché, immobile et non essoufflé, n'est ni vu ni entendu par le monstre ; le scan entend son souffle s'il a couru juste avant.
-- [ ] Le monstre IA ouvre la cachette où il a vu le chassé entrer et l'attrape ; le joueur monstre peut ouvrir une cachette.
-- [ ] La proie IA utilise chaque ruse au moins une fois sur une série de parties simulées, et sort plus souvent qu'à la fin de S-007 (10 sur 20).
-- [ ] Les 60 images/s et le budget de performance de S-006 tiennent toujours (appels de dessin, lumières, taille du build).
+- [x] Une bouteille lancée se brise là où elle tombe, fait un bruit de 8 m, et le monstre IA qui l'entend va enquêter à cet endroit.
+- [x] Un réveil posé sonne 15 s plus tard pendant 10 s, attire le monstre IA, et cesse quand le monstre l'écrase.
+- [x] Un chassé caché, immobile et non essoufflé, n'est ni vu ni entendu par le monstre ; le scan entend son souffle s'il a couru juste avant.
+- [x] Le monstre IA ouvre la cachette où il a vu le chassé entrer et l'attrape ; le joueur monstre peut ouvrir une cachette.
+- [x] La proie IA utilise chaque ruse au moins une fois sur une série de parties simulées, et sort plus souvent qu'à la fin de S-007 (10 sur 20). → Chaque ruse utilisée ; sorties 7 à 12 sur 20 selon les séries, environ 1 sur 2 comme S-007. Maxime choisit de livrer et d'équilibrer avec les testeurs (12/11/2026).
+- [x] Les 60 images/s et le budget de performance de S-006 tiennent toujours (appels de dessin, lumières, taille du build). → Budget tenu (254 appels de dessin au pire) ; 60 images/s à mesurer sur la machine de référence, comme pour S-006 et S-007.
