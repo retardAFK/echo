@@ -234,6 +234,49 @@ const TREES := [
 	Vector2(20, 186), Vector2(185, 170),
 ]
 
+## Ruses (S-008, T-067), as plan points (x, height, y). Each spot is laid
+## against the nearest wall, its door toward the room; each pickup on what is
+## below its point (ground, low wall, workbench).
+const CLOSET := preload("res://game/entities/hiding_spot/closet.tscn")
+const DUMPSTER := preload("res://game/entities/hiding_spot/dumpster.tscn")
+const BOTTLE := preload("res://game/entities/pickup/bottle_pickup.tscn")
+const DECOY := preload("res://game/entities/pickup/decoy_pickup.tscn")
+## How far a hiding spot looks for its wall, in meters, and at which height
+## above the floor (under the window sills).
+const SPOT_WALL_SEARCH := 2.5
+const SPOT_RAY_HEIGHT := 0.5
+## 3 closets in each visitable building (Q5).
+const CLOSETS := [
+	Vector3(93, 0, 109), Vector3(93.5, 3, 90), Vector3(103, 9, 109.5),  # Tower: bin room, flats.
+	Vector3(164.2, 0, 61.5), Vector3(148, 0, 61), Vector3(176.8, 0, 82.5),  # Social centre.
+	Vector3(54.2, 0, 141), Vector3(77.8, 0, 141), Vector3(45.8, 0, 148),  # Gallery.
+	Vector3(141, -3, 112), Vector3(179, -3, 106), Vector3(152, -3, 95.8),  # Car park.
+]
+## 6 dumpsters outside, against the blocks of flats (Q5).
+const DUMPSTERS := [
+	Vector3(30, 0, 35), Vector3(28, 0, 110), Vector3(180, 0, 35),
+	Vector3(184, 0, 92), Vector3(185, 0, 144), Vector3(90, 0, 191),
+]
+## 20 bottles, all there every game (Q1): low walls, benches, halls, car park.
+const BOTTLES := [
+	Vector3(55, 0, 70.15), Vector3(68, 0, 91.85), Vector3(50.15, 0, 85),  # Playground kerb.
+	Vector3(53.5, 0, 90.5), Vector3(111.5, 0, 125.8), Vector3(151.5, 0, 178.6),  # Benches.
+	Vector3(44.2, 0, 161.6), Vector3(148, 0, 184),  # Bench, city stadium board.
+	Vector3(113, 0, 99), Vector3(100.5, 0, 110.5), Vector3(97, 6, 100),  # Tower.
+	Vector3(161.5, 0, 82), Vector3(50, 0, 137.5), Vector3(82, 0, 137.5),  # Halls, arcade.
+	Vector3(60.5, 0, 141), Vector3(150, -3, 115.8), Vector3(165, -3, 96),  # Laundrette, car park.
+	Vector3(178.5, -3, 110), Vector3(125, 0, 104.5), Vector3(95, 0, 158),  # Ramp, transformer.
+]
+## 10 places for an alarm clock, 4 drawn each game by GameLoop (Q3): the open
+## garages, the car park, the offices of the social centre, the back corridor
+## of the gallery.
+const DECOYS := [
+	Vector3(10.2, 0, 157.2), Vector3(10.2, 0, 174.7),
+	Vector3(143, -3, 96.5), Vector3(168, -3, 116.2), Vector3(156.8, -3, 102.33),
+	Vector3(176, -3, 101.3), Vector3(176.5, 0, 61), Vector3(165, 0, 83),
+	Vector3(50, 0, 148), Vector3(84, 0, 148),
+]
+
 var kit := MapKit.new()
 var _root: Node3D
 var _materials := {}
@@ -267,6 +310,7 @@ func _ready() -> void:
 	await get_tree().physics_frame
 	_bake_light()
 	_place_fuse_boxes()
+	_place_ruses()
 	var region: NavigationRegion3D = _root.get_node("NavigationRegion3D")
 	var started := Time.get_ticks_msec()
 	region.bake_navigation_mesh(false)
@@ -778,6 +822,69 @@ func _place_fuse_boxes() -> void:
 		else:
 			push_warning("No wall near %s" % marker.get_path())
 		box.global_rotation.y = atan2(facing.x, facing.z)
+
+
+## The hiding spots, obstacles for the navigation mesh, and the pickups (S-008).
+func _place_ruses() -> void:
+	var spots := _group("Hideouts")
+	spots.add_to_group("navigation_source", true)
+	for i in CLOSETS.size():
+		_place_spot(spots, CLOSET, "Closet%d" % (i + 1), CLOSETS[i])
+	for i in DUMPSTERS.size():
+		_place_spot(spots, DUMPSTER, "Dumpster%d" % (i + 1), DUMPSTERS[i])
+	var pickups := _group("Pickups")
+	for kind: Array in [["Bottles", BOTTLE, "Bottle", BOTTLES], ["Decoys", DECOY, "Decoy", DECOYS]]:
+		var parent := Node3D.new()
+		parent.name = kind[0]
+		pickups.add_child(parent)
+		parent.owner = _root
+		for i in kind[3].size():
+			_place_pickup(parent, kind[1], "%s%d" % [kind[2], i + 1], kind[3][i])
+
+
+## A hiding spot with its back against the nearest wall, its front (+Z) toward
+## the room.
+func _place_spot(parent: Node3D, scene: PackedScene, node_name: String, at: Vector3) -> void:
+	var space := _root.get_world_3d().direct_space_state
+	var spot: Node3D = scene.instantiate()
+	spot.name = node_name
+	parent.add_child(spot)
+	spot.owner = _root
+	spot.position = kit.world(at.x, at.z, at.y)
+	var from := spot.position + Vector3.UP * SPOT_RAY_HEIGHT
+	var best_distance := SPOT_WALL_SEARCH
+	var wall := from
+	var front := Vector3.BACK
+	for direction: Vector3 in [Vector3.FORWARD, Vector3.BACK, Vector3.LEFT, Vector3.RIGHT]:
+		var query := PhysicsRayQueryParameters3D.create(
+			from, from + direction * SPOT_WALL_SEARCH, MapKit.WALLS_LAYER
+		)
+		query.exclude = [spot.get_node("Body").get_rid()]
+		var hit := space.intersect_ray(query)
+		if hit and from.distance_to(hit.position) < best_distance:
+			best_distance = from.distance_to(hit.position)
+			wall = hit.position
+			front = -direction
+	if best_distance >= SPOT_WALL_SEARCH:
+		push_warning("No wall near %s" % node_name)
+		return
+	var shape: BoxShape3D = spot.get_node("Body/CollisionShape3D").shape
+	var center := wall + front * (shape.size.z / 2.0 + 0.02)
+	spot.position = Vector3(center.x, at.y, center.z)
+	spot.rotation.y = atan2(front.x, front.z)
+
+
+## A pickup on whatever lies below its point.
+func _place_pickup(parent: Node3D, scene: PackedScene, node_name: String, at: Vector3) -> void:
+	var space := _root.get_world_3d().direct_space_state
+	var node: Node3D = scene.instantiate()
+	node.name = node_name
+	parent.add_child(node)
+	node.owner = _root
+	var from := kit.world(at.x, at.z, at.y + 1.5)
+	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * 2.5))
+	node.position = hit.position if hit else kit.world(at.x, at.z, at.y)
+	node.rotation.y = fposmod(at.x * 1.3 + at.z * 0.7, TAU)  # Not all lined up.
 
 
 func _add_props() -> void:
