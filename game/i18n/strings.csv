@@ -31,3 +31,9 @@ HUD_CARRY_DECOY,Réveil
 HUD_INTERACT_HIDE,Maintenir E : se cacher
 HUD_INTERACT_LEAVE,Maintenir E : sortir
 HUD_INTERACT_OPEN,Maintenir E : ouvrir
+BENCH_LOADING,Banc d'essai : chargement…
+BENCH_RUNNING,Banc d'essai : encore %d s
+BENCH_DONE,Banc d'essai terminé
+BENCH_FPS,"Images/s : %.1f en moyenne, %.1f au pire, %.1f sur les 1 %% les plus lentes"
+BENCH_DRAWS,"Appels de dessin : %d au pire, triangles : %d au pire"
+BENCH_LOAD,Chargement : %.1f s
