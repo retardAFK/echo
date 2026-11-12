@@ -75,6 +75,15 @@ func contains(point: Vector3) -> bool:
 	return absf(local.x) <= half.x and absf(local.y) <= half.y and absf(local.z) <= half.z
 
 
+## Distance from a world position to the building's volume, 0 inside, in meters.
+func distance_to(point: Vector3) -> float:
+	var box: BoxShape3D = _shape.shape
+	var local := _shape.global_transform.affine_inverse() * point
+	var half := box.size / 2.0
+	var outside := (local.abs() - half).max(Vector3.ZERO)
+	return outside.length()
+
+
 func _restore_lights() -> void:
 	_flicker_timer = 0.0
 	for i in _lights.size():

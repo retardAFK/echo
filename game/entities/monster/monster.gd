@@ -31,6 +31,10 @@ var sees_player := false
 var rng := RandomNumberGenerator.new()
 ## The hiding spot it is going to open, or null.
 var open_target: HidingSpot
+## Its concentration gauge for the building scan (S-009, Q3, D-009).
+var scan: ScanGauge
+## Building it is scanning, or null.
+var scan_target: Building
 
 var _vision_timer := 0.0
 var _was_hidden := false
@@ -44,6 +48,9 @@ func _ready() -> void:
 	_noise = MonsterNoise.new(settings)
 	brain.state_changed.connect(state_changed.emit)
 	brain.chase_lost.connect(_on_chase_lost)
+	brain.trace_lost.connect(_on_trace_lost)
+	brain.scan_finished.connect(_end_scan)
+	scan = ScanGauge.new(settings)
 	rng.randomize()
 	brain.set_patrol(get_patrol_points(), start_index)
 	_agent.target_position = brain.target
@@ -98,6 +105,11 @@ func _physics_process(delta: float) -> void:
 		crouched = player.get_gait() == PlayerMotion.Gait.CROUCH
 		_update_sight(delta)
 	brain.update(delta, sees_player, player_position, distance, crouched, arrived)
+	scan.update(delta)
+	if scan_target != null and not scan.active:
+		brain.stop_scan()  # The gauge ran dry.
+	if scan_target != null and brain.state != MonsterBrain.State.SCAN:
+		_end_scan()  # Spotted the hunted, or heard something.
 	_update_opening(delta, arrived)
 	if _agent.target_position.distance_to(brain.target) > RETARGET_DISTANCE:
 		_agent.target_position = brain.target
@@ -181,6 +193,50 @@ func _on_chase_lost(last_seen: Vector3) -> void:
 		go_open(spot)
 
 
+## It found nobody where it looked (S-009, Q3): if a building lies close by,
+## it stops and scans it, when the gauge and the cooldown allow it.
+func _on_trace_lost(at: Vector3) -> void:
+	var building := nearest_building(at, settings.ai_scan_radius)
+	if building == null or not brain.can_scan(building, scan.can_start()):
+		return
+	if not scan.start():
+		return
+	scan_target = building
+	building.scanned = true  # Its lights flicker: the hunted's warning.
+	brain.start_scan(building, global_position)
+	var center := building.get_box_transform().origin
+	center.y = global_position.y
+	if center.distance_to(global_position) > 0.01:
+		look_at(center, Vector3.UP)
+
+
+## The building nearest to a position, within a distance, or null.
+func nearest_building(at: Vector3, radius: float) -> Building:
+	var best: Building = null
+	var best_distance := radius
+	for building in buildings:
+		var d := building.distance_to(at)
+		if d <= best_distance:
+			best = building
+			best_distance = d
+	return best
+
+
+## True if the scan reveals this noise: listening, and it comes from inside the
+## scanned building, however faint (same rule as the playable monster).
+func scan_reveals(event: NoiseEvent) -> bool:
+	return scan_target != null and scan.is_listening() and scan_target.contains(event.position)
+
+
+func _end_scan() -> void:
+	scan.stop()
+	if scan_target == null:
+		return
+	var building := scan_target
+	scan_target = null
+	building.scanned = false
+
+
 ## Guards the exit tunnel from now on (S-007, Q4): the siren told it where the
 ## hunted is going.
 func guard_exit(points: Array[Vector3]) -> void:
@@ -191,6 +247,10 @@ func guard_exit(points: Array[Vector3]) -> void:
 func _on_noise_emitted(event: NoiseEvent) -> void:
 	if event.source == self or not is_inside_tree():
 		return  # Its own noise, or removed from the map (monster role).
+	if scan_reveals(event):
+		brain.remember(event.position)
+		brain.hear(event.position)  # Even a faint one, like a breath (D-009).
+		return
 	if event.type == NoiseEvent.Type.SIREN and brain.guarding:
 		return  # Heard: it already left for the tunnel.
 	if NoiseBus.can_hear(event, get_ear_position()):
@@ -203,9 +263,10 @@ func _on_noise_emitted(event: NoiseEvent) -> void:
 
 func _move(delta: float) -> void:
 	var horizontal := Vector3.ZERO
+	var scanning := brain.state == MonsterBrain.State.SCAN
 	if brain.lingering:
 		rotate_y(deg_to_rad(settings.look_around_speed) * delta)
-	if not brain.lingering and not _agent.is_navigation_finished():
+	if not brain.lingering and not scanning and not _agent.is_navigation_finished():
 		var next := _agent.get_next_path_position()
 		var direction := next - global_position
 		direction.y = 0.0

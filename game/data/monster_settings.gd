@@ -102,3 +102,12 @@ extends Resource
 @export_group("Debug")
 ## Colour of the field of view outline shown with F4. Never orange (reserved for noise).
 @export var debug_cone_color: Color = Color(0.8, 0.85, 0.9)
+
+@export_group("AI building scan (S-009, Q3)")
+## The AI monster scans a building when it loses the trace this close to it,
+## in meters (0 inside).
+@export_range(0.0, 100.0, 0.5, "suffix:m") var ai_scan_radius: float = 15.0
+## Longest scan of the AI monster, in seconds, concentration included.
+@export_range(0.5, 30.0, 0.5, "suffix:s") var ai_scan_time: float = 4.0
+## Time before the AI monster scans the same building again, in seconds.
+@export_range(0.0, 600.0, 5.0, "suffix:s") var ai_scan_cooldown: float = 30.0

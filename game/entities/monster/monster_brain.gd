@@ -7,8 +7,14 @@ extends RefCounted
 signal state_changed(state: State)
 ## The chase turned into a search: it lost sight of the hunted there (S-008).
 signal chase_lost(last_seen: Vector3)
+## It looked around where it heard or last saw the hunted and found nobody
+## (end of an investigation or a search), or it came back to a building it
+## heard a noise in: a chance to scan a building nearby (S-009, Q3).
+signal trace_lost(at: Vector3)
+## Its scan is over (time out, or it heard something).
+signal scan_finished
 
-enum State { PATROL, INVESTIGATE, CHASE, SEARCH, GUARD, OPEN }
+enum State { PATROL, INVESTIGATE, CHASE, SEARCH, GUARD, OPEN, SCAN }
 enum Pace { PROWL, WALK, RUN }
 
 var settings: MonsterSettings
@@ -38,6 +44,10 @@ var _last_seen := Vector3.ZERO
 var _points_since_detour := 0
 var _route: Array[Vector3] = []
 var _guard_points: Array[Vector3] = []
+## Game time, in seconds, to space out the scans of a building.
+var _clock := 0.0
+## Building key -> game time of its last scan by this monster.
+var _scanned_at := {}
 
 
 func _init(p_settings: MonsterSettings) -> void:
@@ -104,12 +114,43 @@ func is_catch_distance(distance: float) -> bool:
 
 
 ## A noise reached the monster's ears. Ignored during a chase, and while it
-## goes to open a hiding spot (S-008): it knows where to look.
+## goes to open a hiding spot (S-008): it knows where to look. A noise heard
+## while it scans ends the scan.
 func hear(position: Vector3) -> void:
 	if state == State.CHASE or state == State.OPEN:
 		return
+	var was_scanning := state == State.SCAN
 	_enter(State.INVESTIGATE)
 	target = position
+	if was_scanning:
+		scan_finished.emit()
+
+
+## Whether it may scan this building now (S-009, Q3): not chasing, the gauge
+## allows it, and it did not scan it in the last ai_scan_cooldown seconds.
+func can_scan(building_key: Variant, gauge_ready: bool) -> bool:
+	if not gauge_ready or state == State.CHASE or state == State.OPEN or state == State.SCAN:
+		return false
+	if not _scanned_at.has(building_key):
+		return true
+	return _clock - float(_scanned_at[building_key]) >= settings.ai_scan_cooldown
+
+
+## Stops where it stands and scans a building (S-009, Q3), at most
+## ai_scan_time seconds.
+func start_scan(building_key: Variant, here: Vector3) -> void:
+	_scanned_at[building_key] = _clock
+	_enter(State.SCAN)
+	target = here
+
+
+## Ends the scan early (the gauge ran dry): back to its patrol or its watch.
+func stop_scan() -> void:
+	if state != State.SCAN:
+		return
+	_enter(State.GUARD if guarding else State.PATROL)
+	_update_patrol(false)
+	scan_finished.emit()
 
 
 ## Goes to open a hiding spot, standing at its front (S-008, Q7): it saw the
@@ -192,6 +233,7 @@ func update(
 	crouched: bool,
 	arrived: bool
 ) -> void:
+	_clock += delta
 	lure_left = maxf(lure_left - delta, 0.0)
 	_update_watch(delta)
 	_update_spotting(delta, sees_player, distance, crouched)
@@ -208,6 +250,10 @@ func update(
 			_update_chase(delta, sees_player)
 		State.SEARCH:
 			_linger_then_patrol(delta, arrived, settings.search_time)
+		State.SCAN:
+			_timer += delta
+			if _timer >= settings.ai_scan_time:
+				stop_scan()
 
 
 func _update_spotting(delta: float, sees_player: bool, distance: float, crouched: bool) -> void:
@@ -226,6 +272,7 @@ func _update_patrol(arrived: bool) -> void:
 	if arrived:
 		if on_detour:
 			on_detour = false
+			trace_lost.emit(lure)  # Back at the building it heard: worth a scan.
 		else:
 			_patrol_index = (_patrol_index + 1) % _patrol.size()
 			_points_since_detour += 1
@@ -258,8 +305,10 @@ func _linger_then_patrol(delta: float, arrived: bool, duration: float) -> void:
 		return
 	_timer += delta
 	if _timer >= duration:
+		var at := target
 		_enter(State.GUARD if guarding else State.PATROL)
 		_update_patrol(false)
+		trace_lost.emit(at)
 
 
 func _enter(new_state: State) -> void:
