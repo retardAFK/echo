@@ -35,6 +35,14 @@ extends Resource
 ## Highest step climbed without jumping, in meters.
 @export_range(0.0, 0.6, 0.01, "suffix:m") var max_step_height: float = 0.3
 
+@export_group("Breath")
+## Time the player stays out of breath after a sprint, in seconds (D-009).
+@export_range(0.0, 60.0, 0.5, "suffix:s") var breathless_time: float = 10.0
+## Range of the panting, in meters: only the monster's scan reveals it (D-009).
+@export_range(0.0, 10.0, 0.1, "suffix:m") var breath_range: float = 0.5
+## Time between two pants, in seconds.
+@export_range(0.1, 10.0, 0.1, "suffix:s") var breath_interval: float = 1.0
+
 @export_group("Head bob")
 ## Camera sway while moving. Can be turned off for motion sickness.
 @export var head_bob_enabled: bool = true

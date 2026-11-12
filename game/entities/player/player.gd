@@ -11,6 +11,9 @@ signal gait_changed(gait: PlayerMotion.Gait)
 ## crosshair, seen from above (radians).
 const AIM_ANGLE := deg_to_rad(35.0)
 const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
+const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
+## How far down an alarm clock looks for the ground in front of the player, in meters.
+const DECOY_GROUND_SEARCH := 2.5
 
 @export var settings: PlayerSettings
 ## Values of the ruses: bottles, alarm clocks, hiding spots (S-008).
@@ -18,6 +21,8 @@ const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 
 ## What the player carries (S-008).
 var inventory: Inventory
+## The hiding spot the player is in (S-008, Q6), or null.
+var hiding_in: HidingSpot
 
 var _gait := PlayerMotion.Gait.WALK
 var _wants_crouch := false
@@ -27,6 +32,9 @@ var _bob_phase := 0.0
 var _capsule: CapsuleShape3D
 var _headroom_sphere: SphereShape3D
 var _hold := HoldInteraction.new()
+var _hide_yaw := 0.0
+var _breathless_left := 0.0
+var _breath_timer := 0.0
 
 @onready var _collision: CollisionShape3D = $CollisionShape3D
 @onready var _head: Node3D = $Head
@@ -55,6 +63,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		interact()
 	elif event.is_action_pressed("throw") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		throw_bottle()
+	elif event.is_action_pressed("place_decoy") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		place_decoy()
 	elif event is InputEventMouseButton and event.pressed:
 		# Browsers only allow pointer capture right after a user gesture.
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -63,6 +73,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_update_breath(delta)
+	if hiding_in != null:
+		# Hidden (S-008, Q6): no movement, only holding "interact" to get out.
+		_update_height(delta)
+		_hold.update(self, hiding_in, Input.is_action_pressed("interact"), delta)
+		return
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
@@ -96,12 +112,21 @@ func look(relative: Vector2) -> void:
 	var sensitivity := deg_to_rad(settings.mouse_sensitivity)
 	rotate_y(-relative.x * sensitivity)
 	_pitch = PlayerMotion.clamp_pitch(_pitch - relative.y * sensitivity, settings)
+	if hiding_in != null:
+		# Through the slit, the head turns only a little (S-008, Q6).
+		var yaw_limit := deg_to_rad(ruse_settings.hidden_yaw_limit)
+		var turned := clampf(angle_difference(_hide_yaw, rotation.y), -yaw_limit, yaw_limit)
+		rotation.y = _hide_yaw + turned
+		var pitch_limit := deg_to_rad(ruse_settings.hidden_pitch_limit)
+		_pitch = clampf(_pitch, -pitch_limit, pitch_limit)
 	_head.rotation.x = _pitch
 
 
 ## The nearest thing in reach, in front of the crosshair, that the player can
 ## use (a car alarm, S-006), or null. A pickup it has no room for is skipped.
 func get_interactable() -> Node:
+	if hiding_in != null:
+		return hiding_in  # Hidden: the only thing in reach is the way out.
 	var best: Node = null
 	var best_distance := INF
 	var forward := -_camera.global_basis.z
@@ -132,7 +157,7 @@ func interact() -> void:
 ## Throws a bottle where the camera looks, a little upward (S-008, Q2), if the
 ## player carries one. The gesture makes a faint noise.
 func throw_bottle() -> ThrownBottle:
-	if not inventory.use(Inventory.Kind.BOTTLE):
+	if hiding_in != null or not inventory.use(Inventory.Kind.BOTTLE):
 		return null
 	var forward := -_camera.global_basis.z
 	var right := _camera.global_basis.x
@@ -143,6 +168,81 @@ func throw_bottle() -> ThrownBottle:
 	bottle.linear_velocity = direction * ruse_settings.throw_speed
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
 	return bottle
+
+
+## Places an alarm clock on the ground in front of the player (S-008, Q3), if
+## the player carries one, or at their feet when there is no ground there.
+## The gesture makes a faint noise.
+func place_decoy() -> Decoy:
+	if hiding_in != null or not inventory.use(Inventory.Kind.DECOY):
+		return null
+	var offset := -global_basis.z * ruse_settings.decoy_place_distance
+	var spot := global_position
+	if not test_move(global_transform, offset):  # A wall in front: at the feet.
+		var ahead := global_position + offset
+		var query := PhysicsRayQueryParameters3D.create(
+			ahead + Vector3.UP, ahead + Vector3.DOWN * DECOY_GROUND_SEARCH, collision_mask
+		)
+		query.exclude = [get_rid()]
+		var hit := get_world_3d().direct_space_state.intersect_ray(query)
+		if not hit.is_empty():
+			spot = hit.position
+	var decoy: Decoy = DECOY_SCENE.instantiate()
+	get_parent().add_child(decoy)
+	decoy.global_position = spot
+	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	return decoy
+
+
+## Gets into a hiding spot (S-008, Q6): the body stops and stops colliding,
+## the eyes go inside the spot, looking out of its front.
+func hide_in(spot: HidingSpot) -> void:
+	hiding_in = spot
+	velocity = Vector3.ZERO
+	_collision.disabled = true
+	global_position = spot.global_position
+	_hide_yaw = spot.get_out_yaw()
+	rotation.y = _hide_yaw
+	_pitch = 0.0
+	_head.rotation.x = 0.0
+	_wants_crouch = spot.crouched
+	_set_gait(PlayerMotion.Gait.CROUCH if spot.crouched else PlayerMotion.Gait.WALK)
+
+
+## Gets out of the hiding spot, in front of it.
+func leave_hiding() -> void:
+	if hiding_in == null:
+		return
+	global_position = hiding_in.get_exit_point()
+	hiding_in = null
+	_collision.disabled = false
+	velocity = Vector3.ZERO
+
+
+func is_hidden() -> bool:
+	return hiding_in != null
+
+
+## Whether the player is out of breath after a sprint (D-009).
+func is_breathless() -> bool:
+	return _breathless_left > 0.0
+
+
+## Out of breath for a while after a sprint, the player pants faintly: a
+## BREATH noise so short that only the monster's scan reveals it (D-009),
+## hidden or not (S-008, Q6).
+func _update_breath(delta: float) -> void:
+	if _gait == PlayerMotion.Gait.SPRINT and hiding_in == null:
+		_breathless_left = settings.breathless_time
+		_breath_timer = 0.0
+		return
+	if _breathless_left <= 0.0:
+		return
+	_breathless_left -= delta
+	_breath_timer -= delta
+	if _breath_timer <= 0.0:
+		_breath_timer += settings.breath_interval
+		NoiseBus.emit_noise(NoiseEvent.Type.BREATH, get_eye_position(), settings.breath_range, self)
 
 
 ## Progress of what the player holds "interact" on (a fuse box, the

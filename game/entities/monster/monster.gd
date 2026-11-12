@@ -96,7 +96,12 @@ func _physics_process(delta: float) -> void:
 	var before := global_position
 	_move(delta)
 	_make_noise(delta, before)
-	if player != null and brain.is_catch_distance(_flat_distance(player_position)):
+	Decoy.crush_near(get_tree(), global_position, settings.catch_distance)  # S-008, Q4.
+	if (
+		player != null
+		and not HidingSpot.is_hidden(player)
+		and brain.is_catch_distance(_flat_distance(player_position))
+	):
 		catch_count += 1
 		player_caught.emit()
 
@@ -115,7 +120,8 @@ func _update_sight(delta: float) -> void:
 	var eye := get_ear_position()
 	var target: Vector3 = player.get_eye_position()
 	sees_player = (
-		MonsterVision.in_view_cone(eye, -global_basis.z, target, settings)
+		not HidingSpot.is_hidden(player)  # Hidden: never seen (S-008, Q6).
+		and MonsterVision.in_view_cone(eye, -global_basis.z, target, settings)
 		and MonsterVision.has_line_of_sight(get_world_3d().direct_space_state, eye, target)
 	)
 

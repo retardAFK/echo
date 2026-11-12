@@ -24,6 +24,7 @@ var _pace := MonsterBrain.Pace.WALK
 var _prowling := false
 var _pitch := 0.0
 var _noise: MonsterNoise
+var _hold := HoldInteraction.new()
 
 @onready var _head: Node3D = $Head
 @onready var _camera: Camera3D = $Head/Camera3D
@@ -61,6 +62,33 @@ func _physics_process(delta: float) -> void:
 	update_scan(delta, Input.is_action_pressed("scan"))
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	move(input, Input.is_action_pressed("sprint"), delta)
+	_hold.update(self, get_interactable(), Input.is_action_pressed("interact"), delta)
+
+
+## The hiding spot in reach in front of the crosshair, that it can open by
+## holding "interact" (S-008, Q7), or null.
+func get_interactable() -> Node:
+	var best: Node = null
+	var best_distance := INF
+	var forward := -_camera.global_basis.z
+	var aim := Vector2(forward.x, forward.z).normalized()
+	for node in get_tree().get_nodes_in_group(HidingSpot.GROUP):
+		var spot := node as HidingSpot
+		if not spot.can_interact(global_position):
+			continue
+		var gap := spot.global_position - global_position
+		var flat := Vector2(gap.x, gap.z)
+		if flat.length() > 0.01 and aim.dot(flat.normalized()) < cos(Player.AIM_ANGLE):
+			continue
+		if flat.length() < best_distance:
+			best = spot
+			best_distance = flat.length()
+	return best
+
+
+## Progress of the hiding spot it is opening, from 0 to 1.
+func get_hold_ratio() -> float:
+	return _hold.get_ratio()
 
 
 ## Moves one physics step from a 2D input (x = right, y = back).
@@ -80,6 +108,7 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 	move_and_slide()
 	var moved := Vector2(global_position.x - before.x, global_position.z - before.z).length()
 	_noise.update(delta, moved, _pace, global_position, get_ear_position(), self)
+	Decoy.crush_near(get_tree(), global_position, settings.catch_distance)  # S-008, Q4.
 
 
 ## Turns the body (yaw) and the head (pitch) from a mouse movement in screen pixels.
