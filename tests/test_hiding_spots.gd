@@ -119,7 +119,7 @@ func test_hidden_head_turns_only_a_little() -> void:
 	var player: Player = setup[1]
 	_hide(closet, player)
 	var out := closet.get_out_yaw()
-	player.look(Vector2(5000, 5000))
+	player.look(Vector2(400, 400))  # 60° each way: past both limits.
 	var turned := absf(angle_difference(out, player.rotation.y))
 	assert_almost_eq(turned, deg_to_rad(SETTINGS.hidden_yaw_limit), 0.01)
 	assert_almost_eq(absf(player.get_pitch()), deg_to_rad(SETTINGS.hidden_pitch_limit), 0.01)
