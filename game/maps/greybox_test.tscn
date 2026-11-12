@@ -25,6 +25,7 @@
 [ext_resource type="Script" path="res://game/fx/night_environment.gd" id="23_night"]
 [ext_resource type="PackedScene" path="res://game/fx/retro_post.tscn" id="24_retro_post"]
 [ext_resource type="Script" path="res://game/fx/retro_world.gd" id="25_retro_world"]
+[ext_resource type="PackedScene" path="res://game/entities/pickup/bottle_pickup.tscn" id="26_bottle"]
 
 [sub_resource type="BoxShape3D" id="Shape_Floor"]
 size = Vector3(40, 0.2, 40)
@@ -787,3 +788,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.45)
 light_color = Color(0.35, 1, 0.55, 1)
 light_energy = 1.2
 omni_range = 3.0
+
+[node name="Pickups" type="Node3D" parent="."]
+
+[node name="Bottle1" parent="Pickups" instance=ExtResource("26_bottle")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 6)
+
+[node name="Bottle2" parent="Pickups" instance=ExtResource("26_bottle")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 6)
+
+[node name="Bottle3" parent="Pickups" instance=ExtResource("26_bottle")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 4)

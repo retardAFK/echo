@@ -13,6 +13,8 @@ const ALARM_LENGTH := 0.8
 const ALARM_LOW_HZ := 620.0
 const ALARM_HIGH_HZ := 880.0
 const ALARM_VOLUME := 0.5
+const GLASS_LENGTH := 0.35
+const GLASS_CUTOFF := 0.85
 
 
 ## A dull thump: low-passed noise with a fast decay.
@@ -23,6 +25,11 @@ static func step() -> AudioStreamWAV:
 ## A breath: brighter noise that swells then fades.
 static func breath() -> AudioStreamWAV:
 	return _noise_burst(BREATH_LENGTH, BREATH_CUTOFF, true, 23)
+
+
+## Breaking glass (S-008): a short, very bright crack that dies fast.
+static func glass() -> AudioStreamWAV:
+	return _noise_burst(GLASS_LENGTH, GLASS_CUTOFF, false, 37)
 
 
 ## A car alarm: two alternating square tones, one cycle per noise.

@@ -28,7 +28,7 @@ var _noise_left := 0.0
 
 
 func _ready() -> void:
-	add_to_group(CarAlarm.INTERACTABLE_GROUP)
+	add_to_group(Interactable.GROUP)
 	progress = HoldProgress.new(settings.repair_time, settings.kept_on_release)
 	update_label()
 

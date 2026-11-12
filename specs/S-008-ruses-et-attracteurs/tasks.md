@@ -8,7 +8,7 @@ Comme pour S-007, chaque tâche est vérifiée par Claude (tests GUT, lint, impo
 - [x] T-062 — Plan et tâches de S-008
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-061
-- [ ] T-063 — Ramasser et lancer une bouteille
+- [x] T-063 — Ramasser et lancer une bouteille
   - Résultat vérifiable : `RuseSettings`, `Inventory`, `Pickup`, action `throw`, `ThrownBottle` avec bruit `IMPACT` de 8 m, constante `Interactable.GROUP`, HUD « n bouteilles » ; tests GUT (inventaire, portée balistique, impact) ; quelques bouteilles dans la greybox
   - Dépend de : T-062
 - [ ] T-064 — Le réveil-leurre
@@ -38,3 +38,4 @@ Comme pour S-007, chaque tâche est vérifiée par Claude (tests GUT, lint, impo
 
 ## Compte rendu
 - T-061, T-062 (12/11/2026) : spec, plan et tâches écrits, validés par Maxime (« Tout valider »), Q-004 close.
+- T-063 (12/11/2026) : `RuseSettings`, `Inventory`, `Pickup`, `ThrownBottle` (bruit `IMPACT` de 8 m, bris de verre provisoire), action `throw` au clic gauche, `CarryHud`, groupe commun `Interactable.GROUP`, 3 bouteilles dans la greybox ; tests GUT dans `test_bottles.gd`.
