@@ -1,6 +1,6 @@
 # Plan — S-009
 
-**Statut** : brouillon (12/11/2026), en attente du choix de l'hébergement (Q1)
+**Statut** : validé (12/11/2026), hébergement sur itch.io (Q1)
 
 ## Approche technique
 
@@ -12,9 +12,8 @@
 - Résultat : un écran simple (base 640 × 360, D-011) et une ligne `ECHO_BENCH {json}` dans la console, que Claude lit avec les outils du navigateur.
 
 ### Build de test en ligne (Q1)
-- **itch.io (proposé)** : un nouveau job `publish` dans `ci.yml`, seulement sur `push` vers `main`, après le job `godot`. Il récupère l'artefact `web-build`, installe `butler` (outil officiel d'itch.io) et pousse le dossier sur le canal `html5` de la page (`butler push build/web <compte>/<jeu>:html5 --userversion <sha court>`). La clé est le secret `BUTLER_API_KEY` ; le nom de la page est la variable de dépôt `ITCH_TARGET`. Sans secret, le job est sauté sans erreur. Le build est déjà mono-fil (`thread_support=false`), il n'a donc pas besoin de l'option SharedArrayBuffer d'itch.io.
-- **GitHub Pages (autre option)** : job `publish` avec `actions/upload-pages-artifact` et `actions/deploy-pages`. Demande GitHub Pro tant que le dépôt est privé.
-- Version du jeu : la CI écrit le SHA court dans `game/build_version.txt` avant l'export (« dev » en local). Le résumé de fin et le banc d'essai l'affichent.
+- **itch.io (retenu)** : un nouveau job `publish` dans `ci.yml`, seulement sur `push` vers `main`, après le job `godot`. Il récupère l'artefact `web-build`, installe `butler` (outil officiel d'itch.io) et pousse le dossier sur le canal `html5` de la page (`butler push build/web <compte>/<jeu>:html5 --userversion <sha court>`). La clé est le secret `BUTLER_API_KEY` ; le nom de la page est la variable de dépôt `ITCH_TARGET`. Sans secret, le job est sauté sans erreur. Le build est déjà mono-fil (`thread_support=false`), il n'a donc pas besoin de l'option SharedArrayBuffer d'itch.io.
+- Version du jeu : la CI écrit le SHA court dans `application/config/version` de `project.godot` avant l'export (« dev » en local). Le résumé de fin et le banc d'essai l'affichent.
 
 ### Le monstre IA scanne (Q3)
 - `MonsterBrain` gagne un état **`SCAN`**, un signal `trace_lost(at)` (fin d'une enquête ou d'une recherche sans résultat, ou retour au bâtiment entendu) et `can_scan(building, gauge_ready)` : pas en poursuite, jauge prête, bâtiment pas scanné depuis `ai_scan_cooldown` (30 s). Décision pure et testée.

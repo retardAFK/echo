@@ -2,10 +2,10 @@
 
 Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, simulations, captures). Maxime ne joue pas ; il tranche le choix de l'hébergement et transmet le lien aux testeurs.
 
-- [ ] T-073 — Spec S-009
+- [x] T-073 — Spec S-009
   - Résultat vérifiable : spec validée par Maxime (Q1 tranchée)
   - Dépend de : —
-- [ ] T-074 — Plan et tâches de S-009
+- [x] T-074 — Plan et tâches de S-009
   - Résultat vérifiable : `plan.md` et `tasks.md`, avec l'hébergement choisi (Q-012)
   - Dépend de : T-073
 - [ ] T-075 — Mode banc d'essai
@@ -39,3 +39,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
   - Dépend de : T-083
 
 ## Compte rendu
+- T-073, T-074 (12/11/2026) : spec, plan et tâches, PR #70. Q1 : itch.io, page restreinte (Maxime).
