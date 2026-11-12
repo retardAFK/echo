@@ -7,6 +7,9 @@ extends RefCounted
 
 const SHADER := preload("res://game/fx/retro_surface.gdshader")
 const SHADER_DOUBLE := preload("res://game/fx/retro_surface_double.gdshader")
+## For what appears during a game (a thrown bottle, a placed alarm clock),
+## after RetroWorld converted the map.
+const DEFAULT_SETTINGS := preload("res://game/data/visual_settings.tres")
 
 ## One retro material per source material, so meshes keep sharing materials.
 static var _cache: Dictionary = {}

@@ -12,6 +12,7 @@ const SHARDS_DROP := 3.0
 ## The sound of the break carries this far for the ears, in meters.
 const SOUND_DISTANCE := 30.0
 const GLASS_SOUND := preload("res://assets/audio/ruses/glass_break.wav")
+const SHARDS_MODEL := preload("res://assets/models/glass_shards.glb")
 
 @export var settings: RuseSettings
 
@@ -49,6 +50,7 @@ func _ready() -> void:
 	max_contacts_reported = 1
 	continuous_cd = true
 	body_entered.connect(_on_body_entered)
+	RetroSurface.apply_to(self, RetroSurface.DEFAULT_SETTINGS)
 
 
 func _physics_process(delta: float) -> void:
@@ -87,12 +89,10 @@ func _leave_shards(at: Vector3) -> void:
 	shards.name = "Shards"
 	get_parent().add_child(shards)
 	shards.global_position = ground
-	var mesh := MeshInstance3D.new()
-	mesh.mesh = $Mesh.mesh
-	mesh.rotation = Vector3(PI / 2.0, randf() * TAU, 0.0)
-	mesh.scale = Vector3(1.0, 0.4, 0.2)
-	mesh.position.y = 0.01
-	shards.add_child(mesh)
+	var model: Node3D = SHARDS_MODEL.instantiate()
+	model.rotation.y = randf() * TAU
+	shards.add_child(model)
+	RetroSurface.apply_to(shards, RetroSurface.DEFAULT_SETTINGS)
 	var sound := AudioStreamPlayer3D.new()
 	sound.stream = GLASS_SOUND
 	sound.max_distance = SOUND_DISTANCE

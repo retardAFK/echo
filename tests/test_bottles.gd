@@ -189,3 +189,50 @@ func test_the_monster_goes_to_check_an_impact() -> void:
 	brain.hear(spot)
 	assert_eq(brain.state, MonsterBrain.State.INVESTIGATE)
 	assert_eq(brain.target, spot)
+
+
+## T-069: the ruses wear their models, drawn with the retro surface even when
+## they appear during the game.
+func test_the_ruses_wear_their_models() -> void:
+	for path in [
+		"res://game/entities/pickup/bottle_pickup.tscn",
+		"res://game/entities/pickup/decoy_pickup.tscn",
+		"res://game/entities/bottle/thrown_bottle.tscn",
+		"res://game/entities/decoy/decoy.tscn",
+		"res://game/entities/hiding_spot/closet.tscn",
+		"res://game/entities/hiding_spot/dumpster.tscn",
+	]:
+		var scene: Node3D = load(path).instantiate()
+		var model := scene.get_node_or_null("Model")
+		assert_not_null(model, path)
+		if model != null:
+			assert_true(model.scene_file_path.ends_with(".glb"), path)
+			assert_gt(model.find_children("*", "MeshInstance3D", true, false).size(), 0, path)
+		scene.free()
+
+
+func test_broken_glass_lies_on_the_ground_in_retro() -> void:
+	_add_floor()
+	var player := _make_player()
+	await wait_physics_frames(2)
+	var before := get_children()
+	player.inventory.take(Inventory.Kind.BOTTLE)
+	var bottle := player.throw_bottle()
+	var bottle_meshes := bottle.find_children("*", "MeshInstance3D", true, false)
+	assert_gt(bottle_meshes.size(), 0)
+	for mesh: MeshInstance3D in bottle_meshes:
+		assert_true(mesh.get_surface_override_material(0) is ShaderMaterial, "retro bottle")
+	await wait_seconds(2.0)
+	var shards := get_children().filter(
+		func(n: Node) -> bool: return n not in before and n.name.begins_with("Shards")
+	)
+	assert_eq(shards.size(), 1, "shards left on the ground")
+	if shards.is_empty():
+		return
+	var meshes: Array[Node] = shards[0].find_children("*", "MeshInstance3D", true, false)
+	assert_gt(meshes.size(), 0)
+	for mesh: MeshInstance3D in meshes:
+		assert_true(mesh.get_surface_override_material(0) is ShaderMaterial, "retro shards")
+	assert_lt(shards[0].global_position.y, 0.05, "on the ground")
+	for node in shards:
+		node.queue_free()
