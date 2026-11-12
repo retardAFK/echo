@@ -97,3 +97,30 @@ func test_each_game_draws_new_fuses() -> void:
 		draws[str(names)] = true
 		map.free()
 	assert_gt(draws.size(), 1)
+
+
+func test_summary_to_copy() -> void:
+	var map := _make_map()
+	map.game_loop.finish(false)
+	var summary: String = map.end_screen.summary
+	var lines := summary.split("\n")
+	assert_eq(lines.size(), 9, "header, role, result, 5 figures, fps (S-009, Q7)")
+	assert_string_contains(lines[0], RunSummary.build_version())
+	assert_string_contains(summary, tr("MENU_PLAY_HUNTED"))
+	assert_string_contains(summary, tr("END_CAUGHT"))
+	assert_string_contains(summary, "0/3")
+	map.end_screen.get_node("%CopyButton").pressed.emit()
+	assert_eq(map.end_screen.get_node("%CopyButton").text, tr("END_COPIED"))
+
+
+func test_build_version_defaults_to_dev() -> void:
+	assert_eq(RunSummary.build_version(), "dev")
+
+
+func test_average_fps_of_the_game() -> void:
+	var loop := GameLoop.new()
+	assert_eq(loop.get_average_fps(), 0.0)
+	for i in 30:
+		loop._process(1.0 / 30.0)
+	assert_almost_eq(loop.get_average_fps(), 30.0, 0.01)
+	loop.free()
