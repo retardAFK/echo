@@ -27,6 +27,22 @@ static func flat_range(speed: float, lift_degrees: float, height: float, gravity
 	return speed * cos(lift) * time
 
 
+## Speed to throw at so that a bottle lands this far on flat ground, capped
+## (the AI prey aims, S-008), in meters per second.
+static func speed_for_range(
+	distance: float, lift_degrees: float, height: float, gravity: float, max_speed: float
+) -> float:
+	var low := 0.5
+	var high := max_speed
+	for i in 24:
+		var middle := (low + high) / 2.0
+		if flat_range(middle, lift_degrees, height, gravity) < distance:
+			low = middle
+		else:
+			high = middle
+	return high
+
+
 func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 1

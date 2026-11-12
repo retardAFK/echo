@@ -31,3 +31,22 @@ extends Resource
 ## In the game loop, how far from the monster a hiding spot must be for the
 ## prey to run there rather than to the farthest one, in meters (T-060).
 @export_range(0.0, 200.0, 1.0, "suffix:m") var safe_distance: float = 40.0
+
+@export_group("Ruses")
+## Detour to take a bottle or an alarm clock lying this close, in meters (S-008, Q9).
+@export_range(0.0, 50.0, 0.5, "suffix:m") var pickup_detour: float = 6.0
+## Where a thrown bottle should land, away from its goal, in meters (Q9).
+@export_range(1.0, 50.0, 0.5, "suffix:m") var throw_distance_min: float = 12.0
+@export_range(1.0, 50.0, 0.5, "suffix:m") var throw_distance_max: float = 18.0
+## It throws only while the monster is at least this far, in meters: closer,
+## it just runs.
+@export_range(0.0, 50.0, 0.5, "suffix:m") var throw_safe_distance: float = 8.0
+## On its way to repair, it places an alarm clock once this close to the
+## transformer, and only if still this far from it, in meters (Q9).
+@export_range(1.0, 100.0, 1.0, "suffix:m") var decoy_trigger_distance: float = 30.0
+@export_range(0.0, 100.0, 1.0, "suffix:m") var decoy_min_distance: float = 20.0
+## When it flees, a free hiding spot this close and out of the monster's sight
+## is where it runs to, in meters (Q9).
+@export_range(0.0, 50.0, 0.5, "suffix:m") var hide_search_radius: float = 10.0
+## Time between two looks for something to pick up, in seconds.
+@export_range(0.05, 5.0, 0.05, "suffix:s") var pickup_look_interval: float = 0.5

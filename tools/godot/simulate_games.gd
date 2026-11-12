@@ -101,7 +101,7 @@ func _play(index: int) -> Dictionary:
 	var duration := loop.get_duration() * _speed
 	print(
 		(
-			"GAME %d: %s after %.1f min (fuses %d placed %d, noises %d, real %d s)"
+			"GAME %d: %s after %.1f min (fuses %d placed %d, noises %d, ruses %s, real %d s)"
 			% [
 				index,
 				result,
@@ -109,6 +109,7 @@ func _play(index: int) -> Dictionary:
 				loop.rules.found(),
 				loop.rules.placed,
 				loop.noise_count,
+				map.prey.ruse_counts,
 				(Time.get_ticks_msec() - started) / 1000
 			]
 		)
@@ -116,7 +117,7 @@ func _play(index: int) -> Dictionary:
 	get_tree().paused = false
 	map.queue_free()
 	await get_tree().process_frame
-	return {"result": result, "duration": duration}
+	return {"result": result, "duration": duration, "ruses": map.prey.ruse_counts.duplicate()}
 
 
 ## The playable monster stays still, out of the way; an AI monster hunts the

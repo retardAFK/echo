@@ -58,6 +58,32 @@ func set_points(wander_points: Array[Vector3], hiding_spots: Array[Vector3]) -> 
 		target = _wander_points[_wander_index]
 
 
+## Leaves its way for a moment to go and take something (S-008, Q9), only
+## while it searches calmly.
+func detour_to(point: Vector3) -> bool:
+	if state != State.SEARCH:
+		return false
+	target = point
+	return true
+
+
+## Back on its way after a detour.
+func end_detour() -> void:
+	if state == State.SEARCH:
+		_resume()
+
+
+## Flees to this point instead (a hiding spot out of the monster's sight, S-008).
+func flee_to(point: Vector3) -> void:
+	if state == State.FLEE:
+		target = point
+
+
+## Where the current goal of the loop is (S-008: a bottle is thrown away from it).
+func get_goal_point() -> Vector3:
+	return _goal_point()
+
+
 ## Plays the game loop (S-007): slots in visiting order, the point beside the
 ## transformer, the far end of the tunnel.
 func set_loop(slots: Array[Vector3], transformer_point: Vector3, exit_point: Vector3) -> void:
