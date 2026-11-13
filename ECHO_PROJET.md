@@ -511,6 +511,7 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-011 | 10/11/2026 | Rendu net : la 3D est rendue à la résolution de l'écran, sans réduction des couleurs, sans tramage ni tremblement des sommets, avec un grain à peine visible. Les textures restent en gros pixels nets et le brouillard reste | Le rendu basse résolution de S-005, avec son grain et son tramage, faisait mal aux yeux dans une scène de nuit (retour de Maxime sur la cité des Tilleuls) |
 | D-012 | 12/11/2026 | Les maps sont séparées : une map par partie (clôt Q-004) | Suite logique de D-010, qui fait déjà de l'hôpital une map à part ; plus simple à construire et à charger dans le navigateur |
 | D-013 | 12/11/2026 | Après le test à plusieurs (phase 9), le multijoueur passe avant les personnages, l'audio et les menus. Nouvel ordre : 9 test à plusieurs, 10 multijoueur, 11 personnages, 12 audio, 13 menus, 14 hôpital, 15 sortie (détail dans `specs/BACKLOG.md`) | Ce qui est ajouté avant le réseau devrait sinon être repris pour être synchronisé, et on teste plus tôt à 4 vrais joueurs |
+| D-014 | 13/11/2026 | Le test à 3 à 5 personnes (T-083, T-084, point de décision n°2) est reporté : Maxime veut un jeu plus avancé avant de le montrer. La phase 10 (multijoueur) commence sans attendre ; le test sera replanifié plus tard | Maxime a joué le build itch.io et validé les corrections (scan expliqué, objets visibles) |
 
 ### 10.2 Questions ouvertes
 

@@ -90,9 +90,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 **Terminé quand** : 1 monstre et 3 chassés jouent une partie complète depuis 4 navigateurs différents, sur des connexions différentes.
 
-- [ ] T-090 — Étude du point de décision n°3 : architecture réseau et coûts
+- [x] T-090 — Étude du point de décision n°3 : architecture réseau et coûts
   - Résultat vérifiable : note comparant les options (WebRTC entre joueurs avec un hôte et un petit serveur de mise en relation, ou serveur dédié en WebSocket), avec ce qu'elles coûtent par mois, leurs limites dans le navigateur et le travail qu'elles demandent ; recommandation de Claude
-  - Dépend de : T-084
+  - Dépend de : T-084 (levé par D-014 : test à plusieurs reporté)
+  - Fait le 13/11/2026 : [`specs/S-010-multijoueur/etude-reseau.md`](S-010-multijoueur/etude-reseau.md), recommandation : serveur dédié Godot en WebSocket
 - [ ] T-091 — Choix de l'architecture et de l'hébergement **(Maxime)**
   - Résultat vérifiable : décision écrite dans le journal (point de décision n°3)
   - Dépend de : T-090
