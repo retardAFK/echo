@@ -17,6 +17,8 @@ signal lobby_changed(lobby: LobbyState)
 signal game_started(lobby: LobbyState)
 ## Client side: a snapshot of the game from the room (T-097).
 signal snapshot_received(snapshot: Dictionary)
+## Client side: an event of the game from the room (T-098).
+signal event_received(event: Array)
 
 enum Mode { SOLO, CLIENT, ROOM }
 
@@ -53,6 +55,7 @@ func join(url: String) -> void:
 	link.lobby_changed.connect(_on_lobby_changed)
 	link.game_started.connect(_on_game_started)
 	link.snapshot_received.connect(snapshot_received.emit)
+	link.event_received.connect(event_received.emit)
 	link.join(url)
 	mode = Mode.CLIENT
 

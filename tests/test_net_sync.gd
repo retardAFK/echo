@@ -3,6 +3,8 @@ extends GutTest
 ## sent, interpolation of the others, prediction of one's own character.
 
 const PLAYER_SCENE := preload("res://game/entities/player/player.tscn")
+const AVATAR_SCENE := preload("res://game/entities/monster/monster_avatar.tscn")
+const BUILDING_SCENE := preload("res://game/entities/building/building.tscn")
 
 var _settings: NetSettings
 
@@ -155,3 +157,124 @@ func test_puppet_moves_between_snapshots() -> void:
 	puppet.show_at(1.05, 0.15)
 	assert_almost_eq(puppet.global_position.x, 1.0, 0.001)
 	assert_eq(puppet.get_child_count(), 1, "a silhouette")
+
+
+func _room() -> NetGame:
+	var net := NetGame.new()
+	net.settings = _settings
+	net.is_room = true
+	add_child_autofree(net)
+	return net
+
+
+func _events_for(net: NetGame, place: int) -> Array:
+	return (
+		net
+		. sent_events
+		. filter(func(sent: Array) -> bool: return sent[0] == place)
+		. map(func(sent: Array) -> Array: return sent[1])
+	)
+
+
+func test_noise_goes_to_who_hears_it_without_its_maker() -> void:
+	_body(Vector3(100, 1, 100), Vector3(0, -0.5, 0), 1)
+	var hunted := _player(Vector3.ZERO, 0.0)
+	var other := _player(Vector3(0, 0, -4), 0.0)
+	var monster: MonsterAvatar = AVATAR_SCENE.instantiate()
+	monster.local_controls = false
+	monster.position = Vector3(40, 0, 0)
+	add_child_autofree(monster)
+	await wait_physics_frames(2)
+	var near := NoiseEvent.new(NoiseEvent.Type.FOOTSTEP, other.global_position, 8.0, other)
+	var message := NetGame.noise_message(near, hunted, false)
+	assert_eq(message, [NetGame.Event.NOISE, NoiseEvent.Type.FOOTSTEP, other.global_position, 8.0])
+	assert_eq(NetGame.noise_message(near, other, false), [], "not its own noise")
+	assert_eq(NetGame.noise_message(near, monster, false), [], "too far to hear")
+	assert_eq(NetGame.noise_message(near, monster, true).size(), 4, "the monster gets every noise")
+	var silent := NoiseEvent.new(NoiseEvent.Type.FOOTSTEP, Vector3.ZERO, 0.0, other)
+	assert_eq(NetGame.noise_message(silent, monster, true), [])
+
+
+func test_a_hunted_is_never_sent_a_player_it_does_not_see_or_hear() -> void:
+	_body(Vector3(100, 1, 100), Vector3(0, -0.5, 0), 1)
+	var net := _room()
+	var viewer := _player(Vector3.ZERO, 0.0)
+	var unseen := _player(Vector3(27.5, 0, 31.5), 0.0)
+	var monster: MonsterAvatar = AVATAR_SCENE.instantiate()
+	monster.local_controls = false
+	monster.position = Vector3(-33.5, 0, 22.5)
+	add_child_autofree(monster)
+	net.add_avatar(1, 1, viewer)
+	net.add_avatar(2, 2, unseen)
+	net.add_avatar(3, LobbyState.MONSTER_SEAT, monster)
+	await wait_physics_frames(3)
+	net.sent_events.clear()
+	NoiseBus.emit_noise(NoiseEvent.Type.FOOTSTEP, unseen.global_position, 6.0, unseen)
+	NoiseBus.emit_noise(NoiseEvent.Type.BREATH, monster.global_position, 2.0, monster)
+	var text := var_to_str(_events_for(net, 1)) + var_to_str(net.snapshot_for(1))
+	for far: Node3D in [unseen, monster]:
+		assert_false(text.contains(str(far.global_position.x)), "nothing of %s" % far.name)
+	assert_eq(_events_for(net, 3).size(), 1, "the monster gets the footstep")
+
+
+func test_scan_lights_go_to_the_hunted_only() -> void:
+	var building: Building = BUILDING_SCENE.instantiate()
+	building.settings = MonsterSettings.new()
+	add_child_autofree(building)
+	var net := NetGame.new()
+	net.settings = _settings
+	net.is_room = true
+	net.buildings = [building]
+	net.add_avatar(1, 1, Node3D.new())
+	net.add_avatar(2, LobbyState.MONSTER_SEAT, Node3D.new())
+	add_child_autofree(net)
+	building.scanned = true
+	assert_eq(_events_for(net, 1), [[NetGame.Event.SCAN, 0, true]])
+	assert_eq(_events_for(net, 2), [], "the monster sees its own scan")
+	for avatar: Node in net.avatars.values():
+		avatar.free()
+	net.avatars.clear()
+
+
+func test_a_human_monster_catches_a_hunted_it_touches() -> void:
+	_body(Vector3(100, 1, 100), Vector3(0, -0.5, 0), 1)
+	var net := _room()
+	var hunted := _player(Vector3(0, 0, -1), 0.0)
+	var free_one := _player(Vector3(10, 0, 0), 0.0)
+	var monster: MonsterAvatar = AVATAR_SCENE.instantiate()
+	monster.local_controls = false
+	add_child_autofree(monster)
+	net.add_avatar(1, 1, hunted)
+	net.add_avatar(2, 2, free_one)
+	net.add_avatar(3, LobbyState.MONSTER_SEAT, monster)
+	watch_signals(net)
+	net._check_catches()
+	assert_signal_emitted_with_parameters(net, "hunted_caught", [hunted])
+	assert_eq(monster.catch_count, 1)
+	for place in [1, 2, 3]:
+		assert_eq(_events_for(net, place), [[NetGame.Event.CAUGHT, 1]])
+
+
+func test_client_plays_the_room_events() -> void:
+	var building: Building = BUILDING_SCENE.instantiate()
+	building.settings = MonsterSettings.new()
+	add_child_autofree(building)
+	var net := NetGame.new()
+	net.settings = _settings
+	net.buildings = [building]
+	add_child_autofree(net)
+	var heard := []
+	var listen := func(event: NoiseEvent) -> void: heard.append(event)
+	NoiseBus.noise_emitted.connect(listen)
+	net.apply_event([NetGame.Event.NOISE, NoiseEvent.Type.BREATH, Vector3(1, 2, 3), 2.5])
+	NoiseBus.noise_emitted.disconnect(listen)
+	assert_eq(heard.size(), 1)
+	assert_eq(heard[0].position, Vector3(1, 2, 3))
+	assert_null(heard[0].source, "nobody's noise")
+	net.apply_event([NetGame.Event.SCAN, 0, true])
+	assert_true(building.scanned)
+	net.apply_event([NetGame.Event.SCAN, 5, false])
+	watch_signals(net)
+	net.apply_event([NetGame.Event.CAUGHT, 2])
+	assert_signal_emitted_with_parameters(net, "caught_reported", [2])
+	net.apply_event([])
