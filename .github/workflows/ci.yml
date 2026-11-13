@@ -137,10 +137,10 @@ jobs:
           retention-days: 14
 
       # S-009, T-076 (Q1): every merge to main goes to the restricted itch.io
-      # page of the test build. Needs the secret BUTLER_API_KEY and the
+      # page of the test build (a manual run on main republishes it). Needs the secret BUTLER_API_KEY and the
       # variable ITCH_TARGET ("user/game"); skipped without them.
       - name: Publish test build to itch.io
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
           ITCH_TARGET: ${{ vars.ITCH_TARGET }}
