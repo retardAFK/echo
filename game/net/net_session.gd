@@ -60,6 +60,16 @@ func join(url: String) -> void:
 	mode = Mode.CLIENT
 
 
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS  # Keeps the link alive behind a paused end screen.
+
+
+## Room side: the game is over, back to the waiting room (T-099).
+func end_game() -> void:
+	if mode == Mode.ROOM:
+		link.end_game()
+
+
 ## Closes the connection, if any, and goes back to playing alone.
 func leave() -> void:
 	if link != null:

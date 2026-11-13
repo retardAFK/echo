@@ -38,6 +38,14 @@ func take(kind: Kind) -> bool:
 	return true
 
 
+## Sets how many items of a kind are carried, as the room says (S-010, T-099).
+func set_count(kind: Kind, value: int) -> void:
+	value = clampi(value, 0, capacity(kind))
+	if value != _counts[kind]:
+		_counts[kind] = value
+		changed.emit()
+
+
 ## Removes one item if there is any. Returns whether one was used.
 func use(kind: Kind) -> bool:
 	if count(kind) <= 0:

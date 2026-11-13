@@ -107,5 +107,10 @@ func get_hold_ratio() -> float:
 	return progress.get_ratio()
 
 
+## Online client (S-010, T-099): the sparks of a repair in the room.
+func voice() -> void:
+	_sparks.play()
+
+
 func _has_fuse_to_place() -> bool:
 	return game_loop != null and game_loop.rules.carried > 0 and not is_repaired()

@@ -699,7 +699,7 @@ func _buildings() -> Dictionary:
 			[Vector3(142, 0, 62), Vector3(176, 0, 62), Vector3(176, 0, 74), Vector3(170, 0, 82)]],
 		"Gallery": [GALLERY, 0.0, GALLERY_HEIGHT,
 			[[Vector3(58, 2.9, 143), 5.0], [Vector3(66, 2.8, 137), 6.0]],
-			[Vector3(55, 0, 141), Vector3(61, 0, 145), Vector3(76, 0, 142), Vector3(84, 0, 148)]],
+			[Vector3(55, 0, 143), Vector3(61, 0, 145), Vector3(76, 0, 142), Vector3(84, 0, 148)]],
 		"CarPark": [CAR_PARK, -CAR_PARK_DEPTH, 0.0,
 			[[Vector3(152, -0.6, 106), 7.0], [Vector3(170, -0.6, 106), 7.0]],
 			[Vector3(142, -3, 97), Vector3(178, -3, 97), Vector3(142, -3, 115), Vector3(166, -3, 115)]],

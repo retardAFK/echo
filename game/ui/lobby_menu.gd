@@ -82,6 +82,9 @@ func _ready() -> void:
 	NetSession.lobby_changed.connect(show_lobby)
 	NetSession.game_started.connect(_on_game_started)
 	show_entry()
+	var current := NetSession.get_lobby()
+	if current != null:  # Back from a game (T-099): still in the room.
+		show_lobby(current)
 
 
 func _exit_tree() -> void:
@@ -189,12 +192,19 @@ func _on_game_started(state: LobbyState) -> void:
 	_start_button.disabled = true
 	var seat := state.seat_of(NetSession.get_place())
 	launched.emit(seat)
+	if change_scene:
+		enter_game(get_tree(), state)
+
+
+## Plays the seat the room gave this player in the game it launched.
+static func enter_game(tree: SceneTree, state: LobbyState) -> void:
+	var seat := state.seat_of(NetSession.get_place())
 	GameSession.online_seat = seat
 	GameSession.role = (
 		GameSession.Role.MONSTER if seat == LobbyState.MONSTER_SEAT else GameSession.Role.HUNTED
 	)
-	if change_scene:
-		get_tree().change_scene_to_file(MAP_SCENE)
+	tree.paused = false
+	tree.change_scene_to_file(MAP_SCENE)
 
 
 func _on_unreachable() -> void:

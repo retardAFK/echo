@@ -93,3 +93,16 @@ func test_each_pickup_can_be_reached_and_taken() -> void:
 	for pickup in pickups:
 		var end := _path_end(nav_map, pickup.global_position)
 		assert_true(pickup.can_interact(end + Vector3.UP * 0.3), "%s %s" % [pickup.name, end])
+
+
+func test_no_hiding_spot_stands_against_a_fuse_box() -> void:
+	# A closet once stood on a fuse box of the gallery: its body muffled the
+	# box, and the monster beside it did not hear the fuse being taken.
+	_add_map()
+	await wait_physics_frames(2)
+	var monster: Monster = _map.get_node("Monster")
+	monster.player = null
+	for box: FuseBox in _map.get_fuse_boxes():
+		monster.global_position = box.get_approach_point()
+		var noise := NoiseEvent.new(NoiseEvent.Type.FUSE, box.global_position, 3.0, null)
+		assert_true(NoiseBus.can_hear(noise, monster.get_ear_position()), str(box.get_path()))

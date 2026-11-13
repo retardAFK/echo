@@ -40,6 +40,11 @@ var far_building: Building
 var commands := PlayerCommands.new()
 ## Whether this machine's keyboard and mouse drive the monster.
 var local_controls := true
+## Online client (S-010, T-099): the room opens hiding spots and crushes alarm
+## clocks; here the monster moves, scans for its own screen and shows the
+## progress the room says.
+var mirror_world := false
+var remote_hold_ratio := 0.0
 
 var _pace := MonsterBrain.Pace.WALK
 var _prowling := false
@@ -84,7 +89,8 @@ func _physics_process(delta: float) -> void:
 	update_aim()
 	update_scan(delta, commands.scan)
 	move(commands.move, commands.sprint, delta)
-	_hold.update(self, get_interactable(), commands.interact, delta)
+	if not mirror_world:
+		_hold.update(self, get_interactable(), commands.interact, delta)
 
 
 ## Applies the one-shot actions queued in the commands (S-010, T-106). The
@@ -118,7 +124,7 @@ func get_interactable() -> Node:
 
 ## Progress of the hiding spot it is opening, from 0 to 1.
 func get_hold_ratio() -> float:
-	return _hold.get_ratio()
+	return remote_hold_ratio if mirror_world else _hold.get_ratio()
 
 
 ## Moves one physics step from a 2D input (x = right, y = back).
@@ -138,7 +144,8 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 	move_and_slide()
 	var moved := Vector2(global_position.x - before.x, global_position.z - before.z).length()
 	_noise.update(delta, moved, _pace, global_position, get_ear_position(), self)
-	Decoy.crush_near(get_tree(), global_position, settings.catch_distance)  # S-008, Q4.
+	if not mirror_world:
+		Decoy.crush_near(get_tree(), global_position, settings.catch_distance)  # S-008, Q4.
 
 
 ## Turns the body (yaw) and the head (pitch) from a mouse movement in screen pixels.

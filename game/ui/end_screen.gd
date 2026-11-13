@@ -9,9 +9,13 @@ signal replay_requested
 signal menu_requested
 
 const MENU_SCENE := "res://game/ui/start_menu.tscn"
+const LOBBY_SCENE := "res://game/ui/lobby_menu.tscn"
 
 ## Tests turn this off to stay on the map after a choice.
 @export var change_scene := true
+## Online game (S-010, T-099): "replay" goes back to the waiting room, and
+## "menu" leaves the room.
+@export var online := false
 
 ## Text copied by "Copier le résumé" (S-009, Q7).
 var summary := ""
@@ -29,6 +33,8 @@ func _ready() -> void:
 	_replay.pressed.connect(replay)
 	_menu.pressed.connect(go_to_menu)
 	_copy.pressed.connect(copy_summary)
+	if online:
+		_replay.text = "END_BACK_TO_LOBBY"
 
 
 ## Title key for the end of a game, seen from the role the player played.
@@ -77,11 +83,16 @@ func replay() -> void:
 	replay_requested.emit()
 	get_tree().paused = false
 	if change_scene:
-		get_tree().reload_current_scene()
+		if online:
+			get_tree().change_scene_to_file(LOBBY_SCENE)
+		else:
+			get_tree().reload_current_scene()
 
 
 func go_to_menu() -> void:
 	menu_requested.emit()
 	get_tree().paused = false
+	if online:
+		NetSession.leave()
 	if change_scene:
 		get_tree().change_scene_to_file(MENU_SCENE)

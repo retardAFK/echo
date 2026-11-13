@@ -49,3 +49,6 @@ extends Resource
 @export_range(0.5, 30.0, 0.5, "suffix:s") var room_connect_timeout: float = 5.0
 ## Time between two tries to reach a room that is still starting.
 @export_range(0.05, 5.0, 0.05, "suffix:s") var room_connect_retry: float = 0.25
+## After the end of a game, how long the room waits before going back to its
+## waiting room (T-099).
+@export_range(0.5, 30.0, 0.5, "suffix:s") var end_return_delay: float = 3.0
