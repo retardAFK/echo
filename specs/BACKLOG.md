@@ -86,7 +86,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 **But** : 1 monstre et jusqu'à 3 chassés jouent ensemble depuis 4 navigateurs, avec des IA pour remplir les places vides. C'est la phase la plus difficile du projet.
 
-**Questions à trancher dans la spec** : Q-002 (3 ou 4 chassés), Q-003 (chassé attrapé éliminé ou sauvable), Q-005 (amis seulement ou matchmaking public), Q-010 (voix entre joueurs).
+**Questions tranchées dans la spec** (13/11/2026) : Q-002 (3 chassés), Q-003 (sauvable une fois), Q-005 (amis seulement, avec un code), Q-010 (pas de voix en jeu).
 
 **Terminé quand** : 1 monstre et 3 chassés jouent une partie complète depuis 4 navigateurs différents, sur des connexions différentes.
 
@@ -98,46 +98,56 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : décision écrite dans le journal (point de décision n°3)
   - Dépend de : T-090
   - Fait le 13/11/2026 : D-015, serveur dédié Godot en WebSocket chez Hetzner
-- [ ] T-092 — Spec S-010
+- [x] T-092 — Spec S-010
   - Résultat vérifiable : spec validée, Q-002, Q-003, Q-005 et Q-010 closes
   - Dépend de : T-091
-  - 13/11/2026 : spec proposée ([`specs/S-010-multijoueur/spec.md`](S-010-multijoueur/spec.md)), Q1 à Q4 en attente de Maxime
-- [ ] T-093 — Plan et tâches de S-010
+  - Fait le 13/11/2026 : Q1 à Q4 validées par Maxime (3 chassés, sauvable une fois, entre amis avec un code, pas de voix)
+- [x] T-093 — Plan et tâches de S-010
   - Résultat vérifiable : `plan.md` (qui fait autorité, ce que chaque client reçoit, ce qui n'est jamais envoyé aux chassés) et `tasks.md`
   - Dépend de : T-092
-- [ ] T-094 — Serveur de mise en relation (ou serveur dédié)
-  - Résultat vérifiable : serveur dans `tools/server/`, script de déploiement, test automatique de connexion de 4 clients
+  - Fait le 13/11/2026 : [`plan.md`](S-010-multijoueur/plan.md) et [`tasks.md`](S-010-multijoueur/tasks.md)
+- [ ] T-106 — Commandes séparées du clavier
+  - Résultat vérifiable : `PlayerCommands` (sérialisation testée), `LocalControls` ; `Player` et `MonsterAvatar` ne lisent plus `Input` ; tous les tests existants, la simulation et le banc inchangés
+  - Dépend de : T-093
+- [ ] T-094 — Serveur dédié : accueil et salles
+  - Résultat vérifiable : préréglage d'export « Server », modes `--lobby` et `--room`, `RoomCode` testé, une salle lancée par code et arrêtée quand elle est vide ; `tools/server/` (Caddyfile, services, `setup.sh`, `deploy.sh`, README) ; la CI exporte le serveur, le démarre et y connecte 4 clients sans affichage
   - Dépend de : T-093
 - [ ] T-095 — Couche réseau du jeu
-  - Résultat vérifiable : autoload de session réseau, connexion et déconnexion, autorité de l'hôte, ping affiché avec F3 ; tests GUT avec des pairs locaux
-  - Dépend de : T-094
+  - Résultat vérifiable : autoload `NetSession` (solo, client, salle), connexion, version vérifiée, déconnexion, ping affiché avec F3 ; commandes envoyées à 30 /s et appliquées par la salle ; tests GUT avec des pairs locaux
+  - Dépend de : T-094, T-106
 - [ ] T-096 — Salon (lobby)
-  - Résultat vérifiable : créer une partie, la rejoindre avec un code, choisir son rôle, se déclarer prêt, lancer ; places vides remplies par des IA
+  - Résultat vérifiable : `LobbyMenu` : créer, rejoindre avec un code, 4 places, chef, rôles, prêt, lancer ; places vides marquées « IA » ; retour au salon après la fin ; textes dans `strings.csv`
   - Dépend de : T-095
 - [ ] T-097 — Synchronisation des chassés
-  - Résultat vérifiable : positions, accroupi, course, état caché, interpolation fluide jusqu'à 150 ms de ping
+  - Résultat vérifiable : instantanés filtrés à 20 /s, prédiction et rejeu du personnage local, interpolation des autres ; accroupi, course, état caché ; écart prédit et serveur sous le seuil avec 150 ms de ping simulé
   - Dépend de : T-095
 - [ ] T-098 — Synchronisation du bruit et du monstre
-  - Résultat vérifiable : les bruits sont calculés par l'hôte et n'arrivent qu'au monstre (un chassé ne reçoit jamais la position des autres) ; scan, lumières qui vacillent et capture synchronisés
+  - Résultat vérifiable : `NetVisibility` testé ; bruits envoyés au monstre avec leur position, aux chassés seulement s'ils les entendent et sans auteur ; un test lit les messages construits pour un chassé et n'y trouve jamais un joueur qu'il ne voit pas ; scan, lumières qui vacillent et capture synchronisés
   - Dépend de : T-097
 - [ ] T-099 — Synchronisation de la boucle de partie et des ruses
   - Résultat vérifiable : fusibles, transformateur, sirène, sortie, bouteilles, réveils, cachettes, alarmes de voiture ; écran de fin pour chaque joueur
   - Dépend de : T-098
 - [ ] T-100 — Plusieurs chassés
-  - Résultat vérifiable : points d'apparition, règle de capture choisie (Q-003), vue spectateur après élimination, victoire si un chassé sort
+  - Résultat vérifiable : 3 points d'apparition éloignés, le monstre IA choisit parmi plusieurs cibles, victoire dès qu'un chassé sort, défaite quand aucun n'est libre ; simulation à 3 proies IA sans blocage
   - Dépend de : T-099
-- [ ] T-101 — IA de complément
-  - Résultat vérifiable : la proie IA joue aux côtés des chassés humains, le monstre IA prend la place d'un monstre absent ; simulation à 3 proies IA
+- [ ] T-107 — Sauvetage et spectateur
+  - Résultat vérifiable : état capturé à genoux, appel à l'aide (bruit `CALL`), libération en maintenant E 4 s (bruit `RESCUE`), fusible lâché, élimination à la deuxième prise, vue spectateur qui suit un coéquipier ; solo inchangé ; tests GUT de la règle
   - Dépend de : T-100
+- [ ] T-101 — IA de complément
+  - Résultat vérifiable : la proie IA joue aux côtés des chassés humains (et sauve un capturé quand c'est sûr), le monstre IA prend la place d'un monstre absent
+  - Dépend de : T-107
 - [ ] T-102 — Départs et coupures
-  - Résultat vérifiable : un joueur qui part est remplacé par une IA ; si l'hôte part, la partie se termine proprement
+  - Résultat vérifiable : jeton de reprise, place gardée 10 s puis prise par une IA, retour possible avant la fin, chef transmis, salle arrêtée sans humains
   - Dépend de : T-101
 - [ ] T-103 — Test automatique à 4 clients
-  - Résultat vérifiable : la CI lance 4 clients sans affichage et joue une partie scriptée de bout en bout
+  - Résultat vérifiable : la CI lance l'accueil, une salle et 4 clients sans affichage, avec 75 ms de retard ajouté, et joue une partie scriptée de bout en bout (fusibles, capture, sauvetage, sortie) ; charge du serveur mesurée
   - Dépend de : T-102
+- [ ] T-108 — Mise en ligne du serveur **(Maxime crée le compte)**
+  - Résultat vérifiable : serveur Hetzner et nom de domaine créés par Maxime, secrets de déploiement dans GitHub ; `setup.sh` passé, job `deploy` sur `main`, `wss://<domaine>/lobby` répond depuis le build itch.io
+  - Dépend de : T-094
 - [ ] T-104 — Partie à 4 navigateurs **(Maxime)**
   - Résultat vérifiable : Maxime et 3 personnes jouent une partie complète ; retours notés dans la spec
-  - Dépend de : T-103
+  - Dépend de : T-103, T-108
 - [ ] T-105 — Vérification finale de S-010
   - Résultat vérifiable : critères cochés, performance tenue avec 4 joueurs, spec livrée
   - Dépend de : T-104
