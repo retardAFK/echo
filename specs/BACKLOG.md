@@ -114,9 +114,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : préréglage d'export « Server », modes `--lobby` et `--room`, `RoomCode` testé, une salle lancée par code et arrêtée quand elle est vide ; `tools/server/` (Caddyfile, services, `setup.sh`, `deploy.sh`, README) ; la CI exporte le serveur, le démarre et y connecte 4 clients sans affichage
   - Dépend de : T-093
   - Fait le 13/11/2026 : `game/net/` (`RoomCode`, `NetAddress`, `ServerBoot`, `LobbyRegistry`, `LobbyServer`, `LobbyClient`, `RoomLink`, scènes de l'accueil et de la salle), `net_settings.tres`, préréglage « Server » (80 Mo, sans visuels) ; `tools/server/` ; la CI exporte le serveur, le lance et `tools/godot/net_smoke.tscn` y connecte 4 joueurs (ping 7 ms en local, 5e refusé) ; 13 tests GUT
-- [ ] T-095 — Couche réseau du jeu
+- [x] T-095 — Couche réseau du jeu
   - Résultat vérifiable : autoload `NetSession` (solo, client, salle), connexion, version vérifiée, déconnexion, ping affiché avec F3 ; commandes envoyées à 30 /s et appliquées par la salle ; tests GUT avec des pairs locaux
   - Dépend de : T-094, T-106
+  - Fait le 13/11/2026 : autoload `NetSession` (solo, client, salle) qui enveloppe `RoomLink` ; commandes tenues envoyées 30 fois/s (non fiable, ordonné, anciennes trames ignorées), actions ponctuelles en fiable ; version refusée, départ et fermeture de la salle signalés ; ligne `NET place 1 ping 7 ms` avec F3 ; la salle exportée passe par `NetSession` ; 9 tests GUT
 - [ ] T-096 — Salon (lobby)
   - Résultat vérifiable : `LobbyMenu` : créer, rejoindre avec un code, 4 places, chef, rôles, prêt, lancer ; places vides marquées « IA » ; retour au salon après la fin ; textes dans `strings.csv`
   - Dépend de : T-095

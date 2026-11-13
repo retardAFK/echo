@@ -18,6 +18,8 @@ signal pinged(milliseconds: int)
 signal players_changed(count: int)
 ## Room side: nobody has been in the room for room_idle_timeout.
 signal idle_expired
+## Client side: the room closed the connection after the player had joined.
+signal left
 
 const NODE_NAME := "Room"
 ## Seconds between refusing a player and closing its connection.
@@ -26,8 +28,12 @@ const REFUSED_CLOSE_DELAY := 0.5
 @export var settings: NetSettings = preload("res://game/data/net_settings.tres")
 
 var is_room := false
+## Build version a client announces and a room expects (tests change it).
+var version := NetAddress.build_version()
 ## Room side: place of each connected player, by peer id.
 var players := {}
+## Room side: latest commands of each place, by place (T-095).
+var commands := {}
 ## Client side: own place once welcomed, else 0.
 var place := 0
 ## Client side: last round trip in milliseconds, -1 before the first pong.
@@ -117,7 +123,7 @@ func _process(delta: float) -> void:
 
 
 func _on_connected() -> void:
-	hello.rpc_id(1, NetAddress.build_version())
+	hello.rpc_id(1, version)
 
 
 func _on_connection_failed() -> void:
@@ -128,7 +134,7 @@ func _on_connection_failed() -> void:
 func _on_server_disconnected() -> void:
 	if place > 0:
 		place = 0
-		refused.emit("closed")
+		left.emit()
 
 
 func _on_peer_connected(_id: int) -> void:
@@ -136,8 +142,33 @@ func _on_peer_connected(_id: int) -> void:
 
 
 func _on_peer_disconnected(id: int) -> void:
-	if players.erase(id):
+	if players.has(id):
+		commands.erase(players[id])
+		players.erase(id)
 		players_changed.emit(players.size())
+
+
+## Room side: the commands of a place, created empty for a place nobody has
+## sent anything from yet.
+func commands_for(given_place: int) -> PlayerCommands:
+	if not commands.has(given_place):
+		commands[given_place] = PlayerCommands.new()
+	return commands[given_place]
+
+
+## Client side: sends what is held and where the player looks. Frames may be
+## lost or late; the room keeps only the newest.
+func send_held(held: PlayerCommands) -> void:
+	if place > 0:
+		var copy := PlayerCommands.new()
+		copy.copy_held(held)
+		receive_held.rpc_id(1, copy.to_bytes())
+
+
+## Client side: sends a one-shot action, which must not be lost.
+func send_action(action: PlayerCommands.Action) -> void:
+	if place > 0:
+		receive_action.rpc_id(1, action)
 
 
 func _drop(peer_id: int) -> void:
@@ -154,12 +185,12 @@ func free_place() -> int:
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func hello(version: String) -> void:
+func hello(client_version: String) -> void:
 	if not is_room:
 		return
 	var sender := _api.get_remote_sender_id()
 	var reason := ""
-	if version != NetAddress.build_version():
+	if client_version != version:
 		reason = "version"
 	elif free_place() == 0:
 		reason = "full"
@@ -171,6 +202,24 @@ func hello(version: String) -> void:
 	players[sender] = free_place()
 	welcome.rpc_id(sender, players[sender])
 	players_changed.emit(players.size())
+
+
+@rpc("any_peer", "call_remote", "unreliable_ordered")
+func receive_held(bytes: PackedByteArray) -> void:
+	var sender_place: int = players.get(_api.get_remote_sender_id(), 0) if is_room else 0
+	if sender_place == 0:
+		return
+	var received := PlayerCommands.from_bytes(bytes)
+	var held := commands_for(sender_place)
+	if received != null and received.seq > held.seq:
+		held.copy_held(received)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func receive_action(action: int) -> void:
+	var sender_place: int = players.get(_api.get_remote_sender_id(), 0) if is_room else 0
+	if sender_place != 0 and action >= 0 and action < PlayerCommands.Action.size():
+		commands_for(sender_place).push(action as PlayerCommands.Action)
 
 
 @rpc("authority", "call_remote", "reliable")

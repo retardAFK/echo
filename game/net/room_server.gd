@@ -10,15 +10,14 @@ var _link: RoomLink
 
 func _ready() -> void:
 	var port := settings.first_room_port + ServerBoot.room_slot - 1
-	_link = RoomLink.new()
-	_link.settings = settings
-	add_child(_link)
-	var error := _link.listen(port)
+	NetSession.settings = settings
+	var error := NetSession.host(port)
 	if error != OK:
 		printerr("ECHO_ROOM %s cannot listen on %d: %s" % [ServerBoot.room_code, port, error])
 		get_tree().quit(1)
 		return
 	print("ECHO_ROOM %s listening on %d" % [ServerBoot.room_code, port])
+	_link = NetSession.link
 	_link.players_changed.connect(_on_players_changed)
 	_link.idle_expired.connect(_on_idle_expired)
 
