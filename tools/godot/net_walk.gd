@@ -3,7 +3,9 @@ extends Node
 ## the exported server: creates a game, launches it as the only player (a
 ## hunted, the AI monster on the room), sprints forward for 4 s with
 ## 150 ms added to every message, and checks that the predicted position
-## never drifted from the room's beyond correction_threshold.
+## never drifted from the room's beyond correction_threshold. It also checks
+## that the map mirrors the room's (T-099): its fuse boxes hold the fuses the
+## room drew.
 ## Prints ECHO_NET_WALK and quits with 0 on success, 1 otherwise.
 ## Run: godot --headless res://tools/godot/net_walk.tscn
 
@@ -76,11 +78,16 @@ func _physics_process(delta: float) -> void:
 	Input.action_release("move_forward")
 	Input.action_release("sprint")
 	var distance := net.own.global_position.distance_to(_start)
+	var fuses := _map.get_fuse_boxes().filter(func(box: FuseBox) -> bool: return box.has_fuse)
 	var result := (
-		"moved %.1f m, worst gap %.2f m, ping %d ms"
-		% [distance, net.worst_error, NetSession.get_ping_ms()]
+		"moved %.1f m, worst gap %.2f m, ping %d ms, %d fuses mirrored"
+		% [distance, net.worst_error, NetSession.get_ping_ms(), fuses.size()]
 	)
-	if distance < MIN_DISTANCE or net.worst_error >= _settings.correction_threshold:
+	if (
+		distance < MIN_DISTANCE
+		or net.worst_error >= _settings.correction_threshold
+		or fuses.size() != _map.game_loop.settings.fuse_count
+	):
 		_fail(result)
 		return
 	print("ECHO_NET_WALK ok " + result)

@@ -8,6 +8,11 @@ signal noise_emitted(event: NoiseEvent)
 const WALLS_COLLISION_MASK := 1 << 1
 
 var settings: NoiseSettings = preload("res://game/data/noise_settings.tres")
+## On an online client (S-010, T-099) the world only mirrors the room's, so
+## only the local avatar (local_source) and the room (no source) make noise:
+## the room already sends what is heard.
+var mirror := false
+var local_source: Node
 
 
 ## Announces a noise to every listener and returns it.
@@ -15,6 +20,8 @@ func emit_noise(
 	type: NoiseEvent.Type, position: Vector3, noise_range: float, source: Node = null
 ) -> NoiseEvent:
 	var event := NoiseEvent.new(type, position, noise_range, source)
+	if mirror and source != null and source != local_source:
+		return event
 	noise_emitted.emit(event)
 	return event
 

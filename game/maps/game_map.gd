@@ -46,6 +46,8 @@ var pause_menu: PauseMenu
 var _rng := RandomNumberGenerator.new()
 ## The online part of the game (S-010), null in solo.
 var _net: NetGame
+## Room side: the human hunted's players.
+var _online_hunted: Array[Player] = []
 
 @onready var _player: Player = $Player
 @onready var _monster: Monster = $Monster
@@ -134,8 +136,8 @@ func _setup_monster_role() -> void:
 ## Online game (S-010, T-097). The room plays everyone: a Player for each
 ## human hunted, the monster's avatar or the AI monster. A client plays only
 ## its own avatar and sees the others as puppets. Noises, scans and catches
-## come from the room (T-098); the game loop and the AIs in empty seats come
-## with T-099 to T-101.
+## come from the room (T-098), and so do the map's changes and the game loop
+## (T-099), which a client only mirrors. The AIs in empty seats come with T-101.
 func _setup_online() -> void:
 	var net := NetGame.new()
 	net.name = "NetGame"
@@ -143,11 +145,19 @@ func _setup_online() -> void:
 	net.is_room = NetSession.mode == NetSession.Mode.ROOM
 	net.buildings = get_buildings()
 	_net = net
+	net.world = NetWorld.new(self)  # Before the loop draws or takes anything.
 	if net.is_room:
 		_setup_online_room(net)
 	else:
 		_setup_online_client(net)
 	add_child(net)
+	_setup_game_loop()
+	net.world.game_loop = game_loop
+	if net.is_room:
+		for spot in get_hiding_spots():
+			spot.found.connect(_on_online_hidden_found)
+		if game_loop != null:
+			game_loop.ended.connect(_on_online_game_ended)
 
 
 func _setup_online_room(net: NetGame) -> void:
@@ -174,6 +184,7 @@ func _setup_online_room(net: NetGame) -> void:
 			player.rotation.y = marker.global_rotation.y
 		net.add_avatar(place, seat, player)
 		hunted.append(player)
+	_online_hunted = hunted
 	var monster_place: int = lobby.seats[LobbyState.MONSTER_SEAT] if lobby != null else 0
 	if monster_place != 0:
 		avatar = AVATAR_SCENE.instantiate()
@@ -215,6 +226,8 @@ func _setup_online_client(net: NetGame) -> void:
 		_monster = null
 		net.own = _player
 	net.caught_reported.connect(_on_caught_reported)
+	# The next game launched while this one's end screen is up (T-099).
+	NetSession.game_started.connect(_on_next_game)
 	add_child(ShaderWarmup.new())
 
 
@@ -227,6 +240,25 @@ func _on_online_caught() -> void:
 	_net.report_caught(_net.seat_of(caught))
 	_put_back(caught)
 	_monster.reset_to_patrol(_spawn)
+
+
+func _on_next_game(state: LobbyState) -> void:
+	LobbyMenu.enter_game(get_tree(), state)
+
+
+## Room side: the monster opened a hiding spot with a hunted inside.
+func _on_online_hidden_found(occupant: Node3D, _by: Node3D) -> void:
+	_net.report_caught(_net.seat_of(occupant))
+	_put_back(occupant)
+
+
+## Room side: the game is over. Everyone gets the last state at once, and the
+## room goes back to its waiting room a little later (the end screens are up).
+func _on_online_game_ended(_hunted_won: bool) -> void:
+	_net.send_world()
+	get_tree().create_timer(NetSession.settings.end_return_delay).timeout.connect(
+		NetSession.end_game
+	)
 
 
 ## Room side: a caught hunted goes back to a spawn point (until T-107).
@@ -257,16 +289,25 @@ func _setup_game_loop() -> void:
 	var boxes := get_fuse_boxes()
 	if boxes.is_empty():
 		return
+	var room := NetSession.mode == NetSession.Mode.ROOM
 	game_loop = GameLoop.new()
 	game_loop.name = "GameLoop"
 	game_loop.settings = LOOP_SETTINGS
 	game_loop.hunted = prey if avatar != null else _player
+	if room:
+		game_loop.hunted = _online_hunted[0] if not _online_hunted.is_empty() else null
+	elif NetSession.mode == NetSession.Mode.CLIENT:
+		game_loop.mirror = true  # The room's loop decides (T-099).
+		game_loop.hunted = null
 	add_child(game_loop)
 	game_loop.setup(self, GameSession.game_seed)
+	game_loop.exit_opened.connect(_on_exit_opened)
+	if room:
+		return  # No screens on the server.
 	end_screen = END_SCREEN_SCENE.instantiate()
+	end_screen.online = NetSession.mode == NetSession.Mode.CLIENT
 	add_child(end_screen)
 	game_loop.ended.connect(_on_game_ended)
-	game_loop.exit_opened.connect(_on_exit_opened)
 	if prey != null:
 		prey.start_loop(game_loop, boxes, _rng.randi() | 1)
 	if avatar == null:

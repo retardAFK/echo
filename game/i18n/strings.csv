@@ -23,6 +23,7 @@ END_SCANS,Scans du monstre : %d
 END_RUSES,Ruses utilisées : %d
 END_REPLAY,Rejouer
 END_MENU,Menu
+END_BACK_TO_LOBBY,Retour au salon
 HUD_INTERACT_PICKUP_BOTTLE,E : ramasser la bouteille
 HUD_INTERACT_PICKUP_DECOY,E : ramasser le réveil
 HUD_CARRY_BOTTLE,1 bouteille

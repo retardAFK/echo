@@ -93,6 +93,13 @@ func start(by: int) -> bool:
 	return true
 
 
+## The game is over: back to waiting, everyone to say again they are ready.
+func finish() -> void:
+	started = false
+	for player in _ready:
+		_ready[player] = false
+
+
 func seat_of(player: int) -> int:
 	return seats.find(player) if player != 0 else -1
 

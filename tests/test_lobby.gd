@@ -141,6 +141,15 @@ func test_waiting_room_over_the_network() -> void:
 	watch_signals(late)
 	await wait_for_signal(late.refused, 3.0)
 	assert_signal_emitted_with_parameters(late, "refused", ["started"])
+	# The game is over (T-099): everyone back in the waiting room, not ready.
+	watch_signals(room)
+	room.end_game()
+	assert_signal_emitted(room, "game_ended")
+	await _wait_until(func() -> bool: return not first.lobby_state.get("started", true))
+	var after := LobbyState.from_dict(first.lobby_state)
+	assert_false(after.started)
+	assert_false(after.is_ready(first.place))
+	assert_eq(after.seat_of(second.place), LobbyState.MONSTER_SEAT, "seats kept")
 
 
 func test_leaving_frees_the_seat_for_everyone() -> void:

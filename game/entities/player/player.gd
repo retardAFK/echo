@@ -30,6 +30,12 @@ var hiding_in: HidingSpot
 var commands := PlayerCommands.new()
 ## Whether this machine's keyboard and mouse drive the player.
 var local_controls := true
+## Online client (S-010, T-099): the room uses things, throws and hides; here
+## the player only moves, and shows what the room says (inventory, hiding
+## spot, progress of what is held).
+var mirror_world := false
+## Progress of what the player holds "interact" on, as the room says.
+var remote_hold_ratio := 0.0
 
 var _gait := PlayerMotion.Gait.WALK
 var _wants_crouch := false
@@ -78,7 +84,8 @@ func _physics_process(delta: float) -> void:
 	if hiding_in != null:
 		# Hidden (S-008, Q6): no movement, only holding "interact" to get out.
 		_update_height(delta)
-		_hold.update(self, hiding_in, commands.interact, delta)
+		if not mirror_world:
+			_hold.update(self, hiding_in, commands.interact, delta)
 		return
 	if not is_on_floor():
 		velocity += get_gravity() * delta
@@ -105,12 +112,15 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_update_height(delta)
 	_update_head_bob(horizontal.length(), target_speed, delta)
-	_hold.update(self, get_interactable(), commands.interact, delta)
+	if not mirror_world:
+		_hold.update(self, get_interactable(), commands.interact, delta)
 
 
 ## Applies the one-shot actions queued in the commands (S-010, T-106).
 func apply_actions() -> void:
 	for action in commands.take_actions():
+		if mirror_world and action != PlayerCommands.Action.CROUCH:
+			continue  # The room does it and says so.
 		match action:
 			PlayerCommands.Action.CROUCH:
 				toggle_crouch()
@@ -282,7 +292,7 @@ func _update_breath(delta: float) -> void:
 ## Progress of what the player holds "interact" on (a fuse box, the
 ## transformer, S-007), from 0 to 1.
 func get_hold_ratio() -> float:
-	return _hold.get_ratio()
+	return remote_hold_ratio if mirror_world else _hold.get_ratio()
 
 
 ## Switches between crouching and standing (crouch key, toggle mode).

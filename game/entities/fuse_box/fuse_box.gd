@@ -75,6 +75,11 @@ func get_hold_ratio() -> float:
 	return progress.get_ratio()
 
 
+## Online client (S-010, T-099): the clank of a fuse taken in the room.
+func voice() -> void:
+	_sound.play()
+
+
 ## The metal of the box, heard as made by the hunted holding it.
 func _clank(user: Node) -> void:
 	_sound.play()

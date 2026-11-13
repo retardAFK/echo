@@ -34,6 +34,9 @@ var exit_zone: ExitZone
 var siren_left := 0.0
 var is_over := false
 var hunted_won := false
+## Online client (S-010, T-099): draws nothing and decides nothing; the room's
+## loop sends its values (mirror_values) and this one shows them (apply_values).
+var mirror := false
 
 var _elapsed := 0.0
 ## Frames drawn and their time during the game, for the average frames per
@@ -60,6 +63,10 @@ func setup(map: Node, rng_seed := 0) -> void:
 	else:
 		_rng.seed = rng_seed
 	var by_building := {}
+	if mirror:
+		_wire(map)
+		fuses_changed.emit(rules.found(), rules.placed)
+		return
 	for box: FuseBox in _all(map, FuseBox):
 		box.set_fuse(false)
 		if not box.fuse_taken.is_connected(_on_fuse_taken):
@@ -73,6 +80,16 @@ func setup(map: Node, rng_seed := 0) -> void:
 	_draw_decoys(map)
 	for building: Building in _all(map, Building):
 		building.scan_changed.connect(_on_scan_changed)
+	_wire(map)
+	var zones: Array = _all(map, ExitZone)
+	if not zones.is_empty():
+		exit_zone = zones[0]
+		exit_zone.reached.connect(_on_exit_reached)
+	fuses_changed.emit(rules.found(), rules.placed)
+
+
+## The transformer and the gate of the map.
+func _wire(map: Node) -> void:
 	var found: Array = _all(map, Transformer)
 	if not found.is_empty():
 		transformer = found[0]
@@ -81,11 +98,6 @@ func setup(map: Node, rng_seed := 0) -> void:
 	found = _all(map, ExitGate)
 	if not found.is_empty():
 		gate = found[0]
-	found = _all(map, ExitZone)
-	if not found.is_empty():
-		exit_zone = found[0]
-		exit_zone.reached.connect(_on_exit_reached)
-	fuses_changed.emit(rules.found(), rules.placed)
 
 
 ## Game seconds since the start, frozen when it ends. Counted from the
@@ -105,6 +117,42 @@ func place_fuse() -> void:
 	fuses_changed.emit(rules.found(), rules.placed)
 	if rules.is_repaired():
 		_open_exit()
+
+
+## Room side: what a client's mirror loop needs, see apply_values().
+func mirror_values() -> Array:
+	return [
+		rules.carried,
+		rules.placed,
+		is_over,
+		hunted_won,
+		_elapsed,
+		noise_count,
+		scan_count,
+		ruse_count,
+	]
+
+
+## Client side: shows the room's loop: fuses, transformer, siren and exit,
+## the numbers of the end screen, and the end itself.
+func apply_values(values: Array) -> void:
+	if values.size() < 8:
+		return
+	var was_repaired := rules.is_repaired()
+	if values[0] != rules.carried or values[1] != rules.placed:
+		rules.carried = values[0]
+		rules.placed = values[1]
+		fuses_changed.emit(rules.found(), rules.placed)
+		if transformer != null:
+			transformer.update_label()
+	if rules.is_repaired() and not was_repaired:
+		_open_exit()
+	_elapsed = values[4]
+	noise_count = values[5]
+	scan_count = values[6]
+	ruse_count = values[7]
+	if values[2] and not is_over:
+		finish(values[3])
 
 
 ## Ends the game once: the hunted won (got out) or lost (caught).

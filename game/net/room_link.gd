@@ -24,6 +24,8 @@ signal left
 signal lobby_changed(state: Dictionary)
 ## Both sides: the leader launched the game.
 signal game_started(state: Dictionary)
+## Room side: the game is over and the room is back to its waiting room (T-099).
+signal game_ended
 ## Client side: what the room sends about the game, snapshot_rate times a second (T-097).
 signal snapshot_received(snapshot: Dictionary)
 ## Client side: an event of the game from the room, as it happens (T-098).
@@ -328,6 +330,15 @@ func _request_start() -> void:
 	for id in players:
 		_start_game.rpc_id(id, state)
 	game_started.emit(state)
+
+
+## Room side: the game is over; back to the waiting room, sent to everyone.
+func end_game() -> void:
+	if not lobby.started:
+		return
+	lobby.finish()
+	_broadcast_lobby()
+	game_ended.emit()
 
 
 @rpc("authority", "call_remote", "reliable")

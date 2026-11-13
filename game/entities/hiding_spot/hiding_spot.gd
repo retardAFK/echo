@@ -126,6 +126,11 @@ func get_hold_ratio() -> float:
 	return 0.0 if _wait_release else clampf(_progress / settings.hide_time, 0.0, 1.0)
 
 
+## Online client (S-010, T-099): the door of the spot, opened in the room.
+func voice() -> void:
+	_creak.play()
+
+
 func _finish(user: Node) -> void:
 	NoiseBus.emit_noise(
 		NoiseEvent.Type.HIDE, global_position + Vector3.UP, settings.hide_noise_range, self

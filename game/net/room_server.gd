@@ -21,6 +21,7 @@ func _ready() -> void:
 	_link = NetSession.link
 	_link.lobby.code = ServerBoot.room_code
 	_link.game_started.connect(_on_game_started)
+	_link.game_ended.connect(_on_game_ended)
 	_link.players_changed.connect(_on_players_changed)
 	_link.idle_expired.connect(_on_idle_expired)
 
@@ -38,3 +39,12 @@ func _on_game_started(state: Dictionary) -> void:
 	print("ECHO_ROOM %s started, seats %s" % [ServerBoot.room_code, state["seats"]])
 	GameSession.online_lobby = LobbyState.from_dict(state)
 	add_child(map_scene.instantiate())  # A child, so this node keeps the room going.
+
+
+## Back to the waiting room: the map goes, the next launch brings a new one.
+func _on_game_ended() -> void:
+	print("ECHO_ROOM %s game over" % ServerBoot.room_code)
+	for child in get_children():
+		if child is GameMap:
+			remove_child(child)
+			child.queue_free()
