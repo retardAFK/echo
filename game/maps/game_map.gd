@@ -53,6 +53,12 @@ var _net: NetGame
 var _online_hunted: Array[Node3D] = []
 ## Room side: the AI preys among them.
 var _ai_preys: Array[Prey] = []
+## Room side (T-102): places whose player left, with the seconds before an
+## AI takes over; and the places an AI plays for now, with their seat.
+var _gone := {}
+var _replaced := {}
+## Room side: the scene of a hunted's Player.
+var _player_path := ""
 ## Client side, hunted: what its screen shows of its own player, hidden once
 ## it watches a teammate (T-107).
 var _own_huds: Array[Node] = []
@@ -172,6 +178,7 @@ func _setup_online() -> void:
 
 func _setup_online_room(net: NetGame) -> void:
 	var lobby := GameSession.online_lobby
+	_player_path = _player.scene_file_path
 	var spawns: Array = []
 	if has_node("PlayerSpawns"):
 		spawns = far_apart(
@@ -191,20 +198,11 @@ func _setup_online_room(net: NetGame) -> void:
 			one = _new_ai_prey(seat, marker)  # An empty seat (T-101).
 			net.ai_hunted[seat] = one
 		else:
-			var player: Player = load(_player.scene_file_path).instantiate()
-			player.local_controls = false
-			player.name = "Hunted%d" % seat
-			add_child(player)
-			player.get_node("Head/Camera3D").current = false
+			one = _new_player(net, place, seat)
 			if marker != null:
-				player.global_position = marker.global_position
-				player.rotation.y = marker.global_rotation.y
-			net.add_avatar(place, seat, player)
-			one = player
-		var capture := CaptureState.new()
-		one.add_child(capture)
-		one.set("capture", capture)
-		capture.changed.connect(_on_capture_changed.bind(one))
+				one.global_position = marker.global_position
+				one.rotation.y = marker.global_rotation.y
+		_give_capture(one)
 		hunted.append(one)
 	_online_hunted = hunted
 	var monster_place: int = lobby.seats[LobbyState.MONSTER_SEAT] if lobby != null else 0
@@ -228,10 +226,171 @@ func _setup_online_room(net: NetGame) -> void:
 		each.monster = avatar if avatar != null else _monster
 	_free_node(_player)
 	_player = null
+	if NetSession.link != null:
+		NetSession.link.player_left.connect(_on_player_left)
+		NetSession.link.player_returned.connect(_on_player_returned)
+
+
+## Room side: the Player of a human hunted in a place and a seat.
+func _new_player(net: NetGame, place: int, seat: int) -> Player:
+	var player: Player = load(_player_path).instantiate()
+	player.local_controls = false
+	player.name = "Hunted%d" % seat
+	add_child(player)
+	player.get_node("Head/Camera3D").current = false
+	net.add_avatar(place, seat, player)
+	return player
+
+
+## Room side: the capture rule of a hunted (T-107).
+func _give_capture(one: Node3D, like: CaptureState = null) -> CaptureState:
+	var capture := CaptureState.new()
+	if like != null:
+		capture.copy_from(like)
+	one.add_child(capture)
+	one.set("capture", capture)
+	capture.changed.connect(_on_capture_changed.bind(one))
+	return capture
+
+
+## Room side (T-102): a player left a game in progress. Its place waits for
+## it seat_keep_time, then an AI takes it where it was.
+func _on_player_left(place: int) -> void:
+	if _net.avatars.has(place):
+		_gone[place] = NetSession.settings.seat_keep_time
+
+
+## Room side: a player came back with its token before the end: its avatar
+## again, or the AI's place, as the AI left it.
+func _on_player_returned(place: int) -> void:
+	if _gone.erase(place) or not _replaced.has(place):
+		return
+	var seat: int = _replaced[place]
+	_replaced.erase(place)
+	if seat == LobbyState.MONSTER_SEAT:
+		_monster_back(place)
+	else:
+		_hunted_back(place, seat)
+
+
+func _process(delta: float) -> void:
+	for place: int in _gone.keys():
+		_gone[place] -= delta
+		if _gone[place] <= 0.0:
+			_gone.erase(place)
+			replace_with_ai(place)
+
+
+## Room side: an AI plays the place of a player who left, from where it was.
+func replace_with_ai(place: int) -> void:
+	if not _net.avatars.has(place) or (game_loop != null and game_loop.is_over):
+		return
+	var seat: int = _net.seats[place]
+	var old: Node3D = _net.avatars[place]
+	_net.remove_avatar(place)
+	_replaced[place] = seat
+	if seat == LobbyState.MONSTER_SEAT:
+		_monster_to_ai(old as MonsterAvatar)
+		return
+	var player := old as Player
+	if player.hiding_in != null:
+		player.hiding_in.occupant = null
+		player.leave_hiding()
+	var prey := _new_ai_prey(seat, player)  # Where the player was.
+	for kind: Inventory.Kind in [Inventory.Kind.BOTTLE, Inventory.Kind.DECOY]:
+		prey.inventory.set_count(kind, player.inventory.count(kind))
+	prey.monster = avatar if avatar != null else _monster
+	_net.ai_hunted[seat] = prey
+	_swap_hunted(player, prey)
+	if game_loop != null:
+		prey.start_loop(game_loop, get_fuse_boxes(), _rng.randi() | 1)
+
+
+func _hunted_back(place: int, seat: int) -> void:
+	var prey: Prey = _net.ai_hunted.get(seat)
+	if prey == null:
+		return
+	_net.ai_hunted.erase(seat)
+	var player := _new_player(_net, place, seat)
+	player.global_position = prey.global_position
+	player.rotation.y = prey.rotation.y
+	for kind: Inventory.Kind in [Inventory.Kind.BOTTLE, Inventory.Kind.DECOY]:
+		player.inventory.set_count(kind, prey.inventory.count(kind))
+	_ai_preys.erase(prey)
+	_swap_hunted(prey, player)
+	if NetGame.is_out(player):
+		_net.spectate(player)
+
+
+## One hunted takes the place of another: its capture rule, its fuses, its
+## place among the monster's targets. The old one goes.
+func _swap_hunted(old: Node3D, new: Node3D) -> void:
+	var capture := _give_capture(new, old.get("capture"))
+	new.set("held", old.get("held"))
+	_online_hunted[_online_hunted.find(old)] = new
+	if game_loop != null:
+		game_loop.replace_hunted(old, new)
+	if _monster != null:
+		_monster.forget(old)
+		if capture.is_free():
+			_monster.add_target(new)
+	_net.replace_watched(old, new)
+	if capture.state == CaptureState.State.OUT:
+		new.process_mode = Node.PROCESS_MODE_DISABLED
+		new.global_position = Vector3(0, -60, 0)
+	_free_node(old)
+
+
+## The AI monster takes the place of a human monster who left, where it was.
+func _monster_to_ai(old: MonsterAvatar) -> void:
+	var monster: Monster = MONSTER_SCENE.instantiate()
+	monster.name = "Monster"
+	monster.patrol_route = get_node_or_null("PatrolRoute")
+	monster.buildings = get_buildings()
+	monster.position = old.global_position
+	monster.rotation.y = old.rotation.y
+	monster.catch_count = old.catch_count
+	_free_node(old)
+	avatar = null
+	add_child(monster)
+	_set_ai_monster(monster)
+
+
+## The human monster back in the AI monster's place.
+func _monster_back(place: int) -> void:
+	avatar = AVATAR_SCENE.instantiate()
+	avatar.local_controls = false
+	add_child(avatar)
+	avatar.global_transform = _monster.global_transform
+	avatar.catch_count = _monster.catch_count
+	_net.add_avatar(place, LobbyState.MONSTER_SEAT, avatar)
+	_net.ai_monster = null
+	if not _net.hunted_caught.is_connected(_online_catch):
+		_net.hunted_caught.connect(_online_catch)
+	for each in _ai_preys:
+		each.monster = avatar
+	_free_node(_monster)
+	_monster = null
+
+
+## Room side: the AI monster hunts every hunted still free.
+func _set_ai_monster(monster: Monster) -> void:
+	_monster = monster
+	_net.ai_monster = monster
+	for one in _online_hunted:
+		if CaptureState.is_free_hunted(one):
+			monster.add_target(one)
+	if not monster.hunted_caught.is_connected(_online_catch):
+		monster.hunted_caught.connect(_online_catch)
+	for each in _ai_preys:
+		each.monster = monster
+	if game_loop != null and game_loop.is_exit_open():
+		_on_exit_opened()
 
 
 ## Room side: an AI prey for an empty hunted seat (T-101), where the seat's
-## hunted would start. It plays the loop with the others once it is set up.
+## hunted would start (marker), or where a hunted who left was (T-102). It
+## plays the loop with the others once it is set up.
 func _new_ai_prey(seat: int, marker: Node3D) -> Prey:
 	var each: Prey = PREY_SCENE.instantiate()
 	each.name = "AiHunted%d" % seat
@@ -271,8 +430,12 @@ func _setup_online_client(net: NetGame) -> void:
 		net.own = _player
 		net.spectating.connect(_on_spectating)
 	net.caught_reported.connect(_on_caught_reported)
-	# The next game launched while this one's end screen is up (T-099).
+	# The next game launched while this one's end screen is up (T-099), or
+	# this one again after a cut (T-102).
 	NetSession.game_started.connect(_on_next_game)
+	NetSession.left.connect(_on_connection_lost)
+	NetSession.unreachable.connect(_on_rejoin_failed)
+	NetSession.refused.connect(_on_rejoin_failed.unbind(1))
 	add_child(ShaderWarmup.new())
 
 
@@ -312,6 +475,21 @@ func _on_capture_changed(state: CaptureState.State, player: Node3D) -> void:
 			_net.spectate(player)
 			player.process_mode = Node.PROCESS_MODE_DISABLED
 			player.global_position = Vector3(0, -60, 0)
+
+
+## Client side (T-102): the connection to the room broke. It connects again
+## with its token: the room gives its place back and the game starts again
+## here, as it is in the room.
+func _on_connection_lost() -> void:
+	_caught_screen.show_for(NetSession.settings.room_connect_timeout, "HUD_RECONNECTING")
+	NetSession.rejoin()
+
+
+## Client side: the room cannot be reached again: back to the online menu.
+func _on_rejoin_failed() -> void:
+	NetSession.leave()
+	get_tree().paused = false
+	get_tree().change_scene_to_file(EndScreen.LOBBY_SCENE)
 
 
 func _on_next_game(state: LobbyState) -> void:

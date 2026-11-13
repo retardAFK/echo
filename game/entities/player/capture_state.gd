@@ -43,6 +43,15 @@ func catch() -> State:
 	return state
 
 
+## Takes the place of another (an AI replacing a hunted who left, T-102):
+## the same catches and state, without telling anyone.
+func copy_from(other: CaptureState) -> void:
+	catches = other.catches
+	state = other.state
+	if state == State.CAPTURED:
+		add_to_group(Interactable.GROUP)
+
+
 func is_free() -> bool:
 	return state == State.FREE
 

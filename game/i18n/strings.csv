@@ -110,3 +110,4 @@ HUD_CAPTURED,"Capturé : un coéquipier peut te libérer"
 HUD_RESCUED,Libéré
 HUD_ELIMINATED,Éliminé
 HUD_SPECTATOR,"Tu regardes un coéquipier, clic pour changer"
+HUD_RECONNECTING,"Connexion perdue, reconnexion…"

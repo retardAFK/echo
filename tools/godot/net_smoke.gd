@@ -67,7 +67,7 @@ func _on_rejoined(reply: Dictionary) -> void:
 	_rejoined = true
 
 
-func _on_joined(_place: int) -> void:
+func _on_joined(_place: int, _token: String) -> void:
 	var joined := _clients.filter(func(c: RoomLink) -> bool: return c.place > 0)
 	if joined.size() == PLAYERS and _late == null:
 		_late = _link()

@@ -158,6 +158,11 @@ jobs:
             timeout 90 godot --headless res://tools/godot/net_walk.tscn 2>&1 | tee -a build/server/smoke.log
             code=${PIPESTATUS[0]}
           fi
+          if [ "$code" -eq 0 ]; then
+            # T-102: the player cuts its connection and gets its place back.
+            timeout 90 godot --headless res://tools/godot/net_rejoin.tscn 2>&1 | tee -a build/server/smoke.log
+            code=${PIPESTATUS[0]}
+          fi
           pkill -f echo_server.x86_64
           echo "--- lobby and rooms ---"
           cat build/server/lobby.log

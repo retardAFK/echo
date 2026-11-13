@@ -52,3 +52,6 @@ extends Resource
 ## After the end of a game, how long the room waits before going back to its
 ## waiting room (T-099).
 @export_range(0.5, 30.0, 0.5, "suffix:s") var end_return_delay: float = 3.0
+## Seconds a player who left a game keeps its place before an AI takes it
+## where it was (T-102); back before the end, it takes it again.
+@export_range(0.0, 120.0, 0.5, "suffix:s") var seat_keep_time: float = 10.0
