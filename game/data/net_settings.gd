@@ -6,6 +6,9 @@ extends Resource
 ## "wss://<domain>" online (Caddy routes /lobby and /s1../s8 to the ports).
 ## The CI writes the online address into the web build.
 @export var server_address: String = "ws://127.0.0.1"
+## Whether the start menu offers "Jouer en ligne". Off until the online game
+## is playable and the server is online (T-097, T-108).
+@export var show_online: bool = false
 ## Address the lobby and the rooms listen on. Caddy reaches them on the same machine.
 @export var bind_address: String = "127.0.0.1"
 ## Port of the lobby, which hands out game codes.

@@ -8,13 +8,16 @@ signal role_chosen(role: GameSession.Role)
 
 const MAP_SCENE := "res://game/maps/tilleuls/tilleuls.tscn"
 const BENCH_SCENE := "res://game/bench/bench.tscn"
+const LOBBY_SCENE := "res://game/ui/lobby_menu.tscn"
 
 ## Tests turn this off to stay on the menu after a choice.
 @export var change_scene := true
+@export var net_settings: NetSettings = preload("res://game/data/net_settings.tres")
 
 @onready var _buttons: Control = %Buttons
 @onready var _hunted_button: Button = %HuntedButton
 @onready var _monster_button: Button = %MonsterButton
+@onready var _online_button: Button = %OnlineButton
 @onready var _role_panel: Control = %RolePanel
 @onready var _goal: Label = %Goal
 @onready var _controls: Label = %Controls
@@ -36,6 +39,8 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_hunted_button.pressed.connect(choose.bind(GameSession.Role.HUNTED))
 	_monster_button.pressed.connect(choose.bind(GameSession.Role.MONSTER))
+	_online_button.visible = net_settings.show_online
+	_online_button.pressed.connect(play_online)
 	_play_button.pressed.connect(play)
 	_back_button.pressed.connect(back)
 	_hunted_button.grab_focus()
@@ -62,3 +67,9 @@ func back() -> void:
 func play() -> void:
 	if change_scene:
 		get_tree().change_scene_to_file(MAP_SCENE)
+
+
+## The online game menu (S-010, T-096): create or join with a code.
+func play_online() -> void:
+	if change_scene:
+		get_tree().change_scene_to_file(LOBBY_SCENE)

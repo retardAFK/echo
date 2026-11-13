@@ -22,9 +22,10 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web e
   - Résultat vérifiable : autoload `NetSession` (solo, client, salle), connexion, version vérifiée, déconnexion, ping affiché avec F3 ; commandes envoyées à 30 /s et appliquées par la salle ; tests GUT avec des pairs locaux
   - Dépend de : T-094, T-106
   - Fait le 13/11/2026 : autoload `NetSession` (solo, client, salle) qui enveloppe `RoomLink` ; commandes tenues envoyées 30 fois/s (non fiable, ordonné, anciennes trames ignorées), actions ponctuelles en fiable ; version refusée, départ et fermeture de la salle signalés ; ligne `NET place 1 ping 7 ms` avec F3 ; la salle exportée passe par `NetSession` ; 9 tests GUT
-- [ ] T-096 — Salon (lobby)
+- [x] T-096 — Salon (lobby)
   - Résultat vérifiable : `LobbyMenu` : créer, rejoindre avec un code, 4 places, chef, rôles, prêt, lancer ; places vides marquées « IA » ; retour au salon après la fin ; textes dans `strings.csv`
   - Dépend de : T-095
+  - Fait le 13/11/2026 : `LobbyState` (places, prêt, chef, lancement ; testé), demandes et diffusion du salon dans `RoomLink`, `NetSession` relaie le salon ; `LobbyMenu` (créer, rejoindre, Prendre, Échanger pour le chef, Je suis prêt, Lancer la partie, erreurs en clair) ; bouton « Jouer en ligne » caché tant que `show_online` est faux (T-097, T-108) ; une partie lancée refuse les nouveaux venus. Le retour au salon après la fin vient avec l'écran de fin en ligne (T-099) ; 11 tests GUT
 - [ ] T-097 — Synchronisation des chassés
   - Résultat vérifiable : instantanés filtrés à 20 /s, prédiction et rejeu du personnage local, interpolation des autres ; accroupi, course, état caché ; écart prédit et serveur sous le seuil avec 150 ms de ping simulé
   - Dépend de : T-095
