@@ -47,3 +47,4 @@ La cité des Tilleuls est jouable, mais on y erre sans but : rien ne commence et
   → Mesure (T-060), 20 parties simulées proie IA contre monstre IA : 10 sorties en 7,1 à 9,0 min, 10 captures en 2 à 4 min, aucun blocage, moyenne 5,3 min. Une partie menée au bout dure donc environ 8 min ; la moyenne baisse à cause des captures rapides de la proie IA, moins prudente qu'un joueur. À remesurer avec les testeurs du point de décision n°2.
 - [x] Les 60 images/s et le budget de performance de S-006 tiennent toujours.
   → Mesure (T-060) : 215 appels de dessin au pire sur 484 vues (budget 300), 2 lumières visibles au plus (budget 4). Les 60 images/s restent à mesurer sur la machine de référence, comme pour S-006.
+  → Mesure S-009 (T-077, 13/11/2026) : 59,8 images/s en moyenne sur la machine de référence (Radeon 740M, 1920 × 1080), 1 % les plus lentes à 43,9 ; saccades isolées traitées par T-085.
