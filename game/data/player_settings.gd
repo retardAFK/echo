@@ -52,3 +52,11 @@ extends Resource
 @export_range(0.0, 0.2, 0.005, "suffix:m") var head_bob_sprint_amplitude: float = 0.06
 ## Sway cycles per meter travelled (one cycle = two steps).
 @export_range(0.05, 2.0, 0.01) var head_bob_cycles_per_meter: float = 0.35
+
+@export_group("Highlights (S-009, T-087)")
+## Things the hunted can use show a small pale mark up to this distance, in meters.
+@export_range(1.0, 30.0, 0.5, "suffix:m") var highlight_range: float = 8.0
+## Colour of the marks. Pale, never orange (reserved for noise).
+@export var highlight_color: Color = Color(0.85, 0.88, 0.9)
+## Pulses per second of the marks.
+@export_range(0.1, 5.0, 0.1, "suffix:/s") var highlight_pulse_rate: float = 0.8
