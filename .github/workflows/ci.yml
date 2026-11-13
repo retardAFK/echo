@@ -163,10 +163,28 @@ jobs:
             timeout 90 godot --headless res://tools/godot/net_rejoin.tscn 2>&1 | tee -a build/server/smoke.log
             code=${PIPESTATUS[0]}
           fi
+          if [ "$code" -eq 0 ]; then
+            # T-103: a whole game by 4 scripted players (1 monster, 3
+            # hunted: a capture, a rescue, the fuses, the exit).
+            mkdir -p build/server/match
+            for index in 0 1 2 3; do
+              timeout 440 godot --headless res://tools/godot/net_match.tscn -- --index $index \
+                --dir build/server/match > build/server/match/client$index.log 2>&1 &
+              pids[$index]=$!
+            done
+            for index in 0 1 2 3; do
+              wait ${pids[$index]} || code=1
+              grep ECHO_NET_MATCH build/server/match/client$index.log | tee -a build/server/smoke.log
+            done
+            if [ "$code" -ne 0 ]; then
+              tail -n 20 build/server/match/client*.log
+            fi
+          fi
           pkill -f echo_server.x86_64
           echo "--- lobby and rooms ---"
           cat build/server/lobby.log
-          grep -E "ECHO_NET_(SMOKE|WALK)" build/server/smoke.log >> "$GITHUB_STEP_SUMMARY"
+          grep -E "ECHO_NET_(SMOKE|WALK|REJOIN|MATCH)" build/server/smoke.log >> "$GITHUB_STEP_SUMMARY"
+          grep "load" build/server/lobby.log | tail -n 1 >> "$GITHUB_STEP_SUMMARY"
           exit $code
 
       - name: Upload server build
