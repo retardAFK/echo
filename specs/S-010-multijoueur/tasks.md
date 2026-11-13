@@ -14,9 +14,10 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web e
   - Résultat vérifiable : `PlayerCommands` (sérialisation testée), `LocalControls` ; `Player` et `MonsterAvatar` ne lisent plus `Input` ; tous les tests existants, la simulation et le banc inchangés
   - Dépend de : T-093
   - Fait le 13/11/2026 : `game/net/player_commands.gd` (22 octets plus un par action, valeurs bornées à la lecture) et `local_controls.gd` ; les deux avatars lisent `commands` et n'ajoutent `LocalControls` que si `local_controls` est vrai ; 420 tests GUT, dont 8 nouveaux, tous passent
-- [ ] T-094 — Serveur dédié : accueil et salles
+- [x] T-094 — Serveur dédié : accueil et salles
   - Résultat vérifiable : préréglage d'export « Server », modes `--lobby` et `--room`, `RoomCode` testé, une salle lancée par code et arrêtée quand elle est vide ; `tools/server/` (Caddyfile, services, `setup.sh`, `deploy.sh`, README) ; la CI exporte le serveur, le démarre et y connecte 4 clients sans affichage
   - Dépend de : T-093
+  - Fait le 13/11/2026 : `game/net/` (`RoomCode`, `NetAddress`, `ServerBoot`, `LobbyRegistry`, `LobbyServer`, `LobbyClient`, `RoomLink`, scènes de l'accueil et de la salle), `net_settings.tres`, préréglage « Server » (80 Mo, sans visuels) ; `tools/server/` ; la CI exporte le serveur, le lance et `tools/godot/net_smoke.tscn` y connecte 4 joueurs (ping 7 ms en local, 5e refusé) ; 13 tests GUT
 - [ ] T-095 — Couche réseau du jeu
   - Résultat vérifiable : autoload `NetSession` (solo, client, salle), connexion, version vérifiée, déconnexion, ping affiché avec F3 ; commandes envoyées à 30 /s et appliquées par la salle ; tests GUT avec des pairs locaux
   - Dépend de : T-094, T-106

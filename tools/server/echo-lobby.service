@@ -1,0 +1,23 @@
+# Écho lobby (S-010, D-015). It starts one room process per game; stopping or
+# restarting the service stops them all.
+[Unit]
+Description=Echo game lobby
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=echo
+Group=echo
+WorkingDirectory=/opt/echo
+ExecStart=/opt/echo/echo_server.x86_64 --headless -- --lobby
+Restart=always
+RestartSec=2
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/echo
+MemoryMax=3G
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/net/lobby_server.gd" id="1_lobby"]
+
+[node name="LobbyServer" type="Node"]
+script = ExtResource("1_lobby")

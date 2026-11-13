@@ -23,6 +23,12 @@ const BENCH_SCENE := "res://game/bench/bench.tscn"
 
 
 func _ready() -> void:
+	if change_scene and not OS.has_feature("web"):
+		# A server process (S-010, T-094): the lobby or one room, no menu.
+		ServerBoot.parse(OS.get_cmdline_user_args())
+		if ServerBoot.scene() != "":
+			get_tree().change_scene_to_file.call_deferred(ServerBoot.scene())
+			return
 	if change_scene and Bench.is_requested():
 		# Bench mode (S-009, T-075): straight to the camera tour, no menu.
 		get_tree().change_scene_to_file.call_deferred(BENCH_SCENE)
