@@ -90,15 +90,18 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 **Terminé quand** : 1 monstre et 3 chassés jouent une partie complète depuis 4 navigateurs différents, sur des connexions différentes.
 
-- [ ] T-090 — Étude du point de décision n°3 : architecture réseau et coûts
+- [x] T-090 — Étude du point de décision n°3 : architecture réseau et coûts
   - Résultat vérifiable : note comparant les options (WebRTC entre joueurs avec un hôte et un petit serveur de mise en relation, ou serveur dédié en WebSocket), avec ce qu'elles coûtent par mois, leurs limites dans le navigateur et le travail qu'elles demandent ; recommandation de Claude
-  - Dépend de : T-084
-- [ ] T-091 — Choix de l'architecture et de l'hébergement **(Maxime)**
+  - Dépend de : T-084 (levé par D-014 : test à plusieurs reporté)
+  - Fait le 13/11/2026 : [`specs/S-010-multijoueur/etude-reseau.md`](S-010-multijoueur/etude-reseau.md), recommandation : serveur dédié Godot en WebSocket
+- [x] T-091 — Choix de l'architecture et de l'hébergement **(Maxime)**
   - Résultat vérifiable : décision écrite dans le journal (point de décision n°3)
   - Dépend de : T-090
+  - Fait le 13/11/2026 : D-015, serveur dédié Godot en WebSocket chez Hetzner
 - [ ] T-092 — Spec S-010
   - Résultat vérifiable : spec validée, Q-002, Q-003, Q-005 et Q-010 closes
   - Dépend de : T-091
+  - 13/11/2026 : spec proposée ([`specs/S-010-multijoueur/spec.md`](S-010-multijoueur/spec.md)), Q1 à Q4 en attente de Maxime
 - [ ] T-093 — Plan et tâches de S-010
   - Résultat vérifiable : `plan.md` (qui fait autorité, ce que chaque client reçoit, ce qui n'est jamais envoyé aux chassés) et `tasks.md`
   - Dépend de : T-092
