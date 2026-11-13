@@ -30,3 +30,5 @@ extends Resource
 @export_range(0.1, 10.0, 0.1, "suffix:s") var siren_noise_interval: float = 2.0
 ## Seconds the exit grille takes to rise.
 @export_range(0.1, 20.0, 0.1, "suffix:s") var gate_open_time: float = 3.0
+## Least distance between the start points of two hunted (S-010, T-100).
+@export_range(0.0, 200.0, 1.0, "suffix:m") var spawn_spacing: float = 40.0

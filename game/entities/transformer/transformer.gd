@@ -69,8 +69,13 @@ func interact(_user: Node) -> void:
 	pass
 
 
+## Only a hunted with a fuse in its pockets can repair (S-010, T-100).
+func wanted_by(user: Node) -> bool:
+	return game_loop != null and game_loop.carried_by(user) > 0
+
+
 func hold(user: Node, delta: float) -> void:
-	if not _has_fuse_to_place():
+	if not _has_fuse_to_place() or not wanted_by(user):
 		return
 	_noise_left -= delta
 	if _noise_left <= 0.0:
@@ -81,7 +86,7 @@ func hold(user: Node, delta: float) -> void:
 		)
 	if progress.advance(delta):
 		_noise_left = 0.0
-		game_loop.place_fuse()
+		game_loop.place_fuse(user)
 		update_label()
 		fuse_placed.emit()
 		if is_repaired():

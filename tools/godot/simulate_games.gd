@@ -2,8 +2,11 @@ extends Node
 ## Plays whole games of the loop between AI players, sped up, and prints how
 ## they went (spec S-007, T-058 and T-060). Headless:
 ##     godot --headless tools/godot/simulate_games.tscn -- [games] [speed] [--no-monster]
+##         [--preys N]
 ## Without a monster, the AI prey plays alone (it must get out without being
-## stuck). With one, the AI prey plays against the AI monster.
+## stuck). With one, the AI prey plays against the AI monster. With --preys 3,
+## three AI preys play together (S-010, T-100): out as soon as one gets out,
+## caught once none is free.
 
 const MAP_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
 ## Longest game, in game seconds, before it counts as stuck.
@@ -12,6 +15,7 @@ const TIME_LIMIT := 1800.0
 var _games := 5
 var _speed := 8.0
 var _with_monster := true
+var _preys := 1
 
 
 func _ready() -> void:
@@ -21,6 +25,9 @@ func _ready() -> void:
 	if args.size() > 1 and args[1].is_valid_float():
 		_speed = float(args[1])
 	_with_monster = not args.has("--no-monster")
+	var preys_at := args.find("--preys")
+	if preys_at >= 0 and preys_at + 1 < args.size():
+		_preys = maxi(int(args[preys_at + 1]), 1)
 	Engine.physics_ticks_per_second = int(60 * _speed)
 	Engine.max_physics_steps_per_frame = int(8 * _speed)
 	Engine.time_scale = _speed
@@ -54,6 +61,8 @@ func _play(index: int) -> Dictionary:
 	add_child(map)
 	map.end_screen.change_scene = false
 	var avatar := map.avatar
+	if _preys > 1:
+		map.add_ai_preys(_preys)
 	if _with_monster:
 		map.play_ai_against_ai()
 	else:
@@ -73,7 +82,7 @@ func _play(index: int) -> Dictionary:
 			last_report = game_time
 			print(
 				(
-					"  game %d  %3d s  %s goal %s  found %d placed %d  at %s"
+					"  game %d  %3d s  %s goal %s  found %d placed %d  free %d  at %s"
 					% [
 						index,
 						game_time,
@@ -81,6 +90,7 @@ func _play(index: int) -> Dictionary:
 						PreyBrain.Goal.keys()[map.prey.brain.goal],
 						loop.rules.found(),
 						loop.rules.placed,
+						loop.free_count(),
 						map.prey.global_position
 					]
 				)

@@ -18,6 +18,10 @@ signal ended(hunted_won: bool)
 
 ## Who looks for the fuses: the hunted player, or the AI prey.
 var hunted: Node
+## Every hunted of the game (S-010, T-100), hunted included: any of them
+## takes fuses, places those it carries, and wins for all by getting out.
+## Set before the loop enters the tree; just [hunted] when left empty.
+var team: Array[Node] = []
 var rules: LoopRules
 ## Noises made by the hunted since the start.
 var noise_count := 0
@@ -45,13 +49,80 @@ var _frames := 0
 var _frame_time := 0.0
 var _siren_noise_left := 0.0
 var _rng := RandomNumberGenerator.new()
+## Fuses each hunted carries, when the team has several.
+var _carried := {}
+## Hunted out of the game (caught for good).
+var _out: Array[Node] = []
+## Every fuse box of the map.
+var _boxes: Array = []
 
 
 func _ready() -> void:
 	rules = LoopRules.new(settings.fuse_count)
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
-	if hunted != null and hunted.has_signal(&"ruse_used"):
-		hunted.ruse_used.connect(_on_ruse_used)
+	if team.is_empty() and hunted != null:
+		team = [hunted]
+	for member in team:
+		if member.has_signal(&"ruse_used"):
+			member.ruse_used.connect(_on_ruse_used)
+
+
+## Adds a hunted to a loop already started (an extra AI prey, T-100).
+func add_hunted(node: Node) -> void:
+	if node in team:
+		return
+	team.append(node)
+	if node.has_signal(&"ruse_used"):
+		node.ruse_used.connect(_on_ruse_used)
+
+
+func is_hunted(node: Node) -> bool:
+	return node != null and (node == hunted or node in team)
+
+
+## Fuses a hunted carries. Alone, it carries all those found and not placed;
+## on a client, the team's (the room decides who places them).
+func carried_by(node: Node) -> int:
+	if mirror or team.size() <= 1:
+		return rules.carried if mirror or is_hunted(node) else 0
+	return _carried.get(node, 0)
+
+
+## A hunted is caught for good (T-100): the monster wins once none is free.
+func hunted_out(node: Node) -> void:
+	if not is_hunted(node) or node in _out:
+		return
+	_out.append(node)
+	if _out.size() >= team.size():
+		finish(false)
+		return
+	# Its fuses go back into the empty boxes nearest to where it was caught.
+	for i in carried_by(node):
+		var box := _nearest_empty_box((node as Node3D).global_position)
+		if box == null:
+			break
+		box.set_fuse(true)
+		rules.carried -= 1
+		_carried[node] -= 1
+	fuses_changed.emit(rules.found(), rules.placed)
+
+
+func _nearest_empty_box(at: Vector3) -> FuseBox:
+	var best: FuseBox = null
+	for box: FuseBox in _boxes:
+		if box.has_fuse:
+			continue
+		if (
+			best == null
+			or box.global_position.distance_to(at) < best.global_position.distance_to(at)
+		):
+			best = box
+	return best
+
+
+## Hunted still in the game.
+func free_count() -> int:
+	return team.size() - _out.size()
 
 
 ## Starts the game on a map: draws the fuses among its boxes (Q1) and wires
@@ -63,6 +134,7 @@ func setup(map: Node, rng_seed := 0) -> void:
 	else:
 		_rng.seed = rng_seed
 	var by_building := {}
+	_boxes = _all(map, FuseBox)
 	if mirror:
 		_wire(map)
 		fuses_changed.emit(rules.found(), rules.placed)
@@ -110,8 +182,13 @@ func is_exit_open() -> bool:
 	return rules.is_repaired()
 
 
-## Places one carried fuse in the transformer. The third one opens the exit.
-func place_fuse() -> void:
+## Places one fuse carried by user in the transformer (any of them when
+## user is null or plays alone). The third one opens the exit.
+func place_fuse(user: Node = null) -> void:
+	if team.size() > 1 and user != null:
+		if carried_by(user) <= 0:
+			return
+		_carried[user] -= 1
 	if not rules.place_fuse():
 		return
 	fuses_changed.emit(rules.found(), rules.placed)
@@ -199,19 +276,20 @@ func _open_exit() -> void:
 
 
 func _on_exit_reached(body: Node3D) -> void:
-	if body == hunted and is_exit_open():
+	if is_hunted(body) and body not in _out and is_exit_open():
 		finish(true)
 
 
 func _on_fuse_taken(user: Node) -> void:
-	if user != hunted:
+	if not is_hunted(user):
 		return
+	_carried[user] = _carried.get(user, 0) + 1
 	rules.take_fuse()
 	fuses_changed.emit(rules.found(), rules.placed)
 
 
 func _on_noise_emitted(event: NoiseEvent) -> void:
-	if hunted != null and event.source == hunted and not is_over:
+	if is_hunted(event.source) and not is_over:
 		noise_count += 1
 
 

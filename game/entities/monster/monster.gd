@@ -7,6 +7,8 @@ extends CharacterBody3D
 
 signal state_changed(state: MonsterBrain.State)
 signal player_caught
+## Which hunted it caught (S-010, T-100), emitted with player_caught.
+signal hunted_caught(hunted: Node3D)
 
 ## Distance the chase target must move before the path is recomputed, in meters.
 const RETARGET_DISTANCE := 0.5
@@ -24,6 +26,9 @@ const CONE_GROUND_OFFSET := 0.05
 ## Buildings whose noises it remembers (S-007, Q10).
 @export var buildings: Array[Building] = []
 
+## The other hunted (S-010, T-100). It chases the one it sees: when it loses
+## sight of player, the nearest other in sight becomes player.
+var others: Array[Node3D] = []
 var brain: MonsterBrain
 var catch_count := 0
 var sees_player := false
@@ -117,13 +122,32 @@ func _physics_process(delta: float) -> void:
 	_move(delta)
 	_make_noise(delta, before)
 	Decoy.crush_near(get_tree(), global_position, settings.catch_distance)  # S-008, Q4.
-	if (
-		player != null
-		and not HidingSpot.is_hidden(player)
-		and brain.is_catch(player_position - global_position)
-	):
-		catch_count += 1
-		player_caught.emit()
+	for hunted in get_targets():
+		if (
+			not HidingSpot.is_hidden(hunted)
+			and brain.is_catch(hunted.global_position - global_position)
+		):
+			catch_count += 1
+			hunted_caught.emit(hunted)
+			player_caught.emit()
+			break
+
+
+## Every hunted it may catch: player first, then the others still there.
+func get_targets() -> Array[Node3D]:
+	var found: Array[Node3D] = []
+	for hunted: Node3D in [player] + others:
+		if hunted != null and is_instance_valid(hunted) and hunted not in found:
+			found.append(hunted)
+	return found
+
+
+## Stops chasing a hunted for good (caught and out of the game).
+func forget(hunted: Node3D) -> void:
+	others.erase(hunted)
+	if hunted == player:
+		player = others.pop_front() if not others.is_empty() else null
+		sees_player = false
 
 
 ## Footsteps by distance walked, at the pace's range, and a short-range breath.
@@ -143,10 +167,38 @@ func _update_sight(delta: float) -> void:
 	if hidden and not _was_hidden and sees_player:
 		go_open(player.get("hiding_in"))  # It saw the hunted get in (S-008, Q7).
 	_was_hidden = hidden
-	sees_player = (
-		not HidingSpot.is_hidden(player)  # Hidden: never seen (S-008, Q6).
+	sees_player = _can_see(player)
+	if sees_player or others.is_empty():
+		return
+	# Lost sight of it: the nearest other hunted in sight becomes the target.
+	var nearest: Node3D = null
+	for hunted in get_targets():
+		if hunted == player or not _can_see(hunted):
+			continue
+		if nearest == null or _closer(hunted, nearest):
+			nearest = hunted
+	if nearest != null:
+		others.erase(nearest)
+		others.append(player)
+		player = nearest
+		sees_player = true
+		_was_hidden = false
+
+
+func _can_see(hunted: Node3D) -> bool:
+	var eye := get_ear_position()
+	var target: Vector3 = hunted.get_eye_position()
+	return (
+		not HidingSpot.is_hidden(hunted)  # Hidden: never seen (S-008, Q6).
 		and MonsterVision.in_view_cone(eye, -global_basis.z, target, settings)
 		and MonsterVision.has_line_of_sight(get_world_3d().direct_space_state, eye, target)
+	)
+
+
+func _closer(a: Node3D, b: Node3D) -> bool:
+	return (
+		global_position.distance_squared_to(a.global_position)
+		< global_position.distance_squared_to(b.global_position)
 	)
 
 

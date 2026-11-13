@@ -214,6 +214,10 @@ func _arrive() -> void:
 		brain.start_work()
 	elif _boxes[brain.slot_index].has_fuse:
 		brain.start_work()  # It sees the red LED.
+	elif game_loop.rules.found() >= game_loop.rules.fuse_count:
+		# Teammates found the rest (S-010, T-100): on to the transformer or the exit.
+		var rules := game_loop.rules
+		brain.work_done(rules.found(), rules.fuse_count, rules.is_repaired())
 	else:
 		brain.next_slot()
 
@@ -226,7 +230,7 @@ func _work_target() -> Node:
 
 func _work_finished() -> bool:
 	if brain.goal == PreyBrain.Goal.REPAIR:
-		return game_loop.rules.carried == 0 or game_loop.rules.is_repaired()
+		return game_loop.carried_by(self) == 0 or game_loop.rules.is_repaired()
 	return not _boxes[brain.slot_index].has_fuse
 
 

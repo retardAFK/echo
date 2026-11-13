@@ -122,6 +122,8 @@ func work_done(found: int, needed: int, repaired: bool) -> void:
 		goal = Goal.REPAIR
 	elif goal == Goal.FUSES:
 		next_slot()
+	else:
+		goal = Goal.FUSES  # A teammate's fuses went back into the boxes (T-100).
 	_resume()
 
 
