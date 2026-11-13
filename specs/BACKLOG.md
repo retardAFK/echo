@@ -94,9 +94,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : note comparant les options (WebRTC entre joueurs avec un hôte et un petit serveur de mise en relation, ou serveur dédié en WebSocket), avec ce qu'elles coûtent par mois, leurs limites dans le navigateur et le travail qu'elles demandent ; recommandation de Claude
   - Dépend de : T-084 (levé par D-014 : test à plusieurs reporté)
   - Fait le 13/11/2026 : [`specs/S-010-multijoueur/etude-reseau.md`](S-010-multijoueur/etude-reseau.md), recommandation : serveur dédié Godot en WebSocket
-- [ ] T-091 — Choix de l'architecture et de l'hébergement **(Maxime)**
+- [x] T-091 — Choix de l'architecture et de l'hébergement **(Maxime)**
   - Résultat vérifiable : décision écrite dans le journal (point de décision n°3)
   - Dépend de : T-090
+  - Fait le 13/11/2026 : D-015, serveur dédié Godot en WebSocket chez Hetzner
 - [ ] T-092 — Spec S-010
   - Résultat vérifiable : spec validée, Q-002, Q-003, Q-005 et Q-010 closes
   - Dépend de : T-091
