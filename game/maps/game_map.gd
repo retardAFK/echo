@@ -36,6 +36,8 @@ const POINT_MARKER_SIZE := 0.3
 var avatar: MonsterAvatar
 var markers: NoiseMarkers
 var prey: Prey
+## Monster role, simulations (T-100): the AI preys besides prey.
+var extra_preys: Array[Prey] = []
 ## The game loop (S-007), null on a map without fuse boxes.
 var game_loop: GameLoop
 ## Shown when the game loop ends (S-007, Q6).
@@ -164,8 +166,12 @@ func _setup_online_room(net: NetGame) -> void:
 	var lobby := GameSession.online_lobby
 	var spawns: Array = []
 	if has_node("PlayerSpawns"):
-		spawns = get_node("PlayerSpawns").get_children()
-	spawns.shuffle()
+		spawns = far_apart(
+			get_node("PlayerSpawns").get_children(),
+			LobbyState.SEATS - 1,
+			LOOP_SETTINGS.spawn_spacing,
+			_rng
+		)
 	var hunted: Array[Player] = []
 	for seat in range(1, LobbyState.SEATS):
 		var place: int = lobby.seats[seat] if lobby != null else 0
@@ -197,8 +203,10 @@ func _setup_online_room(net: NetGame) -> void:
 		net.hunted_caught.connect(_put_back)
 	else:
 		_monster.player = hunted[0] if not hunted.is_empty() else null
+		for other in hunted.slice(1):
+			_monster.others.append(other)
 		_monster.buildings = get_buildings()
-		_monster.player_caught.connect(_on_online_caught)
+		_monster.hunted_caught.connect(_on_online_caught)
 		net.ai_monster = _monster
 	_free_node(_player)
 	_player = null
@@ -233,10 +241,7 @@ func _setup_online_client(net: NetGame) -> void:
 
 ## Room side: the AI monster caught a hunted; back to a spawn point until the
 ## capture rule of S-010 (T-107).
-func _on_online_caught() -> void:
-	var caught: Node3D = _monster.player
-	if caught == null:
-		return
+func _on_online_caught(caught: Node3D) -> void:
 	_net.report_caught(_net.seat_of(caught))
 	_put_back(caught)
 	_monster.reset_to_patrol(_spawn)
@@ -296,6 +301,7 @@ func _setup_game_loop() -> void:
 	game_loop.hunted = prey if avatar != null else _player
 	if room:
 		game_loop.hunted = _online_hunted[0] if not _online_hunted.is_empty() else null
+		game_loop.team.assign(_online_hunted)
 	elif NetSession.mode == NetSession.Mode.CLIENT:
 		game_loop.mirror = true  # The room's loop decides (T-099).
 		game_loop.hunted = null
@@ -416,6 +422,28 @@ func get_spawn_points() -> Array[Vector3]:
 	return Prey.markers_of(spawns)
 
 
+## Draws count markers (S-010, T-100), each at least spacing meters from the
+## others when the map allows it, the rest anywhere.
+static func far_apart(
+	markers: Array, count: int, spacing: float, rng: RandomNumberGenerator
+) -> Array:
+	var shuffled := LoopRules.draw(markers, markers.size(), rng)
+	var chosen := []
+	for marker: Node3D in shuffled:
+		var far := chosen.all(
+			func(other: Node3D) -> bool:
+				return other.global_position.distance_to(marker.global_position) >= spacing
+		)
+		if far and chosen.size() < count:
+			chosen.append(marker)
+	for marker: Node3D in shuffled:
+		if chosen.size() >= count:
+			break
+		if marker not in chosen:
+			chosen.append(marker)
+	return chosen
+
+
 ## Draws a spawn marker: the hunted starts there, facing where the marker faces.
 func _pick_spawn() -> void:
 	var markers := get_node("PlayerSpawns").get_children()
@@ -437,6 +465,45 @@ func _on_player_caught() -> void:
 	_monster.reset_to_patrol(_spawn)
 
 
+## Monster role only (S-010, T-100): count AI preys in all, each starting at
+## least spawn_spacing from the others, all looking for the same fuses.
+func add_ai_preys(count: int) -> void:
+	var boxes := get_fuse_boxes()
+	var markers := far_apart(
+		get_node("PlayerSpawns").get_children(), count, LOOP_SETTINGS.spawn_spacing, _rng
+	)
+	for i in count:
+		var each: Prey = prey
+		if i > 0:
+			each = PREY_SCENE.instantiate()
+			each.name = "Prey%d" % (i + 1)
+			each.wander_route = $PreyRoute
+			each.hiding_spots = $HidingSpots
+			each.monster = avatar
+			each.buildings = get_buildings()
+		var marker: Node3D = markers[i % markers.size()]
+		each.position = marker.global_position
+		each.rotation.y = marker.global_rotation.y
+		if i > 0:
+			add_child(each)
+			game_loop.add_hunted(each)
+			each.start_loop(game_loop, boxes, _rng.randi() | 1)
+			extra_preys.append(each)
+		else:
+			each.start_loop(game_loop, boxes, _rng.randi() | 1)  # From its new place.
+
+
+## An AI prey caught by the AI monster: out of the game, out of the way. The
+## monster wins once none is free (one prey: at the first catch).
+func _on_ai_prey_caught(caught: Node3D, monster: Monster) -> void:
+	game_loop.hunted_out(caught)
+	if game_loop.is_over:
+		return
+	monster.forget(caught)
+	caught.process_mode = Node.PROCESS_MODE_DISABLED
+	caught.global_position = Vector3(0, -60, 0)
+
+
 ## Monster role only: the playable monster is put away, out of sight and
 ## hearing, and an AI monster hunts the AI prey instead, as it would hunt the
 ## player. Used by the game simulation (S-007) and the bench mode (S-009).
@@ -448,9 +515,12 @@ func play_ai_against_ai() -> Monster:
 	monster.patrol_route = get_node("PatrolRoute")
 	monster.buildings = get_buildings()
 	monster.player = prey
+	for other in extra_preys:
+		monster.others.append(other)
 	monster.position = spawn.global_position
 	add_child(monster)
-	prey.monster = monster
-	monster.player_caught.connect(game_loop.finish.bind(false))
+	for each: Prey in [prey] + extra_preys:
+		each.monster = monster
+	monster.hunted_caught.connect(_on_ai_prey_caught.bind(monster))
 	game_loop.exit_opened.connect(monster.guard_exit.bind(Prey.markers_of(get_node("GuardPoints"))))
 	return monster
