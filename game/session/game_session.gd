@@ -10,3 +10,9 @@ static var role := Role.HUNTED
 ## Seed of the next game (spawn, fuses, decoys), 0 for a new draw each time.
 ## The bench mode (S-009, T-075) fixes it so every run plays the same game.
 static var game_seed := 0
+
+## Online game (S-010, T-097): this player's seat, LobbyState.MONSTER_SEAT for
+## the monster, 1 to 3 for the hunted; -1 when playing alone.
+static var online_seat := -1
+## Online game, room side: the seats as the leader launched them.
+static var online_lobby: LobbyState

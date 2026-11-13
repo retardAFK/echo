@@ -71,6 +71,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _controls != null:
 		_controls.fill()
+	else:
+		set_look(commands.yaw, commands.pitch)  # Played from another machine (T-097).
 	apply_actions()
 	_update_breath(delta)
 	if hiding_in != null:
@@ -130,6 +132,19 @@ func look(relative: Vector2) -> void:
 		var yaw_limit := deg_to_rad(ruse_settings.hidden_yaw_limit)
 		var turned := clampf(angle_difference(_hide_yaw, rotation.y), -yaw_limit, yaw_limit)
 		rotation.y = _hide_yaw + turned
+		var pitch_limit := deg_to_rad(ruse_settings.hidden_pitch_limit)
+		_pitch = clampf(_pitch, -pitch_limit, pitch_limit)
+	_head.rotation.x = _pitch
+
+
+## Turns the body and the head to a yaw and pitch sent by another machine,
+## within the same limits as the mouse.
+func set_look(yaw: float, pitch: float) -> void:
+	rotation.y = yaw
+	_pitch = PlayerMotion.clamp_pitch(pitch, settings)
+	if hiding_in != null:
+		var yaw_limit := deg_to_rad(ruse_settings.hidden_yaw_limit)
+		rotation.y = _hide_yaw + clampf(angle_difference(_hide_yaw, yaw), -yaw_limit, yaw_limit)
 		var pitch_limit := deg_to_rad(ruse_settings.hidden_pitch_limit)
 		_pitch = clampf(_pitch, -pitch_limit, pitch_limit)
 	_head.rotation.x = _pitch

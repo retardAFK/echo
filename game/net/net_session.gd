@@ -15,6 +15,8 @@ signal left
 signal lobby_changed(lobby: LobbyState)
 ## The leader launched the game, with the final seats.
 signal game_started(lobby: LobbyState)
+## Client side: a snapshot of the game from the room (T-097).
+signal snapshot_received(snapshot: Dictionary)
 
 enum Mode { SOLO, CLIENT, ROOM }
 
@@ -50,6 +52,7 @@ func join(url: String) -> void:
 	link.left.connect(left.emit)
 	link.lobby_changed.connect(_on_lobby_changed)
 	link.game_started.connect(_on_game_started)
+	link.snapshot_received.connect(snapshot_received.emit)
 	link.join(url)
 	mode = Mode.CLIENT
 

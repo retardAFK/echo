@@ -9,6 +9,7 @@ extends Control
 signal launched(seat: int)
 
 const START_MENU_SCENE := "res://game/ui/start_menu.tscn"
+const MAP_SCENE := "res://game/maps/tilleuls/tilleuls.tscn"
 const ERROR_KEYS := {
 	"unreachable": "LOBBY_ERROR_UNREACHABLE",
 	"unknown_code": "LOBBY_ERROR_UNKNOWN_CODE",
@@ -186,7 +187,14 @@ func _on_game_started(state: LobbyState) -> void:
 	_set_status(tr("LOBBY_STARTING"))
 	_ready_button.disabled = true
 	_start_button.disabled = true
-	launched.emit(state.seat_of(NetSession.get_place()))
+	var seat := state.seat_of(NetSession.get_place())
+	launched.emit(seat)
+	GameSession.online_seat = seat
+	GameSession.role = (
+		GameSession.Role.MONSTER if seat == LobbyState.MONSTER_SEAT else GameSession.Role.HUNTED
+	)
+	if change_scene:
+		get_tree().change_scene_to_file(MAP_SCENE)
 
 
 func _on_unreachable() -> void:

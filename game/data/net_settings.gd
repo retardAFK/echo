@@ -23,6 +23,24 @@ extends Resource
 @export_range(5.0, 600.0, 1.0, "suffix:s") var room_idle_timeout: float = 60.0
 ## Commands sent by a client per second (S-010, Q5).
 @export_range(5, 60) var commands_rate: int = 30
+## Snapshots sent by the room to each client per second (S-010, Q5).
+@export_range(5, 60) var snapshot_rate: int = 20
+## Other players are shown this far in the past, between two snapshots (Q8).
+@export_range(0.0, 0.5, 0.01, "suffix:s") var interpolation_delay: float = 0.1
+## When a snapshot is late, others keep moving at most this long, then stop.
+@export_range(0.0, 0.5, 0.01, "suffix:s") var max_extrapolation: float = 0.15
+## Gap between the predicted and the room's position corrected smoothly...
+@export_range(0.0, 2.0, 0.05, "suffix:m") var correction_threshold: float = 0.5
+## ...over this time, and above this gap the player jumps to the room's position.
+@export_range(0.01, 1.0, 0.01, "suffix:s") var correction_time: float = 0.2
+@export_range(0.5, 10.0, 0.1, "suffix:m") var snap_threshold: float = 2.0
+## Players further than this are never sent to a hunted (night sight, plan S-010).
+@export_range(5.0, 200.0, 1.0, "suffix:m") var sight_range: float = 40.0
+## Half-angle of the view cone used to filter what a client receives; wider
+## than the camera, so nobody pops in when the head turns.
+@export_range(30.0, 180.0, 1.0, "suffix:°") var sight_half_angle: float = 110.0
+## Added delay on every message, both ways, to test a bad connection (tests only).
+@export_range(0, 500, 1, "suffix:ms") var debug_latency_ms: int = 0
 ## Time between two pings sent by a client.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var ping_interval: float = 1.0
 ## How long a client waits for the lobby to answer.

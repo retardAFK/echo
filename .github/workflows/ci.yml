@@ -146,17 +146,22 @@ jobs:
           test -x build/server/echo_server.x86_64
           echo "Server build: $(( $(stat -c %s build/server/echo_server.x86_64) / 1024 / 1024 )) MB" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Connect 4 players to the server
+      - name: Connect 4 players to the server and play online
         run: |
           build/server/echo_server.x86_64 --headless -- --lobby > build/server/lobby.log 2>&1 &
           sleep 2
           set +e
           timeout 60 godot --headless res://tools/godot/net_smoke.tscn 2>&1 | tee build/server/smoke.log
           code=${PIPESTATUS[0]}
+          if [ "$code" -eq 0 ]; then
+            # T-097: one player walks in a launched game with 150 ms of ping.
+            timeout 90 godot --headless res://tools/godot/net_walk.tscn 2>&1 | tee -a build/server/smoke.log
+            code=${PIPESTATUS[0]}
+          fi
           pkill -f echo_server.x86_64
           echo "--- lobby and rooms ---"
           cat build/server/lobby.log
-          grep ECHO_NET_SMOKE build/server/smoke.log >> "$GITHUB_STEP_SUMMARY"
+          grep -E "ECHO_NET_(SMOKE|WALK)" build/server/smoke.log >> "$GITHUB_STEP_SUMMARY"
           exit $code
 
       - name: Upload server build

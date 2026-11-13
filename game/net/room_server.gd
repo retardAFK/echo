@@ -4,6 +4,7 @@ extends Node
 ## nobody has been in it for room_idle_timeout.
 
 @export var settings: NetSettings = preload("res://game/data/net_settings.tres")
+@export var map_scene: PackedScene = preload("res://game/maps/tilleuls/tilleuls.tscn")
 
 var _link: RoomLink
 
@@ -35,3 +36,5 @@ func _on_idle_expired() -> void:
 
 func _on_game_started(state: Dictionary) -> void:
 	print("ECHO_ROOM %s started, seats %s" % [ServerBoot.room_code, state["seats"]])
+	GameSession.online_lobby = LobbyState.from_dict(state)
+	add_child(map_scene.instantiate())  # A child, so this node keeps the room going.
