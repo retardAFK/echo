@@ -78,6 +78,7 @@ func _ready() -> void:
 	_setup_game_loop()
 	pause_menu = PAUSE_MENU_SCENE.instantiate()
 	add_child(pause_menu)
+	add_child(ShaderWarmup.new())  # No stutter on the first sight of a place (T-085).
 
 
 func _setup_monster_role() -> void:
