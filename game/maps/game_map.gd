@@ -48,8 +48,11 @@ var pause_menu: PauseMenu
 var _rng := RandomNumberGenerator.new()
 ## The online part of the game (S-010), null in solo.
 var _net: NetGame
-## Room side: the human hunted's players.
-var _online_hunted: Array[Player] = []
+## Room side: every hunted, by seat: the humans' players and the AI preys
+## in the empty seats (T-101).
+var _online_hunted: Array[Node3D] = []
+## Room side: the AI preys among them.
+var _ai_preys: Array[Prey] = []
 ## Client side, hunted: what its screen shows of its own player, hidden once
 ## it watches a teammate (T-107).
 var _own_huds: Array[Node] = []
@@ -163,6 +166,8 @@ func _setup_online() -> void:
 			spot.found.connect(_on_online_hidden_found)
 		if game_loop != null:
 			game_loop.ended.connect(_on_online_game_ended)
+			for each in _ai_preys:
+				each.start_loop(game_loop, get_fuse_boxes(), _rng.randi() | 1)
 
 
 func _setup_online_room(net: NetGame) -> void:
@@ -175,27 +180,32 @@ func _setup_online_room(net: NetGame) -> void:
 			LOOP_SETTINGS.spawn_spacing,
 			_rng
 		)
-	var hunted: Array[Player] = []
+	var hunted: Array[Node3D] = []
 	for seat in range(1, LobbyState.SEATS):
 		var place: int = lobby.seats[seat] if lobby != null else 0
-		if place == 0:
-			continue
-		var player: Player = load(_player.scene_file_path).instantiate()
-		player.local_controls = false
-		player.name = "Hunted%d" % seat
 		var marker: Node3D = (
 			spawns[hunted.size() % spawns.size()] if not spawns.is_empty() else null
 		)
-		add_child(player)
-		player.get_node("Head/Camera3D").current = false
-		player.capture = CaptureState.new()
-		player.add_child(player.capture)
-		player.capture.changed.connect(_on_capture_changed.bind(player))
-		if marker != null:
-			player.global_position = marker.global_position
-			player.rotation.y = marker.global_rotation.y
-		net.add_avatar(place, seat, player)
-		hunted.append(player)
+		var one: Node3D
+		if place == 0:
+			one = _new_ai_prey(seat, marker)  # An empty seat (T-101).
+			net.ai_hunted[seat] = one
+		else:
+			var player: Player = load(_player.scene_file_path).instantiate()
+			player.local_controls = false
+			player.name = "Hunted%d" % seat
+			add_child(player)
+			player.get_node("Head/Camera3D").current = false
+			if marker != null:
+				player.global_position = marker.global_position
+				player.rotation.y = marker.global_rotation.y
+			net.add_avatar(place, seat, player)
+			one = player
+		var capture := CaptureState.new()
+		one.add_child(capture)
+		one.set("capture", capture)
+		capture.changed.connect(_on_capture_changed.bind(one))
+		hunted.append(one)
 	_online_hunted = hunted
 	var monster_place: int = lobby.seats[LobbyState.MONSTER_SEAT] if lobby != null else 0
 	if monster_place != 0:
@@ -214,8 +224,26 @@ func _setup_online_room(net: NetGame) -> void:
 		_monster.buildings = get_buildings()
 		_monster.hunted_caught.connect(_online_catch)
 		net.ai_monster = _monster
+	for each in _ai_preys:
+		each.monster = avatar if avatar != null else _monster
 	_free_node(_player)
 	_player = null
+
+
+## Room side: an AI prey for an empty hunted seat (T-101), where the seat's
+## hunted would start. It plays the loop with the others once it is set up.
+func _new_ai_prey(seat: int, marker: Node3D) -> Prey:
+	var each: Prey = PREY_SCENE.instantiate()
+	each.name = "AiHunted%d" % seat
+	each.wander_route = get_node_or_null("PreyRoute")
+	each.hiding_spots = get_node_or_null("HidingSpots")
+	each.buildings = get_buildings()
+	if marker != null:
+		each.position = marker.global_position  # Before the tree: no first footstep jump.
+		each.rotation.y = marker.global_rotation.y
+	add_child(each)
+	_ai_preys.append(each)
+	return each
 
 
 func _setup_online_client(net: NetGame) -> void:
@@ -251,16 +279,16 @@ func _setup_online_client(net: NetGame) -> void:
 ## Room side: the monster (AI or human) caught a hunted, or opened its
 ## hiding spot (T-107): captured the first time, out the second.
 func _online_catch(caught: Node3D) -> void:
-	var player := caught as Player
-	if player != null and player.capture != null and not (game_loop != null and game_loop.is_over):
-		player.capture.catch()
+	var capture: CaptureState = caught.get("capture")
+	if capture != null and not (game_loop != null and game_loop.is_over):
+		capture.catch()
 
 
 ## Room side: a hunted captured, freed or out. Everyone is told; the AI
 ## monster leaves a captured hunted and chases it again once freed; a hunted
 ## out of the game leaves the map and watches a teammate.
-func _on_capture_changed(state: CaptureState.State, player: Player) -> void:
-	player.held = state != CaptureState.State.FREE
+func _on_capture_changed(state: CaptureState.State, player: Node3D) -> void:
+	player.set("held", state != CaptureState.State.FREE)
 	_net.report_caught(_net.seat_of(player), state)
 	match state:
 		CaptureState.State.CAPTURED:

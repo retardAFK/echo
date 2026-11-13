@@ -43,6 +43,11 @@ var inventory: Inventory
 var hiding_in: HidingSpot
 ## How many times it used each ruse, by kind (S-008).
 var ruse_counts := {}
+## Online room (S-010, T-101): its capture rule, null otherwise.
+var capture: CaptureState
+## Captured, on its knees (T-107): it neither moves nor acts.
+var held := false:
+	set = set_held
 
 var _heard_monster := false
 var _vision_timer := 0.0
@@ -66,6 +71,11 @@ var _car_detour: CarAlarm
 var _flee_target := Vector3.ZERO
 var _was_fleeing := false
 var _rng := RandomNumberGenerator.new()
+## Online (T-101): a captured teammate it goes to free (its CaptureState), or
+## a dropped fuse it goes to take, and where it stands for it.
+var _errand: Node3D
+var _errand_spot := Vector3.ZERO
+var _errand_look_left := 0.0
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 
@@ -155,7 +165,7 @@ func get_state() -> PreyBrain.State:
 
 
 func get_gait() -> PlayerMotion.Gait:
-	return brain.get_gait()
+	return PlayerMotion.Gait.CROUCH if held else brain.get_gait()
 
 
 func get_eye_position() -> Vector3:
@@ -163,6 +173,9 @@ func get_eye_position() -> Vector3:
 
 
 func _physics_process(delta: float) -> void:
+	if held:
+		_stay_down(delta)
+		return
 	var threat := Vector3.ZERO
 	if monster != null:
 		threat = monster.global_position
@@ -180,6 +193,10 @@ func _physics_process(delta: float) -> void:
 	_pant(delta)
 	if _update_hiding(delta):
 		return  # Inside a hiding spot, or getting out of it: no move.
+	if _errand != null and _hold.holding:
+		velocity = Vector3.ZERO  # Freeing a teammate or taking a fuse: it stays.
+		_stuck_left = settings.stuck_time
+		return
 	var before := global_position
 	_move(delta)
 	_check_stuck(delta, before)
@@ -191,7 +208,9 @@ func _play_loop(delta: float, arrived: bool) -> void:
 	var work_on: Node = null
 	match brain.state:
 		PreyBrain.State.SEARCH:
-			if (
+			if _errand != null:
+				work_on = _errand if _errand.can_interact(global_position) else null
+			elif (
 				_detour == null
 				and arrived
 				and _agent.target_position.distance_to(brain.target) <= RETARGET_DISTANCE
@@ -247,7 +266,10 @@ func _use_ruses(delta: float, threat: Vector3) -> void:
 		_look_for_hiding_spot(delta, threat)
 	else:
 		_car_detour = null
-	_update_detour(delta)
+	if _errand == null:
+		_update_detour(delta)
+	if _detour == null:
+		_update_errand(delta)
 	_maybe_place_decoy()
 
 
@@ -438,6 +460,116 @@ func _end_detour() -> void:
 	_detour = null
 	if had:
 		brain.end_detour()
+
+
+## Online (S-010, T-101): while it searches calmly and no pickup draws it,
+## it goes to free a captured teammate, or to take a fuse a captured hunted
+## dropped while fuses are still missing; only while the monster is far from
+## there. Rescue first: a free teammate counts more than a fuse.
+func _update_errand(delta: float) -> void:
+	if _errand != null:
+		if (
+			not _errand_wanted(_errand)
+			or brain.state != PreyBrain.State.SEARCH
+			or brain.target.distance_to(_errand_spot) > RETARGET_DISTANCE
+		):
+			_end_errand()
+		return
+	_errand_look_left -= delta
+	if game_loop == null or _errand_look_left > 0.0 or brain.state != PreyBrain.State.SEARCH:
+		return
+	_errand_look_left = settings.pickup_look_interval
+	var best: Node3D = null
+	for node in get_tree().get_nodes_in_group(Interactable.GROUP):
+		var captured := node as CaptureState
+		if (
+			captured != null
+			and _errand_wanted(captured)
+			and global_position.distance_to(captured.global_position) <= settings.rescue_detour
+			and (best == null or _closer(captured, best))
+		):
+			best = captured
+	if best == null and game_loop.rules.found() < game_loop.rules.fuse_count:
+		for drop in game_loop.drops:
+			if (
+				_errand_wanted(drop)
+				and global_position.distance_to(drop.global_position) <= settings.drop_detour
+				and (best == null or _closer(drop, best))
+			):
+				best = drop
+	if best == null:
+		return
+	var spot := best.global_position
+	if best is CaptureState:  # Beside it, not into its body.
+		var side := global_position - spot
+		side.y = 0.0
+		spot += side.normalized() * 0.8 if side.length_squared() > 0.01 else Vector3.ZERO
+	if brain.detour_to(spot):
+		_errand = best
+		_errand_spot = spot
+
+
+## Whether an errand is still worth it: still there, and the monster far.
+func _errand_wanted(node: Node3D) -> bool:
+	if not is_instance_valid(node) or node.is_queued_for_deletion():
+		return false
+	if node is CaptureState:
+		var captured := node as CaptureState
+		if captured.state != CaptureState.State.CAPTURED or not captured.wanted_by(self):
+			return false
+	elif not (node as FuseBox).has_fuse:
+		return false
+	return (
+		monster == null
+		or (
+			monster.global_position.distance_to(node.global_position)
+			>= settings.rescue_safe_distance
+		)
+	)
+
+
+func _closer(a: Node3D, b: Node3D) -> bool:
+	return (
+		global_position.distance_squared_to(a.global_position)
+		< global_position.distance_squared_to(b.global_position)
+	)
+
+
+func _end_errand() -> void:
+	_errand = null
+	if brain.state != PreyBrain.State.SEARCH:
+		return  # Fled: the brain already left it.
+	if game_loop != null:
+		var rules := game_loop.rules
+		if brain.goal == PreyBrain.Goal.FUSES and rules.found() >= rules.fuse_count:
+			brain.goal = PreyBrain.Goal.REPAIR  # It took the last one.
+	brain.end_detour()
+
+
+## Online (T-107): captured or freed. Captured, it drops what it was doing.
+func set_held(value: bool) -> void:
+	held = value
+	if not held:
+		return
+	if hiding_in != null:
+		hiding_in.occupant = null
+		leave_hiding()
+	_hide_spot = null
+	_detour = null
+	_errand = null
+	_car_detour = null
+
+
+## Captured: on its knees where it is, still falling if in the air.
+func _stay_down(delta: float) -> void:
+	_hold.update(self, null, false, delta)
+	velocity.x = 0.0
+	velocity.z = 0.0
+	if is_on_floor():
+		velocity.y = 0.0
+	else:
+		velocity += get_gravity() * delta
+	move_and_slide()
 
 
 ## Gets into the hiding spot it fled to, stays while it hides, and gets out

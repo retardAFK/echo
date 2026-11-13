@@ -1,11 +1,12 @@
 class_name CaptureState
 extends Node3D
 ## The capture rule of an online game (S-010, Q2, T-107), for one hunted on
-## the room: a child of its Player. Caught once, the hunted is CAPTURED: on its
-## knees where it was, it neither moves nor acts, and calls for help (a faint
-## CALL noise, regularly). A free teammate frees it by holding "interact" next
-## to it for rescue_time, with a RESCUE noise at the start and at the end.
-## Caught a second time, it is OUT: eliminated, it watches a teammate.
+## the room: a child of its Player, or of an AI Prey in an empty seat (T-101).
+## Caught once, the hunted is CAPTURED: on its knees where it was, it neither
+## moves nor acts, and calls for help (a faint CALL noise, regularly). A free
+## teammate frees it by holding "interact" next to it for rescue_time, with a
+## RESCUE noise at the start and at the end. Caught a second time, it is OUT:
+## eliminated, it watches a teammate.
 ## Solo never uses it: a catch there ends the game.
 
 ## The state changed: captured, freed or out.
@@ -26,7 +27,9 @@ var _noise: NoiseSettings = NoiseBus.settings
 
 
 func _ready() -> void:
-	_settings = _hunted.get("settings") if _hunted.get("settings") != null else PlayerSettings.new()
+	_settings = _hunted.get("motion") if _hunted is Prey else _hunted.get("settings")
+	if _settings == null:
+		_settings = PlayerSettings.new()
 	progress = HoldProgress.new(_settings.rescue_time)
 
 
@@ -82,11 +85,12 @@ func wanted_by(user: Node) -> bool:
 	return user != _hunted and is_free_hunted(user)
 
 
-## Whether a node is a hunted that may act: a Player not captured nor out.
+## Whether a node is a hunted that may act: a Player or an AI Prey, not
+## captured nor out.
 static func is_free_hunted(node: Node) -> bool:
-	if not node is Player:
+	if not (node is Player or node is Prey):
 		return false
-	var capture: CaptureState = (node as Player).capture
+	var capture: CaptureState = node.get("capture")
 	return capture == null or capture.is_free()
 
 
