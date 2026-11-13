@@ -105,3 +105,8 @@ LOBBY_ERROR_STARTED,Cette partie a déjà commencé.
 LOBBY_ERROR_CLOSED,La partie a été fermée.
 LOBBY_ERROR_BAD_CODE,Un code fait 4 lettres.
 LOBBY_ERROR_OTHER,Erreur de connexion.
+HUD_INTERACT_RESCUE,Maintenir E : libérer
+HUD_CAPTURED,"Capturé : un coéquipier peut te libérer"
+HUD_RESCUED,Libéré
+HUD_ELIMINATED,Éliminé
+HUD_SPECTATOR,"Tu regardes un coéquipier, clic pour changer"

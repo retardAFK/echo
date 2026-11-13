@@ -150,6 +150,25 @@ func forget(hunted: Node3D) -> void:
 		sees_player = false
 
 
+## Chases a hunted again (freed by a teammate, S-010, T-107).
+func add_target(hunted: Node3D) -> void:
+	if hunted in get_targets():
+		return
+	if player == null:
+		player = hunted
+	else:
+		others.append(hunted)
+
+
+## Leaves a hunted it just captured (T-107): back to its watch, or on patrol
+## from the point farthest from there, walking, so that a teammate may come
+## to free it.
+func walk_away(from: Vector3) -> void:
+	sees_player = false
+	brain.let_go(MonsterBrain.farthest_index(get_patrol_points(), from))
+	_agent.target_position = brain.target
+
+
 ## Footsteps by distance walked, at the pace's range, and a short-range breath.
 func _make_noise(delta: float, before: Vector3) -> void:
 	var moved := Vector2(global_position.x - before.x, global_position.z - before.z).length()
@@ -301,6 +320,8 @@ func _on_noise_emitted(event: NoiseEvent) -> void:
 		return
 	if event.type == NoiseEvent.Type.SIREN and brain.guarding:
 		return  # Heard: it already left for the tunnel.
+	if event.type == NoiseEvent.Type.CALL:
+		return  # Its own prisoner calling: nothing new (T-107).
 	if NoiseBus.can_hear(event, get_ear_position()):
 		brain.hear(event.position)
 		for building in buildings:

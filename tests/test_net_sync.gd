@@ -251,8 +251,7 @@ func test_a_human_monster_catches_a_hunted_it_touches() -> void:
 	net._check_catches()
 	assert_signal_emitted_with_parameters(net, "hunted_caught", [hunted])
 	assert_eq(monster.catch_count, 1)
-	for place in [1, 2, 3]:
-		assert_eq(_events_for(net, place), [[NetGame.Event.CAUGHT, 1]])
+	assert_signal_emit_count(net, "hunted_caught", 1, "not the one far away")
 
 
 func test_client_plays_the_room_events() -> void:
@@ -275,6 +274,6 @@ func test_client_plays_the_room_events() -> void:
 	assert_true(building.scanned)
 	net.apply_event([NetGame.Event.SCAN, 5, false])
 	watch_signals(net)
-	net.apply_event([NetGame.Event.CAUGHT, 2])
-	assert_signal_emitted_with_parameters(net, "caught_reported", [2])
+	net.apply_event([NetGame.Event.CAUGHT, 2, CaptureState.State.OUT])
+	assert_signal_emitted_with_parameters(net, "caught_reported", [2, CaptureState.State.OUT])
 	net.apply_event([])

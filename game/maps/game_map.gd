@@ -50,6 +50,9 @@ var _rng := RandomNumberGenerator.new()
 var _net: NetGame
 ## Room side: the human hunted's players.
 var _online_hunted: Array[Player] = []
+## Client side, hunted: what its screen shows of its own player, hidden once
+## it watches a teammate (T-107).
+var _own_huds: Array[Node] = []
 
 @onready var _player: Player = $Player
 @onready var _monster: Monster = $Monster
@@ -185,6 +188,9 @@ func _setup_online_room(net: NetGame) -> void:
 		)
 		add_child(player)
 		player.get_node("Head/Camera3D").current = false
+		player.capture = CaptureState.new()
+		player.add_child(player.capture)
+		player.capture.changed.connect(_on_capture_changed.bind(player))
 		if marker != null:
 			player.global_position = marker.global_position
 			player.rotation.y = marker.global_rotation.y
@@ -200,13 +206,13 @@ func _setup_online_room(net: NetGame) -> void:
 		net.add_avatar(monster_place, LobbyState.MONSTER_SEAT, avatar)
 		_free_node(_monster)
 		_monster = null
-		net.hunted_caught.connect(_put_back)
+		net.hunted_caught.connect(_online_catch)
 	else:
 		_monster.player = hunted[0] if not hunted.is_empty() else null
 		for other in hunted.slice(1):
 			_monster.others.append(other)
 		_monster.buildings = get_buildings()
-		_monster.hunted_caught.connect(_on_online_caught)
+		_monster.hunted_caught.connect(_online_catch)
 		net.ai_monster = _monster
 	_free_node(_player)
 	_player = null
@@ -229,22 +235,55 @@ func _setup_online_client(net: NetGame) -> void:
 		var highlights: InteractHighlights = HIGHLIGHTS_SCENE.instantiate()
 		highlights.player = _player
 		add_child(highlights)
+		_own_huds.assign([carry, mask, highlights, _gauge])
+		_own_huds.append_array(_player.find_children("*", "CanvasLayer", true, false))
 		_overlay.monster = null
 		_free_node(_monster)  # The room runs the monster; here it is a puppet.
 		_monster = null
 		net.own = _player
+		net.spectating.connect(_on_spectating)
 	net.caught_reported.connect(_on_caught_reported)
 	# The next game launched while this one's end screen is up (T-099).
 	NetSession.game_started.connect(_on_next_game)
 	add_child(ShaderWarmup.new())
 
 
-## Room side: the AI monster caught a hunted; back to a spawn point until the
-## capture rule of S-010 (T-107).
-func _on_online_caught(caught: Node3D) -> void:
-	_net.report_caught(_net.seat_of(caught))
-	_put_back(caught)
-	_monster.reset_to_patrol(_spawn)
+## Room side: the monster (AI or human) caught a hunted, or opened its
+## hiding spot (T-107): captured the first time, out the second.
+func _online_catch(caught: Node3D) -> void:
+	var player := caught as Player
+	if player != null and player.capture != null and not (game_loop != null and game_loop.is_over):
+		player.capture.catch()
+
+
+## Room side: a hunted captured, freed or out. Everyone is told; the AI
+## monster leaves a captured hunted and chases it again once freed; a hunted
+## out of the game leaves the map and watches a teammate.
+func _on_capture_changed(state: CaptureState.State, player: Player) -> void:
+	player.held = state != CaptureState.State.FREE
+	_net.report_caught(_net.seat_of(player), state)
+	match state:
+		CaptureState.State.CAPTURED:
+			if game_loop != null:
+				game_loop.set_captured(player, true)
+			if _monster != null:
+				_monster.forget(player)
+				_monster.walk_away(player.global_position)
+		CaptureState.State.FREE:
+			if game_loop != null:
+				game_loop.set_captured(player, false)
+			if _monster != null:
+				_monster.add_target(player)
+		CaptureState.State.OUT:
+			if game_loop != null:
+				game_loop.drop_fuses(player)
+				game_loop.hunted_out(player)
+			if _monster != null:
+				_monster.forget(player)
+				_monster.walk_away(player.global_position)
+			_net.spectate(player)
+			player.process_mode = Node.PROCESS_MODE_DISABLED
+			player.global_position = Vector3(0, -60, 0)
 
 
 func _on_next_game(state: LobbyState) -> void:
@@ -253,8 +292,7 @@ func _on_next_game(state: LobbyState) -> void:
 
 ## Room side: the monster opened a hiding spot with a hunted inside.
 func _on_online_hidden_found(occupant: Node3D, _by: Node3D) -> void:
-	_net.report_caught(_net.seat_of(occupant))
-	_put_back(occupant)
+	_online_catch(occupant)
 
 
 ## Room side: the game is over. Everyone gets the last state at once, and the
@@ -266,21 +304,33 @@ func _on_online_game_ended(_hunted_won: bool) -> void:
 	)
 
 
-## Room side: a caught hunted goes back to a spawn point (until T-107).
-func _put_back(caught: Node3D) -> void:
-	_pick_spawn()
-	caught.global_position = _spawn
-	caught.velocity = Vector3.ZERO
-
-
-## Client side: the room says a hunted was caught. Its player sees the "caught"
-## screen; the monster sees that it caught someone.
-func _on_caught_reported(seat: int) -> void:
+## Client side: the room says a hunted was caught or freed (T-107). Its
+## player sees that it is captured, freed, or out; the monster sees that it
+## caught someone.
+func _on_caught_reported(seat: int, state: CaptureState.State) -> void:
 	var settings: MonsterSettings = avatar.settings if avatar != null else MONSTER_SETTINGS
 	if avatar != null:
-		_caught_screen.show_for(settings.caught_screen_time, "HUD_PREY_CAUGHT")
+		if state != CaptureState.State.FREE:
+			_caught_screen.show_for(settings.caught_screen_time, "HUD_PREY_CAUGHT")
 	elif seat == GameSession.online_seat:
-		_caught_screen.show_for(settings.caught_screen_time)
+		var keys := {
+			CaptureState.State.CAPTURED: "HUD_CAPTURED",
+			CaptureState.State.FREE: "HUD_RESCUED",
+			CaptureState.State.OUT: "HUD_ELIMINATED",
+		}
+		_caught_screen.show_for(settings.caught_screen_time, keys[state])
+
+
+## Client side: out of the game, the hunted watches a teammate (T-107).
+func _on_spectating() -> void:
+	for hud in _own_huds:
+		if is_instance_valid(hud):
+			hud.set("visible", false)
+			hud.process_mode = Node.PROCESS_MODE_DISABLED
+	var view := SpectatorView.new()
+	view.name = "SpectatorView"
+	view.net = _net
+	add_child(view)
 
 
 func _free_node(node: Node) -> void:

@@ -43,6 +43,12 @@ extends Resource
 ## Time between two pants, in seconds.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var breath_interval: float = 1.0
 
+@export_group("Rescue (S-010, T-107)")
+## Seconds a teammate holds "interact" to free a captured hunted.
+@export_range(0.1, 20.0, 0.1, "suffix:s") var rescue_time: float = 4.0
+## Farthest distance from a captured hunted to free it, in meters.
+@export_range(0.5, 5.0, 0.1, "suffix:m") var rescue_reach: float = 1.5
+
 @export_group("Head bob")
 ## Camera sway while moving. Can be turned off for motion sickness.
 @export var head_bob_enabled: bool = true

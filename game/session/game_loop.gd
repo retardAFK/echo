@@ -14,6 +14,8 @@ signal exit_opened
 ## The game is over: the hunted got out (won) or was caught.
 signal ended(hunted_won: bool)
 
+const DROPPED_FUSE_SCENE := preload("res://game/entities/fuse_box/dropped_fuse.tscn")
+
 @export var settings: LoopSettings
 
 ## Who looks for the fuses: the hunted player, or the AI prey.
@@ -41,6 +43,8 @@ var hunted_won := false
 ## Online client (S-010, T-099): draws nothing and decides nothing; the room's
 ## loop sends its values (mirror_values) and this one shows them (apply_values).
 var mirror := false
+## Fuses dropped on the ground by captured hunted (T-107), still there.
+var drops: Array[FuseBox] = []
 
 var _elapsed := 0.0
 ## Frames drawn and their time during the game, for the average frames per
@@ -55,6 +59,9 @@ var _carried := {}
 var _out: Array[Node] = []
 ## Every fuse box of the map.
 var _boxes: Array = []
+## Hunted captured and waiting for a teammate (S-010, T-107).
+var _captured: Array[Node] = []
+var _map: Node
 
 
 func _ready() -> void:
@@ -93,7 +100,8 @@ func hunted_out(node: Node) -> void:
 	if not is_hunted(node) or node in _out:
 		return
 	_out.append(node)
-	if _out.size() >= team.size():
+	_captured.erase(node)
+	if free_count() <= 0:
 		finish(false)
 		return
 	# Its fuses go back into the empty boxes nearest to where it was caught.
@@ -120,9 +128,83 @@ func _nearest_empty_box(at: Vector3) -> FuseBox:
 	return best
 
 
-## Hunted still in the game.
+## Hunted still in the game, neither out nor captured.
 func free_count() -> int:
-	return team.size() - _out.size()
+	return team.size() - _out.size() - _captured.size()
+
+
+## Online (S-010, T-107): a hunted captured on its knees, or freed by a
+## teammate. The monster wins once none is free.
+func set_captured(node: Node, captured: bool) -> void:
+	if not is_hunted(node) or node in _out or (node in _captured) == captured:
+		return
+	if not captured:
+		_captured.erase(node)
+		return
+	_captured.append(node)
+	drop_fuses(node)
+	if free_count() <= 0:
+		finish(false)
+
+
+func is_captured(node: Node) -> bool:
+	return node in _captured
+
+
+## The fuses a hunted carries fall at its feet (T-107): any hunted picks them
+## up again, like from a fuse box.
+func drop_fuses(node: Node) -> void:
+	var count := carried_by(node)
+	if count <= 0 or _map == null:
+		return
+	var at := (node as Node3D).global_position
+	for i in count:
+		var drop := spawn_drop(at + Vector3(0.3 * i, 0.0, 0.0))
+		drop.fuse_taken.connect(_on_fuse_taken)
+		drop.fuse_taken.connect(_on_drop_taken.bind(drop))
+		rules.carried -= 1
+		if _carried.has(node):
+			_carried[node] -= 1
+	fuses_changed.emit(rules.found(), rules.placed)
+
+
+## A fuse lying on the ground at a point (on a client, a copy of the room's).
+func spawn_drop(at: Vector3) -> FuseBox:
+	var drop: FuseBox = DROPPED_FUSE_SCENE.instantiate()
+	drop.has_fuse = true
+	_map.add_child(drop)
+	drop.global_position = at
+	drops.append(drop)
+	return drop
+
+
+## Where the dropped fuses still lie.
+func drop_positions() -> Array:
+	return drops.map(func(drop: FuseBox) -> Vector3: return drop.global_position)
+
+
+## Client side: the dropped fuses are those of the room.
+func apply_drops(positions: Array) -> void:
+	for drop in drops.duplicate():
+		if not positions.any(
+			func(at: Vector3) -> bool: return at.is_equal_approx(drop.global_position)
+		):
+			_remove_drop(drop)
+	for at: Vector3 in positions:
+		if not drops.any(
+			func(drop: FuseBox) -> bool: return at.is_equal_approx(drop.global_position)
+		):
+			spawn_drop(at)
+
+
+func _on_drop_taken(_user: Node, drop: FuseBox) -> void:
+	_remove_drop(drop)
+
+
+func _remove_drop(drop: FuseBox) -> void:
+	drops.erase(drop)
+	if is_instance_valid(drop):
+		drop.queue_free()
 
 
 ## Starts the game on a map: draws the fuses among its boxes (Q1) and wires
@@ -134,6 +216,7 @@ func setup(map: Node, rng_seed := 0) -> void:
 	else:
 		_rng.seed = rng_seed
 	var by_building := {}
+	_map = map
 	_boxes = _all(map, FuseBox)
 	if mirror:
 		_wire(map)
@@ -276,7 +359,7 @@ func _open_exit() -> void:
 
 
 func _on_exit_reached(body: Node3D) -> void:
-	if is_hunted(body) and body not in _out and is_exit_open():
+	if is_hunted(body) and body not in _out and body not in _captured and is_exit_open():
 		finish(true)
 
 

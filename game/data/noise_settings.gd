@@ -25,6 +25,14 @@ extends Resource
 ## Walls beyond this count are ignored (keeps raycasts cheap).
 @export_range(0, 10) var max_walls_counted: int = 4
 
+@export_group("Capture (S-010, T-107)")
+## Range of the call for help of a captured hunted, in meters.
+@export_range(0.0, 50.0, 0.5, "suffix:m") var call_range: float = 8.0
+## Time between two calls for help, in seconds.
+@export_range(0.5, 20.0, 0.5, "suffix:s") var call_interval: float = 3.0
+## Range of the noise of a rescue, in meters.
+@export_range(0.0, 50.0, 0.5, "suffix:m") var rescue_range: float = 15.0
+
 @export_group("Gauge")
 ## Noise range that fills the gauge, in meters.
 @export_range(1.0, 50.0, 0.5, "suffix:m") var gauge_full_range: float = 15.0
