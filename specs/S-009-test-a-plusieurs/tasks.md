@@ -35,6 +35,12 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-085 — Saccades à la première vue d'un lieu
   - Résultat vérifiable : minimum du banc au-dessus de 45 images/s sur la machine de référence (shaders et matériaux préchargés au chargement de la map)
   - Dépend de : T-077
+- [x] T-086 — Le scan s'explique (retour de Maxime, 13/11/2026)
+  - Résultat vérifiable : nom du bâtiment scannable visé et « maintenir clic droit pour scanner », « trop loin » avec la distance, message quand le clic droit ne lance rien (rien à scanner, jauge trop basse) ; tests GUT
+  - Dépend de : T-082
+- [ ] T-087 — Objets interactifs visibles (retour de Maxime, 13/11/2026)
+  - Résultat vérifiable : bouteilles, réveils, fusibles, cachettes et transformateur repérables de près ; tests GUT
+  - Dépend de : T-082
 - [ ] T-083 — Tests à 3 à 5 personnes **(Maxime)**
   - Résultat vérifiable : retours rapportés
   - Dépend de : T-082
@@ -52,3 +58,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - T-077 (13/11/2026, build `192f46e` sur itch.io, navigateur intégré de l'app Claude basé sur Chrome 156, PC de Maxime : AMD Radeon 740M, rendu 1920 × 1080) : 59,8 images/s en moyenne sur le parcours de 60 s (3 589 images), 1 % les plus lentes à 43,9, minimum 14,2 (une saccade isolée), 262 appels de dessin et 61 000 triangles au pire, chargement 1,7 s. Les 60 images/s tiennent en moyenne. Les images lentes viennent de quelques saccades quand une vue nouvelle apparaît, probablement la compilation des shaders : tâche T-085 ajoutée. Un second passage n'a pas pu être mesuré, le panneau du navigateur ayant été masqué (la page tourne alors en arrière-plan et ne dessine plus) : il faut garder le panneau affiché pendant une mesure.
 - T-082 (13/11/2026) : vérification finale. 7 critères sur 8 cochés. Menu, panneau des commandes du chassé et pause vérifiés dans le jeu (captures sous Xvfb) ; scan, résumé à copier et pause couverts par les tests GUT. Non atteint : la durée moyenne de 8 à 12 min et 40 à 60 % de sorties (T-079 : environ 6 min, 65 à 75 %), à régler avec les retours des testeurs (T-084). Lien et questionnaire envoyés à Maxime.
 - T-085 (13/11/2026) : `ShaderWarmup` au chargement de la map. Pendant 4 images, derrière un écran noir, une petite copie de chaque maillage et matériau différent de la map (101 dans la cité), plus la bouteille lancée et le réveil, est dessinée devant la caméra, sans puis avec une lampe : le navigateur compile alors tous les shaders avant que le joueur voie la cité. Sans effet mesurable en rendu logiciel (pas de saccade ici) ; le gain se mesure au prochain banc sur la machine de référence.
+- T-086 (13/11/2026) : Maxime n'arrivait pas à scanner. Seuls 5 bâtiments sont scannables (tour, centre social, galerie, parking, garages), à moins de 30 m, et rien ne le disait. Sous la jauge du réticule, une ligne dit maintenant ce que le scan peut faire : « Tour : maintenir clic droit pour scanner », « Tour : trop loin pour scanner (40 m) » (bâtiment visé jusqu'à 120 m, sans mur devant), « jauge en recharge » ; un clic droit sans effet explique pourquoi pendant 3 s (rien à scanner, avec la liste des bâtiments scannables, ou jauge trop basse). Règles inchangées. Noms des bâtiments dans `strings.csv` (`display_key` posé par `build_tilleuls`).

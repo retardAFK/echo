@@ -6,6 +6,9 @@ extends CanvasLayer
 ## its distance, the word "listening" with a sound meter of what the scan
 ## hears, and the scan gauge under the frame. Without a scan, the gauge is a
 ## thin line under the crosshair. Always pale, never orange: orange is noise.
+## Under the gauge, a line of text says what the scan can do (S-009, T-086):
+## the name of the scannable building aimed at and how to scan it, "too far"
+## with its distance, or why the scan button did nothing.
 
 ## Layout, in pixels of the 640 x 360 internal resolution.
 const CROSS_GAP := 4.0
@@ -30,14 +33,21 @@ const METER_RATE := 15.0
 const METER_DECAY := 2.5
 ## Faint hum on the meter while the scan hears nothing.
 const METER_HUM := 0.12
+## Gap between the idle gauge and the hint text under it.
+const HINT_OFFSET := 14.0
 
 @export var monster: MonsterAvatar
+## Scannable buildings of the map, named when nothing scannable is aimed at.
+var buildings: Array[Building] = []
 
 ## Sound meter levels, from 0 to 1, oldest first.
 var meter: Array[float] = []
 ## Loudest noise heard by the scan recently, from 0 to 1, fading out.
 var level := 0.0
 
+## Why the last scan did not start, shown until _miss_time runs out.
+var _miss_text := ""
+var _miss_time := 0.0
 var _meter_time := 0.0
 var _rng := RandomNumberGenerator.new()
 
@@ -49,11 +59,59 @@ func _ready() -> void:
 	meter.fill(0.0)
 	_canvas.draw.connect(_draw_reticle)
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
+	monster.scan_missed.connect(_on_scan_missed)
 
 
 func _process(delta: float) -> void:
 	update_meter(delta)
+	_miss_time = maxf(_miss_time - delta, 0.0)
 	_canvas.queue_redraw()
+
+
+## The line of text under the gauge: why the scan did not start (for a few
+## seconds after the button), or what the crosshair is on. Empty while
+## scanning or when nothing scannable is aimed at.
+func hint_text() -> String:
+	if monster.scan.active:
+		return ""
+	if _miss_time > 0.0:
+		return _miss_text
+	if monster.aimed_building != null:
+		var aimed := monster.aimed_building.get_display_name()
+		if monster.scan.can_start():
+			return tr("HUD_SCAN_HINT") % aimed
+		return tr("HUD_SCAN_RECHARGING") % aimed
+	if monster.far_building != null:
+		var far := monster.far_building
+		return tr("HUD_SCAN_TOO_FAR") % [far.get_display_name(), _far_distance(far)]
+	return ""
+
+
+## Text for a scan that did not start.
+func miss_text(reason: MonsterAvatar.ScanMiss) -> String:
+	match reason:
+		MonsterAvatar.ScanMiss.GAUGE_LOW:
+			return tr("HUD_SCAN_GAUGE_LOW")
+		MonsterAvatar.ScanMiss.TOO_FAR:
+			var far := monster.aim_far_building()
+			var label := far.get_display_name() if far != null else tr("BUILDING_DEFAULT")
+			return tr("HUD_SCAN_TOO_FAR") % [label, _far_distance(far)]
+	var names: Array[String] = []
+	for building in buildings:
+		if not names.has(building.get_display_name()):
+			names.append(building.get_display_name())
+	return tr("HUD_SCAN_NOTHING") % ", ".join(names)
+
+
+func _far_distance(building: Building) -> String:
+	if building == null:
+		return ""
+	return NoiseMarkers.distance_text(building.distance_to(monster.get_camera().global_position))
+
+
+func _on_scan_missed(reason: MonsterAvatar.ScanMiss) -> void:
+	_miss_text = miss_text(reason)
+	_miss_time = monster.settings.scan_miss_message_time
 
 
 ## Screen rectangle around a building's box, or an empty one when the box is
@@ -116,6 +174,18 @@ func _draw_reticle() -> void:
 	else:
 		var start := center + Vector2(-IDLE_GAUGE_WIDTH / 2.0, IDLE_GAUGE_OFFSET)
 		_draw_gauge(start, IDLE_GAUGE_WIDTH, pale)
+	var hint := hint_text()
+	if not hint.is_empty():
+		var at := Vector2(0.0, center.y + IDLE_GAUGE_OFFSET + HINT_OFFSET)
+		_canvas.draw_string(
+			ThemeDB.fallback_font,
+			at,
+			hint,
+			HORIZONTAL_ALIGNMENT_CENTER,
+			_canvas.size.x,
+			FONT_SIZE,
+			pale
+		)
 
 
 func _draw_cross(center: Vector2, color: Color) -> void:

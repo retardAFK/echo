@@ -10,6 +10,16 @@ extends CharacterBody3D
 
 signal scan_started(building: Building)
 signal scan_ended(building: Building)
+## The scan button was pressed but no scan started (T-086), and why.
+signal scan_missed(reason: ScanMiss)
+
+## Why a scan did not start: nothing scannable aimed at, a scannable building
+## aimed at but too far, or a gauge too low.
+enum ScanMiss { NOTHING, TOO_FAR, GAUGE_LOW }
+
+## A wall this close to a building's box (its facade may stand a little
+## outside the box) belongs to it, for aim_far_building().
+const FAR_AIM_WALL_MARGIN := 4.0
 
 @export var settings: MonsterSettings
 ## Mouse sensitivity, look limit and acceleration are shared with the hunted.
@@ -19,12 +29,19 @@ var catch_count := 0
 var scan: ScanGauge
 ## Building being scanned, or null.
 var scan_target: Building
+## Scannable building in the middle of the view, within scan range, or null.
+## Updated every physics frame, for the reticle (T-086).
+var aimed_building: Building
+## Scannable building in the middle of the view beyond scan range (up to
+## scan_hint_distance, no wall in front), when aimed_building is null.
+var far_building: Building
 
 var _pace := MonsterBrain.Pace.WALK
 var _prowling := false
 var _pitch := 0.0
 var _noise: MonsterNoise
 var _hold := HoldInteraction.new()
+var _was_holding := false
 
 @onready var _head: Node3D = $Head
 @onready var _camera: Camera3D = $Head/Camera3D
@@ -59,6 +76,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	update_aim()
 	update_scan(delta, Input.is_action_pressed("scan"))
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	move(input, Input.is_action_pressed("sprint"), delta)
@@ -127,14 +145,58 @@ func update_scan(delta: float, holding: bool) -> void:
 			scan_target = building
 			building.scanned = true
 			scan_started.emit(building)
+		elif not _was_holding:
+			scan_missed.emit(miss_reason(building))
 	elif not holding and scan.active:
 		scan.stop()
 	scan.update(delta)
+	_was_holding = holding
 	if not scan.active and scan_target != null:
 		var building := scan_target
 		scan_target = null
 		building.scanned = false
 		scan_ended.emit(building)
+
+
+## What the reticle shows: the building aimed at in range, or else the one
+## aimed at too far away.
+func update_aim() -> void:
+	aimed_building = aim_building()
+	far_building = null if aimed_building != null else aim_far_building()
+
+
+## Why pressing the scan button did not start a scan, with the building in
+## range aimed at (or null).
+func miss_reason(building: Building) -> ScanMiss:
+	if building != null:
+		return ScanMiss.GAUGE_LOW
+	if aim_far_building() != null:
+		return ScanMiss.TOO_FAR
+	return ScanMiss.NOTHING
+
+
+## The scannable building in the middle of the view, up to
+## scan_hint_distance, if no wall stands in front of it, or null.
+func aim_far_building() -> Building:
+	var from := _camera.global_position
+	var to := from - _camera.global_basis.z * settings.scan_hint_distance
+	var query := PhysicsRayQueryParameters3D.create(from, to, Building.SCAN_LAYER)
+	query.collide_with_areas = true
+	query.collide_with_bodies = false
+	var space := get_world_3d().direct_space_state
+	var hit := space.intersect_ray(query)
+	if hit.is_empty():
+		return null
+	var building := hit.get("collider") as Building
+	var wall_query := PhysicsRayQueryParameters3D.create(
+		from, hit.position, collision_mask, [get_rid()]
+	)
+	wall_query.hit_from_inside = true  # A camera inside a wall sees nothing.
+	var wall := space.intersect_ray(wall_query)
+	# A wall in front hides the building, unless it is one of its own walls.
+	if not wall.is_empty() and building.distance_to(wall.position) > FAR_AIM_WALL_MARGIN:
+		return null
+	return building
 
 
 ## The building in the middle of the view, within scan range, or null.

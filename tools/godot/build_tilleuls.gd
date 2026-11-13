@@ -725,6 +725,7 @@ func _add_buildings() -> void:
 		var center := rect.get_center()
 		building.position = kit.world(center.x, center.y, (bottom + top) / 2.0)
 		building.set("size", Vector3(rect.size.x, top - bottom, rect.size.y))
+		building.set("display_key", "BUILDING_" + building_name.to_snake_case().to_upper())
 		parent.add_child(building)
 		building.owner = _root
 		for i in entry[3].size():

@@ -95,6 +95,11 @@ extends Resource
 @export_range(0.0, 10.0, 0.1, "suffix:s") var scan_focus_time: float = 1.0
 ## Farthest building that can be aimed at, in meters.
 @export_range(1.0, 200.0, 1.0, "suffix:m") var scan_max_distance: float = 30.0
+## Farthest scannable building whose name the reticle shows, with "too far"
+## beyond scan_max_distance (S-009, T-086), in meters.
+@export_range(1.0, 300.0, 1.0, "suffix:m") var scan_hint_distance: float = 120.0
+## How long the reticle explains why a scan could not start, in seconds.
+@export_range(0.5, 10.0, 0.5, "suffix:s") var scan_miss_message_time: float = 3.0
 ## Light flickers per second in a scanned building, the hunted's discreet warning.
 @export_range(0.5, 30.0, 0.5, "suffix:/s") var light_flicker_rate: float = 8.0
 ## Dimmest a flickering light gets, as a share of its normal energy.

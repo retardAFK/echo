@@ -47,7 +47,7 @@ CONTROLS_INTERACT,"E : ramasser, interagir ; maintenir E : fusible, cachette"
 CONTROLS_THROW,Clic gauche : lancer une bouteille
 CONTROLS_DECOY,Clic droit : poser un réveil
 CONTROLS_PROWL,C : rôder (silencieux)
-CONTROLS_SCAN,Maintenir clic droit en visant un bâtiment : scanner
+CONTROLS_SCAN,Maintenir clic droit en visant un bâtiment visitable proche : scanner
 CONTROLS_OPEN,Maintenir E : ouvrir une cachette
 CONTROLS_PAUSE,Échap : pause
 GOAL_HUNTED,"Trouvez 3 fusibles, posez-les dans le transformateur, puis fuyez par le tunnel. Chaque bruit trahit votre position au monstre."
@@ -61,3 +61,14 @@ SUMMARY_ROLE,Rôle : %s
 SUMMARY_FPS,Images/s moyennes : %d
 END_COPY,Copier le résumé
 END_COPIED,Copié !
+BUILDING_DEFAULT,Bâtiment
+BUILDING_TOWER,Tour
+BUILDING_SOCIAL_CENTRE,Centre social
+BUILDING_GALLERY,Galerie
+BUILDING_CAR_PARK,Parking
+BUILDING_GARAGES,Garages
+HUD_SCAN_HINT,%s : maintenir clic droit pour scanner
+HUD_SCAN_RECHARGING,%s : jauge de scan en recharge
+HUD_SCAN_TOO_FAR,"%s : trop loin pour scanner (%s)"
+HUD_SCAN_GAUGE_LOW,Jauge de scan trop basse : attends qu'elle se recharge
+HUD_SCAN_NOTHING,"Rien à scanner ici. Bâtiments scannables : %s"
