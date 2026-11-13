@@ -56,3 +56,13 @@ extends Resource
 @export_range(0.0, 50.0, 0.5, "suffix:m") var car_alarm_detour: float = 15.0
 ## Time between two looks for something to pick up, in seconds.
 @export_range(0.05, 5.0, 0.05, "suffix:s") var pickup_look_interval: float = 0.5
+
+@export_group("Team (S-010, T-101)")
+## Online, it goes to free a captured teammate this close, in meters.
+@export_range(0.0, 400.0, 1.0, "suffix:m") var rescue_detour: float = 80.0
+## It goes there, and stays, only while the monster is at least this far
+## from the captured teammate, in meters.
+@export_range(0.0, 100.0, 1.0, "suffix:m") var rescue_safe_distance: float = 25.0
+## While it looks for fuses, it goes for a fuse dropped this close, in meters
+## (the whole cité by default: teammates tell each other), if it is safe.
+@export_range(0.0, 400.0, 1.0, "suffix:m") var drop_detour: float = 300.0

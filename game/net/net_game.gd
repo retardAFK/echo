@@ -54,6 +54,8 @@ var avatars := {}
 ## Room side: seat of each avatar, by place; and the AI monster, if any.
 var seats := {}
 var ai_monster: Node3D
+## Room side: the AI preys in the empty hunted seats (T-101), by seat.
+var ai_hunted := {}
 ## Client side: the avatar played here.
 var own: Node3D
 var prediction: Prediction
@@ -159,8 +161,8 @@ func _check_catches() -> void:
 	var monster := _human_monster()
 	if monster == null:
 		return
-	for place in avatars:
-		var hunted: Node3D = avatars[place]
+	for entry in _entities():
+		var hunted: Node3D = entry[1]
 		if (
 			hunted == monster
 			or HidingSpot.is_hidden(hunted)
@@ -214,17 +216,18 @@ func _next_watched(current: Node3D) -> Node3D:
 
 ## Whether a hunted is out of the game (caught twice, T-107).
 static func is_out(node: Node3D) -> bool:
-	var player := node as Player
-	return (
-		player != null and player.capture != null and player.capture.state == CaptureState.State.OUT
-	)
+	var capture: CaptureState = node.get("capture")
+	return capture != null and capture.state == CaptureState.State.OUT
 
 
-## Room side: the seat of an avatar, -1 if it is not a human's.
+## Room side: the seat of an avatar or an AI prey, -1 if none.
 func seat_of(node: Node3D) -> int:
 	for place in avatars:
 		if avatars[place] == node:
 			return seats[place]
+	for seat in ai_hunted:
+		if ai_hunted[seat] == node:
+			return seat
 	return -1
 
 
@@ -381,6 +384,9 @@ func _entities() -> Array:
 	for place in avatars:
 		if not is_out(avatars[place]):
 			found.append([seats[place], avatars[place]])
+	for seat in ai_hunted:
+		if not is_out(ai_hunted[seat]):
+			found.append([seat, ai_hunted[seat]])
 	if ai_monster != null:
 		found.append([LobbyState.MONSTER_SEAT, ai_monster])
 	return found
