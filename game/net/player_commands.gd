@@ -6,6 +6,9 @@ extends RefCounted
 ## or, later, received from the network (T-095). Avatars read it instead of
 ## Input, so the same code moves a local player and a remote one.
 
+## A one-shot action was queued, so the network can send it reliably (T-095).
+signal action_pushed(action: Action)
+
 ## One-shot actions, applied once by the avatar.
 enum Action { CROUCH, INTERACT, THROW, DECOY }
 
@@ -33,6 +36,18 @@ var _actions: Array[Action] = []
 ## Queues a one-shot action for the next frame.
 func push(action: Action) -> void:
 	_actions.append(action)
+	action_pushed.emit(action)
+
+
+## Copies what is held and where it looks (not the queued actions) from other.
+func copy_held(other: PlayerCommands) -> void:
+	seq = other.seq
+	move = other.move
+	yaw = other.yaw
+	pitch = other.pitch
+	sprint = other.sprint
+	interact = other.interact
+	scan = other.scan
 
 
 ## The queued one-shot actions, oldest first; the queue is emptied.

@@ -55,6 +55,9 @@ func refresh() -> void:
 		var breath := " breathless" if prey.brain.is_breathless() else ""
 		var warned := " warned" if prey.is_warned() else ""
 		_label.text += "\nPREY %s%s%s" % [prey_state, breath, warned]
+	var net := NetSession.describe()
+	if net != "":
+		_label.text += "\n" + net  # Ping of an online game (S-010, T-095).
 
 
 func get_text() -> String:

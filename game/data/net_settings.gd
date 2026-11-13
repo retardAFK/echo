@@ -18,6 +18,8 @@ extends Resource
 @export_range(1, 8) var room_size: int = 4
 ## A room nobody is in stops after this long, freeing its code.
 @export_range(5.0, 600.0, 1.0, "suffix:s") var room_idle_timeout: float = 60.0
+## Commands sent by a client per second (S-010, Q5).
+@export_range(5, 60) var commands_rate: int = 30
 ## Time between two pings sent by a client.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var ping_interval: float = 1.0
 ## How long a client waits for the lobby to answer.
