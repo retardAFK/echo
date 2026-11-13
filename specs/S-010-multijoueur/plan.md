@@ -64,7 +64,7 @@ Un **spectateur** (chassé éliminé, Q2) reçoit l'instantané du coéquipier q
 - Le test de latence ajoute un retard sur la boucle locale de la CI (`tc netem`, 75 ms dans chaque sens) et vérifie l'écart entre position prédite et position du serveur.
 
 ## Le salon (Q6)
-- Code de 4 lettres tiré dans `ACDEFGHJKMNPQRTUVWXYZ` (sans I, L, O, S, B ni chiffres), unique tant que la salle existe.
+- Code de 4 lettres tiré dans `ABCDEFGHJKMNPQRTUVWXYZ` (sans I, L, O, S ni chiffres), unique tant que la salle existe.
 - La salle garde 4 places : monstre, chassé 1, chassé 2, chassé 3. Le premier arrivé est **chef** : il change les rôles et lance quand tous les humains sont prêts. Une place vide affiche « IA ».
 - À la connexion, le client envoie la version du build ; une version différente de celle du serveur est refusée avec « Recharge la page : une nouvelle version est en ligne ».
 - Une partie lancée n'accepte plus de nouveaux joueurs, seulement le retour d'un joueur parti (jeton de reprise ci-dessous).

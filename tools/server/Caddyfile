@@ -1,0 +1,36 @@
+# Écho dedicated server (S-010, D-015). Caddy gets the HTTPS certificate from
+# Let's Encrypt and forwards the WebSocket connections to the Godot processes
+# on this machine. ECHO_DOMAIN is set in /etc/default/caddy by setup.sh.
+{$ECHO_DOMAIN} {
+	handle /lobby {
+		reverse_proxy 127.0.0.1:8910
+	}
+	# One route per room slot; ports follow game/data/net_settings.tres.
+	handle /s1 {
+		reverse_proxy 127.0.0.1:9001
+	}
+	handle /s2 {
+		reverse_proxy 127.0.0.1:9002
+	}
+	handle /s3 {
+		reverse_proxy 127.0.0.1:9003
+	}
+	handle /s4 {
+		reverse_proxy 127.0.0.1:9004
+	}
+	handle /s5 {
+		reverse_proxy 127.0.0.1:9005
+	}
+	handle /s6 {
+		reverse_proxy 127.0.0.1:9006
+	}
+	handle /s7 {
+		reverse_proxy 127.0.0.1:9007
+	}
+	handle /s8 {
+		reverse_proxy 127.0.0.1:9008
+	}
+	handle {
+		respond "Écho" 200
+	}
+}

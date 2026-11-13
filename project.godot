@@ -8,6 +8,7 @@ config_version=5
 
 config/name="Écho"
 run/main_scene="res://game/ui/start_menu.tscn"
+run/flush_stdout_on_print.dedicated_server=true
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
