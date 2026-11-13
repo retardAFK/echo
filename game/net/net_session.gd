@@ -11,6 +11,10 @@ signal refused(reason: String)
 signal unreachable
 ## The room closed the connection after the player had joined.
 signal left
+## The waiting room changed (T-096): a LobbyState read from the room.
+signal lobby_changed(lobby: LobbyState)
+## The leader launched the game, with the final seats.
+signal game_started(lobby: LobbyState)
 
 enum Mode { SOLO, CLIENT, ROOM }
 
@@ -44,6 +48,8 @@ func join(url: String) -> void:
 	link.refused.connect(refused.emit)
 	link.unreachable.connect(unreachable.emit)
 	link.left.connect(left.emit)
+	link.lobby_changed.connect(_on_lobby_changed)
+	link.game_started.connect(_on_game_started)
 	link.join(url)
 	mode = Mode.CLIENT
 
@@ -61,6 +67,43 @@ func leave() -> void:
 ## Client side: own place in the room (1 to room_size), or 0.
 func get_place() -> int:
 	return link.place if mode == Mode.CLIENT else 0
+
+
+## Client side: the last waiting room received, or null.
+func get_lobby() -> LobbyState:
+	if mode != Mode.CLIENT or link.lobby_state.is_empty():
+		return null
+	return LobbyState.from_dict(link.lobby_state)
+
+
+## Client side: own seat in the waiting room (LobbyState.MONSTER_SEAT for the
+## monster, 1 to 3 for the hunted), or -1.
+func get_seat() -> int:
+	var lobby := get_lobby()
+	return lobby.seat_of(get_place()) if lobby != null else -1
+
+
+## Client side, waiting room: sit in a free seat.
+func take_seat(seat: int) -> void:
+	if mode == Mode.CLIENT:
+		link.ask_seat(seat)
+
+
+## Client side, leader only: swap two seats.
+func swap_seats(first: int, second: int) -> void:
+	if mode == Mode.CLIENT:
+		link.ask_swap(first, second)
+
+
+func set_ready(is_ready: bool) -> void:
+	if mode == Mode.CLIENT:
+		link.ask_ready(is_ready)
+
+
+## Client side, leader only: launch the game once everyone is ready.
+func start_game() -> void:
+	if mode == Mode.CLIENT:
+		link.ask_start()
 
 
 ## Client side: last round trip to the room in milliseconds, or -1.
@@ -96,6 +139,14 @@ func _process(delta: float) -> void:
 		_send_left += 1.0 / settings.commands_rate
 		_send_left = maxf(_send_left, 0.0)
 		link.send_held(local_commands)
+
+
+func _on_lobby_changed(state: Dictionary) -> void:
+	lobby_changed.emit(LobbyState.from_dict(state))
+
+
+func _on_game_started(state: Dictionary) -> void:
+	game_started.emit(LobbyState.from_dict(state))
 
 
 func _on_action_pushed(action: PlayerCommands.Action) -> void:

@@ -18,6 +18,8 @@ func _ready() -> void:
 		return
 	print("ECHO_ROOM %s listening on %d" % [ServerBoot.room_code, port])
 	_link = NetSession.link
+	_link.lobby.code = ServerBoot.room_code
+	_link.game_started.connect(_on_game_started)
 	_link.players_changed.connect(_on_players_changed)
 	_link.idle_expired.connect(_on_idle_expired)
 
@@ -29,3 +31,7 @@ func _on_players_changed(count: int) -> void:
 func _on_idle_expired() -> void:
 	print("ECHO_ROOM %s empty, stopping" % ServerBoot.room_code)
 	get_tree().quit()
+
+
+func _on_game_started(state: Dictionary) -> void:
+	print("ECHO_ROOM %s started, seats %s" % [ServerBoot.room_code, state["seats"]])

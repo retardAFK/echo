@@ -72,3 +72,35 @@ HUD_SCAN_RECHARGING,%s : jauge de scan en recharge
 HUD_SCAN_TOO_FAR,"%s : trop loin pour scanner (%s)"
 HUD_SCAN_GAUGE_LOW,Jauge de scan trop basse : attends qu'elle se recharge
 HUD_SCAN_NOTHING,"Rien à scanner ici. Bâtiments scannables : %s"
+MENU_ONLINE,Jouer en ligne
+LOBBY_CREATE,Créer une partie
+LOBBY_JOIN,Rejoindre
+LOBBY_CODE_HINT,Code de la partie
+LOBBY_CODE,Code : %s
+LOBBY_SHARE,Envoie ce code à tes amis pour qu'ils te rejoignent.
+LOBBY_SEAT_MONSTER,Monstre
+LOBBY_SEAT_HUNTED,Chassé %d
+LOBBY_AI,IA
+LOBBY_YOU,Toi
+LOBBY_PLAYER,Joueur %d
+LOBBY_LEADER,(chef)
+LOBBY_IS_READY,prêt
+LOBBY_TAKE,Prendre
+LOBBY_SWAP,Échanger
+LOBBY_READY,Je suis prêt
+LOBBY_NOT_READY,Pas prêt
+LOBBY_START,Lancer la partie
+LOBBY_LEAVE,Quitter
+LOBBY_CONNECTING,Connexion…
+LOBBY_STARTING,La partie commence…
+LOBBY_WAIT_LEADER,Le chef lance la partie quand tout le monde est prêt.
+LOBBY_WAIT_READY,Lance la partie quand tout le monde est prêt. Les places vides sont jouées par des IA.
+LOBBY_ERROR_UNREACHABLE,Serveur injoignable. Réessaie plus tard.
+LOBBY_ERROR_UNKNOWN_CODE,Aucune partie avec ce code.
+LOBBY_ERROR_BUSY,Le serveur est plein. Réessaie plus tard.
+LOBBY_ERROR_VERSION,Recharge la page : une nouvelle version est en ligne.
+LOBBY_ERROR_FULL,Cette partie est complète.
+LOBBY_ERROR_STARTED,Cette partie a déjà commencé.
+LOBBY_ERROR_CLOSED,La partie a été fermée.
+LOBBY_ERROR_BAD_CODE,Un code fait 4 lettres.
+LOBBY_ERROR_OTHER,Erreur de connexion.

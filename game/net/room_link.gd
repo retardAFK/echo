@@ -20,6 +20,10 @@ signal players_changed(count: int)
 signal idle_expired
 ## Client side: the room closed the connection after the player had joined.
 signal left
+## Client side: the waiting room changed (T-096); state is LobbyState.to_dict().
+signal lobby_changed(state: Dictionary)
+## Both sides: the leader launched the game.
+signal game_started(state: Dictionary)
 
 const NODE_NAME := "Room"
 ## Seconds between refusing a player and closing its connection.
@@ -34,6 +38,10 @@ var version := NetAddress.build_version()
 var players := {}
 ## Room side: latest commands of each place, by place (T-095).
 var commands := {}
+## Room side: the waiting room (T-096).
+var lobby := LobbyState.new()
+## Client side: the last waiting room received.
+var lobby_state := {}
 ## Client side: own place once welcomed, else 0.
 var place := 0
 ## Client side: last round trip in milliseconds, -1 before the first pong.
@@ -144,8 +152,10 @@ func _on_peer_connected(_id: int) -> void:
 func _on_peer_disconnected(id: int) -> void:
 	if players.has(id):
 		commands.erase(players[id])
+		lobby.remove_player(players[id])
 		players.erase(id)
 		players_changed.emit(players.size())
+		_broadcast_lobby()
 
 
 ## Room side: the commands of a place, created empty for a place nobody has
@@ -162,13 +172,13 @@ func send_held(held: PlayerCommands) -> void:
 	if place > 0:
 		var copy := PlayerCommands.new()
 		copy.copy_held(held)
-		receive_held.rpc_id(1, copy.to_bytes())
+		_receive_held.rpc_id(1, copy.to_bytes())
 
 
 ## Client side: sends a one-shot action, which must not be lost.
 func send_action(action: PlayerCommands.Action) -> void:
 	if place > 0:
-		receive_action.rpc_id(1, action)
+		_receive_action.rpc_id(1, action)
 
 
 func _drop(peer_id: int) -> void:
@@ -192,6 +202,8 @@ func hello(client_version: String) -> void:
 	var reason := ""
 	if client_version != version:
 		reason = "version"
+	elif lobby.started:
+		reason = "started"
 	elif free_place() == 0:
 		reason = "full"
 	if reason != "":
@@ -200,12 +212,14 @@ func hello(client_version: String) -> void:
 		get_tree().create_timer(REFUSED_CLOSE_DELAY).timeout.connect(_drop.bind(sender))
 		return
 	players[sender] = free_place()
+	lobby.add_player(players[sender])
 	welcome.rpc_id(sender, players[sender])
 	players_changed.emit(players.size())
+	_broadcast_lobby()
 
 
 @rpc("any_peer", "call_remote", "unreliable_ordered")
-func receive_held(bytes: PackedByteArray) -> void:
+func _receive_held(bytes: PackedByteArray) -> void:
 	var sender_place: int = players.get(_api.get_remote_sender_id(), 0) if is_room else 0
 	if sender_place == 0:
 		return
@@ -216,7 +230,7 @@ func receive_held(bytes: PackedByteArray) -> void:
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func receive_action(action: int) -> void:
+func _receive_action(action: int) -> void:
 	var sender_place: int = players.get(_api.get_remote_sender_id(), 0) if is_room else 0
 	if sender_place != 0 and action >= 0 and action < PlayerCommands.Action.size():
 		commands_for(sender_place).push(action as PlayerCommands.Action)
@@ -245,3 +259,77 @@ func ping(sent_msec: int) -> void:
 func pong(sent_msec: int) -> void:
 	ping_ms = Time.get_ticks_msec() - sent_msec
 	pinged.emit(ping_ms)
+
+
+## Client side: asks for a free seat of the waiting room.
+func ask_seat(seat: int) -> void:
+	if place > 0:
+		_request_seat.rpc_id(1, seat)
+
+
+## Client side: the leader asks to swap two seats.
+func ask_swap(first: int, second: int) -> void:
+	if place > 0:
+		_request_swap.rpc_id(1, first, second)
+
+
+func ask_ready(is_ready: bool) -> void:
+	if place > 0:
+		_request_ready.rpc_id(1, is_ready)
+
+
+## Client side: the leader asks to launch.
+func ask_start() -> void:
+	if place > 0:
+		_request_start.rpc_id(1)
+
+
+func _sender_place() -> int:
+	return players.get(_api.get_remote_sender_id(), 0) if is_room else 0
+
+
+func _broadcast_lobby() -> void:
+	var state := lobby.to_dict()
+	for id in players:
+		_show_lobby.rpc_id(id, state)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _request_seat(seat: int) -> void:
+	if _sender_place() != 0 and lobby.take_seat(_sender_place(), seat):
+		_broadcast_lobby()
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _request_swap(first: int, second: int) -> void:
+	if _sender_place() != 0 and lobby.swap(_sender_place(), first, second):
+		_broadcast_lobby()
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _request_ready(is_ready: bool) -> void:
+	if _sender_place() != 0:
+		lobby.set_ready(_sender_place(), is_ready)
+		_broadcast_lobby()
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _request_start() -> void:
+	if _sender_place() == 0 or not lobby.start(_sender_place()):
+		return
+	var state := lobby.to_dict()
+	for id in players:
+		_start_game.rpc_id(id, state)
+	game_started.emit(state)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _show_lobby(state: Dictionary) -> void:
+	lobby_state = state
+	lobby_changed.emit(state)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _start_game(state: Dictionary) -> void:
+	lobby_state = state
+	game_started.emit(state)
