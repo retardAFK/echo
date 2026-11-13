@@ -22,6 +22,10 @@ signal event_received(event: Array)
 
 enum Mode { SOLO, CLIENT, ROOM }
 
+## Where the resume tokens are kept between visits (T-102): user:// is the
+## browser's storage in the web build.
+const RESUME_FILE := "user://resume.cfg"
+
 var settings: NetSettings = preload("res://game/data/net_settings.tres")
 var mode := Mode.SOLO
 var link: RoomLink
@@ -30,6 +34,8 @@ var local_commands: PlayerCommands:
 	set = set_local_commands
 
 var _send_left := 0.0
+## Client side: the room joined last, to come back to it (T-102).
+var _last_url := ""
 
 
 ## Becomes a room listening on port.
@@ -44,11 +50,13 @@ func host(port: int) -> Error:
 	return OK
 
 
-## Connects to a room; joined, refused or unreachable tells how it went.
+## Connects to a room; joined, refused or unreachable tells how it went. The
+## token the room gave last time, if any, asks for the same place back.
 func join(url: String) -> void:
 	leave()
+	_last_url = url
 	link = _new_link()
-	link.joined.connect(joined.emit)
+	link.joined.connect(_on_joined)
 	link.refused.connect(refused.emit)
 	link.unreachable.connect(unreachable.emit)
 	link.left.connect(left.emit)
@@ -56,8 +64,31 @@ func join(url: String) -> void:
 	link.game_started.connect(_on_game_started)
 	link.snapshot_received.connect(snapshot_received.emit)
 	link.event_received.connect(event_received.emit)
-	link.join(url)
+	link.join(url, saved_token(url))
 	mode = Mode.CLIENT
+
+
+## Client side: connects again to the room joined last, with its token, to
+## get the place back after a cut (T-102).
+func rejoin() -> void:
+	if _last_url != "":
+		join(_last_url)
+
+
+## The resume token kept for a room, "" if none.
+func saved_token(url: String) -> String:
+	var file := ConfigFile.new()
+	if file.load(RESUME_FILE) != OK:
+		return ""
+	return str(file.get_value("tokens", url, ""))
+
+
+func _on_joined(place: int, token: String) -> void:
+	var file := ConfigFile.new()
+	file.load(RESUME_FILE)  # Missing the first time: a new file.
+	file.set_value("tokens", _last_url, token)
+	file.save(RESUME_FILE)
+	joined.emit(place)
 
 
 func _ready() -> void:

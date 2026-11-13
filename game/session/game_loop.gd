@@ -83,6 +83,26 @@ func add_hunted(node: Node) -> void:
 		node.ruse_used.connect(_on_ruse_used)
 
 
+## Online (T-102): an AI takes the place of a hunted who left, or the hunted
+## comes back in the AI's place: the same fuses, captured or out the same.
+func replace_hunted(old: Node, new: Node) -> void:
+	var index := team.find(old)
+	if index < 0:
+		return
+	team[index] = new
+	if hunted == old:
+		hunted = new
+	if _carried.has(old):
+		_carried[new] = _carried[old]
+		_carried.erase(old)
+	for list: Array[Node] in [_captured, _out]:
+		var at := list.find(old)
+		if at >= 0:
+			list[at] = new
+	if new.has_signal(&"ruse_used") and not new.ruse_used.is_connected(_on_ruse_used):
+		new.ruse_used.connect(_on_ruse_used)
+
+
 func is_hunted(node: Node) -> bool:
 	return node != null and (node == hunted or node in team)
 

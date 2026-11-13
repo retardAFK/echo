@@ -6,9 +6,13 @@ extends Node
 ## live in one process (tests, CI) without mixing their messages. Its
 ## remote procedures need the same node name on both sides: always "Room".
 ## A client says hello with its build version; the room welcomes it with a
-## place (1 to room_size) or refuses it (other version, room full).
+## place (1 to room_size) and a resume token, or refuses it (other version,
+## room full, game started).
+## Departures (T-102): a player who leaves a game in progress keeps its seat;
+## coming back with its token before the end, it gets its place back. The
+## leader's role goes to another player still there.
 
-signal joined(place: int)
+signal joined(place: int, token: String)
 signal refused(reason: String)
 ## A client could not reach the room before room_connect_timeout.
 signal unreachable
@@ -16,6 +20,12 @@ signal unreachable
 signal pinged(milliseconds: int)
 ## Room side: a player arrived or left.
 signal players_changed(count: int)
+## Room side, game in progress (T-102): the player of a place left, or came
+## back with its token.
+signal player_left(place: int)
+signal player_returned(place: int)
+## Room side: the game map of a place is ready to receive the game (T-102).
+signal place_ready(place: int)
 ## Room side: nobody has been in the room for room_idle_timeout.
 signal idle_expired
 ## Client side: the room closed the connection after the player had joined.
@@ -48,8 +58,12 @@ var commands := {}
 var lobby := LobbyState.new()
 ## Client side: the last waiting room received.
 var lobby_state := {}
+## Room side: the resume token of each place (T-102).
+var tokens := {}
 ## Client side: own place once welcomed, else 0.
 var place := 0
+## Client side: the token sent with hello, to get a place back.
+var resume_token := ""
 ## Client side: last round trip in milliseconds, -1 before the first pong.
 var ping_ms := -1
 
@@ -86,10 +100,12 @@ func listen(port: int) -> Error:
 	return OK
 
 
-## Client side: connects to a room, trying again while it starts.
-func join(url: String) -> void:
+## Client side: connects to a room, trying again while it starts. A token
+## from an earlier welcome asks for that place back (T-102).
+func join(url: String, token := "") -> void:
 	is_room = false
 	_url = url
+	resume_token = token
 	_connect_left = settings.room_connect_timeout
 	_api.connected_to_server.connect(_on_connected)
 	_api.connection_failed.connect(_on_connection_failed)
@@ -138,7 +154,7 @@ func _process(delta: float) -> void:
 
 
 func _on_connected() -> void:
-	hello.rpc_id(1, version)
+	hello.rpc_id(1, version, resume_token)
 
 
 func _on_connection_failed() -> void:
@@ -157,12 +173,27 @@ func _on_peer_connected(_id: int) -> void:
 
 
 func _on_peer_disconnected(id: int) -> void:
-	if players.has(id):
-		commands.erase(players[id])
-		lobby.remove_player(players[id])
-		players.erase(id)
-		players_changed.emit(players.size())
-		_broadcast_lobby()
+	if not players.has(id):
+		return
+	var gone: int = players[id]
+	commands.erase(gone)
+	players.erase(id)
+	if lobby.started:
+		# Its seat waits for it (T-102); the leader's role goes on.
+		if lobby.leader == gone:
+			lobby.leader = _lowest_place()
+		player_left.emit(gone)
+	else:
+		lobby.remove_player(gone)
+		tokens.erase(gone)
+	players_changed.emit(players.size())
+	_broadcast_lobby()
+
+
+func _lowest_place() -> int:
+	var connected: Array = players.values()
+	connected.sort()
+	return connected[0] if not connected.is_empty() else 0
 
 
 ## Room side: the commands of a place, created empty for a place nobody has
@@ -194,19 +225,34 @@ func _drop(peer_id: int) -> void:
 		_peer.disconnect_peer(peer_id)
 
 
-## The free place with the lowest number, or 0 if the room is full.
+## The free place with the lowest number, or 0 if the room is full. A place
+## kept for a player who left (it has a token) is not free.
 func free_place() -> int:
 	for candidate in range(1, settings.room_size + 1):
-		if not players.values().has(candidate):
+		if not players.values().has(candidate) and not tokens.has(candidate):
 			return candidate
 	return 0
 
 
+## The place a token was given for, if its player is not connected; else 0.
+func returning_place(token: String) -> int:
+	if token == "":
+		return 0
+	for kept: int in tokens:
+		if tokens[kept] == token and _peer_of(kept) == 0:
+			return kept
+	return 0
+
+
 @rpc("any_peer", "call_remote", "reliable")
-func hello(client_version: String) -> void:
+func hello(client_version: String, token := "") -> void:
 	if not is_room:
 		return
 	var sender := _api.get_remote_sender_id()
+	var back := returning_place(token) if client_version == version else 0
+	if back != 0:
+		_welcome_back(sender, back)
+		return
 	var reason := ""
 	if client_version != version:
 		reason = "version"
@@ -220,10 +266,30 @@ func hello(client_version: String) -> void:
 		get_tree().create_timer(REFUSED_CLOSE_DELAY).timeout.connect(_drop.bind(sender))
 		return
 	players[sender] = free_place()
+	tokens[players[sender]] = _new_token()
 	lobby.add_player(players[sender])
-	welcome.rpc_id(sender, players[sender])
+	welcome.rpc_id(sender, players[sender], tokens[players[sender]])
 	players_changed.emit(players.size())
 	_broadcast_lobby()
+
+
+## A player back with its token (T-102): its place again, and the game in
+## progress if there is one.
+func _welcome_back(sender: int, back: int) -> void:
+	players[sender] = back
+	welcome.rpc_id(sender, back, tokens[back])
+	if lobby.leader == 0:
+		lobby.leader = back
+	players_changed.emit(players.size())
+	if lobby.started:
+		_start_game.rpc_id(sender, lobby.to_dict())
+		player_returned.emit(back)
+	_broadcast_lobby()
+
+
+static func _new_token() -> String:
+	var bytes := Crypto.new().generate_random_bytes(12)
+	return bytes.hex_encode()
 
 
 @rpc("any_peer", "call_remote", "unreliable_ordered")
@@ -245,10 +311,23 @@ func _receive_action(action: int) -> void:
 
 
 @rpc("authority", "call_remote", "reliable")
-func welcome(given_place: int) -> void:
+func welcome(given_place: int, token: String) -> void:
 	place = given_place
+	resume_token = token
 	_ping_left = 0.0
-	joined.emit(place)
+	joined.emit(place, token)
+
+
+## Client side: its game map is ready; the room then sends it the game.
+func say_ready() -> void:
+	if place > 0:
+		_client_ready.rpc_id(1)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _client_ready() -> void:
+	if _sender_place() != 0:
+		place_ready.emit(_sender_place())
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -337,6 +416,12 @@ func end_game() -> void:
 	if not lobby.started:
 		return
 	lobby.finish()
+	# Those who left and never came back lose their seat now.
+	var connected: Array = players.values()
+	for kept: int in tokens.keys():
+		if kept not in connected:
+			lobby.remove_player(kept)
+			tokens.erase(kept)
 	_broadcast_lobby()
 	game_ended.emit()
 

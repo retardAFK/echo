@@ -82,6 +82,8 @@ func _ready() -> void:
 	process_physics_priority = -10 if is_room else 10
 	if is_room:
 		NoiseBus.noise_emitted.connect(_on_noise_emitted)
+		if NetSession.link != null:
+			NetSession.link.place_ready.connect(_on_place_ready)
 		for i in buildings.size():
 			buildings[i].scan_changed.connect(_on_scan_changed.bind(i))
 		get_parent().child_entered_tree.connect(_on_map_child_added)
@@ -93,6 +95,8 @@ func _ready() -> void:
 		prediction = Prediction.new(settings)
 		NetSession.snapshot_received.connect(apply_snapshot)
 		NetSession.event_received.connect(apply_event)
+		if NetSession.link != null:
+			NetSession.link.say_ready()  # The room sends the map as it is now.
 
 
 func _exit_tree() -> void:
@@ -100,9 +104,10 @@ func _exit_tree() -> void:
 		[NoiseBus.noise_emitted, _on_noise_emitted],
 		[NetSession.snapshot_received, apply_snapshot],
 		[NetSession.event_received, apply_event],
+		[NetSession.link.place_ready if NetSession.link != null else Signal(), _on_place_ready],
 	]:
 		var event: Signal = connection[0]
-		if event.is_connected(connection[1]):
+		if not event.is_null() and event.is_connected(connection[1]):
 			event.disconnect(connection[1])
 	if not is_room:
 		NoiseBus.mirror = false
@@ -113,6 +118,21 @@ func _exit_tree() -> void:
 func add_avatar(place: int, seat: int, avatar: Node3D) -> void:
 	avatars[place] = avatar
 	seats[place] = seat
+
+
+## Room side: the player of a place left and an AI plays for it (T-102).
+func remove_avatar(place: int) -> void:
+	avatars.erase(place)
+	seats.erase(place)
+	_watching.erase(place)
+	_acked.erase(place)
+
+
+## Room side: spectators watching a hunted now watch who took its place.
+func replace_watched(old: Node3D, new: Node3D) -> void:
+	for place in _watching:
+		if _watching[place] == old:
+			_watching[place] = new
 
 
 func _physics_process(delta: float) -> void:
@@ -277,6 +297,13 @@ func send_world() -> void:
 		return
 	_sent_world = state.duplicate(true)
 	_send_to_all([Event.WORLD, state])
+
+
+## Room side: a player's map is ready (at the start, or back after a cut,
+## T-102): it gets the map and the loop as they are now.
+func _on_place_ready(place: int) -> void:
+	if world != null and avatars.has(place):
+		_send_event(place, [Event.WORLD, world.state()])
 
 
 func _send_to_all(event: Array) -> void:
