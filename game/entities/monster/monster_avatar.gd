@@ -78,6 +78,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _controls != null:
 		_controls.fill()
+	else:
+		set_look(commands.yaw, commands.pitch)  # Played from another machine (T-097).
 	apply_actions()
 	update_aim()
 	update_scan(delta, commands.scan)
@@ -144,6 +146,13 @@ func look(relative: Vector2) -> void:
 	var sensitivity := deg_to_rad(controls.mouse_sensitivity)
 	rotate_y(-relative.x * sensitivity)
 	_pitch = PlayerMotion.clamp_pitch(_pitch - relative.y * sensitivity, controls)
+	_head.rotation.x = _pitch
+
+
+## Turns the body and the head to a yaw and pitch sent by another machine.
+func set_look(yaw: float, pitch: float) -> void:
+	rotation.y = yaw
+	_pitch = PlayerMotion.clamp_pitch(pitch, controls)
 	_head.rotation.x = _pitch
 
 

@@ -88,6 +88,22 @@ func test_boxes_are_visited_building_by_building() -> void:
 	assert_eq(changes, 3, "four buildings, each visited once")
 
 
+func test_it_does_not_give_up_its_first_box_on_its_first_frames() -> void:
+	GameSession.role = GameSession.Role.MONSTER
+	var map: GameMap = MAP_SCENE.instantiate()
+	add_child_autofree(map)
+	map.end_screen.change_scene = false
+	map.avatar.process_mode = Node.PROCESS_MODE_DISABLED
+	map.avatar.global_position = Vector3(0, -50, 0)
+	var prey := map.prey
+	# Already standing on its first slot: no new target resets its stuck timer.
+	# A full box there, so arriving keeps it on that slot too.
+	prey._boxes[0].has_fuse = true
+	prey.global_position = prey.brain.target
+	await wait_physics_frames(5)
+	assert_eq(prey.brain.slot_index, 0, "no new path yet is not being stuck")
+
+
 func test_in_the_monster_role_the_prey_takes_a_fuse_and_repairs() -> void:
 	GameSession.role = GameSession.Role.MONSTER
 	var map: GameMap = MAP_SCENE.instantiate()

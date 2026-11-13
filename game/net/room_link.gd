@@ -24,6 +24,8 @@ signal left
 signal lobby_changed(state: Dictionary)
 ## Both sides: the leader launched the game.
 signal game_started(state: Dictionary)
+## Client side: what the room sends about the game, snapshot_rate times a second (T-097).
+signal snapshot_received(snapshot: Dictionary)
 
 const NODE_NAME := "Room"
 ## Seconds between refusing a player and closing its connection.
@@ -127,7 +129,8 @@ func _process(delta: float) -> void:
 		_ping_left -= delta
 		if _ping_left <= 0.0:
 			_ping_left = settings.ping_interval
-			ping.rpc_id(1, Time.get_ticks_msec())
+			var sent := Time.get_ticks_msec()
+			_later(func() -> void: ping.rpc_id(1, sent))
 
 
 func _on_connected() -> void:
@@ -172,13 +175,14 @@ func send_held(held: PlayerCommands) -> void:
 	if place > 0:
 		var copy := PlayerCommands.new()
 		copy.copy_held(held)
-		_receive_held.rpc_id(1, copy.to_bytes())
+		var bytes := copy.to_bytes()
+		_later(func() -> void: _receive_held.rpc_id(1, bytes))
 
 
 ## Client side: sends a one-shot action, which must not be lost.
 func send_action(action: PlayerCommands.Action) -> void:
 	if place > 0:
-		_receive_action.rpc_id(1, action)
+		_later(func() -> void: _receive_action.rpc_id(1, action))
 
 
 func _drop(peer_id: int) -> void:
@@ -252,7 +256,8 @@ func refuse(reason: String) -> void:
 @rpc("any_peer", "call_remote", "unreliable")
 func ping(sent_msec: int) -> void:
 	if is_room and players.has(_api.get_remote_sender_id()):
-		pong.rpc_id(_api.get_remote_sender_id(), sent_msec)
+		var sender := _api.get_remote_sender_id()
+		_later(func() -> void: pong.rpc_id(sender, sent_msec))
 
 
 @rpc("authority", "call_remote", "unreliable")
@@ -333,3 +338,30 @@ func _show_lobby(state: Dictionary) -> void:
 func _start_game(state: Dictionary) -> void:
 	lobby_state = state
 	game_started.emit(state)
+
+
+## Room side: sends a snapshot to the player in a place. Lost or late ones
+## are replaced by the next.
+func send_snapshot(to_place: int, snapshot: Dictionary) -> void:
+	for id in players:
+		if players[id] == to_place:
+			var peer_id: int = id
+			_later(func() -> void: _snapshot.rpc_id(peer_id, snapshot))
+			return
+
+
+## Calls send now, or after debug_latency_ms to test a bad connection.
+func _later(send: Callable) -> void:
+	if settings.debug_latency_ms <= 0:
+		send.call()
+		return
+	get_tree().create_timer(settings.debug_latency_ms / 1000.0).timeout.connect(
+		func() -> void:
+			if _peer != null and _api.multiplayer_peer != null:
+				send.call()
+	)
+
+
+@rpc("authority", "call_remote", "unreliable_ordered")
+func _snapshot(snapshot: Dictionary) -> void:
+	snapshot_received.emit(snapshot)

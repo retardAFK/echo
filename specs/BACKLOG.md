@@ -122,9 +122,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : `LobbyMenu` : créer, rejoindre avec un code, 4 places, chef, rôles, prêt, lancer ; places vides marquées « IA » ; retour au salon après la fin ; textes dans `strings.csv`
   - Dépend de : T-095
   - Fait le 13/11/2026 : `LobbyState` (places, prêt, chef, lancement ; testé), demandes et diffusion du salon dans `RoomLink`, `NetSession` relaie le salon ; `LobbyMenu` (créer, rejoindre, Prendre, Échanger pour le chef, Je suis prêt, Lancer la partie, erreurs en clair) ; bouton « Jouer en ligne » caché tant que `show_online` est faux (T-097, T-108) ; une partie lancée refuse les nouveaux venus. Le retour au salon après la fin vient avec l'écran de fin en ligne (T-099) ; 11 tests GUT
-- [ ] T-097 — Synchronisation des chassés
+- [x] T-097 — Synchronisation des chassés
   - Résultat vérifiable : instantanés filtrés à 20 /s, prédiction et rejeu du personnage local, interpolation des autres ; accroupi, course, état caché ; écart prédit et serveur sous le seuil avec 150 ms de ping simulé
   - Dépend de : T-095
+  - Fait le 13/11/2026 : `NetGame` (salle : commandes vers les avatars, instantanés à 20 /s filtrés par `NetVisibility` ; client : `Prediction` avec correction douce ou saut, `NetPuppet` interpolés par `SnapshotBuffer`), lancement de la map sur la salle et les clients, places monstre ou chassé ; la CI joue `tools/godot/net_walk.tscn` contre le serveur exporté avec 150 ms de ping : écart prédit et serveur 0,09 à 0,28 m (seuil 0,5 m) ; 11 tests GUT. L'état caché, les cachettes et les ramassages restent prédits localement jusqu'à T-099
 - [ ] T-098 — Synchronisation du bruit et du monstre
   - Résultat vérifiable : `NetVisibility` testé ; bruits envoyés au monstre avec leur position, aux chassés seulement s'ils les entendent et sans auteur ; un test lit les messages construits pour un chassé et n'y trouve jamais un joueur qu'il ne voit pas ; scan, lumières qui vacillent et capture synchronisés
   - Dépend de : T-097
@@ -235,6 +236,8 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 ## Phase 13 — Interface, menus et options (S-013)
 
 **But** : un joueur inconnu lance le jeu, règle ce qu'il veut et retrouve ses réglages à la visite suivante.
+
+**Retour de Maxime (13/11/2026)** : le salon en ligne de T-096 (créer, rejoindre, places) est une version de test ; son design est à reprendre ici avec les autres menus.
 
 **Terminé quand** : chaque menu se parcourt à la souris et au clavier, et les réglages survivent à un rechargement de la page.
 

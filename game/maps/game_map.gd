@@ -62,6 +62,9 @@ func _ready() -> void:
 		_pick_spawn()
 		_player.global_position = _spawn
 		_player.rotation.y = _spawn_yaw
+	if NetSession.mode != NetSession.Mode.SOLO:
+		_setup_online()  # S-010, T-097.
+		return
 	if GameSession.role == GameSession.Role.MONSTER:
 		_setup_monster_role()
 	else:
@@ -125,6 +128,106 @@ func _setup_monster_role() -> void:
 	_monster = null
 
 
+## Online game (S-010, T-097). The room plays everyone: a Player for each
+## human hunted, the monster's avatar or the AI monster. A client plays only
+## its own avatar and sees the others as puppets. The game loop, the noises
+## sent to the monster and the AIs in empty seats come with T-098 to T-101.
+func _setup_online() -> void:
+	var net := NetGame.new()
+	net.name = "NetGame"
+	net.settings = NetSession.settings
+	net.is_room = NetSession.mode == NetSession.Mode.ROOM
+	if net.is_room:
+		_setup_online_room(net)
+	else:
+		_setup_online_client(net)
+	add_child(net)
+
+
+func _setup_online_room(net: NetGame) -> void:
+	var lobby := GameSession.online_lobby
+	var spawns: Array = []
+	if has_node("PlayerSpawns"):
+		spawns = get_node("PlayerSpawns").get_children()
+	spawns.shuffle()
+	var hunted: Array[Player] = []
+	for seat in range(1, LobbyState.SEATS):
+		var place: int = lobby.seats[seat] if lobby != null else 0
+		if place == 0:
+			continue
+		var player: Player = load(_player.scene_file_path).instantiate()
+		player.local_controls = false
+		player.name = "Hunted%d" % seat
+		var marker: Node3D = (
+			spawns[hunted.size() % spawns.size()] if not spawns.is_empty() else null
+		)
+		add_child(player)
+		player.get_node("Head/Camera3D").current = false
+		if marker != null:
+			player.global_position = marker.global_position
+			player.rotation.y = marker.global_rotation.y
+		net.add_avatar(place, seat, player)
+		hunted.append(player)
+	var monster_place: int = lobby.seats[LobbyState.MONSTER_SEAT] if lobby != null else 0
+	if monster_place != 0:
+		avatar = AVATAR_SCENE.instantiate()
+		avatar.local_controls = false
+		add_child(avatar)
+		avatar.global_transform = _monster.global_transform
+		net.add_avatar(monster_place, LobbyState.MONSTER_SEAT, avatar)
+		_free_node(_monster)
+		_monster = null
+	else:
+		_monster.player = hunted[0] if not hunted.is_empty() else null
+		_monster.buildings = get_buildings()
+		_monster.player_caught.connect(_on_online_caught)
+		net.ai_monster = _monster
+	_free_node(_player)
+	_player = null
+
+
+func _setup_online_client(net: NetGame) -> void:
+	if GameSession.online_seat == LobbyState.MONSTER_SEAT:
+		_setup_monster_role()  # Builds the local monster and its view...
+		_free_node(prey)  # ...without the AI prey: the hunted are puppets.
+		prey = null
+		_overlay.prey = null
+		net.own = avatar
+	else:
+		var carry: CarryHud = CARRY_HUD_SCENE.instantiate()
+		carry.player = _player
+		add_child(carry)
+		var mask: HideMask = HIDE_MASK_SCENE.instantiate()
+		mask.player = _player
+		add_child(mask)
+		var highlights: InteractHighlights = HIGHLIGHTS_SCENE.instantiate()
+		highlights.player = _player
+		add_child(highlights)
+		_overlay.monster = null
+		_free_node(_monster)  # The room runs the monster; here it is a puppet.
+		_monster = null
+		net.own = _player
+	add_child(ShaderWarmup.new())
+
+
+## Room side: the AI monster caught a hunted; back to a spawn point until the
+## capture rule of S-010 (T-107).
+func _on_online_caught() -> void:
+	var caught: Node3D = _monster.player
+	if caught == null:
+		return
+	_pick_spawn()
+	caught.global_position = _spawn
+	caught.velocity = Vector3.ZERO
+	_monster.reset_to_patrol(_spawn)
+
+
+func _free_node(node: Node) -> void:
+	if node != null and node.get_parent() == self:
+		remove_child(node)
+		node.queue_free()
+
+
 ## The fuses, the transformer and the exit (S-007), when the map has fuse boxes.
 func _setup_game_loop() -> void:
 	var boxes := get_fuse_boxes()
@@ -158,7 +261,12 @@ func get_fuse_boxes() -> Array[FuseBox]:
 
 
 func _physics_process(_delta: float) -> void:
-	if avatar == null or _caught_screen.visible or (game_loop != null and game_loop.is_over):
+	if (
+		avatar == null
+		or prey == null
+		or _caught_screen.visible
+		or (game_loop != null and game_loop.is_over)
+	):
 		return
 	if HidingSpot.is_hidden(prey):
 		return  # Only opening the hiding spot catches it (S-008, Q7).
