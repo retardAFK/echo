@@ -28,6 +28,7 @@ const CARRY_HUD_SCENE := preload("res://game/ui/carry_hud.tscn")
 const HIDE_MASK_SCENE := preload("res://game/ui/hide_mask.tscn")
 const INTERACT_PROMPT_SCENE := preload("res://game/ui/interact_prompt.tscn")
 const PAUSE_MENU_SCENE := preload("res://game/ui/pause_menu.tscn")
+const HIGHLIGHTS_SCENE := preload("res://game/ui/interact_highlights.tscn")
 ## Size of the F4 markers for the prey's wander points and hiding spots, in meters.
 const POINT_MARKER_SIZE := 0.3
 
@@ -73,6 +74,9 @@ func _ready() -> void:
 		var mask: HideMask = HIDE_MASK_SCENE.instantiate()
 		mask.player = _player
 		add_child(mask)
+		var highlights: InteractHighlights = HIGHLIGHTS_SCENE.instantiate()
+		highlights.player = _player
+		add_child(highlights)
 	for spot in get_hiding_spots():
 		spot.found.connect(_on_hidden_found)
 	_setup_game_loop()
