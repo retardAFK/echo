@@ -517,14 +517,14 @@ Points vérifiés, et écarts éventuels à faire valider.
 ### 10.2 Questions ouvertes
 
 - [ ] **Q-001** : Nom définitif du jeu (« Écho » est provisoire).
-- [ ] **Q-002** : Combien de chassés au final : 3 ou 4 ?
-- [ ] **Q-003** : Le chassé attrapé est-il éliminé, ou peut-il être sauvé par un coéquipier ?
+- [x] **Q-002** : Combien de chassés au final : 3 ou 4 ? → 3 chassés contre 1 monstre (S-010, Q1, 13/11/2026).
+- [x] **Q-003** : Le chassé attrapé est-il éliminé, ou peut-il être sauvé par un coéquipier ? → sauvable une fois par un coéquipier ; attrapé une deuxième fois, il est éliminé et devient spectateur (S-010, Q2, 13/11/2026).
 - [x] **Q-004** : Les maps sont-elles reliées entre elles ou séparées ? → séparées, une map par partie (D-012).
-- [ ] **Q-005** : Multijoueur entre amis seulement, ou matchmaking public ?
+- [x] **Q-005** : Multijoueur entre amis seulement, ou matchmaking public ? → entre amis seulement, avec un code de partie ; le matchmaking public pourra revenir avec S-015 (S-010, Q3, 13/11/2026).
 - [ ] **Q-006** : Le PC de développement est fourni par l'employeur. Faut-il un PC personnel pour ce projet ?
 - [ ] **Q-007** : Projet gratuit ou payant à terme (itch.io, Steam) ? Lien avec la structure envisagée pour publier des applications.
 - [x] **Q-008** : Limite du scan de bâtiment → jauge de concentration (D-009).
 - [x] **Q-009** : Discrétion du monstre et alerte du scan → voir D-009.
-- [ ] **Q-010** : Les chassés peuvent-ils se parler en jeu (voix de proximité qui fait du bruit), ou passent-ils par un outil externe ? À trancher dans S-010.
+- [x] **Q-010** : Les chassés peuvent-ils se parler en jeu (voix de proximité qui fait du bruit), ou passent-ils par un outil externe ? → pas de voix dans le jeu pour l'instant, outil externe au besoin ; une voix de proximité serait une spec à part, après les premières parties à 4 (S-010, Q4, 13/11/2026).
 - [ ] **Q-011** : Langues de sortie : français seul, ou aussi anglais ? À trancher dans S-015.
 - [x] **Q-012** : Où héberger le build de test ? → page itch.io en accès restreint, protégée par mot de passe (S-009, Q1, 12/11/2026).
