@@ -101,6 +101,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-092 — Spec S-010
   - Résultat vérifiable : spec validée, Q-002, Q-003, Q-005 et Q-010 closes
   - Dépend de : T-091
+  - 13/11/2026 : spec proposée ([`specs/S-010-multijoueur/spec.md`](S-010-multijoueur/spec.md)), Q1 à Q4 en attente de Maxime
 - [ ] T-093 — Plan et tâches de S-010
   - Résultat vérifiable : `plan.md` (qui fait autorité, ce que chaque client reçoit, ce qui n'est jamais envoyé aux chassés) et `tasks.md`
   - Dépend de : T-092
