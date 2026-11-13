@@ -25,6 +25,11 @@ const DECOY_GROUND_SEARCH := 2.5
 var inventory: Inventory
 ## The hiding spot the player is in (S-008, Q6), or null.
 var hiding_in: HidingSpot
+## What the player asks this frame (S-010, T-106): from the keyboard and
+## mouse when local_controls is on, else set by the network.
+var commands := PlayerCommands.new()
+## Whether this machine's keyboard and mouse drive the player.
+var local_controls := true
 
 var _gait := PlayerMotion.Gait.WALK
 var _wants_crouch := false
@@ -37,6 +42,7 @@ var _hold := HoldInteraction.new()
 var _hide_yaw := 0.0
 var _breathless_left := 0.0
 var _breath_timer := 0.0
+var _controls: LocalControls
 
 @onready var _collision: CollisionShape3D = $CollisionShape3D
 @onready var _head: Node3D = $Head
@@ -54,40 +60,29 @@ func _ready() -> void:
 	_headroom_sphere.radius = settings.capsule_radius
 	_headroom_cast.shape = _headroom_sphere
 	_apply_height(settings.standing_height)
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("release_mouse"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	elif event.is_action_pressed("crouch"):
-		toggle_crouch()
-	elif event.is_action_pressed("interact"):
-		interact()
-	elif event.is_action_pressed("throw") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		throw_bottle()
-	elif event.is_action_pressed("place_decoy") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		place_decoy()
-	elif event is InputEventMouseButton and event.pressed:
-		# Browsers only allow pointer capture right after a user gesture.
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	elif event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		look(event.screen_relative)
+	if local_controls:
+		_controls = LocalControls.new()
+		_controls.commands = commands
+		add_child(_controls)
 
 
 func _physics_process(delta: float) -> void:
+	if _controls != null:
+		_controls.fill()
+	apply_actions()
 	_update_breath(delta)
 	if hiding_in != null:
 		# Hidden (S-008, Q6): no movement, only holding "interact" to get out.
 		_update_height(delta)
-		_hold.update(self, hiding_in, Input.is_action_pressed("interact"), delta)
+		_hold.update(self, hiding_in, commands.interact, delta)
 		return
 	if not is_on_floor():
 		velocity += get_gravity() * delta
-	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var input := commands.move
 	_set_gait(
 		PlayerMotion.resolve_gait(
 			_wants_crouch,
-			Input.is_action_pressed("sprint"),
+			commands.sprint,
 			not input.is_zero_approx(),
 			_gait == PlayerMotion.Gait.CROUCH,
 			_has_headroom()
@@ -106,7 +101,21 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_update_height(delta)
 	_update_head_bob(horizontal.length(), target_speed, delta)
-	_hold.update(self, get_interactable(), Input.is_action_pressed("interact"), delta)
+	_hold.update(self, get_interactable(), commands.interact, delta)
+
+
+## Applies the one-shot actions queued in the commands (S-010, T-106).
+func apply_actions() -> void:
+	for action in commands.take_actions():
+		match action:
+			PlayerCommands.Action.CROUCH:
+				toggle_crouch()
+			PlayerCommands.Action.INTERACT:
+				interact()
+			PlayerCommands.Action.THROW:
+				throw_bottle()
+			PlayerCommands.Action.DECOY:
+				place_decoy()
 
 
 ## Turns the body (yaw) and the head (pitch) from a mouse movement in screen pixels.

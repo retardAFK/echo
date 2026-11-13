@@ -106,9 +106,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : `plan.md` (qui fait autorité, ce que chaque client reçoit, ce qui n'est jamais envoyé aux chassés) et `tasks.md`
   - Dépend de : T-092
   - Fait le 13/11/2026 : [`plan.md`](S-010-multijoueur/plan.md) et [`tasks.md`](S-010-multijoueur/tasks.md)
-- [ ] T-106 — Commandes séparées du clavier
+- [x] T-106 — Commandes séparées du clavier
   - Résultat vérifiable : `PlayerCommands` (sérialisation testée), `LocalControls` ; `Player` et `MonsterAvatar` ne lisent plus `Input` ; tous les tests existants, la simulation et le banc inchangés
   - Dépend de : T-093
+  - Fait le 13/11/2026 : `game/net/player_commands.gd` (22 octets plus un par action, valeurs bornées à la lecture) et `local_controls.gd` ; les deux avatars lisent `commands` et n'ajoutent `LocalControls` que si `local_controls` est vrai ; 420 tests GUT, dont 8 nouveaux, tous passent
 - [ ] T-094 — Serveur dédié : accueil et salles
   - Résultat vérifiable : préréglage d'export « Server », modes `--lobby` et `--room`, `RoomCode` testé, une salle lancée par code et arrêtée quand elle est vide ; `tools/server/` (Caddyfile, services, `setup.sh`, `deploy.sh`, README) ; la CI exporte le serveur, le démarre et y connecte 4 clients sans affichage
   - Dépend de : T-093

@@ -35,6 +35,11 @@ var aimed_building: Building
 ## Scannable building in the middle of the view beyond scan range (up to
 ## scan_hint_distance, no wall in front), when aimed_building is null.
 var far_building: Building
+## What the player asks this frame (S-010, T-106): from the keyboard and
+## mouse when local_controls is on, else set by the network.
+var commands := PlayerCommands.new()
+## Whether this machine's keyboard and mouse drive the monster.
+var local_controls := true
 
 var _pace := MonsterBrain.Pace.WALK
 var _prowling := false
@@ -42,6 +47,7 @@ var _pitch := 0.0
 var _noise: MonsterNoise
 var _hold := HoldInteraction.new()
 var _was_holding := false
+var _controls: LocalControls
 
 @onready var _head: Node3D = $Head
 @onready var _camera: Camera3D = $Head/Camera3D
@@ -61,26 +67,28 @@ func _ready() -> void:
 	scan = ScanGauge.new(settings)
 	_head.position.y = settings.ear_height
 	_camera.current = true
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("release_mouse"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	elif event.is_action_pressed("crouch"):
-		toggle_prowl()
-	elif event is InputEventMouseButton and event.pressed:
-		# Browsers only allow pointer capture right after a user gesture.
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	elif event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		look(event.screen_relative)
+	if local_controls:
+		_controls = LocalControls.new()
+		_controls.commands = commands
+		add_child(_controls)
 
 
 func _physics_process(delta: float) -> void:
+	if _controls != null:
+		_controls.fill()
+	apply_actions()
 	update_aim()
-	update_scan(delta, Input.is_action_pressed("scan"))
-	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	move(input, Input.is_action_pressed("sprint"), delta)
-	_hold.update(self, get_interactable(), Input.is_action_pressed("interact"), delta)
+	update_scan(delta, commands.scan)
+	move(commands.move, commands.sprint, delta)
+	_hold.update(self, get_interactable(), commands.interact, delta)
+
+
+## Applies the one-shot actions queued in the commands (S-010, T-106). The
+## monster only prowls; it has no bottles, alarm clocks or pickups.
+func apply_actions() -> void:
+	for action in commands.take_actions():
+		if action == PlayerCommands.Action.CROUCH:
+			toggle_prowl()
 
 
 ## The hiding spot in reach in front of the crosshair, that it can open by
@@ -222,6 +230,11 @@ func scan_reveals(event: NoiseEvent) -> bool:
 
 func toggle_prowl() -> void:
 	_prowling = not _prowling
+
+
+## Head pitch in radians, for the commands sent over the network.
+func get_pitch() -> float:
+	return _pitch
 
 
 func get_pace() -> MonsterBrain.Pace:
