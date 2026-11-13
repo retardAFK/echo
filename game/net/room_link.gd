@@ -26,6 +26,8 @@ signal lobby_changed(state: Dictionary)
 signal game_started(state: Dictionary)
 ## Client side: what the room sends about the game, snapshot_rate times a second (T-097).
 signal snapshot_received(snapshot: Dictionary)
+## Client side: an event of the game from the room, as it happens (T-098).
+signal event_received(event: Array)
 
 const NODE_NAME := "Room"
 ## Seconds between refusing a player and closing its connection.
@@ -343,11 +345,24 @@ func _start_game(state: Dictionary) -> void:
 ## Room side: sends a snapshot to the player in a place. Lost or late ones
 ## are replaced by the next.
 func send_snapshot(to_place: int, snapshot: Dictionary) -> void:
-	for id in players:
-		if players[id] == to_place:
-			var peer_id: int = id
-			_later(func() -> void: _snapshot.rpc_id(peer_id, snapshot))
-			return
+	var peer_id := _peer_of(to_place)
+	if peer_id != 0:
+		_later(func() -> void: _snapshot.rpc_id(peer_id, snapshot))
+
+
+## Room side: sends an event to the player in a place, reliably and in order.
+func send_event(to_place: int, event: Array) -> void:
+	var peer_id := _peer_of(to_place)
+	if peer_id != 0:
+		_later(func() -> void: _event.rpc_id(peer_id, event))
+
+
+## The peer playing a place, 0 if nobody.
+func _peer_of(place: int) -> int:
+	for id: int in players:
+		if players[id] == place:
+			return id
+	return 0
 
 
 ## Calls send now, or after debug_latency_ms to test a bad connection.
@@ -365,3 +380,8 @@ func _later(send: Callable) -> void:
 @rpc("authority", "call_remote", "unreliable_ordered")
 func _snapshot(snapshot: Dictionary) -> void:
 	snapshot_received.emit(snapshot)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _event(event: Array) -> void:
+	event_received.emit(event)

@@ -22,6 +22,7 @@ const SCAN_RETICLE_SCENE := preload("res://game/ui/scan_reticle.tscn")
 const MONSTER_SCENE := preload("res://game/entities/monster/monster.tscn")
 const PREY_SCENE := preload("res://game/entities/prey/prey.tscn")
 const LOOP_SETTINGS := preload("res://game/data/loop_settings.tres")
+const MONSTER_SETTINGS := preload("res://game/data/monster_settings.tres")
 const LOOP_HUD_SCENE := preload("res://game/ui/loop_hud.tscn")
 const END_SCREEN_SCENE := preload("res://game/ui/end_screen.tscn")
 const CARRY_HUD_SCENE := preload("res://game/ui/carry_hud.tscn")
@@ -43,6 +44,8 @@ var end_screen: EndScreen
 var pause_menu: PauseMenu
 
 var _rng := RandomNumberGenerator.new()
+## The online part of the game (S-010), null in solo.
+var _net: NetGame
 
 @onready var _player: Player = $Player
 @onready var _monster: Monster = $Monster
@@ -130,13 +133,16 @@ func _setup_monster_role() -> void:
 
 ## Online game (S-010, T-097). The room plays everyone: a Player for each
 ## human hunted, the monster's avatar or the AI monster. A client plays only
-## its own avatar and sees the others as puppets. The game loop, the noises
-## sent to the monster and the AIs in empty seats come with T-098 to T-101.
+## its own avatar and sees the others as puppets. Noises, scans and catches
+## come from the room (T-098); the game loop and the AIs in empty seats come
+## with T-099 to T-101.
 func _setup_online() -> void:
 	var net := NetGame.new()
 	net.name = "NetGame"
 	net.settings = NetSession.settings
 	net.is_room = NetSession.mode == NetSession.Mode.ROOM
+	net.buildings = get_buildings()
+	_net = net
 	if net.is_room:
 		_setup_online_room(net)
 	else:
@@ -177,6 +183,7 @@ func _setup_online_room(net: NetGame) -> void:
 		net.add_avatar(monster_place, LobbyState.MONSTER_SEAT, avatar)
 		_free_node(_monster)
 		_monster = null
+		net.hunted_caught.connect(_put_back)
 	else:
 		_monster.player = hunted[0] if not hunted.is_empty() else null
 		_monster.buildings = get_buildings()
@@ -207,6 +214,7 @@ func _setup_online_client(net: NetGame) -> void:
 		_free_node(_monster)  # The room runs the monster; here it is a puppet.
 		_monster = null
 		net.own = _player
+	net.caught_reported.connect(_on_caught_reported)
 	add_child(ShaderWarmup.new())
 
 
@@ -216,10 +224,26 @@ func _on_online_caught() -> void:
 	var caught: Node3D = _monster.player
 	if caught == null:
 		return
+	_net.report_caught(_net.seat_of(caught))
+	_put_back(caught)
+	_monster.reset_to_patrol(_spawn)
+
+
+## Room side: a caught hunted goes back to a spawn point (until T-107).
+func _put_back(caught: Node3D) -> void:
 	_pick_spawn()
 	caught.global_position = _spawn
 	caught.velocity = Vector3.ZERO
-	_monster.reset_to_patrol(_spawn)
+
+
+## Client side: the room says a hunted was caught. Its player sees the "caught"
+## screen; the monster sees that it caught someone.
+func _on_caught_reported(seat: int) -> void:
+	var settings: MonsterSettings = avatar.settings if avatar != null else MONSTER_SETTINGS
+	if avatar != null:
+		_caught_screen.show_for(settings.caught_screen_time, "HUD_PREY_CAUGHT")
+	elif seat == GameSession.online_seat:
+		_caught_screen.show_for(settings.caught_screen_time)
 
 
 func _free_node(node: Node) -> void:

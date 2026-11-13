@@ -126,9 +126,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : instantanés filtrés à 20 /s, prédiction et rejeu du personnage local, interpolation des autres ; accroupi, course, état caché ; écart prédit et serveur sous le seuil avec 150 ms de ping simulé
   - Dépend de : T-095
   - Fait le 13/11/2026 : `NetGame` (salle : commandes vers les avatars, instantanés à 20 /s filtrés par `NetVisibility` ; client : `Prediction` avec correction douce ou saut, `NetPuppet` interpolés par `SnapshotBuffer`), lancement de la map sur la salle et les clients, places monstre ou chassé ; la CI joue `tools/godot/net_walk.tscn` contre le serveur exporté avec 150 ms de ping : écart prédit et serveur 0,09 à 0,28 m (seuil 0,5 m) ; 11 tests GUT. L'état caché, les cachettes et les ramassages restent prédits localement jusqu'à T-099
-- [ ] T-098 — Synchronisation du bruit et du monstre
+- [x] T-098 — Synchronisation du bruit et du monstre
   - Résultat vérifiable : `NetVisibility` testé ; bruits envoyés au monstre avec leur position, aux chassés seulement s'ils les entendent et sans auteur ; un test lit les messages construits pour un chassé et n'y trouve jamais un joueur qu'il ne voit pas ; scan, lumières qui vacillent et capture synchronisés
   - Dépend de : T-097
+  - Fait le 13/11/2026 : canal d'évènements fiable (`RoomLink.send_event`) ; la salle envoie au monstre tous les bruits sauf les siens, à chaque chassé seulement ceux qu'il entend (`NoiseBus.can_hear`), jamais les siens ni leur auteur ; le client les rejoue par `NoiseBus` (oreilles, marqueurs, scan inchangés). Scan d'un bâtiment envoyé aux chassés (lumières qui vacillent). Capture par contact du monstre humain (comme en solo, pas dans une cachette) ou par le monstre IA : écran « attrapé » chez le chassé, le chassé repart d'un point d'apparition en attendant T-107 ; 5 tests GUT, dont un qui vérifie qu'aucun message pour un chassé ne contient un joueur qu'il ne voit ni n'entend
 - [ ] T-099 — Synchronisation de la boucle de partie et des ruses
   - Résultat vérifiable : fusibles, transformateur, sirène, sortie, bouteilles, réveils, cachettes, alarmes de voiture ; écran de fin pour chaque joueur
   - Dépend de : T-098
