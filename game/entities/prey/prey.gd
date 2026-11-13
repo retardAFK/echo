@@ -77,6 +77,9 @@ func _ready() -> void:
 	brain.state_changed.connect(state_changed.emit)
 	brain.set_points(markers_of(wander_route), markers_of(hiding_spots))
 	_agent.target_position = brain.target
+	# A full stuck timer from the start: at 0 it gave up its first goal on its
+	# first frame, before the navigation had its first path.
+	_stuck_left = settings.stuck_time
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
 	for building in buildings:
 		building.scan_changed.connect(_on_scan_changed.bind(building))
