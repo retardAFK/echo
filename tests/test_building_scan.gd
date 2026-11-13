@@ -97,3 +97,46 @@ func test_monster_stands_still_while_scanning() -> void:
 func test_scan_reticle_is_pale() -> void:
 	assert_eq(_map.find_children("*", "ScanReticle", false, false).size(), 1)
 	assert_ne(_avatar.settings.scan_bar_color, NoiseBus.settings.noise_color)
+
+
+func test_far_building_is_named_but_not_scanned() -> void:
+	_avatar.global_position = INSIDE + Vector3(-_avatar.settings.scan_max_distance - 10, -0.3, 0)
+	_avatar.look_at(INSIDE, Vector3.UP)
+	await wait_physics_frames(1)
+	_avatar.update_aim()
+	assert_null(_avatar.aimed_building)
+	assert_eq(_avatar.far_building, _building)
+	assert_eq(_avatar.miss_reason(null), MonsterAvatar.ScanMiss.TOO_FAR)
+
+
+func test_aimed_building_in_range() -> void:
+	_avatar.update_aim()
+	assert_eq(_avatar.aimed_building, _building)
+	assert_null(_avatar.far_building)
+
+
+func test_pressing_scan_on_nothing_says_why() -> void:
+	_avatar.rotation.y += PI
+	await wait_physics_frames(1)
+	watch_signals(_avatar)
+	await _hold(0.2)
+	assert_signal_emit_count(_avatar, "scan_missed", 1, "once per press")
+	assert_signal_emitted_with_parameters(_avatar, "scan_missed", [MonsterAvatar.ScanMiss.NOTHING])
+	assert_false(_avatar.scan.active)
+
+
+func test_pressing_scan_with_a_low_gauge_says_why() -> void:
+	_avatar.scan.level = 0.0
+	watch_signals(_avatar)
+	await _hold(0.1)
+	assert_signal_emitted_with_parameters(
+		_avatar, "scan_missed", [MonsterAvatar.ScanMiss.GAUGE_LOW]
+	)
+
+
+func test_reticle_names_the_building_and_lists_scannable_ones() -> void:
+	var reticle: ScanReticle = _map.find_children("*", "ScanReticle", false, false)[0]
+	_avatar.update_aim()
+	assert_string_contains(reticle.hint_text(), _building.get_display_name())
+	var nothing := reticle.miss_text(MonsterAvatar.ScanMiss.NOTHING)
+	assert_string_contains(nothing, _building.get_display_name())

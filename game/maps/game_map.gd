@@ -90,6 +90,7 @@ func _setup_monster_role() -> void:
 	add_child(markers)
 	var reticle: ScanReticle = SCAN_RETICLE_SCENE.instantiate()
 	reticle.monster = avatar
+	reticle.buildings = get_buildings()
 	add_child(reticle)
 	var scan_look := ScanLook.new()
 	scan_look.monster = avatar

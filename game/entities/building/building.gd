@@ -14,6 +14,8 @@ const SCAN_LAYER := 1 << 4
 ## is built from it at load, because an override of an instanced child's shape
 ## is lost in the exported game (T-028).
 @export var size := Vector3.ONE
+## Key of the building's name in strings.csv, shown by the scan reticle (T-086).
+@export var display_key := "BUILDING_DEFAULT"
 
 var scanned := false:
 	set(value):
@@ -63,6 +65,11 @@ func get_base_energy(index: int) -> float:
 
 
 ## World transform of the box volume (its center and orientation).
+## The building's name, as the scan reticle shows it.
+func get_display_name() -> String:
+	return tr(display_key)
+
+
 func get_box_transform() -> Transform3D:
 	return _shape.global_transform
 
