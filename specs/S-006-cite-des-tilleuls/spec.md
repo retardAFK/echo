@@ -47,6 +47,7 @@ Le 07/11/2026, Maxime a répondu « Parfait » au plan et aux propositions Q2 à
 - [x] On traverse la map en courant en moins de 45 s.
 - [x] Le monstre IA trouve son chemin partout, y compris dans la tour et le parking.
 - [x] 60 images par seconde dans Chrome sur la machine de référence, en chassé et en monstre, à l'endroit le plus chargé de la map.
+  → Mesure S-009 (T-077, 13/11/2026) : 59,8 images/s en moyenne sur la machine de référence (Radeon 740M, 1920 × 1080), 1 % les plus lentes à 43,9 ; saccades isolées traitées par T-085.
 - [x] La map se charge en moins de 10 s, et le build web reste sous 60 Mo.
 
 ## Hors périmètre

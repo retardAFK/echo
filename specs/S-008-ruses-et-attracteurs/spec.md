@@ -46,3 +46,4 @@ Depuis S-007, une partie complète se joue, mais le chassé n'a que deux armes :
 - [x] Le monstre IA ouvre la cachette où il a vu le chassé entrer et l'attrape ; le joueur monstre peut ouvrir une cachette.
 - [x] La proie IA utilise chaque ruse au moins une fois sur une série de parties simulées, et sort plus souvent qu'à la fin de S-007 (10 sur 20). → Chaque ruse utilisée ; sorties 7 à 12 sur 20 selon les séries, environ 1 sur 2 comme S-007. Maxime choisit de livrer et d'équilibrer avec les testeurs (12/11/2026).
 - [x] Les 60 images/s et le budget de performance de S-006 tiennent toujours (appels de dessin, lumières, taille du build). → Budget tenu (254 appels de dessin au pire) ; 60 images/s à mesurer sur la machine de référence, comme pour S-006 et S-007.
+  → Mesure S-009 (T-077, 13/11/2026) : 59,8 images/s en moyenne sur la machine de référence (Radeon 740M, 1920 × 1080), 1 % les plus lentes à 43,9 ; saccades isolées traitées par T-085.
