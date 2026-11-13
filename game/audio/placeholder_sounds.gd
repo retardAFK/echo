@@ -13,6 +13,12 @@ const ALARM_LENGTH := 0.8
 const ALARM_LOW_HZ := 620.0
 const ALARM_HIGH_HZ := 880.0
 const ALARM_VOLUME := 0.5
+const CALL_LENGTH := 0.6
+const CALL_HIGH_HZ := 520.0
+const CALL_LOW_HZ := 360.0
+const CALL_VOLUME := 0.35
+const RESCUE_LENGTH := 0.5
+const RESCUE_CUTOFF := 0.15
 
 
 ## A dull thump: low-passed noise with a fast decay.
@@ -37,6 +43,25 @@ static func alarm() -> AudioStreamWAV:
 		var sample := ALARM_VOLUME * (1.0 if fmod(phase, 1.0) < 0.5 else -1.0)
 		data.encode_s16(i * 2, int(sample * 32767.0))
 	return _stream(data)
+
+
+## A call for help (S-010, T-107): a soft voice-like tone that falls.
+static func call_for_help() -> AudioStreamWAV:
+	var count := int(CALL_LENGTH * MIX_RATE)
+	var data := PackedByteArray()
+	data.resize(count * 2)
+	var phase := 0.0
+	for i in count:
+		var t := float(i) / count
+		phase += lerpf(CALL_HIGH_HZ, CALL_LOW_HZ, t) / MIX_RATE
+		var sample := CALL_VOLUME * sin(TAU * phase) * sin(PI * t)
+		data.encode_s16(i * 2, int(sample * 32767.0))
+	return _stream(data)
+
+
+## A rescue: the rustle of a struggle.
+static func rescue() -> AudioStreamWAV:
+	return _noise_burst(RESCUE_LENGTH, RESCUE_CUTOFF, true, 37)
 
 
 static func _noise_burst(

@@ -34,7 +34,7 @@ func _init(map: Node) -> void:
 
 
 ## Room side: [fuse in each box, each pickup still there, state of each car
-## alarm, values of the game loop].
+## alarm, values of the game loop, where the dropped fuses lie (T-107)].
 func state() -> Array:
 	var fuses := []
 	for box in boxes:
@@ -45,7 +45,13 @@ func state() -> Array:
 	var ringing := []
 	for alarm in alarms:
 		ringing.append(alarm.state)
-	return [fuses, present, ringing, game_loop.mirror_values() if game_loop != null else []]
+	return [
+		fuses,
+		present,
+		ringing,
+		game_loop.mirror_values() if game_loop != null else [],
+		game_loop.drop_positions() if game_loop != null else [],
+	]
 
 
 ## Client side: makes the map look like the room's.
@@ -67,6 +73,8 @@ func apply(values: Array) -> void:
 			alarms[i].interact(null)
 	if game_loop != null:
 		game_loop.apply_values(values[3])
+		if values.size() >= 5:
+			game_loop.apply_drops(values[4])
 
 
 ## Client side: the sound of a noise made in the room by something of the map
@@ -75,7 +83,7 @@ func voice(type: NoiseEvent.Type, at: Vector3) -> void:
 	var candidates: Array = []
 	match type:
 		NoiseEvent.Type.FUSE:
-			candidates = boxes
+			candidates = boxes + (game_loop.drops if game_loop != null else [])
 		NoiseEvent.Type.REPAIR:
 			candidates = [transformer] if transformer != null else []
 		NoiseEvent.Type.HIDE:

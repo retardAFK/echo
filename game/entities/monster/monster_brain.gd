@@ -153,6 +153,16 @@ func start_scan(building_key: Variant, here: Vector3) -> void:
 	target = here
 
 
+## Gives up the hunted in front of it (S-010, T-107): back to its watch at
+## the tunnel, or to its patrol from the point at start_index.
+func let_go(start_index: int) -> void:
+	spot_level = 0.0
+	if not guarding:
+		_patrol_index = clampi(start_index, 0, maxi(_patrol.size() - 1, 0))
+	_enter(State.GUARD if guarding else State.PATROL)
+	_update_patrol(false)
+
+
 ## Ends the scan early (the gauge ran dry): back to its patrol or its watch.
 func stop_scan() -> void:
 	if state != State.SCAN:

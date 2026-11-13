@@ -2,7 +2,11 @@ class_name NoiseEvent
 extends RefCounted
 ## One noise heard in the world (spec S-002). Pure data, sent by NoiseBus.
 
-enum Type { FOOTSTEP, BREATH, CAR_ALARM, FUSE, REPAIR, SIREN, THROW, IMPACT, DECOY, HIDE }
+## CALL and RESCUE: a captured hunted calling for help, a teammate freeing it
+## (S-010, T-107).
+enum Type {
+	FOOTSTEP, BREATH, CAR_ALARM, FUSE, REPAIR, SIREN, THROW, IMPACT, DECOY, HIDE, CALL, RESCUE
+}
 
 var type: Type
 ## Where the noise starts, in world space.

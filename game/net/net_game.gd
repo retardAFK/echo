@@ -7,24 +7,32 @@ extends Node
 ## Client side: the player's own avatar is predicted (Prediction) and nudged
 ## to the room's position; the others are NetPuppets moved between snapshots.
 ## Snapshot: {"ack": last command applied, "you": [position, velocity, yaw,
-## gait, hidden, hold ratio, bottles, alarm clocks, hiding spot index],
-## "others": [[seat, position, yaw, gait], ...]}.
+## gait, hidden, hold ratio, bottles, alarm clocks, hiding spot index, held],
+## "others": [[seat, position, yaw, gait, down], ...]}.
+## A spectator (a hunted out of the game, T-107) gets instead what the
+## teammate it watches sees: {"ack", "watch": seat, "pitch": its head pitch,
+## "others": that teammate first, then those it sees}; it presses "interact"
+## to watch the next one.
 ## Events (T-098), sent reliably as they happen:
 ## - [NOISE, type, position, range]: to the monster, every noise but its own;
 ##   to a hunted, only those its ears hear (NoiseBus.can_hear), never its own,
 ##   never who made it. The client plays it through NoiseBus.
 ## - [SCAN, building index, scanned]: to the hunted, so the lights flicker.
-## - [CAUGHT, seat]: to everyone, when the monster catches a hunted.
+## - [CAUGHT, seat, CaptureState.State]: to everyone, when the monster
+##   catches a hunted (captured, or out the second time) or a teammate frees
+##   it (T-107).
 ## - [WORLD, NetWorld.state()]: to everyone, when the map or the loop changes
 ##   (T-099); the client's map and loop only mirror the room's.
 ## - [BOTTLE, position, velocity] and [DECOY, position]: to everyone, a bottle
 ##   thrown or an alarm clock placed; the client plays its own copy.
 ## - [CRUSH, position]: to everyone, the monster crushed a ringing alarm clock.
 
-## Room side: a human monster touched a hunted; GameMap puts it back.
+## Room side: a human monster touched a hunted; GameMap captures it.
 signal hunted_caught(hunted: Node3D)
-## Client side: the room says the hunted in a seat was caught.
-signal caught_reported(seat: int)
+## Client side: the room says the hunted in a seat was caught or freed.
+signal caught_reported(seat: int, state: CaptureState.State)
+## Client side: this player is out of the game and watches a teammate.
+signal spectating
 
 enum Event { NOISE, SCAN, CAUGHT, WORLD, BOTTLE, DECOY, CRUSH }
 
@@ -53,10 +61,17 @@ var prediction: Prediction
 var puppets := {}
 ## Client side: largest gap seen between prediction and room, for tests.
 var worst_error := 0.0
+## Client side, spectator (T-107): the seat watched (-1 if none) and where
+## its head looks up or down.
+var watched_seat := -1
+var watched_pitch := 0.0
+var is_spectator := false
 
 var _send_left := 0.0
 var _acked := {}
 var _sent_world := []
+## Room side: the teammate each spectator's place watches.
+var _watching := {}
 
 
 func _ready() -> void:
@@ -109,7 +124,7 @@ func _physics_process(delta: float) -> void:
 			_send_left = maxf(_send_left + 1.0 / settings.snapshot_rate, 0.0)
 			send_world()
 			_send_snapshots()
-	elif own != null:
+	elif own != null and not is_spectator:
 		prediction.record(own.commands.seq, own.global_position)
 		own.global_position += prediction.step(delta)
 
@@ -127,6 +142,11 @@ func _apply_commands() -> void:
 	for place in avatars:
 		var avatar: Node3D = avatars[place]
 		var received := link.commands_for(place)
+		if _watching.has(place):
+			for action in received.take_actions():
+				if action == PlayerCommands.Action.INTERACT:
+					_watching[place] = _next_watched(_watching[place])
+			continue
 		avatar.commands.copy_held(received)
 		for action in received.take_actions():
 			avatar.commands.push(action)
@@ -141,7 +161,11 @@ func _check_catches() -> void:
 		return
 	for place in avatars:
 		var hunted: Node3D = avatars[place]
-		if hunted == monster or HidingSpot.is_hidden(hunted):
+		if (
+			hunted == monster
+			or HidingSpot.is_hidden(hunted)
+			or not CaptureState.is_free_hunted(hunted)
+		):
 			continue
 		var gap := hunted.global_position - monster.global_position
 		if (
@@ -149,8 +173,7 @@ func _check_catches() -> void:
 			and absf(gap.y) <= monster.settings.catch_height
 		):
 			monster.catch_count += 1
-			report_caught(seats[place])
-			hunted_caught.emit(hunted)
+			hunted_caught.emit(hunted)  # GameMap applies the capture rule and tells everyone.
 
 
 func _human_monster() -> MonsterAvatar:
@@ -160,9 +183,41 @@ func _human_monster() -> MonsterAvatar:
 	return null
 
 
-## Room side: tells everyone the hunted in a seat was caught.
-func report_caught(seat: int) -> void:
-	_send_to_all([Event.CAUGHT, seat])
+## Room side: tells everyone the hunted in a seat was caught or freed.
+func report_caught(seat: int, state := CaptureState.State.CAPTURED) -> void:
+	_send_to_all([Event.CAUGHT, seat, state])
+
+
+## Room side: a hunted is out of the game (T-107); its place watches a
+## teammate from now on.
+func spectate(hunted: Node3D) -> void:
+	for place in avatars:
+		if avatars[place] == hunted:
+			_watching[place] = _next_watched(null)
+
+
+## Room side: the hunted still in the game after current, by seat, going round.
+func _next_watched(current: Node3D) -> Node3D:
+	var in_game := []
+	for entry in _entities():
+		if entry[0] != LobbyState.MONSTER_SEAT:
+			in_game.append(entry)
+	if in_game.is_empty():
+		return null
+	in_game.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var index := -1
+	for i in in_game.size():
+		if in_game[i][1] == current:
+			index = i
+	return in_game[(index + 1) % in_game.size()][1]
+
+
+## Whether a hunted is out of the game (caught twice, T-107).
+static func is_out(node: Node3D) -> bool:
+	var player := node as Player
+	return (
+		player != null and player.capture != null and player.capture.state == CaptureState.State.OUT
+	)
 
 
 ## Room side: the seat of an avatar, -1 if it is not a human's.
@@ -184,9 +239,13 @@ static func noise_message(event: NoiseEvent, viewer: Node3D, viewer_is_monster: 
 	return [Event.NOISE, event.type, event.position, event.noise_range]
 
 
+## A spectator hears what the teammate it watches hears.
 func _on_noise_emitted(event: NoiseEvent) -> void:
 	for place in avatars:
-		var message := noise_message(event, avatars[place], seats[place] == LobbyState.MONSTER_SEAT)
+		var listener: Node3D = _watching.get(place, avatars[place])
+		if listener == null or not is_instance_valid(listener):
+			continue
+		var message := noise_message(event, listener, seats[place] == LobbyState.MONSTER_SEAT)
 		if not message.is_empty():
 			_send_event(place, message)
 
@@ -248,18 +307,12 @@ func _send_snapshots() -> void:
 
 ## Room side: what the player in a place is sent.
 func snapshot_for(place: int) -> Dictionary:
+	if _watching.has(place):
+		return _spectator_snapshot(place)
 	var viewer: Node3D = avatars[place]
 	var hidden: bool = viewer.has_method("is_hidden") and viewer.is_hidden()
 	var inventory: Inventory = viewer.get("inventory")
 	var spot: HidingSpot = viewer.get("hiding_in")
-	var others := []
-	for other in _entities():
-		if other[1] == viewer:
-			continue
-		if sees(viewer, other[1]):
-			others.append(
-				[other[0], other[1].global_position, other[1].rotation.y, _gait(other[1])]
-			)
 	return {
 		"ack": _acked.get(place, 0),
 		"you":
@@ -273,9 +326,40 @@ func snapshot_for(place: int) -> Dictionary:
 			inventory.count(Inventory.Kind.BOTTLE) if inventory != null else 0,
 			inventory.count(Inventory.Kind.DECOY) if inventory != null else 0,
 			world.spot_index(spot) if world != null else -1,
+			viewer.get("held") == true,
 		],
-		"others": others,
+		"others": _seen_by(viewer),
 	}
+
+
+## What a spectator sees: what the teammate it watches sees, that teammate
+## first. A teammate out of the game in the meantime makes way for the next.
+func _spectator_snapshot(place: int) -> Dictionary:
+	var watched: Node3D = _watching[place]
+	if watched == null or not is_instance_valid(watched) or is_out(watched):
+		watched = _next_watched(null)
+		_watching[place] = watched
+	var snapshot := {"ack": _acked.get(place, 0), "watch": -1, "pitch": 0.0, "others": []}
+	if watched == null:
+		return snapshot
+	var seat := seat_of(watched)
+	snapshot["watch"] = seat
+	snapshot["pitch"] = watched.get_pitch() if watched.has_method("get_pitch") else 0.0
+	snapshot["others"] = [_entry(seat, watched)] + _seen_by(watched)
+	return snapshot
+
+
+## The others a player sees, as snapshot entries.
+func _seen_by(viewer: Node3D) -> Array:
+	var others := []
+	for other in _entities():
+		if other[1] != viewer and sees(viewer, other[1]):
+			others.append(_entry(other[0], other[1]))
+	return others
+
+
+func _entry(seat: int, node: Node3D) -> Array:
+	return [seat, node.global_position, node.rotation.y, _gait(node), node.get("held") == true]
 
 
 ## Room side: whether viewer sees target, walls and hiding spots included.
@@ -291,11 +375,12 @@ func sees(viewer: Node3D, target: Node3D) -> bool:
 	return NetVisibility.sees(eye, -viewer.global_basis.z, aim, false, clear, settings)
 
 
-## Every player and AI on the room, as [seat, node].
+## Every player and AI on the room still in the game, as [seat, node].
 func _entities() -> Array:
 	var found := []
 	for place in avatars:
-		found.append([seats[place], avatars[place]])
+		if not is_out(avatars[place]):
+			found.append([seats[place], avatars[place]])
 	if ai_monster != null:
 		found.append([LobbyState.MONSTER_SEAT, ai_monster])
 	return found
@@ -311,6 +396,8 @@ func _gait(node: Node3D) -> int:
 func apply_snapshot(snapshot: Dictionary) -> void:
 	if own == null:
 		return
+	if snapshot.has("watch"):
+		_watch(snapshot["watch"], snapshot.get("pitch", 0.0))
 	var you: Array = snapshot.get("you", [])
 	if you.size() >= 1:
 		var server_position: Vector3 = you[0]
@@ -334,6 +421,7 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 			puppet.buffer = SnapshotBuffer.new()  # Back in sight: no slide from where it was lost.
 			puppet.visible = true
 		puppet.buffer.push(now, entry[1], entry[2])
+		puppet.set_down(entry.size() >= 5 and entry[4])
 	for seat in puppets:
 		if not seen.has(seat):
 			puppets[seat].visible = false
@@ -353,8 +441,8 @@ func apply_event(event: Array) -> void:
 			var index: int = event[1]
 			if index >= 0 and index < buildings.size():
 				buildings[index].scanned = event[2]
-		Event.CAUGHT when event.size() == 2:
-			caught_reported.emit(event[1])
+		Event.CAUGHT when event.size() == 3:
+			caught_reported.emit(event[1], event[2])
 		Event.WORLD when event.size() == 2 and world != null:
 			world.apply(event[1])
 		Event.BOTTLE when event.size() == 3:
@@ -366,10 +454,29 @@ func apply_event(event: Array) -> void:
 			_crush_near(event[1])
 
 
+## Client side, spectator (T-107): the room sends what a teammate sees. The
+## player's own avatar stops; SpectatorView shows the teammate's view.
+func _watch(seat: int, pitch: float) -> void:
+	watched_seat = seat
+	watched_pitch = pitch
+	if is_spectator:
+		return
+	is_spectator = true
+	own.process_mode = Node.PROCESS_MODE_DISABLED
+	own.visible = false
+	var body := own.get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if body != null:
+		body.disabled = true
+	spectating.emit()
+
+
 ## Client side: what the room says of the player's own avatar beyond where it
-## is: progress of what it holds, what it carries, where it hides.
+## is: progress of what it holds, what it carries, where it hides, whether it
+## is captured.
 func _apply_own_state(you: Array) -> void:
 	own.remote_hold_ratio = you[5]
+	if own is Player and you.size() >= 10:
+		(own as Player).held = you[9]
 	var inventory: Inventory = own.get("inventory")
 	if inventory != null:
 		inventory.set_count(Inventory.Kind.BOTTLE, you[6])

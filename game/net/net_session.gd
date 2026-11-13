@@ -143,7 +143,7 @@ func describe() -> String:
 				return "NET connecting"
 			return "NET place %d ping %d ms" % [get_place(), get_ping_ms()]
 		Mode.ROOM:
-			return "NET room %d players" % link.players.size()
+			return "NET room %d players" % (link.players.size() if link != null else 0)
 	return ""
 
 

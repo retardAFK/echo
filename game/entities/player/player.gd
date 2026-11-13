@@ -36,6 +36,12 @@ var local_controls := true
 var mirror_world := false
 ## Progress of what the player holds "interact" on, as the room says.
 var remote_hold_ratio := 0.0
+## Online room (S-010, T-107): the capture rule of this hunted, null in solo
+## and on a client.
+var capture: CaptureState
+## Captured, on its knees (T-107): it neither moves nor acts. On the room it
+## follows capture; on a client, what the room says.
+var held := false
 
 var _gait := PlayerMotion.Gait.WALK
 var _wants_crouch := false
@@ -81,6 +87,9 @@ func _physics_process(delta: float) -> void:
 		set_look(commands.yaw, commands.pitch)  # Played from another machine (T-097).
 	apply_actions()
 	_update_breath(delta)
+	if held:
+		_stay_down(delta)
+		return
 	if hiding_in != null:
 		# Hidden (S-008, Q6): no movement, only holding "interact" to get out.
 		_update_height(delta)
@@ -119,6 +128,8 @@ func _physics_process(delta: float) -> void:
 ## Applies the one-shot actions queued in the commands (S-010, T-106).
 func apply_actions() -> void:
 	for action in commands.take_actions():
+		if held:
+			continue  # Captured (T-107).
 		if mirror_world and action != PlayerCommands.Action.CROUCH:
 			continue  # The room does it and says so.
 		match action:
@@ -130,6 +141,19 @@ func apply_actions() -> void:
 				throw_bottle()
 			PlayerCommands.Action.DECOY:
 				place_decoy()
+
+
+## Captured (T-107): on its knees where it is, still falling if in the air.
+func _stay_down(delta: float) -> void:
+	_wants_crouch = false  # Stands up once freed, if there is room.
+	_set_gait(PlayerMotion.Gait.CROUCH)
+	velocity.x = 0.0
+	velocity.z = 0.0
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+	move_and_slide()
+	_update_height(delta)
+	_hold.update(self, null, false, delta)  # Lets go of what it held.
 
 
 ## Turns the body (yaw) and the head (pitch) from a mouse movement in screen pixels.
@@ -163,6 +187,8 @@ func set_look(yaw: float, pitch: float) -> void:
 ## The nearest thing in reach, in front of the crosshair, that the player can
 ## use (a car alarm, S-006), or null. A pickup it has no room for is skipped.
 func get_interactable() -> Node:
+	if held:
+		return null
 	if hiding_in != null:
 		return hiding_in  # Hidden: the only thing in reach is the way out.
 	var best: Node = null

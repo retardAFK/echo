@@ -32,6 +32,8 @@ func _ready() -> void:
 	_sounds[NoiseEvent.Type.FOOTSTEP] = PlaceholderSounds.step()
 	_sounds[NoiseEvent.Type.BREATH] = PlaceholderSounds.breath()
 	_sounds[NoiseEvent.Type.CAR_ALARM] = PlaceholderSounds.alarm()
+	_sounds[NoiseEvent.Type.CALL] = PlaceholderSounds.call_for_help()
+	_sounds[NoiseEvent.Type.RESCUE] = PlaceholderSounds.rescue()
 	for i in VOICES:
 		var voice := AudioStreamPlayer3D.new()
 		voice.top_level = true
