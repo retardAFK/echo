@@ -38,15 +38,17 @@ Les phases 1 à 8 ont donné une partie complète dans la cité des Tilleuls, av
 - Les nouvelles ruses, les portes mobiles, une nouvelle map.
 
 ## Critères d'acceptation (vérifiables à la main)
-- [ ] Le lien de test s'ouvre dans Chrome sans installation et affiche le menu ; il montre toujours le dernier `main`.
-- [ ] `?bench` joue le parcours de 60 s et affiche images/s moyennes, minimum, 1 % les plus lentes, appels de dessin, triangles et temps de chargement.
+- [x] Le lien de test s'ouvre dans Chrome sans installation et affiche le menu ; il montre toujours le dernier `main`.
+  → https://retardafk.itch.io/echo-test (page protégée par mot de passe), publiée par la CI à chaque merge sur `main` (T-076, PR #77) ; ouverte dans le navigateur de l'app Claude sur le PC de Maxime le 13/11/2026.
+- [x] `?bench` joue le parcours de 60 s et affiche images/s moyennes, minimum, 1 % les plus lentes, appels de dessin, triangles et temps de chargement.
 - [x] Les 60 images/s sont mesurées sur la machine de référence et notées dans S-006, S-007, S-008 et S-009 ; s'il en manque, des tâches d'optimisation sont ajoutées.
   → T-077 (13/11/2026, build `192f46e` sur itch.io, navigateur intégré de l'app Claude basé sur Chrome 156, PC de Maxime : AMD Radeon 740M, rendu 1920 × 1080) : 59,8 images/s en moyenne sur le parcours de 60 s (3 589 images), 1 % les plus lentes à 43,9, minimum 14,2 (une saccade isolée), 262 appels de dessin et 61 000 triangles au pire, chargement 1,7 s. Saccades isolées : T-085.
-- [ ] Le monstre IA scanne un bâtiment visitable quand il y perd la trace, en respectant la jauge ; les lumières du bâtiment vacillent ; la simulation compte les scans.
+- [x] Le monstre IA scanne un bâtiment visitable quand il y perd la trace, en respectant la jauge ; les lumières du bâtiment vacillent ; la simulation compte les scans.
 - [ ] Sur 3 séries de 20 parties simulées, la proie IA sort 40 à 60 % du temps et une partie dure 8 à 12 min en moyenne, sans blocage. → T-079 (12/11/2026) : 13, 15 et 13 sorties sur 20 (65 à 75 %), durée moyenne 5,9 à 6,4 min, aucun blocage. La capture répétée au parking venait d'une capture à travers le plafond (corrigée). Les sorties durent 6 à 9,5 min : la proie IA va droit aux fusibles, la durée réelle se mesurera avec les testeurs.
-- [ ] Après le choix du rôle, les commandes et le but de ce rôle sont affichés ; Échap met en pause et propose reprendre, commandes, revenir au menu.
-- [ ] L'écran de fin copie un résumé de la partie ; le questionnaire est prêt.
-- [ ] Le budget de performance de la section 2.2 tient toujours (taille du build, appels de dessin, chargement).
+- [x] Après le choix du rôle, les commandes et le but de ce rôle sont affichés ; Échap met en pause et propose reprendre, commandes, revenir au menu.
+- [x] L'écran de fin copie un résumé de la partie ; le questionnaire est prêt.
+- [x] Le budget de performance de la section 2.2 tient toujours (taille du build, appels de dessin, chargement).
+  → T-082 : build web de 44 Mo (budget 60), 262 appels de dessin au pire (budget 300), chargement 1,7 s.
 
 ## Notes de playtest
 - (à venir, T-083) retours des testeurs.

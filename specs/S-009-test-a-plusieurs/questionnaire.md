@@ -8,7 +8,7 @@ Merci d'essayer **Écho**, un jeu de chasse à l'homme où chaque bruit trahit t
 
 **Comment jouer** : ouvre le lien dans Chrome sur un ordinateur (pas sur téléphone), de préférence avec un casque. Joue **une partie en Chassé** et **une partie en Monstre**. Une partie dure une dizaine de minutes. Les commandes s'affichent après le choix du rôle et dans la pause (Échap).
 
-Lien : [lien]
+Lien : https://retardafk.itch.io/echo-test
 Mot de passe : [mot de passe]
 
 À la fin de chaque partie, clique sur **« Copier le résumé »** et colle-le dans ta réponse.

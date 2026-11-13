@@ -29,7 +29,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-081 — Recueil des retours
   - Résultat vérifiable : « Copier le résumé » sur l'écran de fin, `RunSummary` testé, `questionnaire.md`
   - Dépend de : T-080
-- [ ] T-082 — Vérification finale de S-009
+- [x] T-082 — Vérification finale de S-009
   - Résultat vérifiable : critères cochés, lien et questionnaire envoyés à Maxime
   - Dépend de : T-077, T-079, T-081
 - [ ] T-085 — Saccades à la première vue d'un lieu
@@ -50,3 +50,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - T-081 (12/11/2026) : résumé à copier et questionnaire, PR #75.
 - T-079 (12/11/2026) : PR #76. Cause des captures au parking vers 2 min : le monstre dans la rue attrapait la proie 3 m plus bas, dans le parking (distance au sol seule). Capture limitée au même étage (`catch_height` 1,5 m). Trois séries de 20 : 13, 15, 13 sorties ; 5,9, 6,4, 5,9 min en moyenne ; 0 blocage. Reste un endroit de capture fréquent à l'entrée nord du couloir du centre social (poursuites, vers 3,5 min), jugé normal : la proie y est poursuivie. Pour allonger les parties ou rendre le monstre plus fort, il faudrait toucher des valeurs validées (temps des fusibles, chance d'ouvrir une cachette) : à décider avec les retours des testeurs.
 - T-077 (13/11/2026, build `192f46e` sur itch.io, navigateur intégré de l'app Claude basé sur Chrome 156, PC de Maxime : AMD Radeon 740M, rendu 1920 × 1080) : 59,8 images/s en moyenne sur le parcours de 60 s (3 589 images), 1 % les plus lentes à 43,9, minimum 14,2 (une saccade isolée), 262 appels de dessin et 61 000 triangles au pire, chargement 1,7 s. Les 60 images/s tiennent en moyenne. Les images lentes viennent de quelques saccades quand une vue nouvelle apparaît, probablement la compilation des shaders : tâche T-085 ajoutée. Un second passage n'a pas pu être mesuré, le panneau du navigateur ayant été masqué (la page tourne alors en arrière-plan et ne dessine plus) : il faut garder le panneau affiché pendant une mesure.
+- T-082 (13/11/2026) : vérification finale. 7 critères sur 8 cochés. Menu, panneau des commandes du chassé et pause vérifiés dans le jeu (captures sous Xvfb) ; scan, résumé à copier et pause couverts par les tests GUT. Non atteint : la durée moyenne de 8 à 12 min et 40 à 60 % de sorties (T-079 : environ 6 min, 65 à 75 %), à régler avec les retours des testeurs (T-084). Lien et questionnaire envoyés à Maxime.
