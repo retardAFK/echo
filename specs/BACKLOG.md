@@ -187,15 +187,18 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-123 — Squelette et animations du monstre
   - Résultat vérifiable : rôder, marcher, courir, scanner, ouvrir une cachette, écraser un réveil, attraper
   - Dépend de : T-122
-- [ ] T-124 — Modèles des chassés
+- [x] T-124 — Modèles des chassés
   - Résultat vérifiable : une variante par chassé (Q-002), 800 à 2 500 triangles, base CC0 adaptée au style ; rendus validés par Maxime
   - Dépend de : T-121
+  - Fait le 14/11/2026 (avancé à la demande de Maxime, avant la fin de S-010) : les trois chassés de « Le Réseau », sans nom (ambulancier, parka, masque), sur la base CC0 Universal Base Characters de Quaternius, 2 377 à 2 478 triangles, validés par Maxime le 14/11. Scripts dans `tools/blender/hunted/` (`export.py` écrit `assets/models/hunted/*.glb` : pose de repos, textures de tissu en vraies UV)
 - [ ] T-125 — Animations des chassés
   - Résultat vérifiable : marcher, courir, accroupi, lancer, ramasser, réparer, entrer et sortir d'une cachette
   - Dépend de : T-124
+  - En cours : repos, marche, course et à genoux (capturé), faits par `export.py` en tournant les os ; reste accroupi, lancer, ramasser, réparer, cachette
 - [ ] T-126 — Intégration en jeu et en réseau
   - Résultat vérifiable : arbres d'animation pilotés par l'état synchronisé (S-010) ; IA comprises ; tests GUT sur le choix de l'animation
   - Dépend de : T-123, T-125
+  - En cours : `HuntedBody` montre un des trois chassés (place 1 à 3 en ligne, ordre des proies IA hors ligne) et choisit l'animation selon la vitesse et la capture ; branché sur `Prey` et `NetPuppet` ; aucun modèle sur le serveur dédié ; 7 tests GUT
 - [ ] T-127 — Capture
   - Résultat vérifiable : séquence de capture vue par le chassé, qui respecte la règle des 2 secondes (2.3)
   - Dépend de : T-126

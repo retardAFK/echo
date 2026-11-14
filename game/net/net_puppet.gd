@@ -1,8 +1,9 @@
 class_name NetPuppet
 extends Node3D
 ## Another player of an online game as this client sees it (S-010, T-097): a
-## plain silhouette (characters come with S-011), moved between the snapshots
-## the room sends. Hidden while the room does not send it (out of sight).
+## hunted is one of the three characters (HuntedBody, S-011), animated from how
+## fast it moves; the monster is still a plain silhouette. It moves between the
+## snapshots the room sends. Hidden while the room does not send it (out of sight).
 ## A captured hunted (T-107) is down on its knees: a free hunted next to it
 ## sees the prompt to free it, and the room does the freeing.
 
@@ -20,14 +21,25 @@ const EYE_OFFSET := 0.15
 const PLAYER_SETTINGS := preload("res://game/data/player_settings.tres")
 
 var kind := Kind.HUNTED
+## Which of the three hunted (seat 1 to 3 online: 0 to 2).
+var look := 0
 var buffer := SnapshotBuffer.new()
 ## Captured, on its knees (T-107).
 var down := false
 
 var _body: MeshInstance3D
+var _hunted: HuntedBody
+var _last_position := Vector3.ZERO
+var _speed := 0.0
 
 
 func _ready() -> void:
+	if kind == Kind.HUNTED:
+		_hunted = HuntedBody.new()
+		_hunted.name = "Body"
+		_hunted.look = look
+		add_child(_hunted)
+		return
 	var height := _height()
 	var capsule := CapsuleMesh.new()
 	capsule.height = height
@@ -51,14 +63,23 @@ func show_at(time: float, max_extrapolation: float) -> void:
 	rotation.y = pose[1]
 
 
+func _process(delta: float) -> void:
+	if _hunted == null or delta <= 0.0:
+		return
+	var moved := global_position - _last_position
+	_last_position = global_position
+	# Smoothed: the snapshots do not land on every frame.
+	var now := Vector2(moved.x, moved.z).length() / delta
+	_speed = lerpf(_speed, minf(now, 12.0), minf(1.0, delta * 8.0))
+	_hunted.speed = _speed
+
+
 ## Down on its knees (captured) or standing again (freed).
 func set_down(value: bool) -> void:
 	if value == down or kind != Kind.HUNTED:
 		return
 	down = value
-	var scale_y := KNEEL_SCALE if down else 1.0
-	_body.scale.y = scale_y
-	_body.position.y = _height() * scale_y / 2.0
+	_hunted.down = down
 	if down:
 		add_to_group(Interactable.GROUP)
 	else:
