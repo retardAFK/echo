@@ -90,7 +90,7 @@ func value_text() -> String:
 		Kind.FLAG:
 			return tr("OPTIONS_ON") if Settings.get_value(setting) else tr("OPTIONS_OFF")
 		Kind.CHOICE:
-			return "◂ %s ▸" % tr("OPTIONS_CHOICE_" + str(Settings.get_value(setting)).to_upper())
+			return "‹ %s ›" % tr("OPTIONS_CHOICE_" + str(Settings.get_value(setting)).to_upper())
 		_:
 			return tr("OPTIONS_PRESS_KEY") if waiting else Settings.key_label(setting)
 

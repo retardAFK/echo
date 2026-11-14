@@ -69,10 +69,10 @@ const KEY_NAMES := {
 	KEY_ENTER: "Entrée",
 	KEY_BACKSPACE: "Retour arrière",
 	KEY_CAPSLOCK: "Verr. maj",
-	KEY_UP: "↑",
-	KEY_DOWN: "↓",
-	KEY_LEFT: "←",
-	KEY_RIGHT: "→",
+	KEY_UP: "Haut",
+	KEY_DOWN: "Bas",
+	KEY_LEFT: "Gauche",
+	KEY_RIGHT: "Droite",
 }
 
 ## Tests use another file so the player's own settings stay untouched.

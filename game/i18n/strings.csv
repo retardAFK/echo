@@ -154,4 +154,4 @@ OPTIONS_ON,Oui
 OPTIONS_OFF,Non
 OPTIONS_PRESS_KEY,Appuie sur une touche… (Échap : annuler)
 OPTIONS_RESET,Rétablir les réglages
-OPTIONS_HELP,◂ ▸ régler · Entrée : changer une touche · Échap : retour (tout est enregistré)
+OPTIONS_HELP,‹ › : régler · Entrée : changer une touche · Échap : retour (tout est enregistré)
