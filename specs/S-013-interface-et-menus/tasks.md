@@ -18,9 +18,10 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import, export web, ca
   - Résultat vérifiable : `LobbyMenu` en scène, `Digicode` et `Intercom` ; tous les tests du salon passent ; test à 4 clients de la CI inchangé
   - Dépend de : T-162
   - Fait le 14/11/2026 : `lobby_menu.tscn` remplace la construction dans le code ; `Digicode` (22 lettres de `RoomCode`, clavier physique, envoi à la 4e lettre ou sur OK) et `Intercom` (étiquette par place, voyant allumé quand le joueur est prêt, ligne cliquable pour prendre ou échanger une place) ; code en grand dans le salon, liste Je suis prêt / Lancer la partie / Quitter ; Échap revient en arrière ; 7 tests GUT, ceux du salon inchangés
-- [ ] T-164 — Pause et menus en partie
+- [x] T-164 — Pause et menus en partie
   - Résultat vérifiable : pause au style A ; en solo la partie s'arrête, en ligne elle continue avec des commandes neutres ; quitter proprement
   - Dépend de : T-162
+  - Fait le 14/11/2026 : bandeau sur toute la largeur, Reprendre / Revenir au menu et les commandes du rôle toujours affichées ; en ligne la partie continue (`LocalControls.frozen` : personnage immobile, aucune action) et « Quitter la partie » ferme la connexion ; « Options » s'ajoute avec T-163 ; 10 tests GUT
 - [ ] T-163 — Options
   - Résultat vérifiable : `UserSettings` (autoload `Settings`), écran Options à quatre onglets depuis l'accueil et la pause ; volumes par bus, sensibilité, inversion, champ de vision, luminosité, qualité (brouillard, ombres), clavier AZERTY ou QWERTY et touches modifiables ; enregistrés dans `user://` ; tests GUT
   - Dépend de : T-162

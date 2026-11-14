@@ -1,56 +1,76 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/ui/pause_menu.gd" id="1_pause"]
+[ext_resource type="Theme" path="res://game/ui/theme/echo_theme.tres" id="2_theme"]
+[ext_resource type="Script" path="res://game/ui/menu/menu_list.gd" id="3_list"]
 
 [node name="PauseMenu" type="CanvasLayer"]
 layer = 40
 script = ExtResource("1_pause")
 
-[node name="Shade" type="ColorRect" parent="."]
+[node name="Root" type="Control" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.7)
+theme = ExtResource("2_theme")
 
-[node name="Box" type="VBoxContainer" parent="."]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -110.0
-offset_right = 150.0
-offset_bottom = 110.0
+[node name="Shade" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-alignment = 1
-theme_override_constants/separation = 8
+color = Color(0.024, 0.024, 0.02, 0.72)
 
-[node name="Title" type="Label" parent="Box"]
-theme_override_font_sizes/font_size = 22
+[node name="Band" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -86.0
+offset_bottom = 86.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"Band"
+
+[node name="Columns" type="HBoxContainer" parent="Root/Band"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Left" type="VBoxContainer" parent="Root/Band/Columns"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Root/Band/Columns/Left"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
 text = "PAUSE_TITLE"
-horizontal_alignment = 1
+uppercase = true
 
-[node name="ResumeButton" type="Button" parent="Box"]
+[node name="OnlineNote" type="Label" parent="Root/Band/Columns/Left"]
 unique_name_in_owner = true
-theme_override_font_sizes/font_size = 12
-text = "PAUSE_RESUME"
+visible = false
+layout_mode = 2
+theme_type_variation = &"SubLabel"
+text = "PAUSE_ONLINE_NOTE"
+uppercase = true
 
-[node name="ControlsButton" type="Button" parent="Box"]
+[node name="PauseList" type="VBoxContainer" parent="Root/Band/Columns/Left"]
 unique_name_in_owner = true
-theme_override_font_sizes/font_size = 12
-text = "PAUSE_CONTROLS"
+layout_mode = 2
+script = ExtResource("3_list")
+keys = PackedStringArray("PAUSE_RESUME", "PAUSE_MENU")
 
-[node name="MenuButton" type="Button" parent="Box"]
+[node name="Controls" type="Label" parent="Root/Band/Columns"]
 unique_name_in_owner = true
-theme_override_font_sizes/font_size = 12
-text = "PAUSE_MENU"
-
-[node name="Controls" type="Label" parent="Box"]
-unique_name_in_owner = true
-theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 9
-horizontal_alignment = 1
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_type_variation = &"HintLabel"
+theme_override_colors/font_color = Color(0.718, 0.686, 0.6, 1)
+autowrap_mode = 3

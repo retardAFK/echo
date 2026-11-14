@@ -6,12 +6,18 @@ extends Node
 ## gets its commands from the network instead.
 ## Mouse movement turns the avatar at once, so the view never waits.
 
+## True while the pause menu is open in an online game (S-013, Q6, T-164):
+## the game goes on, the avatar stands still and takes no action.
+static var frozen := false
+
 var commands: PlayerCommands
 
 @onready var _avatar: Node = get_parent()
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if frozen:
+		return
 	var captured := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	if event.is_action_pressed("release_mouse"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -34,9 +40,13 @@ func _unhandled_input(event: InputEvent) -> void:
 ## the start of its physics frame, so a key pressed this frame counts at once.
 func fill() -> void:
 	commands.seq += 1
-	commands.move = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	commands.sprint = Input.is_action_pressed("sprint")
-	commands.interact = Input.is_action_pressed("interact")
-	commands.scan = Input.is_action_pressed("scan")
+	commands.move = (
+		Vector2.ZERO
+		if frozen
+		else Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	)
+	commands.sprint = not frozen and Input.is_action_pressed("sprint")
+	commands.interact = not frozen and Input.is_action_pressed("interact")
+	commands.scan = not frozen and Input.is_action_pressed("scan")
 	commands.yaw = _avatar.rotation.y
 	commands.pitch = _avatar.get_pitch()

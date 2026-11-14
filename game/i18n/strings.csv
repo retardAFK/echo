@@ -55,7 +55,6 @@ GOAL_HUNTED,"Trouvez 3 fusibles, posez-les dans le transformateur, puis fuyez pa
 GOAL_MONSTER,"Les bruits de la proie s'affichent en orange, avec leur distance. Attrapez-la avant qu'elle ne s'enfuie."
 PAUSE_TITLE,Pause
 PAUSE_RESUME,Reprendre
-PAUSE_CONTROLS,Commandes
 PAUSE_MENU,Revenir au menu
 SUMMARY_HEADER,Écho : résumé de partie (version %s)
 SUMMARY_ROLE,Rôle : %s
@@ -125,3 +124,5 @@ LOBBY_ONLINE_SUB,Un monstre contre trois chassés
 LOBBY_JOIN_HINT,"Tape le code que ton ami t'a envoyé, sur le digicode ou au clavier. Un code fait 4 lettres."
 LOBBY_CODE_CAPTION,Code à envoyer à tes amis
 LOBBY_ROOM,Salon
+PAUSE_ONLINE_NOTE,En ligne : la partie continue
+PAUSE_LEAVE_ONLINE,Quitter la partie
