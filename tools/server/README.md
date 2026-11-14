@@ -28,7 +28,7 @@ Maxime crée les comptes et les clés. Claude donne les étapes au moment voulu 
    Sans copie du dépôt sur la machine, les trois fichiers peuvent y être envoyés en une ligne : une archive `tar.gz` en base64 décodée par `base64 -d | tar xz`.
    Le script ouvre 80 et 443 dans le pare-feu de la machine (les règles iptables des images Oracle, ou ufw ailleurs).
 5. Dans GitHub : le secret `ECHO_DEPLOY_KEY` (clé privée `echo_deploy`) et la variable `ECHO_HOST` (le domaine). Sur une machine ARM, ajouter la variable `ECHO_SERVER_ARCH=arm64`.
-6. La CI déploie ensuite chaque version de `main` avec `deploy.sh` (l'export pour le processeur du serveur, copié en `/opt/echo/echo_server`), et le build web de la même version, servi par Caddy sur `https://<domaine>/` (copié en `/opt/echo/web`) et connecté à `wss://<domaine>`.
+6. La CI déploie ensuite chaque version de `main` avec `deploy.sh` (l'export pour le processeur du serveur, copié en `/opt/echo/echo_server`), et le build web de la même version, servi par Caddy sur `https://<domaine>/` (copié en `/opt/echo/web` ; `deploy.sh` recharge aussi les routes de Caddy par son API locale, avec `/opt/echo/Caddyfile`, sans connexion root) et connecté à `wss://<domaine>`.
 
 ## Fichiers
 | Fichier | Rôle |

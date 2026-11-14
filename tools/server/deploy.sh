@@ -27,5 +27,13 @@ if [ -n "$web" ]; then
 		if [ -d /opt/echo/web ]; then mv /opt/echo/web /opt/echo/web.old; fi
 		mv /opt/echo/web.new /opt/echo/web
 		rm -rf /opt/echo/web.old'
+	# The routes that serve it, loaded into the running Caddy through its
+	# local admin API: the "echo" user cannot write /etc/caddy, and this
+	# keeps an existing server up to date without a root login. setup.sh
+	# writes the same file for restarts.
+	sed "s/{\$ECHO_DOMAIN}/$ECHO_HOST/" "$(dirname "$0")/Caddyfile" \
+		| ssh "$target" 'cat > /opt/echo/Caddyfile \
+		&& caddy reload --config /opt/echo/Caddyfile --adapter caddyfile' \
+		|| echo "::warning::web game copied but Caddy not reloaded"
 fi
 echo "Deployed to $ECHO_HOST"
