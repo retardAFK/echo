@@ -260,7 +260,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [x] T-161 — Plan et tâches de S-013
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-160
-- [ ] T-162 — Menu principal définitif
+- [x] T-162 — Menu principal définitif
   - Résultat vérifiable : jouer seul, jouer en ligne, options, crédits ; écran titre avec le nom retenu ou provisoire
   - Dépend de : T-161
 - [ ] T-163 — Options
