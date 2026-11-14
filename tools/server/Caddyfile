@@ -1,6 +1,6 @@
 # Écho dedicated server (S-010, D-015). Caddy gets the HTTPS certificate from
 # Let's Encrypt and forwards the WebSocket connections to the Godot processes
-# on this machine. ECHO_DOMAIN is set in /etc/default/caddy by setup.sh.
+# on this machine. setup.sh writes the domain in place of {$ECHO_DOMAIN}.
 {$ECHO_DOMAIN} {
 	handle /lobby {
 		reverse_proxy 127.0.0.1:8910

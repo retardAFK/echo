@@ -46,8 +46,10 @@ install -m 644 "$here/echo-lobby.service" /etc/systemd/system/echo-lobby.service
 systemctl daemon-reload
 systemctl enable echo-lobby
 
-install -m 644 "$here/Caddyfile" /etc/caddy/Caddyfile
-echo "ECHO_DOMAIN=$ECHO_DOMAIN" > /etc/default/caddy
+# The domain goes into the file: the caddy service of the Ubuntu package
+# reads no environment file.
+sed "s/{\$ECHO_DOMAIN}/$ECHO_DOMAIN/" "$here/Caddyfile" > /etc/caddy/Caddyfile
+chmod 644 /etc/caddy/Caddyfile
 systemctl restart caddy
 
 echo "Server ready for https://$ECHO_DOMAIN; deploy a server build to start the lobby."

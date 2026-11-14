@@ -155,7 +155,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Dépend de : T-102
   - Fait le 13/11/2026 : `tools/godot/net_match.tscn`, lancé 4 fois en parallèle par la CI contre le serveur exporté (75 ms de retard sur chaque message). Le premier crée la partie et joue le monstre, les trois autres rejoignent avec le code. Chacun se dirige comme un joueur (touches et regard, en suivant le maillage de navigation) : chaque chassé prend le fusible d'un boîtier, le monstre attrape celui de la place 2 à son boîtier puis s'éloigne, un coéquipier le libère, il reprend son fusible tombé, les trois posent leurs fusibles au transformateur et sortent. Les processus se disent leur étape par des fichiers. 6 parties d'affilée gagnées par les chassés en local, en 2 à 4 min. La salle mesure sa charge et l'écrit toutes les 30 s (temps de ses images physiques, mémoire) : environ 2,3 ms en moyenne, moins de 7 ms au pire, et 109 Mo, pour 4 joueurs.
 - [ ] T-108 — Mise en ligne du serveur **(Maxime crée le compte)**
-  - Résultat vérifiable : serveur (Oracle Cloud gratuit, machine ARM ; choix de Maxime du 14/11/2026 à la place de Hetzner) et nom de domaine créés par Maxime, secrets de déploiement dans GitHub ; `setup.sh` passé, job `deploy` sur `main`, `wss://<domaine>/lobby` répond depuis le build itch.io
+  - Résultat vérifiable : serveur (VPS XS d'IONOS, choix de Maxime du 14/11/2026 à la place de Hetzner, D-016) et nom de domaine créés par Maxime, secrets de déploiement dans GitHub ; `setup.sh` passé, job `deploy` sur `main`, `wss://<domaine>/lobby` répond depuis le build itch.io
   - Dépend de : T-094
 - [ ] T-104 — Partie à 4 navigateurs **(Maxime)**
   - Résultat vérifiable : Maxime et 3 personnes jouent une partie complète ; retours notés dans la spec
