@@ -272,9 +272,9 @@ const BOTTLES := [
 ## of the gallery.
 const DECOYS := [
 	Vector3(10.2, 0, 157.2), Vector3(10.2, 0, 174.7),
-	Vector3(143, -3, 96.5), Vector3(168, -3, 116.2), Vector3(156.8, -3, 102.33),
-	Vector3(176, -3, 101.3), Vector3(176.5, 0, 61), Vector3(165, 0, 83),
-	Vector3(50, 0, 148), Vector3(84, 0, 148),
+	Vector3(146, -3, 96.5), Vector3(168, -3, 116.2), Vector3(156.8, -3, 102.33),
+	Vector3(176, -3, 101.3), Vector3(173, 0, 61), Vector3(165, 0, 83),
+	Vector3(50, 0, 148), Vector3(79, 0, 148),
 ]
 
 var kit := MapKit.new()

@@ -106,3 +106,17 @@ func test_no_hiding_spot_stands_against_a_fuse_box() -> void:
 		monster.global_position = box.get_approach_point()
 		var noise := NoiseEvent.new(NoiseEvent.Type.FUSE, box.global_position, 3.0, null)
 		assert_true(NoiseBus.can_hear(noise, monster.get_ear_position()), str(box.get_path()))
+
+
+func test_no_alarm_clock_lies_in_front_of_a_fuse_box() -> void:
+	# An alarm clock once lay on a fuse slot of the gallery: when both were
+	# drawn, it caught the aim in front of the box and the box could not be
+	# used (the online test of 4 players got stuck there).
+	var map: GameMap = MAP_SCENE.instantiate()
+	add_child_autofree(map)
+	var slots := map.get_node("FuseSlots").find_children("Slot*", "Marker3D")
+	assert_gt(slots.size(), 0)
+	for pickup in _pickups(map, Inventory.Kind.DECOY):
+		for slot: Marker3D in slots:
+			var gap := pickup.global_position.distance_to(slot.global_position)
+			assert_gt(gap, 2.0, "%s near %s" % [pickup.name, slot.get_path()])
