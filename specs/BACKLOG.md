@@ -266,7 +266,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-163 — Options
   - Résultat vérifiable : volumes par bus, sensibilité, inversion, champ de vision, luminosité, qualité (brouillard, ombres), clavier AZERTY ou QWERTY et touches modifiables ; enregistrées dans `user://` ; tests GUT
   - Dépend de : T-162
-- [ ] T-169 — Jouer en ligne : digicode et interphone
+- [x] T-169 — Jouer en ligne : digicode et interphone
   - Résultat vérifiable : salon en ligne refait au style choisi (T-160)
   - Dépend de : T-162
 - [ ] T-164 — Pause et menus en partie

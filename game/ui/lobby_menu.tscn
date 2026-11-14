@@ -1,6 +1,12 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/ui/lobby_menu.gd" id="1_lobby"]
+[ext_resource type="Theme" path="res://game/ui/theme/echo_theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://game/ui/menu/menu_backdrop.tscn" id="3_backdrop"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/menu_tower.jpg" id="4_bg"]
+[ext_resource type="Script" path="res://game/ui/menu/menu_list.gd" id="5_list"]
+[ext_resource type="Script" path="res://game/ui/menu/digicode.gd" id="6_digicode"]
+[ext_resource type="Script" path="res://game/ui/menu/intercom.gd" id="7_intercom"]
 
 [node name="LobbyMenu" type="Control"]
 layout_mode = 3
@@ -9,4 +15,167 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_theme")
 script = ExtResource("1_lobby")
+
+[node name="Backdrop" parent="." instance=ExtResource("3_backdrop")]
+layout_mode = 1
+background = ExtResource("4_bg")
+
+[node name="Entry" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Heading" type="VBoxContainer" parent="Entry"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 30.0
+offset_right = 334.0
+offset_bottom = 80.0
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="Entry/Heading"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "MENU_ONLINE"
+uppercase = true
+
+[node name="Sub" type="Label" parent="Entry/Heading"]
+layout_mode = 2
+theme_type_variation = &"SubLabel"
+text = "LOBBY_ONLINE_SUB"
+uppercase = true
+
+[node name="EntryList" type="VBoxContainer" parent="Entry"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 34.0
+offset_top = 96.0
+offset_right = 234.0
+offset_bottom = 180.0
+script = ExtResource("5_list")
+keys = PackedStringArray("LOBBY_CREATE", "LOBBY_JOIN", "MENU_BACK")
+
+[node name="JoinHint" type="Label" parent="Entry"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 190.0
+offset_right = 264.0
+offset_bottom = 220.0
+theme_type_variation = &"HintLabel"
+text = "LOBBY_JOIN_HINT"
+autowrap_mode = 3
+
+[node name="Digicode" type="PanelContainer" parent="Entry"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 396.0
+offset_top = 50.0
+offset_right = 596.0
+offset_bottom = 200.0
+script = ExtResource("6_digicode")
+
+[node name="Room" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Heading" type="VBoxContainer" parent="Room"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 30.0
+offset_right = 280.0
+offset_bottom = 150.0
+theme_override_constants/separation = 2
+
+[node name="Title" type="Label" parent="Room/Heading"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "LOBBY_ROOM"
+uppercase = true
+
+[node name="Caption" type="Label" parent="Room/Heading"]
+layout_mode = 2
+theme_type_variation = &"FootLabel"
+text = "LOBBY_CODE_CAPTION"
+uppercase = true
+
+[node name="Code" type="Label" parent="Room/Heading"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CodeLabel"
+auto_translate_mode = 2
+
+[node name="Hint" type="Label" parent="Room"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 34.0
+offset_top = 138.0
+offset_right = 264.0
+offset_bottom = 170.0
+theme_type_variation = &"HintLabel"
+autowrap_mode = 3
+
+[node name="Intercom" type="PanelContainer" parent="Room"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 316.0
+offset_top = 40.0
+offset_right = 610.0
+offset_bottom = 160.0
+script = ExtResource("7_intercom")
+
+[node name="RoomList" type="VBoxContainer" parent="Room"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 34.0
+offset_top = 180.0
+offset_right = 234.0
+offset_bottom = 274.0
+script = ExtResource("5_list")
+keys = PackedStringArray("LOBBY_READY", "LOBBY_START", "LOBBY_LEAVE")
+
+[node name="Status" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 34.0
+offset_top = -56.0
+offset_right = -34.0
+offset_bottom = -34.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_type_variation = &"BodyLabel"
+theme_override_colors/font_color = Color(0.937, 0.902, 0.8, 1)
+autowrap_mode = 3
+
+[node name="Foot" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 34.0
+offset_top = -26.0
+offset_right = -34.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_type_variation = &"FootLabel"
+text = "MENU_HELP"
+uppercase = true
