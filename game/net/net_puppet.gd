@@ -3,7 +3,8 @@ extends Node3D
 ## Another player of an online game as this client sees it (S-010, T-097),
 ## moved between the snapshots the room sends. A hunted has its character
 ## (S-011, T-126: the seat decides which), animated from its gait and the
-## speed seen between snapshots; the monster is still a plain silhouette.
+## speed seen between snapshots; the monster has the hunter's body (T-123),
+## animated from that speed.
 ## Hidden while the room does not send it (out of sight).
 ## A captured hunted (T-107) is down on its knees: a free hunted next to it
 ## sees the prompt to free it, and the room does the freeing.
@@ -12,15 +13,13 @@ enum Kind { HUNTED, MONSTER }
 
 const HUNTED_HEIGHT := 1.75
 const MONSTER_HEIGHT := 2.2
-const RADIUS := 0.3
-const HUNTED_COLOR := Color(0.55, 0.55, 0.5)
-const MONSTER_COLOR := Color(0.12, 0.1, 0.1)
 ## Share of its height a captured hunted keeps on its knees.
 const KNEEL_SCALE := 0.55
 ## Eyes below the top of the silhouette, in meters (the spectator's view).
 const EYE_OFFSET := 0.15
 const PLAYER_SETTINGS := preload("res://game/data/player_settings.tres")
 const BODY_SCENE := preload("res://game/entities/hunted_body/hunted_body.tscn")
+const MONSTER_BODY_SCENE := preload("res://game/entities/monster_body/monster_body.tscn")
 ## How fast the shown speed follows the speed seen between frames (per second).
 const SPEED_SMOOTHING := 10.0
 
@@ -33,8 +32,8 @@ var buffer := SnapshotBuffer.new()
 ## Captured, on its knees (T-107).
 var down := false
 
-var _body: MeshInstance3D
 var _character: HuntedBody
+var _monster_body: MonsterBody
 var _speed := 0.0
 var _last_position := Vector3.ZERO
 var _last_time := -1.0
@@ -46,18 +45,8 @@ func _ready() -> void:
 		_character.role = HuntedBody.role_for_seat(seat)
 		add_child(_character)
 		return
-	var height := _height()
-	var capsule := CapsuleMesh.new()
-	capsule.height = height
-	capsule.radius = RADIUS
-	var material := StandardMaterial3D.new()
-	material.albedo_color = MONSTER_COLOR if kind == Kind.MONSTER else HUNTED_COLOR
-	material.roughness = 1.0
-	_body = MeshInstance3D.new()
-	_body.mesh = capsule
-	_body.material_override = material
-	_body.position.y = height / 2.0
-	add_child(_body)
+	_monster_body = MONSTER_BODY_SCENE.instantiate()
+	add_child(_monster_body)
 
 
 ## Moves to where the buffer has it at time (seconds).
@@ -76,6 +65,8 @@ func show_at(time: float, max_extrapolation: float) -> void:
 	rotation.y = pose[1]
 	if _character != null:
 		_character.show_state(gait, _speed, down)
+	if _monster_body != null:
+		_monster_body.show_state(_speed)
 
 
 ## Back in sight: no speed from where it was lost.

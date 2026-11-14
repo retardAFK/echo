@@ -8,10 +8,12 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-121 — Plan et tâches de S-011
   - Résultat vérifiable : `plan.md` et ce fichier
   - Fait le 14/11/2026
-- [ ] T-122 — Modèle du monstre
+- [x] T-122 — Modèle du monstre
   - Résultat vérifiable : planches du nouveau chasseur, script dans `tools/blender/`, 2 500 triangles au plus ; rendus validés par Maxime
-- [ ] T-123 — Squelette et animations du monstre
+  - Fait le 14/11/2026 : piste B validée par Maxime ; `tools/blender/hunter.py` (même base CC0 et même chaîne que les chassés, bras allongés dans la pose de repos), 2 438 triangles, `assets/models/hunter/hunter.glb`
+- [x] T-123 — Squelette et animations du monstre
   - Dépend de : T-122
+  - Fait le 14/11/2026 : `idle`, `prowl`, `walk`, `run`, `scan`, `reach` (ouvrir une cachette) ; `MonsterBody` dans `Monster` (allure et état du cerveau) et dans `NetPuppet` (vitesse vue entre deux instantanés) ; 6 tests GUT. Écraser un réveil et attraper restent pour T-127
 - [x] T-124 — Modèles des chassés
   - Résultat vérifiable : `tools/blender/hunted.py`, trois `.glb` skinnés sous 2 500 triangles, crédit CC0
   - Fait le 14/11/2026 : 2 478, 2 377 et 2 399 triangles ; sources CC0 dans `art_src/quaternius_ubc/` ; `assets/models/hunted/`
