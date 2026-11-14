@@ -250,6 +250,8 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 **Retour de Maxime (13/11/2026)** : le salon en ligne de T-096 (créer, rejoindre, places) est une version de test ; son design est à reprendre ici avec les autres menus.
 
+**Avancée (14/11/2026)** : à la demande de Maxime, le design des menus commence avant les phases 11 et 12. Brouillon de spec : `specs/S-013-interface-et-menus/spec.md` ; trois styles maquettés, choix en attente.
+
 **Terminé quand** : chaque menu se parcourt à la souris et au clavier, et les réglages survivent à un rechargement de la page.
 
 - [ ] T-160 — Spec S-013
