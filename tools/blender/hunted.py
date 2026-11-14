@@ -708,6 +708,12 @@ CYCLES = {
 
 
 class Rig:
+    """Keys cycles on the skeleton. cycles: name -> parameters (see CYCLES);
+    a subclass may add to each pose in finish() (the hunter, hunter.py)."""
+
+    cycles = CYCLES
+    scaled = ()  # Bones whose scale is keyed too.
+
     def __init__(self, c):
         self.arm = c.arm
         b = c.arm.data.bones
@@ -731,7 +737,7 @@ class Rig:
 
     def pose(self, name, t):
         """Pose of a cycle at time t (seconds)."""
-        sec, swing, k0, k1, arm_sw, fore, lean, ca, cb = CYCLES[name]
+        sec, swing, k0, k1, arm_sw, fore, lean, ca, cb = self.cycles[name]
         p = 2 * math.pi * t / sec
         for pb in self.arm.pose.bones:
             pb.matrix_basis = Matrix.Identity(4)
@@ -767,9 +773,13 @@ class Rig:
             for f in ("index", "middle", "ring", "pinky"):
                 for j in ("01", "02", "03"):
                     self.rot(f"{f}_{j}_{s}", "Y", -28 * sign)
+        self.finish(name, p)
+
+    def finish(self, name, p):
+        """Extra keys of a subclass, after the base pose."""
 
     def bake(self, name):
-        sec = CYCLES[name][0]
+        sec = self.cycles[name][0]
         frames = round(sec * FPS)
         act = bpy.data.actions.new(name)
         act.use_fake_user = True
@@ -783,6 +793,8 @@ class Rig:
                 pb.keyframe_insert("rotation_quaternion", frame=f)
                 if bone == "pelvis":
                     pb.keyframe_insert("location", frame=f)
+                if bone in self.scaled:
+                    pb.keyframe_insert("scale", frame=f)
         self.arm.animation_data.action = None
         return act
 
@@ -802,7 +814,7 @@ def build(role):
     c = ROLES[role]()
     body = c.merge()
     rig = Rig(c)
-    for name in CYCLES:
+    for name in rig.cycles:
         rig.bake(name)
     for pb in c.arm.pose.bones:
         pb.matrix_basis = Matrix.Identity(4)
