@@ -120,3 +120,7 @@ renderer/rendering_method.mobile="gl_compatibility"
 
 locale/translations=PackedStringArray("res://game/i18n/strings.fr.translation")
 locale/fallback="fr"
+
+[editor]
+
+export/convert_text_resources_to_binary=false
