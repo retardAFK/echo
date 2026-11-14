@@ -57,7 +57,7 @@ jobs:
           path: |
             ~/godot
             ~/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.stable
-          key: godot-${{ env.GODOT_VERSION }}-web-linux-${{ runner.os }}
+          key: godot-${{ env.GODOT_VERSION }}-web-linux-arm64-${{ runner.os }}
 
       - name: Download Godot, web and Linux export templates
         if: steps.cache-godot.outputs.cache-hit != 'true'
@@ -67,11 +67,12 @@ jobs:
           curl -fsSL -o /tmp/godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
           unzip -q /tmp/godot.zip -d ~/godot
           mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
-          # Only the web templates and the Linux one (dedicated server, S-010) are kept
+          # Only the web templates and the Linux ones (dedicated server, S-010:
+          # x86_64 for the CI, arm64 for the Oracle Ampere server, T-108) are kept
           curl -fsSL -o /tmp/templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
           dest=~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
           mkdir -p "$dest"
-          unzip -q -j /tmp/templates.tpz 'templates/web_*' 'templates/linux_release.x86_64' 'templates/version.txt' -d "$dest"
+          unzip -q -j /tmp/templates.tpz 'templates/web_*' 'templates/linux_release.x86_64' 'templates/linux_release.arm64' 'templates/version.txt' -d "$dest"
           rm /tmp/godot.zip /tmp/templates.tpz
           ls -la "$dest"
 
@@ -109,10 +110,20 @@ jobs:
           sed -i '/^\[application\]/a config/version="'"${GITHUB_SHA::7}"'"' project.godot
           grep -n "config/version" project.godot
 
+      # T-108: the web build plays online on the server named by the variable
+      # ECHO_HOST (its domain). The settings go back as they were right after,
+      # for the network checks below, which run on this machine.
       - name: Export web build
+        env:
+          ECHO_HOST: ${{ vars.ECHO_HOST }}
         run: |
           mkdir -p build/web
+          if [ -n "$ECHO_HOST" ]; then
+            sed -i '/^script = /a server_address = "wss://'"$ECHO_HOST"'"' game/data/net_settings.tres
+            grep -n server_address game/data/net_settings.tres
+          fi
           godot --headless --export-release "Web" build/web/index.html
+          git checkout -- game/data/net_settings.tres
           test -f build/web/index.html
           test -f build/web/index.pck
           test -f build/web/index.wasm
@@ -145,6 +156,9 @@ jobs:
           godot --headless --export-release "Server" build/server/echo_server.x86_64
           test -x build/server/echo_server.x86_64
           echo "Server build: $(( $(stat -c %s build/server/echo_server.x86_64) / 1024 / 1024 )) MB" >> "$GITHUB_STEP_SUMMARY"
+          # T-108: the same for the ARM processor of the Oracle Ampere server.
+          godot --headless --export-release "Server ARM" build/server/echo_server.arm64
+          file build/server/echo_server.arm64 | grep -q "ARM aarch64"
 
       - name: Connect 4 players to the server and play online
         run: |
@@ -191,8 +205,33 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: server-build
-          path: build/server/echo_server.x86_64
+          path: |
+            build/server/echo_server.x86_64
+            build/server/echo_server.arm64
           retention-days: 14
+
+      # T-108: every merge to main goes to the online server (tools/server),
+      # with the same version as the itch.io build. Needs the variable
+      # ECHO_HOST (the server's domain) and the secret ECHO_DEPLOY_KEY (the
+      # private key of the "echo" user); skipped without them.
+      - name: Deploy the server
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          ECHO_HOST: ${{ vars.ECHO_HOST }}
+          ECHO_DEPLOY_KEY: ${{ secrets.ECHO_DEPLOY_KEY }}
+          ECHO_SERVER_ARCH: ${{ vars.ECHO_SERVER_ARCH || 'arm64' }}
+        run: |
+          if [ -z "$ECHO_HOST" ] || [ -z "$ECHO_DEPLOY_KEY" ]; then
+            echo "::notice::server not set up (ECHO_HOST, ECHO_DEPLOY_KEY): not deployed"
+            exit 0
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$ECHO_DEPLOY_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -t ed25519 "$ECHO_HOST" >> ~/.ssh/known_hosts
+          bash tools/server/deploy.sh "build/server/echo_server.${ECHO_SERVER_ARCH}"
+          rm ~/.ssh/id_ed25519
+          echo "Server ${GITHUB_SHA::7} deployed to wss://${ECHO_HOST}/lobby" >> "$GITHUB_STEP_SUMMARY"
 
       # S-009, T-076 (Q1): every merge to main goes to the restricted itch.io
       # page of the test build (a manual run on main republishes it). Needs the secret BUTLER_API_KEY and the

@@ -1,6 +1,6 @@
 # Serveur d'Écho (S-010)
 
-Le serveur fait jouer les parties en ligne (D-015). C'est le projet Godot lui-même, exporté pour Linux sans affichage (préréglage d'export « Server »). Il tourne chez Hetzner, derrière Caddy, qui fournit le HTTPS.
+Le serveur fait jouer les parties en ligne (D-015). C'est le projet Godot lui-même, exporté pour Linux sans affichage (préréglages d'export « Server » pour x86_64, « Server ARM » pour arm64). Il tourne sur une machine Ampere A1 (ARM) de l'offre gratuite d'Oracle Cloud (choix de Maxime du 14/11/2026, à la place de Hetzner), derrière Caddy, qui fournit le HTTPS.
 
 ```
 navigateur ── wss://<domaine>/lobby ──► Caddy ──► accueil (port 8910) : codes de partie
@@ -18,13 +18,16 @@ godot --headless res://tools/godot/net_smoke.tscn   # 4 joueurs se connectent
 ```
 La CI fait la même chose avec le serveur exporté à chaque pull request.
 
-## Mise en place chez Hetzner (une fois, T-108)
-Maxime crée le compte, le serveur et le nom de domaine. Claude donne les étapes au moment voulu et ne voit jamais les clés.
-1. Un serveur **CX22** (Ubuntu 24.04, Allemagne ou Finlande) et un nom de domaine qui pointe sur son adresse IP.
-2. Une paire de clés SSH réservée au déploiement : la clé publique va au serveur, la clé privée dans le secret GitHub `ECHO_DEPLOY_KEY` ; le domaine va dans la variable `ECHO_HOST`.
-3. Sur le serveur, en root : copier ce dossier, puis
-   `ECHO_DOMAIN=<domaine> DEPLOY_KEY="<clé publique>" bash setup.sh`.
-4. La CI déploie ensuite chaque version de `main` avec `deploy.sh`.
+## Mise en place (une fois, T-108)
+Maxime crée les comptes et les clés. Claude donne les étapes au moment voulu et ne voit jamais les clés privées.
+1. Deux paires de clés SSH sur le PC de Maxime : `echo_admin` (pour lui) et `echo_deploy` (pour la CI, sans phrase de passe).
+2. Oracle Cloud (offre « Always Free ») : une instance **VM.Standard.A1.Flex** (ARM) sous Ubuntu 24.04, avec la clé publique `echo_admin`. Dans la « security list » du réseau (VCN), autoriser l'entrée TCP 80 et 443.
+3. Un nom de domaine qui pointe sur l'IP publique (sous-domaine DuckDNS gratuit pour les tests).
+4. Sur le serveur (`ssh -i echo_admin ubuntu@<ip>`), en root : copier ce dossier, puis
+   `ECHO_DOMAIN=<domaine> DEPLOY_KEY="<clé publique echo_deploy>" bash setup.sh`.
+   Le script ouvre 80 et 443 dans le pare-feu de la machine (les règles iptables des images Oracle, ou ufw ailleurs).
+5. Dans GitHub : le secret `ECHO_DEPLOY_KEY` (clé privée `echo_deploy`) et la variable `ECHO_HOST` (le domaine). Sur une machine x86_64, ajouter la variable `ECHO_SERVER_ARCH=x86_64`.
+6. La CI déploie ensuite chaque version de `main` avec `deploy.sh` (l'export pour le processeur du serveur, copié en `/opt/echo/echo_server`), et le build web de la même version se connecte à `wss://<domaine>`.
 
 ## Fichiers
 | Fichier | Rôle |
