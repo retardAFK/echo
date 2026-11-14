@@ -1,85 +1,103 @@
 class_name HuntedBody
 extends Node3D
-## How a hunted looks to the others (S-011): one of the three characters of
-## "Le Réseau" (made by tools/blender/hunted/export.py), animated from how fast
-## it moves and whether it is captured. Used by the AI prey and by the other
-## players of an online game (NetPuppet). Feet at the origin, facing -Z.
-## A dedicated server (no display) builds no model: nobody looks at it.
+## The body of a hunted (spec S-011, T-126): one of the three characters made
+## by tools/blender/hunted.py, animated from what the game already knows of
+## the hunted (gait, horizontal speed, captured). Nothing new goes over the
+## network (Q6). Without a display (server, tests) no model is loaded.
 
-## The three characters, by look (seat 1 to 3 online, prey order offline).
-const MODELS := [
-	"res://assets/models/hunted/hunted_ambulancier.glb",
-	"res://assets/models/hunted/hunted_parka.glb",
-	"res://assets/models/hunted/hunted_masque.glb",
-]
-## Below this speed (m/s) it stands still.
-const IDLE_SPEED := 0.3
-## Above this speed (m/s) it runs.
-const RUN_SPEED := 3.6
-## Speeds (m/s) at which the walk and the run play at their own pace.
-const WALK_PACE := 2.0
-const RUN_PACE := 4.5
-## Seconds to blend from one animation to the next.
-const BLEND := 0.2
+## The three hunted, by role (Q1); online, the seat decides (Q5).
+enum Role { AMBULANCIER, PARKA, MASQUE }
 
-## Which of the three characters (wraps around).
-@export var look := 0:
-	set = set_look
+const MODELS := {
+	Role.AMBULANCIER: "res://assets/models/hunted/hunted_ambulancier.glb",
+	Role.PARKA: "res://assets/models/hunted/hunted_parka.glb",
+	Role.MASQUE: "res://assets/models/hunted/hunted_masque.glb",
+}
+const IDLE := &"idle"
+const WALK := &"walk"
+const RUN := &"run"
+const CROUCH := &"crouch"
+const CROUCH_IDLE := &"crouch_idle"
+const KNEEL := &"kneel"
 
-## Horizontal speed in m/s, set by the owner every frame.
-var speed := 0.0
-## Captured: on its knees.
-var down := false
+@export var role := Role.AMBULANCIER:
+	set(value):
+		role = value
+		if is_inside_tree():
+			_load_model()
+@export var settings: HuntedBodySettings
+
+## The animation chosen last (also without a model).
+var animation := IDLE
 
 var _model: Node3D
 var _player: AnimationPlayer
 
 
 func _ready() -> void:
-	if DisplayServer.get_name() != "headless":
-		build()
+	_load_model()
 
 
-func set_look(value: int) -> void:
-	look = value
-	if _model != null:
-		build()
+## The character of an online seat (1 to 3); seat 0 is the monster's.
+static func role_for_seat(seat: int) -> Role:
+	return clampi(seat - 1, 0, Role.size() - 1) as Role
 
 
-## Makes (or remakes) the model of the current look.
-func build() -> void:
+## The animation for a state: captured kneels, crouched creeps or crouches,
+## otherwise idle, walk or run by gait and speed.
+static func pick(
+	gait: PlayerMotion.Gait, speed: float, down: bool, values: HuntedBodySettings
+) -> StringName:
+	if down:
+		return KNEEL
+	var still := speed < values.still_speed
+	match gait:
+		PlayerMotion.Gait.CROUCH:
+			return CROUCH_IDLE if still else CROUCH
+		PlayerMotion.Gait.SPRINT:
+			return IDLE if still else RUN
+	return IDLE if still else WALK
+
+
+## Playback speed of an animation at a speed, so the feet roughly keep pace.
+static func playback_scale(anim: StringName, speed: float, values: HuntedBodySettings) -> float:
+	var made_for := 0.0
+	match anim:
+		WALK:
+			made_for = values.walk_speed
+		RUN:
+			made_for = values.run_speed
+		CROUCH:
+			made_for = values.crouch_speed
+	if made_for <= 0.0:
+		return 1.0
+	return clampf(speed / made_for, values.min_scale, values.max_scale)
+
+
+## Plays what fits the hunted's state.
+func show_state(gait: PlayerMotion.Gait, speed: float, down: bool) -> void:
+	var next := pick(gait, speed, down, settings)
+	if _player != null:
+		if next != animation or not _player.is_playing():
+			_player.play(next, settings.blend_time)
+		_player.speed_scale = playback_scale(next, speed, settings)
+	animation = next
+
+
+func _load_model() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	if _model != null:
 		_model.queue_free()
-	_model = (load(MODELS[posmod(look, MODELS.size())]) as PackedScene).instantiate()
+		_model = null
+		_player = null
+	var scene: PackedScene = load(MODELS[role])
+	_model = scene.instantiate()
 	add_child(_model)
-	_player = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	if _player == null:
+	var players := _model.find_children("*", "AnimationPlayer", true, false)
+	if players.is_empty():
 		return
-	for name in ["Idle", "Walk", "Run"]:
-		if _player.has_animation(name):
-			_player.get_animation(name).loop_mode = Animation.LOOP_LINEAR
-	_player.play("Idle")
-
-
-## The animation for the current speed and state, and its pace.
-func get_wanted() -> Array:
-	if down:
-		return ["Kneel", 1.0]
-	if speed < IDLE_SPEED:
-		return ["Idle", 1.0]
-	if speed < RUN_SPEED:
-		return ["Walk", clampf(speed / WALK_PACE, 0.5, 2.0)]
-	return ["Run", clampf(speed / RUN_PACE, 0.7, 1.6)]
-
-
-func get_animation() -> StringName:
-	return _player.current_animation if _player != null else &""
-
-
-func _process(_delta: float) -> void:
-	if _player == null:
-		return
-	var wanted := get_wanted()
-	if _player.current_animation != wanted[0]:
-		_player.play(wanted[0], BLEND)
-	_player.speed_scale = wanted[1]
+	_player = players[0]
+	for anim_name in _player.get_animation_list():
+		_player.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
+	_player.play(animation)

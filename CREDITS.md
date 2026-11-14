@@ -5,7 +5,7 @@ Seuls les assets faits par nous ou sous licence **CC0** sont acceptés.
 
 | Asset | Auteur | Licence | Lien | Utilisé dans |
 |---|---|---|---|---|
-| Universal Base Characters (corps et squelette des chassés, cheveux) | Quaternius | CC0 | https://quaternius.com | Chassés, `assets/models/hunted/` (S-011, T-124), adaptés par `tools/blender/hunted/` |
+| Universal Base Characters (corps et squelette des chassés, cheveux) | Quaternius | CC0 | https://quaternius.com | Chassés, `assets/models/hunted/` (S-011, T-124), sources dans `art_src/quaternius_ubc/`, adaptés par `tools/blender/hunted.py` |
 | Barlow et Barlow Condensed (polices des menus) | Jeremy Tribby, The Barlow Project Authors | SIL OFL 1.1 (`assets/fonts/OFL-Barlow.txt`) | https://github.com/jpt/barlow | Menus, `assets/fonts/` (S-013, T-162) |
 | VT323 (afficheur du digicode) | Peter Hull, The VT323 Project Authors | SIL OFL 1.1 (`assets/fonts/OFL-VT323.txt`) | https://github.com/phoikoi/VT323 | Menu en ligne, `assets/fonts/` (S-013) |
 

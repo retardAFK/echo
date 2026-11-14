@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cy3mh7wejh3qf"
-path="res://.godot/imported/hunted_parka_T_Superhero_Female_Dark_BaseColor_256.png-cbdf7d78c272f61a3990c64565ea935d.ctex"
+uid="uid://dmur8cvsnhqce"
+path="res://.godot/imported/hunted_ambulancier_tx_skin_m.png-a5897553215b954fb56ae13c349b5349.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "c8ab977da387b22df3208c69ab2fc7c4"
+"md5": "d87ef12dff57511f77e64a6e4f820b4c"
 }
 
 [deps]
 
-source_file="res://assets/models/hunted/hunted_parka_T_Superhero_Female_Dark_BaseColor_256.png"
-dest_files=["res://.godot/imported/hunted_parka_T_Superhero_Female_Dark_BaseColor_256.png-cbdf7d78c272f61a3990c64565ea935d.ctex"]
+source_file="res://assets/models/hunted/hunted_ambulancier_tx_skin_m.png"
+dest_files=["res://.godot/imported/hunted_ambulancier_tx_skin_m.png-a5897553215b954fb56ae13c349b5349.ctex"]
 
 [params]
 

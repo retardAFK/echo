@@ -452,8 +452,11 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 		var puppet := _puppet(seat)
 		if not puppet.visible:
 			puppet.buffer = SnapshotBuffer.new()  # Back in sight: no slide from where it was lost.
+			puppet.restart_motion()
 			puppet.visible = true
 		puppet.buffer.push(now, entry[1], entry[2])
+		if entry.size() >= 4:
+			puppet.gait = entry[3]
 		puppet.set_down(entry.size() >= 5 and entry[4])
 	for seat in puppets:
 		if not seen.has(seat):
@@ -553,10 +556,10 @@ func _puppet(seat: int) -> NetPuppet:
 	if not puppets.has(seat):
 		var puppet := NetPuppet.new()
 		puppet.name = "Puppet%d" % seat
+		puppet.seat = seat
 		puppet.kind = (
 			NetPuppet.Kind.MONSTER if seat == LobbyState.MONSTER_SEAT else NetPuppet.Kind.HUNTED
 		)
-		puppet.look = seat - 1
 		puppet.visible = false
 		get_parent().add_child(puppet)
 		puppets[seat] = puppet
