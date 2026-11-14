@@ -7758,7 +7758,7 @@ settings = ExtResource("53_0w0p7")
 kind = 1
 
 [node name="Decoy3" type="Node3D" parent="Pickups/Decoys" unique_id=1370085613 instance=ExtResource("57_2ix4d")]
-transform = Transform3D(-0.52421355, 0, 0.8515868, 0, 1, 0, -0.8515868, 0, -0.52421355, 33, -3, -13.5)
+transform = Transform3D(-0.52421355, 0, 0.8515868, 0, 1, 0, -0.8515868, 0, -0.52421355, 36, -3, -13.5)
 script = ExtResource("56_8lt5b")
 settings = ExtResource("53_0w0p7")
 kind = 1
@@ -7782,7 +7782,7 @@ settings = ExtResource("53_0w0p7")
 kind = 1
 
 [node name="Decoy7" type="Node3D" parent="Pickups/Decoys" unique_id=1711400946 instance=ExtResource("57_2ix4d")]
-transform = Transform3D(-0.39147633, 0, 0.9201882, 0, 1, 0, -0.9201882, 0, -0.39147633, 66.5, 2.2351742e-08, -49)
+transform = Transform3D(-0.39147633, 0, 0.9201882, 0, 1, 0, -0.9201882, 0, -0.39147633, 63, 2.2351742e-08, -49)
 script = ExtResource("56_8lt5b")
 settings = ExtResource("53_0w0p7")
 kind = 1
@@ -7800,7 +7800,7 @@ settings = ExtResource("53_0w0p7")
 kind = 1
 
 [node name="Decoy10" type="Node3D" parent="Pickups/Decoys" unique_id=1250431109 instance=ExtResource("57_2ix4d")]
-transform = Transform3D(0.67612904, 0, -0.7367832, 0, 1, 0, 0.7367832, 0, 0.67612904, -26, 2.2351742e-08, 38)
+transform = Transform3D(0.67612904, 0, -0.7367832, 0, 1, 0, 0.7367832, 0, 0.67612904, -31, 2.2351742e-08, 38)
 script = ExtResource("56_8lt5b")
 settings = ExtResource("53_0w0p7")
 kind = 1
