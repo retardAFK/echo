@@ -169,16 +169,19 @@ func _step(delta: float) -> void:
 		var speed := Vector2(_net.own.velocity.x, _net.own.velocity.z).length()
 		print(
 			(
-				"seat %d %s at %s, path %d/%d, %.1f m/s, gap %.2f m"
-				% [
-					_seat,
-					_phase,
-					_own_position().snapped(Vector3.ONE * 0.1),
-					_path_index,
-					_path.size(),
-					speed,
-					_net.worst_error,
-				]
+				(
+					"seat %d %s at %s, path %d/%d, %.1f m/s, gap %.2f m"
+					% [
+						_seat,
+						_phase,
+						_own_position().snapped(Vector3.ONE * 0.1),
+						_path_index,
+						_path.size(),
+						speed,
+						_net.worst_error,
+					]
+				)
+				+ _aim_status()
 			)
 		)
 	var loop := _map.game_loop
@@ -189,6 +192,22 @@ func _step(delta: float) -> void:
 		_play_monster(delta)
 	else:
 		_play_hunted(delta)
+
+
+## What a hunted aims at and holds, for the status lines: a hunted that
+## stands still at a box or the transformer shows why.
+func _aim_status() -> String:
+	var player := _net.own as Player
+	if player == null:
+		return ""
+	var target := player.get_interactable()
+	var box := ""
+	if _box != null:
+		box = ", box %s fuse %s" % [_box.global_position.snapped(Vector3.ONE * 0.1), _box.has_fuse]
+	return (
+		", aims %s, hold %.2f%s"
+		% [target.name if target != null else "nothing", player.get_hold_ratio(), box]
+	)
 
 
 func _join_when_created() -> void:
