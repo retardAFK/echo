@@ -6,7 +6,7 @@
 [ext_resource type="Script" path="res://game/entities/player/footstep_emitter.gd" id="4_footsteps"]
 [ext_resource type="Resource" path="res://game/data/noise_settings.tres" id="5_noise"]
 [ext_resource type="Resource" path="res://game/data/ruse_settings.tres" id="6_ruses"]
-[ext_resource type="Script" path="res://game/entities/hunted_body/hunted_body.gd" id="7_body"]
+[ext_resource type="PackedScene" path="res://game/entities/hunted_body/hunted_body.tscn" id="7_body"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_body"]
 radius = 0.3
@@ -24,8 +24,7 @@ ruse_settings = ExtResource("6_ruses")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
 shape = SubResource("Shape_body")
 
-[node name="Body" type="Node3D" parent="."]
-script = ExtResource("7_body")
+[node name="Body" parent="." instance=ExtResource("7_body")]
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 path_desired_distance = 0.5

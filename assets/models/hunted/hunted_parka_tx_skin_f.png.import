@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dwtytdb1j5wjj"
-path="res://.godot/imported/hunted_masque_T_Superhero_Male_Dark_256.png-d448af99cf89e3774e261475f2754d0f.ctex"
+uid="uid://e5qndckcn8tm"
+path="res://.godot/imported/hunted_parka_tx_skin_f.png-f553151b13d57a1549d9092b731d4b4a.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "b96aa0a258b0ede5ae0208d3fc7f4b32"
+"md5": "a3507e8388faf8b2648584748bedb3d3"
 }
 
 [deps]
 
-source_file="res://assets/models/hunted/hunted_masque_T_Superhero_Male_Dark_256.png"
-dest_files=["res://.godot/imported/hunted_masque_T_Superhero_Male_Dark_256.png-d448af99cf89e3774e261475f2754d0f.ctex"]
+source_file="res://assets/models/hunted/hunted_parka_tx_skin_f.png"
+dest_files=["res://.godot/imported/hunted_parka_tx_skin_f.png-f553151b13d57a1549d9092b731d4b4a.ctex"]
 
 [params]
 

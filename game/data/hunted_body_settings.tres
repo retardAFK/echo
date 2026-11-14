@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="HuntedBodySettings" format=3]
+
+[ext_resource type="Script" path="res://game/data/hunted_body_settings.gd" id="1_settings"]
+
+[resource]
+script = ExtResource("1_settings")
+still_speed = 0.3
+blend_time = 0.2
+walk_speed = 2.2
+run_speed = 4.0
+crouch_speed = 1.2
+min_scale = 0.6
+max_scale = 1.6

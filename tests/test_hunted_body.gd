@@ -1,91 +1,101 @@
 extends GutTest
-## The three hunted characters (S-011): models, animations, and which one a
-## prey or another online player gets.
+## The hunted's animated bodies (spec S-011, T-126): which animation for which
+## state, how fast it plays, which character for which seat, and the
+## network puppet that drives it from the snapshots.
+
+const SETTINGS := preload("res://game/data/hunted_body_settings.tres")
+const WALK := PlayerMotion.Gait.WALK
+const CROUCH := PlayerMotion.Gait.CROUCH
+const SPRINT := PlayerMotion.Gait.SPRINT
 
 
-func test_each_look_has_its_animations() -> void:
-	for look in HuntedBody.MODELS.size():
-		var body := HuntedBody.new()
-		body.look = look
-		add_child_autofree(body)
-		body.build()
-		var player := body.find_child("AnimationPlayer", true, false) as AnimationPlayer
-		assert_not_null(player, "look %d is animated" % look)
-		for name in ["Idle", "Walk", "Run", "Kneel"]:
-			assert_true(player.has_animation(name), "look %d has %s" % [look, name])
-		assert_eq(player.get_animation("Walk").loop_mode, Animation.LOOP_LINEAR, "the walk loops")
-		assert_not_null(body.find_children("*", "Skeleton3D", true, false).front())
+func test_still_hunted_idles_in_every_gait_but_crouch() -> void:
+	assert_eq(HuntedBody.pick(WALK, 0.0, false, SETTINGS), HuntedBody.IDLE)
+	assert_eq(HuntedBody.pick(SPRINT, 0.1, false, SETTINGS), HuntedBody.IDLE)
+	assert_eq(HuntedBody.pick(CROUCH, 0.0, false, SETTINGS), HuntedBody.CROUCH_IDLE)
 
 
-func test_no_model_without_a_display() -> void:
-	var body := HuntedBody.new()
-	add_child_autofree(body)
-	# The tests run headless, like the dedicated server: nothing is built.
-	assert_eq(body.get_child_count(), 0)
+func test_moving_hunted_walks_runs_or_creeps() -> void:
+	assert_eq(HuntedBody.pick(WALK, 3.0, false, SETTINGS), HuntedBody.WALK)
+	assert_eq(HuntedBody.pick(SPRINT, 5.5, false, SETTINGS), HuntedBody.RUN)
+	assert_eq(HuntedBody.pick(CROUCH, 1.5, false, SETTINGS), HuntedBody.CROUCH)
 
 
-func test_animation_follows_speed_and_capture() -> void:
-	var body := HuntedBody.new()
-	assert_eq(body.get_wanted()[0], "Idle")
-	body.speed = 1.5
-	assert_eq(body.get_wanted()[0], "Walk")
-	body.speed = 3.0
-	assert_eq(body.get_wanted()[0], "Walk", "the walk speed of the hunted")
-	body.speed = 5.5
-	assert_eq(body.get_wanted()[0], "Run", "the sprint")
-	assert_lt(body.get_wanted()[1], 1.6)
-	body.down = true
-	assert_eq(body.get_wanted()[0], "Kneel", "captured")
-	body.free()
+func test_captured_hunted_kneels_whatever_it_does() -> void:
+	for gait: PlayerMotion.Gait in [WALK, CROUCH, SPRINT]:
+		assert_eq(HuntedBody.pick(gait, 4.0, true, SETTINGS), HuntedBody.KNEEL)
 
 
-func test_body_plays_the_wanted_animation() -> void:
-	var body := HuntedBody.new()
-	add_child_autofree(body)
-	body.build()
-	body.speed = 5.0
-	await wait_process_frames(2)
-	assert_eq(body.get_animation(), &"Run")
-	body.down = true
-	await wait_process_frames(2)
-	assert_eq(body.get_animation(), &"Kneel")
-
-
-func test_changing_the_look_rebuilds() -> void:
-	var body := HuntedBody.new()
-	add_child_autofree(body)
-	body.build()
-	body.look = 2
-	await wait_process_frames(1)
-	var models := body.get_children().filter(
-		func(node: Node) -> bool: return not node.is_queued_for_deletion()
+func test_playback_follows_speed_within_bounds() -> void:
+	assert_almost_eq(
+		HuntedBody.playback_scale(HuntedBody.WALK, SETTINGS.walk_speed, SETTINGS), 1.0, 0.001
 	)
-	assert_eq(models.size(), 1)
+	assert_eq(HuntedBody.playback_scale(HuntedBody.RUN, 100.0, SETTINGS), SETTINGS.max_scale)
+	assert_eq(HuntedBody.playback_scale(HuntedBody.CROUCH, 0.01, SETTINGS), SETTINGS.min_scale)
+	assert_eq(HuntedBody.playback_scale(HuntedBody.IDLE, 3.0, SETTINGS), 1.0)
+	assert_eq(HuntedBody.playback_scale(HuntedBody.KNEEL, 3.0, SETTINGS), 1.0)
 
 
-func test_online_hunted_get_a_character_and_the_monster_does_not() -> void:
-	var hunted := NetPuppet.new()
-	hunted.look = 1
-	add_child_autofree(hunted)
-	var body := hunted.get_node_or_null("Body") as HuntedBody
-	assert_not_null(body)
-	assert_eq(body.look, 1)
-	hunted.set_down(true)
-	assert_true(body.down, "captured: on its knees")
-	var monster := NetPuppet.new()
-	monster.kind = NetPuppet.Kind.MONSTER
-	add_child_autofree(monster)
-	assert_null(monster.get_node_or_null("Body"))
+func test_each_seat_has_its_character() -> void:
+	assert_eq(HuntedBody.role_for_seat(1), HuntedBody.Role.AMBULANCIER)
+	assert_eq(HuntedBody.role_for_seat(2), HuntedBody.Role.PARKA)
+	assert_eq(HuntedBody.role_for_seat(3), HuntedBody.Role.MASQUE)
 
 
-func test_prey_passes_its_look_and_speed() -> void:
-	var prey: Prey = load("res://game/entities/prey/prey.tscn").instantiate()
-	prey.look = 2
-	add_child_autofree(prey)
-	var body := prey.get_node("Body") as HuntedBody
-	assert_eq(body.look, 2)
-	prey.velocity = Vector3(3, 0, 4)
-	prey._process(0.016)
-	assert_almost_eq(body.speed, 5.0, 0.01)
-	prey.look = 0
-	assert_eq(body.look, 0)
+func test_every_character_has_its_model_and_animations() -> void:
+	for role: HuntedBody.Role in HuntedBody.MODELS:
+		var model: Node = (load(HuntedBody.MODELS[role]) as PackedScene).instantiate()
+		var players := model.find_children("*", "AnimationPlayer", true, false)
+		assert_eq(players.size(), 1, HuntedBody.MODELS[role])
+		var player: AnimationPlayer = players[0]
+		for anim in [
+			HuntedBody.IDLE,
+			HuntedBody.WALK,
+			HuntedBody.RUN,
+			HuntedBody.CROUCH,
+			HuntedBody.CROUCH_IDLE,
+			HuntedBody.KNEEL
+		]:
+			assert_true(player.has_animation(anim), "%s in %s" % [anim, HuntedBody.MODELS[role]])
+		model.free()
+
+
+func test_puppet_runs_when_it_moves_fast_and_kneels_when_caught() -> void:
+	var puppet := NetPuppet.new()
+	puppet.seat = 2
+	add_child_autofree(puppet)
+	var body: HuntedBody = puppet.find_children("*", "HuntedBody", true, false)[0]
+	assert_eq(body.role, HuntedBody.Role.PARKA)
+	puppet.gait = SPRINT
+	for i in 30:  # 5.5 m/s for half a second of snapshots.
+		puppet.buffer.push(i * 0.05, Vector3(i * 0.05 * 5.5, 0, 0), 0.0)
+	for i in 20:
+		puppet.show_at(0.5 + i * 0.016, 0.1)
+	assert_eq(body.animation, HuntedBody.RUN)
+	puppet.set_down(true)
+	puppet.show_at(1.0, 0.1)
+	assert_eq(body.animation, HuntedBody.KNEEL)
+
+
+func test_monster_puppet_has_no_hunted_body() -> void:
+	var puppet := NetPuppet.new()
+	puppet.kind = NetPuppet.Kind.MONSTER
+	add_child_autofree(puppet)
+	assert_eq(puppet.find_children("*", "HuntedBody", true, false).size(), 0)
+
+
+func test_prey_wears_a_hunted_body() -> void:
+	var prey: Prey = (load("res://game/entities/prey/prey.tscn") as PackedScene).instantiate()
+	assert_true(prey.get_node("Body") is HuntedBody)
+	prey.free()
+
+
+func test_every_character_faces_forward() -> void:
+	# Godot's forward is -Z (look_at): the toes are ahead of the ankles.
+	for role: HuntedBody.Role in HuntedBody.MODELS:
+		var model: Node = (load(HuntedBody.MODELS[role]) as PackedScene).instantiate()
+		var skeleton: Skeleton3D = model.find_children("*", "Skeleton3D", true, false)[0]
+		var ankle := skeleton.get_bone_global_rest(skeleton.find_bone("foot_l")).origin
+		var toes := skeleton.get_bone_global_rest(skeleton.find_bone("ball_l")).origin
+		assert_lt(toes.z, ankle.z, HuntedBody.MODELS[role])
+		model.free()
