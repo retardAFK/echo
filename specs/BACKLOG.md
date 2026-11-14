@@ -265,7 +265,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [x] T-162 — Menu principal définitif
   - Résultat vérifiable : jouer seul, jouer en ligne, options, crédits ; écran titre avec le nom retenu ou provisoire
   - Dépend de : T-161
-- [ ] T-163 — Options
+- [x] T-163 — Options
   - Résultat vérifiable : volumes par bus, sensibilité, inversion, champ de vision, luminosité, qualité (brouillard, ombres), clavier AZERTY ou QWERTY et touches modifiables ; enregistrées dans `user://` ; tests GUT
   - Dépend de : T-162
 - [x] T-169 — Jouer en ligne : digicode et interphone

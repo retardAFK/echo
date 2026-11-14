@@ -142,7 +142,7 @@ func test_player_holds_e_on_a_box_and_sees_the_ring() -> void:
 	await wait_physics_frames(2)
 	await wait_process_frames(2)
 	assert_eq(player.get_interactable(), box)
-	assert_eq(prompt.get_node("Label").text, "HUD_INTERACT_FUSE_BOX")
+	assert_eq(prompt.get_node("Label").text, Settings.fill(tr("HUD_INTERACT_FUSE_BOX")))
 	Input.action_press("interact")
 	await wait_seconds(1.0)
 	assert_between(player.get_hold_ratio(), 0.3, 0.7)

@@ -22,9 +22,10 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import, export web, ca
   - Résultat vérifiable : pause au style A ; en solo la partie s'arrête, en ligne elle continue avec des commandes neutres ; quitter proprement
   - Dépend de : T-162
   - Fait le 14/11/2026 : bandeau sur toute la largeur, Reprendre / Revenir au menu et les commandes du rôle toujours affichées ; en ligne la partie continue (`LocalControls.frozen` : personnage immobile, aucune action) et « Quitter la partie » ferme la connexion ; « Options » s'ajoute avec T-163 ; 10 tests GUT
-- [ ] T-163 — Options
+- [x] T-163 — Options
   - Résultat vérifiable : `UserSettings` (autoload `Settings`), écran Options à quatre onglets depuis l'accueil et la pause ; volumes par bus, sensibilité, inversion, champ de vision, luminosité, qualité (brouillard, ombres), clavier AZERTY ou QWERTY et touches modifiables ; enregistrés dans `user://` ; tests GUT
   - Dépend de : T-162
+  - Fait le 14/11/2026 : autoload `Settings` (`UserSettings`) : valeurs bornées et arrondies au pas, `user://settings.cfg`, valeur abîmée remise par défaut ; bus Effets, Ambiance et Musique créés au démarrage, chaque nouveau son envoyé sur Ambiance (ambiance de la map) ou Effets ; sensibilité et inversion dans `LocalControls`, champ de vision sur les caméras du chassé et du monstre, luminosité par l'`Environment` ; sept touches modifiables (une touche déjà prise est échangée, Échap reste la pause), noms AZERTY ou QWERTY ; textes des commandes et invites avec des jetons (`{interact}`…) remplis par le nom de la touche ; écran Options (`OptionRow`) depuis l'accueil et la pause. Pas de qualité brouillard ou ombres (voir Q4) ; 10 tests GUT
 - [ ] T-165 — HUD final
   - Résultat vérifiable : HUD des deux rôles repris sur la base 640 × 360 (D-011), lisible à toutes les tailles d'écran
   - Dépend de : T-161

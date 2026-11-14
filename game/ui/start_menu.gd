@@ -26,6 +26,8 @@ const ROLES := {
 @onready var _goal: Label = %Goal
 @onready var _controls: Label = %Controls
 @onready var _version: Label = %Version
+@onready var _foot: Control = %Foot
+@onready var _options: OptionsMenu = %Options
 
 
 func _ready() -> void:
@@ -43,6 +45,7 @@ func _ready() -> void:
 	_main_list.set_item_visible("MENU_ONLINE", net_settings.show_online)
 	_main_list.chosen.connect(_on_main_chosen)
 	_role_list.chosen.connect(_on_role_chosen)
+	_options.closed.connect(show_home)
 	for key: String in ROLES:
 		_role_list.item(key).focus_entered.connect(preview.bind(ROLES[key]))
 	var version := str(ProjectSettings.get_setting("application/config/version", ""))
@@ -57,6 +60,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func show_home() -> void:
+	_options.visible = false
+	_foot.visible = true
 	_solo.visible = false
 	_home.visible = true
 	_main_list.focus_first()
@@ -68,6 +73,12 @@ func show_solo() -> void:
 	_solo.visible = true
 	_role_list.focus_first()
 	preview(GameSession.Role.HUNTED)
+
+
+func show_options() -> void:
+	_home.visible = false
+	_foot.visible = false
+	_options.open()
 
 
 ## Shows the goal and the controls of a role.
@@ -101,6 +112,8 @@ func _on_main_chosen(key: String) -> void:
 			show_solo()
 		"MENU_ONLINE":
 			play_online()
+		"MENU_OPTIONS":
+			show_options()
 
 
 func _on_role_chosen(key: String) -> void:

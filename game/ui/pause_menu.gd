@@ -21,17 +21,20 @@ var _was_captured := false
 @onready var _list: MenuList = %PauseList
 @onready var _controls: Label = %Controls
 @onready var _online_note: Label = %OnlineNote
+@onready var _band: Control = %Band
+@onready var _options: OptionsMenu = %Options
 
 
 func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_list.chosen.connect(_on_chosen)
+	_options.closed.connect(_on_options_closed)
 
 
 func _input(event: InputEvent) -> void:
-	if not event.is_action_pressed("release_mouse"):
-		return
+	if not event.is_action_pressed("release_mouse") or _options.visible:
+		return  # Escape in the options closes them first.
 	if is_paused:
 		resume()
 	elif can_pause():
@@ -59,6 +62,8 @@ func can_pause() -> bool:
 func pause() -> void:
 	is_paused = true
 	visible = true
+	_options.visible = false
+	_band.visible = true
 	var online := is_online()
 	_controls.text = ControlsText.controls(GameSession.role)
 	_online_note.visible = online
@@ -100,5 +105,13 @@ func _on_chosen(key: String) -> void:
 	match key:
 		"PAUSE_RESUME":
 			resume()
+		"PAUSE_OPTIONS":
+			_band.visible = false
+			_options.open()
 		"PAUSE_MENU":
 			go_to_menu()
+
+
+func _on_options_closed() -> void:
+	_band.visible = true
+	_list.item("PAUSE_OPTIONS").grab_focus()

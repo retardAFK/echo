@@ -12,6 +12,8 @@ extends Button
 		_refresh_text()
 
 var _lit := false
+## A text color set from outside (the current tab), kept while lit.
+var _kept_color: Variant = null
 
 
 func _init() -> void:
@@ -52,8 +54,21 @@ func _set_lit(lit: bool) -> void:
 		add_theme_color_override("font_color", get_theme_color("font_focus_color"))
 	else:
 		remove_theme_stylebox_override("normal")
-		remove_theme_color_override("font_color")
+		if _kept_color != null:
+			add_theme_color_override("font_color", _kept_color)
+		else:
+			remove_theme_color_override("font_color")
 	queue_redraw()
+
+
+## A text color of its own when not chosen (the current tab), or null.
+func set_text_color(color: Variant) -> void:
+	_kept_color = color
+	if not _lit:
+		if color != null:
+			add_theme_color_override("font_color", color)
+		else:
+			remove_theme_color_override("font_color")
 
 
 func _refresh_text() -> void:

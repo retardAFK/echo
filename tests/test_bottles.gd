@@ -100,7 +100,7 @@ func test_player_picks_up_bottles_in_front_until_full() -> void:
 	add_child_autofree(prompt)
 	await wait_physics_frames(2)
 	await wait_process_frames(2)
-	assert_eq(prompt.get_node("Label").text, "HUD_INTERACT_PICKUP_BOTTLE")
+	assert_eq(prompt.get_node("Label").text, Settings.fill(tr("HUD_INTERACT_PICKUP_BOTTLE")))
 	player.interact()
 	await wait_process_frames(2)
 	player.interact()

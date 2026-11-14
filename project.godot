@@ -15,6 +15,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 NoiseBus="*res://game/autoload/noise_bus.gd"
 NetSession="*res://game/net/net_session.gd"
+Settings="*res://game/settings/user_settings.gd"
 
 [display]
 

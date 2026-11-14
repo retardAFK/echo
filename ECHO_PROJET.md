@@ -119,6 +119,7 @@ Toute fonctionnalité qui dépasse un budget doit être simplifiée ou faire l'o
 ### 2.7 Droits et licences
 
 - Uniquement des assets **faits par nous** ou sous licence **CC0** (Kenney, Quaternius, Poly Haven, Freesound filtré en CC0, etc.).
+- Exception pour les **polices** seulement : la licence **SIL OFL** est aussi acceptée (D-017). Le texte de la licence est rangé à côté de la police.
 - Chaque asset externe est noté dans `CREDITS.md` : nom, auteur, licence, lien.
 - Pas de nom, logo ou personnage d'une œuvre existante. *Neyasnoe* est une inspiration de style, pas une source à copier.
 
@@ -514,6 +515,7 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-014 | 13/11/2026 | Le test à 3 à 5 personnes (T-083, T-084, point de décision n°2) est reporté : Maxime veut un jeu plus avancé avant de le montrer. La phase 10 (multijoueur) commence sans attendre ; le test sera replanifié plus tard | Maxime a joué le build itch.io et validé les corrections (scan expliqué, objets visibles) |
 | D-015 | 13/11/2026 | Point de décision n°3 : multijoueur sur un **serveur dédié** (le projet Godot exporté pour Linux sans affichage fait autorité), connexions WebSocket chiffrées (`wss://`) derrière Caddy, hébergé chez Hetzner (environ 5 €/mois) avec un nom de domaine | Partie indépendante des onglets, secret du bruit garanti, passe les filtres réseau, simple à tester à 4 clients en CI (`specs/S-010-multijoueur/etude-reseau.md`) |
 | D-016 | 14/11/2026 | Hébergement du serveur (D-015) : **VPS XS d'IONOS** (x86_64, Ubuntu 24.04, `echo404.duckdns.org`) à la place de Hetzner ; nom de domaine gratuit (DuckDNS) pour les tests. Le serveur est aussi exporté pour arm64 (préréglage « Server ARM »), pour une machine ARM plus tard | Choix de Maxime : Hetzner demandait un dépôt de 25 € par PayPal ; l'offre gratuite d'Oracle Cloud et les VPS d'OVH étaient indisponibles ce jour-là. Le VPS XS (1 cœur, 1 Go) suffit pour les tests à 4 (une salle prend environ 110 Mo) ; à revoir avant la sortie (`tools/server/README.md`) |
+| D-017 | 14/11/2026 | Règle 2.7 : les polices sous licence SIL OFL sont acceptées en plus du CC0, pour les polices seulement (Barlow, Barlow Condensed et VT323 dans les menus, S-013) | L'OFL permet l'usage gratuit dans un jeu, même vendu, et n'interdit que la revente de la police seule ; presque aucune bonne police condensée n'est en CC0 (choix de Maxime) |
 
 ### 10.2 Questions ouvertes
 
