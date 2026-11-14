@@ -229,9 +229,9 @@ jobs:
           printf '%s\n' "$ECHO_DEPLOY_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -t ed25519 "$ECHO_HOST" >> ~/.ssh/known_hosts
-          bash tools/server/deploy.sh "build/server/echo_server.${ECHO_SERVER_ARCH}"
+          bash tools/server/deploy.sh "build/server/echo_server.${ECHO_SERVER_ARCH}" build/web
           rm ~/.ssh/id_ed25519
-          echo "Server ${GITHUB_SHA::7} deployed to wss://${ECHO_HOST}/lobby" >> "$GITHUB_STEP_SUMMARY"
+          echo "Server ${GITHUB_SHA::7} deployed to wss://${ECHO_HOST}/lobby, game at https://${ECHO_HOST}/" >> "$GITHUB_STEP_SUMMARY"
 
       # S-009, T-076 (Q1): every merge to main goes to the restricted itch.io
       # page of the test build (a manual run on main republishes it). Needs the secret BUTLER_API_KEY and the

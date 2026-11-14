@@ -28,12 +28,12 @@ Maxime crée les comptes et les clés. Claude donne les étapes au moment voulu 
    Sans copie du dépôt sur la machine, les trois fichiers peuvent y être envoyés en une ligne : une archive `tar.gz` en base64 décodée par `base64 -d | tar xz`.
    Le script ouvre 80 et 443 dans le pare-feu de la machine (les règles iptables des images Oracle, ou ufw ailleurs).
 5. Dans GitHub : le secret `ECHO_DEPLOY_KEY` (clé privée `echo_deploy`) et la variable `ECHO_HOST` (le domaine). Sur une machine ARM, ajouter la variable `ECHO_SERVER_ARCH=arm64`.
-6. La CI déploie ensuite chaque version de `main` avec `deploy.sh` (l'export pour le processeur du serveur, copié en `/opt/echo/echo_server`), et le build web de la même version se connecte à `wss://<domaine>`.
+6. La CI déploie ensuite chaque version de `main` avec `deploy.sh` (l'export pour le processeur du serveur, copié en `/opt/echo/echo_server`), et le build web de la même version, servi par Caddy sur `https://<domaine>/` (copié en `/opt/echo/web`) et connecté à `wss://<domaine>`.
 
 ## Fichiers
 | Fichier | Rôle |
 |---|---|
-| `Caddyfile` | HTTPS et aiguillage `/lobby`, `/s1` à `/s8` vers les ports |
+| `Caddyfile` | HTTPS, aiguillage `/lobby`, `/s1` à `/s8` vers les ports, et le jeu web à la racine |
 | `echo-lobby.service` | service systemd de l'accueil (et de ses salles) |
 | `setup.sh` | installation d'un serveur neuf |
-| `deploy.sh` | envoi d'une nouvelle version et redémarrage |
+| `deploy.sh` | envoi d'une nouvelle version (serveur et jeu web) et redémarrage |
