@@ -1,6 +1,6 @@
 # Écho dedicated server (S-010, D-015). Caddy gets the HTTPS certificate from
 # Let's Encrypt and forwards the WebSocket connections to the Godot processes
-# on this machine. setup.sh writes the domain in place of {$ECHO_DOMAIN}.
+# on this machine, and serves the web game. setup.sh writes the domain in place of {$ECHO_DOMAIN}.
 {$ECHO_DOMAIN} {
 	handle /lobby {
 		reverse_proxy 127.0.0.1:8910
@@ -30,7 +30,13 @@
 	handle /s8 {
 		reverse_proxy 127.0.0.1:9008
 	}
+	# Everything else is the web game itself (T-108), sent by deploy.sh.
+	# Its file names never change between versions, so browsers must check
+	# for a new version each time (no stale build after a deploy).
 	handle {
-		respond "Écho" 200
+		root * /opt/echo/web
+		header Cache-Control "no-cache"
+		encode zstd gzip
+		file_server
 	}
 }
