@@ -250,14 +250,14 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 **Retour de Maxime (13/11/2026)** : le salon en ligne de T-096 (créer, rejoindre, places) est une version de test ; son design est à reprendre ici avec les autres menus.
 
-**Avancée (14/11/2026)** : à la demande de Maxime, le design des menus commence avant les phases 11 et 12. Brouillon de spec : `specs/S-013-interface-et-menus/spec.md` ; trois styles maquettés, choix en attente.
+**Avancée (14/11/2026)** : à la demande de Maxime, le design des menus commence avant les phases 11 et 12. Spec : `specs/S-013-interface-et-menus/spec.md` ; style A « Sodium et digicode » choisi par Maxime.
 
 **Terminé quand** : chaque menu se parcourt à la souris et au clavier, et les réglages survivent à un rechargement de la page.
 
-- [ ] T-160 — Spec S-013
+- [x] T-160 — Spec S-013
   - Résultat vérifiable : spec validée
   - Dépend de : T-148
-- [ ] T-161 — Plan et tâches de S-013
+- [x] T-161 — Plan et tâches de S-013
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-160
 - [ ] T-162 — Menu principal définitif
@@ -265,6 +265,9 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Dépend de : T-161
 - [ ] T-163 — Options
   - Résultat vérifiable : volumes par bus, sensibilité, inversion, champ de vision, luminosité, qualité (brouillard, ombres), clavier AZERTY ou QWERTY et touches modifiables ; enregistrées dans `user://` ; tests GUT
+  - Dépend de : T-162
+- [ ] T-169 — Jouer en ligne : digicode et interphone
+  - Résultat vérifiable : salon en ligne refait au style choisi (T-160)
   - Dépend de : T-162
 - [ ] T-164 — Pause et menus en partie
   - Résultat vérifiable : en solo la partie s'arrête, en ligne elle continue ; quitter proprement

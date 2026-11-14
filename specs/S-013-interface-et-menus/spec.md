@@ -1,6 +1,6 @@
 # S-013 — Interface, menus et options
 
-**Statut** : brouillon (14/11/2026). Q1 (le style) attend le choix de Maxime ; Q2 à Q8 sont des propositions de Claude
+**Statut** : validée (14/11/2026), Q1 tranchée par Maxime, Q2 à Q8 proposées par Claude
 **Piliers servis** : P3 (l'inquiétante familiarité) et P4 (le rétro qui dérange) dès le premier écran ; P1 par des réglages de son qui laissent entendre les bruits
 **Phase** : 13 — Interface, menus et options (voir `specs/BACKLOG.md`), commencée avant les phases 11 et 12 à la demande de Maxime (14/11/2026)
 **Maquettes** : https://claude.ai/artifact/9uoNuSUbyjuRZcnAdZ9wrA (trois styles, cinq écrans chacun)
@@ -31,7 +31,7 @@ En pleine partie, elle appuie sur Échap : le menu de pause s'ouvre par-dessus l
 8. **Chargement** : une progression pendant le chargement de la map (T-166).
 
 ## Clarifications
-- Q1 : Quel style pour tous les menus ? → Proposition : **A, Sodium et digicode** (signalétique de cité, sélection en ocre de lampadaire, rejoindre sur un digicode, salon en interphone), le plus lisible et le plus proche de la palette de la section 2.3. Autres choix : B, Main courante (dossier de police) ; C, Vidéosurveillance (écran du gardien, salon en quatre caméras). → R : en attente de Maxime.
+- Q1 : Quel style pour tous les menus ? → Proposition : **A, Sodium et digicode** (signalétique de cité, sélection en ocre de lampadaire, rejoindre sur un digicode, salon en interphone), le plus lisible et le plus proche de la palette de la section 2.3. Autres choix : B, Main courante (dossier de police) ; C, Vidéosurveillance (écran du gardien, salon en quatre caméras). → R : **A, Sodium et digicode** (Maxime, 14/11/2026).
 - Q2 : Que montre le fond des menus ? → Proposition : de **vraies vues de la cité**, capturées dans le jeu par un script de `tools/godot/` et enregistrées en images (une par écran). Une vraie scène 3D en mouvement derrière le menu serait plus belle mais chargerait la map avant même de jouer, ce qui coûte du temps de chargement et de la mémoire. → R : proposition de Claude.
 - Q3 : Quelles polices ? → Proposition : des polices **libres (OFL ou Apache)** embarquées dans le jeu, notées dans `CREDITS.md`, avec un seul thème Godot (`game/ui/theme/`) partagé par tous les menus au lieu de réglages bouton par bouton. → R : proposition de Claude.
 - Q4 : Quels réglages ? → Proposition : **Son** : volume général, effets, ambiance, musique (les bus qui n'existent pas encore avant S-012 sont créés vides). **Contrôles** : sensibilité de la souris, inversion verticale. **Image** : luminosité, champ de vision, qualité (brouillard, ombres). **Touches** : clavier AZERTY ou QWERTY (le jeu lit déjà les touches physiques, ce réglage change l'affichage des noms de touches), et touches modifiables action par action. → R : proposition de Claude.
