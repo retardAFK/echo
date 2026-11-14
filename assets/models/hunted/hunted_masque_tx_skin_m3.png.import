@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b3e386pt0x4da"
-path="res://.godot/imported/hunted_ambulancier_T_Superhero_Male_Dark_256.png-715e4fc32ae4269318df6adf1b9b7308.ctex"
+uid="uid://4kdn5tyqws4m"
+path="res://.godot/imported/hunted_masque_tx_skin_m3.png-ae9012a8d249b8235a2cf80a56c57d62.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "b96aa0a258b0ede5ae0208d3fc7f4b32"
+"md5": "bad74a8f0afba69868f4a1765b6bb5fd"
 }
 
 [deps]
 
-source_file="res://assets/models/hunted/hunted_ambulancier_T_Superhero_Male_Dark_256.png"
-dest_files=["res://.godot/imported/hunted_ambulancier_T_Superhero_Male_Dark_256.png-715e4fc32ae4269318df6adf1b9b7308.ctex"]
+source_file="res://assets/models/hunted/hunted_masque_tx_skin_m3.png"
+dest_files=["res://.godot/imported/hunted_masque_tx_skin_m3.png-ae9012a8d249b8235a2cf80a56c57d62.ctex"]
 
 [params]
 

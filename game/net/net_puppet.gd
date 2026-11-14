@@ -1,9 +1,10 @@
 class_name NetPuppet
 extends Node3D
-## Another player of an online game as this client sees it (S-010, T-097): a
-## hunted is one of the three characters (HuntedBody, S-011), animated from how
-## fast it moves; the monster is still a plain silhouette. It moves between the
-## snapshots the room sends. Hidden while the room does not send it (out of sight).
+## Another player of an online game as this client sees it (S-010, T-097),
+## moved between the snapshots the room sends. A hunted has its character
+## (S-011, T-126: the seat decides which), animated from its gait and the
+## speed seen between snapshots; the monster is still a plain silhouette.
+## Hidden while the room does not send it (out of sight).
 ## A captured hunted (T-107) is down on its knees: a free hunted next to it
 ## sees the prompt to free it, and the room does the freeing.
 
@@ -19,26 +20,31 @@ const KNEEL_SCALE := 0.55
 ## Eyes below the top of the silhouette, in meters (the spectator's view).
 const EYE_OFFSET := 0.15
 const PLAYER_SETTINGS := preload("res://game/data/player_settings.tres")
+const BODY_SCENE := preload("res://game/entities/hunted_body/hunted_body.tscn")
+## How fast the shown speed follows the speed seen between frames (per second).
+const SPEED_SMOOTHING := 10.0
 
 var kind := Kind.HUNTED
-## Which of the three hunted (seat 1 to 3 online: 0 to 2).
-var look := 0
+## Its seat in the lobby (S-011 Q5: a hunted's character).
+var seat := 1
+## Its gait, from the snapshots (PlayerMotion.Gait).
+var gait := PlayerMotion.Gait.WALK
 var buffer := SnapshotBuffer.new()
 ## Captured, on its knees (T-107).
 var down := false
 
 var _body: MeshInstance3D
-var _hunted: HuntedBody
-var _last_position := Vector3.ZERO
+var _character: HuntedBody
 var _speed := 0.0
+var _last_position := Vector3.ZERO
+var _last_time := -1.0
 
 
 func _ready() -> void:
 	if kind == Kind.HUNTED:
-		_hunted = HuntedBody.new()
-		_hunted.name = "Body"
-		_hunted.look = look
-		add_child(_hunted)
+		_character = BODY_SCENE.instantiate()
+		_character.role = HuntedBody.role_for_seat(seat)
+		add_child(_character)
 		return
 	var height := _height()
 	var capsule := CapsuleMesh.new()
@@ -59,31 +65,40 @@ func show_at(time: float, max_extrapolation: float) -> void:
 	if buffer.is_empty():
 		return
 	var pose := buffer.sample(time, max_extrapolation)
-	global_position = pose[0]
+	var position_now: Vector3 = pose[0]
+	if _last_time >= 0.0 and time > _last_time:
+		var gap := position_now - _last_position
+		var seen := Vector2(gap.x, gap.z).length() / (time - _last_time)
+		_speed = lerpf(_speed, seen, minf(1.0, SPEED_SMOOTHING * (time - _last_time)))
+	_last_time = time
+	_last_position = position_now
+	global_position = position_now
 	rotation.y = pose[1]
+	if _character != null:
+		_character.show_state(gait, _speed, down)
 
 
-func _process(delta: float) -> void:
-	if _hunted == null or delta <= 0.0:
-		return
-	var moved := global_position - _last_position
-	_last_position = global_position
-	# Smoothed: the snapshots do not land on every frame.
-	var now := Vector2(moved.x, moved.z).length() / delta
-	_speed = lerpf(_speed, minf(now, 12.0), minf(1.0, delta * 8.0))
-	_hunted.speed = _speed
+## Back in sight: no speed from where it was lost.
+func restart_motion() -> void:
+	_last_time = -1.0
+	_speed = 0.0
 
 
 ## Down on its knees (captured) or standing again (freed).
 func set_down(value: bool) -> void:
 	if value == down or kind != Kind.HUNTED:
 		return
-	down = value
-	_hunted.down = down
+	down = value  # The character kneels (show_state).
 	if down:
 		add_to_group(Interactable.GROUP)
 	else:
 		remove_from_group(Interactable.GROUP)
+
+
+## Hides its character while the spectator camera sits in its head.
+func set_seen_from_inside(inside: bool) -> void:
+	if _character != null:
+		_character.visible = not inside
 
 
 ## Height of its eyes above its feet.

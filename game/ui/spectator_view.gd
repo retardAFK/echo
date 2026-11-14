@@ -10,6 +10,8 @@ var net: NetGame
 
 var _camera := Camera3D.new()
 var _hint := Label.new()
+## The teammate whose eyes the camera uses: its body is hidden.
+var _inside: NetPuppet
 
 
 func _ready() -> void:
@@ -38,6 +40,12 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	var puppet: NetPuppet = net.puppets.get(net.watched_seat)
 	_hint.visible = puppet != null
+	if puppet != _inside:  # Its own body would hide the view (S-011).
+		if is_instance_valid(_inside):
+			_inside.set_seen_from_inside(false)
+		_inside = puppet
+		if puppet != null:
+			puppet.set_seen_from_inside(true)
 	if puppet == null:
 		return
 	_camera.global_position = puppet.global_position + Vector3.UP * puppet.get_eye_height()
