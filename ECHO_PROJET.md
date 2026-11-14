@@ -365,7 +365,7 @@ Chaque phase a un objectif, des livrables et une **définition de « terminé »
 
 > **Point de décision n°2** : version jouable à faire tester à 3 ou 5 personnes de confiance. On note les retours dans le journal.
 
-> **Point de décision n°3** : faut-il un serveur payant ? Coûts et hébergement à étudier avant de commencer la phase 10. → Tranché le 13/11/2026 (D-015) : serveur dédié Hetzner ; hébergé finalement sur l'offre gratuite d'Oracle Cloud (D-016, 14/11/2026).
+> **Point de décision n°3** : faut-il un serveur payant ? Coûts et hébergement à étudier avant de commencer la phase 10. → Tranché le 13/11/2026 (D-015) : serveur dédié Hetzner ; hébergé finalement chez IONOS (D-016, 14/11/2026).
 
 ### Phase 10 — Multijoueur en ligne (la phase la plus difficile)
 - Spec S-010 : architecture réseau. Pour le navigateur, Godot propose WebSocket et WebRTC. Choix à faire dans le plan.
@@ -513,7 +513,7 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-013 | 12/11/2026 | Après le test à plusieurs (phase 9), le multijoueur passe avant les personnages, l'audio et les menus. Nouvel ordre : 9 test à plusieurs, 10 multijoueur, 11 personnages, 12 audio, 13 menus, 14 hôpital, 15 sortie (détail dans `specs/BACKLOG.md`) | Ce qui est ajouté avant le réseau devrait sinon être repris pour être synchronisé, et on teste plus tôt à 4 vrais joueurs |
 | D-014 | 13/11/2026 | Le test à 3 à 5 personnes (T-083, T-084, point de décision n°2) est reporté : Maxime veut un jeu plus avancé avant de le montrer. La phase 10 (multijoueur) commence sans attendre ; le test sera replanifié plus tard | Maxime a joué le build itch.io et validé les corrections (scan expliqué, objets visibles) |
 | D-015 | 13/11/2026 | Point de décision n°3 : multijoueur sur un **serveur dédié** (le projet Godot exporté pour Linux sans affichage fait autorité), connexions WebSocket chiffrées (`wss://`) derrière Caddy, hébergé chez Hetzner (environ 5 €/mois) avec un nom de domaine | Partie indépendante des onglets, secret du bruit garanti, passe les filtres réseau, simple à tester à 4 clients en CI (`specs/S-010-multijoueur/etude-reseau.md`) |
-| D-016 | 14/11/2026 | Hébergement du serveur (D-015) : **offre gratuite d'Oracle Cloud** (machine ARM Ampere A1, Ubuntu 24.04) à la place de Hetzner ; le serveur est aussi exporté pour arm64 (préréglage « Server ARM ») ; nom de domaine gratuit (DuckDNS) pour les tests | Choix de Maxime : 0 € au lieu d'un dépôt de 25 € chez Hetzner ; la machine est largement assez puissante. Contreparties acceptées : vérification par carte, disponibilité parfois limitée, machine reprise par Oracle si inutilisée (`tools/server/README.md`) |
+| D-016 | 14/11/2026 | Hébergement du serveur (D-015) : **VPS XS d'IONOS** (x86_64, Ubuntu 24.04, `echo404.duckdns.org`) à la place de Hetzner ; nom de domaine gratuit (DuckDNS) pour les tests. Le serveur est aussi exporté pour arm64 (préréglage « Server ARM »), pour une machine ARM plus tard | Choix de Maxime : Hetzner demandait un dépôt de 25 € par PayPal ; l'offre gratuite d'Oracle Cloud et les VPS d'OVH étaient indisponibles ce jour-là. Le VPS XS (1 cœur, 1 Go) suffit pour les tests à 4 (une salle prend environ 110 Mo) ; à revoir avant la sortie (`tools/server/README.md`) |
 
 ### 10.2 Questions ouvertes
 

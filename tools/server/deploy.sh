@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Sends a server build to the Écho server and restarts the lobby (S-010).
-# Used by the CI on main (T-108): deploy.sh build/server/echo_server.arm64
-# (the build for the server's processor: arm64 on Oracle Ampere, x86_64 elsewhere).
+# Used by the CI on main (T-108): deploy.sh build/server/echo_server.x86_64
+# (the build for the server's processor: x86_64, or arm64 on an ARM machine).
 # Needs ECHO_HOST (the domain) and an SSH agent or key for the "echo" user.
 set -euo pipefail
 

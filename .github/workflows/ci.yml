@@ -68,7 +68,7 @@ jobs:
           unzip -q /tmp/godot.zip -d ~/godot
           mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
           # Only the web templates and the Linux ones (dedicated server, S-010:
-          # x86_64 for the CI, arm64 for the Oracle Ampere server, T-108) are kept
+          # x86_64 for the CI and the server, arm64 for an ARM server, T-108) are kept
           curl -fsSL -o /tmp/templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
           dest=~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
           mkdir -p "$dest"
@@ -156,7 +156,7 @@ jobs:
           godot --headless --export-release "Server" build/server/echo_server.x86_64
           test -x build/server/echo_server.x86_64
           echo "Server build: $(( $(stat -c %s build/server/echo_server.x86_64) / 1024 / 1024 )) MB" >> "$GITHUB_STEP_SUMMARY"
-          # T-108: the same for the ARM processor of the Oracle Ampere server.
+          # T-108: the same for an ARM server (D-016).
           godot --headless --export-release "Server ARM" build/server/echo_server.arm64
           file build/server/echo_server.arm64 | grep -q "ARM aarch64"
 
@@ -219,7 +219,7 @@ jobs:
         env:
           ECHO_HOST: ${{ vars.ECHO_HOST }}
           ECHO_DEPLOY_KEY: ${{ secrets.ECHO_DEPLOY_KEY }}
-          ECHO_SERVER_ARCH: ${{ vars.ECHO_SERVER_ARCH || 'arm64' }}
+          ECHO_SERVER_ARCH: ${{ vars.ECHO_SERVER_ARCH || 'x86_64' }}
         run: |
           if [ -z "$ECHO_HOST" ] || [ -z "$ECHO_DEPLOY_KEY" ]; then
             echo "::notice::server not set up (ECHO_HOST, ECHO_DEPLOY_KEY): not deployed"
