@@ -1,9 +1,11 @@
 class_name PauseMenu
 extends CanvasLayer
-## Pause (spec S-009, Q6, T-080): Escape freezes the game (AIs, timers,
-## sounds), frees the mouse and offers to resume, read the controls or go back
-## to the start menu. In a browser, Escape always frees a captured mouse first
-## and the key may never reach the game: losing the mouse also pauses.
+## Pause (spec S-009, Q6, T-080; style A of S-013, T-164): Escape opens a band
+## across the screen to resume or go back to the menu, with the controls of
+## the role. Alone, the game stops (AIs, timers, sounds). Online it goes on
+## and the avatar stands still while the menu is open (S-013, Q6). In a
+## browser, Escape always frees a captured mouse first and the key may never
+## reach the game: losing the mouse also pauses.
 
 signal paused_changed(is_paused: bool)
 
@@ -16,19 +18,15 @@ var is_paused := false
 
 var _was_captured := false
 
-@onready var _resume: Button = %ResumeButton
-@onready var _controls_button: Button = %ControlsButton
-@onready var _menu: Button = %MenuButton
+@onready var _list: MenuList = %PauseList
 @onready var _controls: Label = %Controls
+@onready var _online_note: Label = %OnlineNote
 
 
 func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_resume.pressed.connect(resume)
-	_controls_button.pressed.connect(toggle_controls)
-	_menu.pressed.connect(go_to_menu)
-	_controls.visible = false
+	_list.chosen.connect(_on_chosen)
 
 
 func _input(event: InputEvent) -> void:
@@ -48,6 +46,11 @@ func _process(_delta: float) -> void:
 	_was_captured = captured
 
 
+## True in an online game: the pause does not stop it.
+static func is_online() -> bool:
+	return NetSession.mode == NetSession.Mode.CLIENT
+
+
 ## Not over another screen that already stopped the game (end of game).
 func can_pause() -> bool:
 	return not get_tree().paused
@@ -56,11 +59,17 @@ func can_pause() -> bool:
 func pause() -> void:
 	is_paused = true
 	visible = true
+	var online := is_online()
 	_controls.text = ControlsText.controls(GameSession.role)
-	get_tree().paused = true
+	_online_note.visible = online
+	_list.item("PAUSE_MENU").key = "PAUSE_LEAVE_ONLINE" if online else "PAUSE_MENU"
+	if online:
+		LocalControls.frozen = true
+	else:
+		get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_was_captured = false
-	_resume.grab_focus()
+	_list.focus_first()
 	paused_changed.emit(true)
 
 
@@ -68,19 +77,28 @@ func pause() -> void:
 func resume() -> void:
 	is_paused = false
 	visible = false
-	_controls.visible = false
+	LocalControls.frozen = false
 	get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_was_captured = Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	paused_changed.emit(false)
 
 
-func toggle_controls() -> void:
-	_controls.visible = not _controls.visible
-
-
+## Back to the start menu. Online, this player leaves the game: an AI takes
+## the seat (S-010, Q7) and the same code lets the player come back.
 func go_to_menu() -> void:
 	is_paused = false
+	LocalControls.frozen = false
 	get_tree().paused = false
+	if is_online():
+		NetSession.leave()
 	if change_scene:
 		get_tree().change_scene_to_file(MENU_SCENE)
+
+
+func _on_chosen(key: String) -> void:
+	match key:
+		"PAUSE_RESUME":
+			resume()
+		"PAUSE_MENU":
+			go_to_menu()

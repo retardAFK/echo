@@ -271,7 +271,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [x] T-169 — Jouer en ligne : digicode et interphone
   - Résultat vérifiable : salon en ligne refait au style choisi (T-160)
   - Dépend de : T-162
-- [ ] T-164 — Pause et menus en partie
+- [x] T-164 — Pause et menus en partie
   - Résultat vérifiable : en solo la partie s'arrête, en ligne elle continue ; quitter proprement
   - Dépend de : T-162
 - [ ] T-165 — HUD final
