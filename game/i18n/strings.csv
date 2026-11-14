@@ -111,3 +111,17 @@ HUD_RESCUED,Libéré
 HUD_ELIMINATED,Éliminé
 HUD_SPECTATOR,"Tu regardes un coéquipier, clic pour changer"
 HUD_RECONNECTING,"Connexion perdue, reconnexion…"
+MENU_TITLE,Écho
+MENU_SUBTITLE,Cité des Tilleuls · 02 h 47
+MENU_PLATE,Bât. C · Esc. 2
+MENU_SOLO,Jouer seul
+MENU_SOLO_HINT,"Une partie contre l'IA, dans ton navigateur. Choisis ton rôle."
+MENU_HELP,Entrée : valider · Échap : retour
+MENU_VERSION,version %s
+LOBBY_LEADER_TAG,chef
+LOBBY_INTERCOM,Interphone
+LOBBY_INTERCOM_HINT,Appuie pour prendre une place
+LOBBY_ONLINE_SUB,Un monstre contre trois chassés
+LOBBY_JOIN_HINT,"Tape le code que ton ami t'a envoyé, sur le digicode ou au clavier. Un code fait 4 lettres."
+LOBBY_CODE_CAPTION,Code à envoyer à tes amis
+LOBBY_ROOM,Salon

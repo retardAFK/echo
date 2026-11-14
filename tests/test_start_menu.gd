@@ -1,5 +1,5 @@
 extends GutTest
-## Start menu and role choice (spec S-004, Q1, T-021).
+## Start menu and role choice (spec S-004, Q1, T-021; style A of S-013, T-162).
 
 const MENU_SCENE := preload("res://game/ui/start_menu.tscn")
 const MAP_SCENE := preload("res://game/maps/greybox_test.tscn")
@@ -17,34 +17,50 @@ func after_each() -> void:
 	GameSession.role = GameSession.Role.HUNTED
 
 
-func test_buttons_use_translation_keys() -> void:
-	assert_eq(_menu.get_node("%HuntedButton").text, "MENU_PLAY_HUNTED")
-	assert_eq(_menu.get_node("%MonsterButton").text, "MENU_PLAY_MONSTER")
-	assert_eq(tr("MENU_PLAY_MONSTER"), "Monstre")
+func test_entries_use_translation_keys() -> void:
+	var main: MenuList = _menu.get_node("%MainList")
+	assert_eq(main.item("MENU_SOLO").text, tr("MENU_SOLO").to_upper())
+	var roles: MenuList = _menu.get_node("%RoleList")
+	assert_eq(roles.item("MENU_PLAY_MONSTER").text, "MONSTRE")
 
 
-func test_buttons_set_the_role() -> void:
+func test_solo_opens_the_role_choice_and_back() -> void:
+	assert_true(_menu.get_node("%Home").visible)
+	assert_false(_menu.get_node("%Solo").visible)
+	_menu.get_node("%MainList").item("MENU_SOLO").pressed.emit()
+	assert_true(_menu.get_node("%Solo").visible)
+	assert_false(_menu.get_node("%Home").visible)
+	_menu.get_node("%RoleList").item("MENU_BACK").pressed.emit()
+	assert_true(_menu.get_node("%Home").visible)
+
+
+func test_role_entries_set_the_role() -> void:
 	watch_signals(_menu)
-	_menu.get_node("%MonsterButton").pressed.emit()
+	_menu.show_solo()
+	_menu.get_node("%RoleList").item("MENU_PLAY_MONSTER").pressed.emit()
 	assert_eq(GameSession.role, GameSession.Role.MONSTER)
 	assert_signal_emitted_with_parameters(_menu, "role_chosen", [GameSession.Role.MONSTER])
-	_menu.get_node("%HuntedButton").pressed.emit()
+	_menu.get_node("%RoleList").item("MENU_PLAY_HUNTED").pressed.emit()
 	assert_eq(GameSession.role, GameSession.Role.HUNTED)
+	assert_eq(GameSession.online_seat, -1, "alone, not online")
 
 
-func test_choice_shows_goal_and_controls_of_the_role() -> void:
-	assert_false(_menu.get_node("%RolePanel").visible)
-	_menu.choose(GameSession.Role.MONSTER)
-	assert_true(_menu.get_node("%RolePanel").visible)
-	assert_false(_menu.get_node("%Buttons").visible)
+func test_role_under_the_cursor_shows_goal_and_controls() -> void:
+	_menu.show_solo()
+	assert_eq(_menu.get_node("%Goal").text, tr("GOAL_HUNTED"), "the first role is shown")
+	_menu.get_node("%RoleList").item("MENU_PLAY_MONSTER").grab_focus()
 	var controls: String = _menu.get_node("%Controls").text
 	assert_string_contains(controls, tr("CONTROLS_SCAN"))
 	assert_false(controls.contains(tr("CONTROLS_THROW")), "no bottles for the monster")
 	assert_eq(_menu.get_node("%Goal").text, tr("GOAL_MONSTER"))
-	_menu.back()
-	assert_true(_menu.get_node("%Buttons").visible)
-	_menu.choose(GameSession.Role.HUNTED)
+	_menu.get_node("%RoleList").item("MENU_PLAY_HUNTED").grab_focus()
 	assert_string_contains(_menu.get_node("%Controls").text, tr("CONTROLS_THROW"))
+
+
+func test_home_has_the_focus_for_the_keyboard() -> void:
+	assert_true(_menu.get_node("%MainList").item("MENU_SOLO").has_focus())
+	_menu.show_solo()
+	assert_true(_menu.get_node("%RoleList").item("MENU_PLAY_HUNTED").has_focus())
 
 
 func test_every_control_line_is_translated() -> void:

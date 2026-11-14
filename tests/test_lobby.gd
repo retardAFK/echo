@@ -209,10 +209,10 @@ func test_online_button_hidden_until_enabled() -> void:
 	var menu: StartMenu = START_MENU.instantiate()
 	menu.change_scene = false
 	add_child_autofree(menu)
-	assert_false(menu.get_node("%OnlineButton").visible)
+	assert_false(menu.get_node("%MainList").item("MENU_ONLINE").visible)
 	var shown: StartMenu = START_MENU.instantiate()
 	shown.change_scene = false
 	shown.net_settings = _settings
 	_settings.show_online = true
 	add_child_autofree(shown)
-	assert_true(shown.get_node("%OnlineButton").visible)
+	assert_true(shown.get_node("%MainList").item("MENU_ONLINE").visible)

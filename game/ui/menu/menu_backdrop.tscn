@@ -1,0 +1,75 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/ui/menu/menu_backdrop.gd" id="1_backdrop"]
+
+[sub_resource type="Gradient" id="Gradient_shade"]
+offsets = PackedFloat32Array(0, 0.4, 1)
+colors = PackedColorArray(0.03, 0.027, 0.02, 0.93, 0.03, 0.027, 0.02, 0.62, 0.1, 0.07, 0.02, 0.1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_shade"]
+gradient = SubResource("Gradient_shade")
+width = 256
+height = 4
+
+[sub_resource type="Gradient" id="Gradient_floor"]
+offsets = PackedFloat32Array(0, 0.7, 1)
+colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0.02, 0.02, 0.015, 0.7)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_floor"]
+gradient = SubResource("Gradient_floor")
+width = 4
+height = 128
+fill_to = Vector2(0, 1)
+
+[node name="MenuBackdrop" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_backdrop")
+
+[node name="Fill" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.043, 0.039, 0.031, 1)
+
+[node name="Image" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Shade" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_shade")
+expand_mode = 1
+
+[node name="Floor" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_floor")
+expand_mode = 1
