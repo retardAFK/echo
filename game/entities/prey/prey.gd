@@ -46,6 +46,9 @@ var ruse_counts := {}
 ## Online room (S-010, T-101): its capture rule, null otherwise.
 var capture: CaptureState
 ## Captured, on its knees (T-107): it neither moves nor acts.
+## Which of the three hunted it looks like (S-011, HuntedBody).
+var look := 0:
+	set = set_look
 var held := false:
 	set = set_held
 
@@ -78,9 +81,11 @@ var _errand_spot := Vector3.ZERO
 var _errand_look_left := 0.0
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
+@onready var _body: HuntedBody = $Body
 
 
 func _ready() -> void:
+	_body.look = look
 	_rng.seed = hash(name)
 	inventory = Inventory.new(ruse_settings)
 	brain = PreyBrain.new(settings, _rng.randi())
@@ -595,6 +600,17 @@ func _update_hiding(delta: float) -> bool:
 		return false
 	_hide_hold.update(self, _hide_spot, want, delta)
 	return hiding_in != null or want
+
+
+func set_look(value: int) -> void:
+	look = value
+	if is_node_ready():
+		_body.look = value
+
+
+func _process(_delta: float) -> void:
+	_body.speed = Vector2(velocity.x, velocity.z).length()
+	_body.down = held or (capture != null and capture.state == CaptureState.State.CAPTURED)
 
 
 ## Gets into a hiding spot (S-008): still, out of reach, out of sight.

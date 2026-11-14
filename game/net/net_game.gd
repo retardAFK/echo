@@ -556,6 +556,7 @@ func _puppet(seat: int) -> NetPuppet:
 		puppet.kind = (
 			NetPuppet.Kind.MONSTER if seat == LobbyState.MONSTER_SEAT else NetPuppet.Kind.HUNTED
 		)
+		puppet.look = seat - 1
 		puppet.visible = false
 		get_parent().add_child(puppet)
 		puppets[seat] = puppet

@@ -5,7 +5,7 @@ Seuls les assets faits par nous ou sous licence **CC0** sont acceptés.
 
 | Asset | Auteur | Licence | Lien | Utilisé dans |
 |---|---|---|---|---|
-| _(aucun pour l'instant)_ | | | | |
+| Universal Base Characters (corps et squelette des chassés, cheveux) | Quaternius | CC0 | https://quaternius.com | Chassés, `assets/models/hunted/` (S-011, T-124), adaptés par `tools/blender/hunted/` |
 
 ## Assets faits par nous
 

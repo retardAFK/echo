@@ -394,6 +394,7 @@ func _set_ai_monster(monster: Monster) -> void:
 func _new_ai_prey(seat: int, marker: Node3D) -> Prey:
 	var each: Prey = PREY_SCENE.instantiate()
 	each.name = "AiHunted%d" % seat
+	each.look = seat - 1
 	each.wander_route = get_node_or_null("PreyRoute")
 	each.hiding_spots = get_node_or_null("HidingSpots")
 	each.buildings = get_buildings()
@@ -737,6 +738,7 @@ func add_ai_preys(count: int) -> void:
 			each.hiding_spots = $HidingSpots
 			each.monster = avatar
 			each.buildings = get_buildings()
+		each.look = i
 		var marker: Node3D = markers[i % markers.size()]
 		each.position = marker.global_position
 		each.rotation.y = marker.global_rotation.y
