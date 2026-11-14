@@ -201,6 +201,17 @@ jobs:
           grep "load" build/server/lobby.log | tail -n 1 >> "$GITHUB_STEP_SUMMARY"
           exit $code
 
+      - name: Upload online test logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: online-test-logs
+          path: |
+            build/server/*.log
+            build/server/match/
+          retention-days: 14
+          if-no-files-found: ignore
+
       - name: Upload server build
         uses: actions/upload-artifact@v7
         with:
