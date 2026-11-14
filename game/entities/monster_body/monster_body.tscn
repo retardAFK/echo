@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/monster_body/monster_body.gd" id="1_body"]
+[ext_resource type="Resource" path="res://game/data/monster_body_settings.tres" id="2_settings"]
+
+[node name="MonsterBody" type="Node3D"]
+script = ExtResource("1_body")
+settings = ExtResource("2_settings")

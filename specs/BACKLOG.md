@@ -181,12 +181,14 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-121 — Plan et tâches de S-011
   - Résultat vérifiable : `plan.md` (squelettes, sources d'animations CC0, budget de triangles) et `tasks.md`
   - Dépend de : T-120
-- [ ] T-122 — Modèle du monstre
+- [x] T-122 — Modèle du monstre
   - Résultat vérifiable : script dans `tools/blender/`, 2 500 triangles au plus, textures de 64 à 256 px ; rendus validés par Maxime
   - Dépend de : T-121
+  - Fait le 14/11/2026 : le chasseur, piste B choisie par Maxime (masque blanc fêlé à deux yeux rouges, 2,30 m, bras griffus étirés), `tools/blender/hunter.py`, 2 438 triangles
 - [ ] T-123 — Squelette et animations du monstre
   - Résultat vérifiable : rôder, marcher, courir, scanner, ouvrir une cachette, écraser un réveil, attraper
   - Dépend de : T-122
+  - En cours : repos, rôder, marcher, courir, scanner, ouvrir une cachette, en jeu (IA et vue des chassés en ligne) ; restent écraser un réveil et attraper (avec T-127)
 - [x] T-124 — Modèles des chassés
   - Résultat vérifiable : une variante par chassé (Q-002), 800 à 2 500 triangles, base CC0 adaptée au style ; rendus validés par Maxime
   - Dépend de : T-121

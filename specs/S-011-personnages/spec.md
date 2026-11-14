@@ -1,6 +1,6 @@
 # S-011 — Personnages et animations
 
-**Statut** : en cours (14/11/2026). Q1 validée par Maxime ; Q2 en proposition ; Q3 à Q6 proposées par Claude
+**Statut** : en cours (14/11/2026). Q1 et Q2 validées par Maxime ; Q3 à Q6 proposées par Claude
 **Piliers servis** : P3 (asymétrie) — deux rôles qui se lisent d'un coup d'œil ; P2 (le dilemme) — on reconnaît le coéquipier à sauver
 **Phase** : 11 — Personnages et animations (voir `specs/BACKLOG.md`)
 
@@ -17,7 +17,7 @@ Léa joue la jeune femme à la parka. Au coin du bâtiment C, elle voit une silh
 
 ## Clarifications
 - Q1 (Q-002) : Combien de chassés, et quelle allure ? → Proposition : trois chassés de la piste « Le Réseau », sans noms, désignés par leur rôle : l'ancien ambulancier (bleu), la jeune femme à la parka (vert), le vieux monteur de lignes masqué (blanc). Brassard et petite lumière de la couleur du joueur ; jamais d'orange (bruit) ni de rouge (monstre) sur un chassé. Corps sculpté libre de droits (Quaternius, CC0), habillé par script. → R : **validé** (Maxime, 14/11/2026, quatrième tour de planches).
-- Q2 : Quel monstre ? → Proposition en cours : un nouveau chasseur plus sombre et effrayant, créature originale (inspiration libre d'un androïde à l'esprit psychique, sans reprendre aucun élément d'une œuvre existante, règle 2.7), présenté sur planches comme les chassés. En attendant, le monstre garde sa forme actuelle. → R : à trancher par Maxime.
+- Q2 : Quel monstre ? → Proposition en cours : un nouveau chasseur plus sombre et effrayant, créature originale (inspiration libre d'un androïde à l'esprit psychique, sans reprendre aucun élément d'une œuvre existante, règle 2.7), présenté sur planches comme les chassés. → R : **piste B, le masque blanc**, « plus Jinzo avec les yeux rouges » : 2,30 m, maigre, voûté, bras étirés et griffus, masque blanc fêlé à deux yeux rouges, paraboles d'écoute, câbles de nuque, torse recousu sous un manteau ouvert en lambeaux (Maxime, 14/11/2026).
 - Q3 : Voit-on ses bras en vue subjective ? → Proposition : **non** pour cette spec. La vue reste sans corps, comme aujourd'hui ; les bras demandent un second modèle et des animations à part. → R : proposition de Claude.
 - Q4 : D'où viennent les animations ? → Proposition : animations **faites par script Blender** sur le squelette de la base CC0 (marcher, courir, accroupi, repos, à genoux), courtes et en boucle, exportées dans le modèle. La bibliothèque d'animations Quaternius n'est pas joignable depuis l'environnement de travail ; on pourra la brancher plus tard, le squelette est le même. → R : proposition de Claude.
 - Q5 : Qui joue quel chassé ? → Proposition : la **place** dans le salon décide : place 1 l'ambulancier (bleu), place 2 la parka (vert), place 3 le monteur de lignes (blanc). Une IA dans une place prend le personnage de cette place. En solo, la proie IA est l'ambulancier. → R : proposition de Claude.
@@ -26,7 +26,6 @@ Léa joue la jeune femme à la parka. Au coin du bâtiment C, elle voit une silh
 ## Hors périmètre
 - Les bras en vue subjective (Q3).
 - Les animations d'action (lancer, ramasser, réparer, cachette) : T-125 suite, après validation du monstre.
-- Le nouveau monstre en jeu tant que Q2 n'est pas tranchée.
 
 ## Critères d'acceptation (vérifiables à la main)
 - [ ] Les trois chassés sont en jeu, sous 2 500 triangles chacun, textures de 64 à 256 px en pixels nets.

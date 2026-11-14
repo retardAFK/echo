@@ -46,6 +46,7 @@ var _was_hidden := false
 var _noise: MonsterNoise
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
+@onready var _body: MonsterBody = $Body
 
 
 func _ready() -> void:
@@ -97,6 +98,11 @@ func reset_to_patrol(away_from: Vector3) -> void:
 	sees_player = false
 	brain.set_patrol(points, index)
 	_agent.target_position = brain.target
+
+
+func _process(_delta: float) -> void:
+	var speed := Vector2(velocity.x, velocity.z).length()
+	_body.show_state(speed, MonsterBody.action_for(brain.state))
 
 
 func _physics_process(delta: float) -> void:
