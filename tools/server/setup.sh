@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # One-time setup of a fresh Ubuntu 24.04 server for Écho (S-010, T-108).
 # Run as root: ECHO_DOMAIN=echo.example.org DEPLOY_KEY="ssh-ed25519 AAAA..." bash setup.sh
-# - installs Caddy and the firewall rules (SSH, HTTP, HTTPS only)
+# - installs Caddy and opens HTTP and HTTPS (ufw, or the iptables rules that
+#   Oracle Cloud images come with; SSH stays open)
 # - creates the "echo" user, which the CI uses to deploy, with the right to
 #   restart the lobby service and nothing else
 # - installs the lobby service; it starts once a server build is deployed
@@ -12,12 +13,22 @@ set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 
 apt-get update
-apt-get install -y caddy ufw
+apt-get install -y caddy
 
-ufw allow OpenSSH
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw --force enable
+if [ -f /etc/iptables/rules.v4 ] && command -v netfilter-persistent >/dev/null; then
+	# Oracle Cloud: its rules reject everything but SSH; ufw would fight them.
+	for port in 80 443; do
+		iptables -C INPUT -p tcp --dport "$port" -m state --state NEW -j ACCEPT 2>/dev/null \
+			|| iptables -I INPUT 5 -p tcp --dport "$port" -m state --state NEW -j ACCEPT
+	done
+	netfilter-persistent save
+else
+	apt-get install -y ufw
+	ufw allow OpenSSH
+	ufw allow 80/tcp
+	ufw allow 443/tcp
+	ufw --force enable
+fi
 
 id echo >/dev/null 2>&1 || useradd --system --create-home --home-dir /opt/echo --shell /bin/bash echo
 install -d -o echo -g echo -m 755 /opt/echo
