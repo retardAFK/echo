@@ -37,7 +37,7 @@ func _ready() -> void:
 	column.add_child(keys)
 	for letter in RoomCode.LETTERS:
 		keys.add_child(_key(letter, type_letter.bind(letter)))
-	keys.add_child(_key("←", erase))
+	keys.add_child(_key("‹", erase))
 	keys.add_child(_key("OK", submit))
 	_refresh()
 

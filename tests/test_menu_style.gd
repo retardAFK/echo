@@ -15,6 +15,26 @@ func test_theme_never_uses_the_noise_orange() -> void:
 		assert_gt(_distance(color, NOISE.noise_color), 0.2, "sodium stays apart from the noise")
 
 
+## The web build has no fallback font: a character missing from the menu
+## fonts shows as an empty box (arrows did, T-163).
+func test_menu_fonts_have_every_character_of_the_texts() -> void:
+	var texts: Array[String] = []
+	var file := FileAccess.open("res://game/i18n/strings.csv", FileAccess.READ)
+	while not file.eof_reached():
+		texts.append(",".join(file.get_csv_line().slice(1)))
+	texts.append_array(UserSettings.KEY_NAMES.values())
+	texts.append("‹ AZERTY ›")
+	for path in [MenuStyle.FONT_BODY, MenuStyle.FONT_DISPLAY, MenuStyle.FONT_DISPLAY_LCD]:
+		var font: Font = load(path)
+		var missing := ""
+		for text in texts:
+			for index in text.length():
+				var letter := text.unicode_at(index)
+				if letter >= 32 and not font.has_char(letter) and missing.find(char(letter)) < 0:
+					missing += char(letter)
+		assert_eq(missing, "", path)
+
+
 func test_theme_file_matches_the_style() -> void:
 	var built := BUILDER.build()
 	for type in ["MenuItem", "TitleLabel", "CodeLabel", "LcdLabel"]:

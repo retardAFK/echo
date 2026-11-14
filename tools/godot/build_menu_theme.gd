@@ -145,6 +145,9 @@ static func _digicode_and_intercom(theme: Theme) -> void:
 	lcd.set_border_width_all(1)
 	theme.set_type_variation("LcdPanel", "PanelContainer")
 	theme.set_stylebox("panel", "LcdPanel", lcd)
+	theme.set_type_variation("OptionRow", "Button")
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"]:
+		theme.set_stylebox(state, "OptionRow", StyleBoxEmpty.new())
 	theme.set_type_variation("IntercomRow", "Button")
 	var row := _empty(Vector4(0, 0, 0, 0))
 	var row_lit := _flat(Color(STYLE.SODIUM, 0.18), Vector4(0, 0, 0, 0))

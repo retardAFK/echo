@@ -33,7 +33,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		# Browsers only allow pointer capture right after a user gesture.
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	elif event is InputEventMouseMotion and captured:
-		_avatar.look(event.screen_relative)
+		_avatar.look(Settings.adjust_look(event.screen_relative))
 
 
 ## Reads the keys held now and where the avatar looks. Called by the avatar at

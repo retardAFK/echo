@@ -32,7 +32,7 @@ func _process(_delta: float) -> void:
 		)
 	_label.visible = prompt != ""
 	if _label.visible:
-		_label.text = prompt
+		_label.text = Settings.fill(tr(prompt))
 	_dot.visible = present
 	var size := DOT_SIZE_TARGET if _label.visible else DOT_SIZE_IDLE
 	_dot.color = DOT_TARGET if _label.visible else DOT_IDLE

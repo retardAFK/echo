@@ -17,6 +17,14 @@ func test_no_override_of_instanced_children() -> void:
 	assert_eq(offenders, [] as Array[String], "set the value on the instance root instead")
 
 
+## Converting text scenes to binary at export lost the entries of every menu
+## list in the web build (PR #112): the scenes stay text in the export.
+func test_scenes_stay_text_in_the_export() -> void:
+	assert_false(
+		ProjectSettings.get_setting("editor/export/convert_text_resources_to_binary", true)
+	)
+
+
 func test_building_volume_comes_from_its_size() -> void:
 	var building: Building = load("res://game/entities/building/building.tscn").instantiate()
 	building.size = Vector3(4, 2, 3)

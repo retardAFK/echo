@@ -72,6 +72,8 @@ func _ready() -> void:
 	scan = ScanGauge.new(settings)
 	_head.position.y = settings.ear_height
 	_camera.current = true
+	_apply_view_settings("")
+	Settings.changed.connect(_apply_view_settings)
 	if local_controls:
 		_controls = LocalControls.new()
 		_controls.commands = commands
@@ -146,6 +148,11 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 	_noise.update(delta, moved, _pace, global_position, get_ear_position(), self)
 	if not mirror_world:
 		Decoy.crush_near(get_tree(), global_position, settings.catch_distance)  # S-008, Q4.
+
+
+## Field of view from the options (S-013, T-163).
+func _apply_view_settings(_key: String) -> void:
+	_camera.fov = float(Settings.get_value("fov"))
 
 
 ## Turns the body (yaw) and the head (pitch) from a mouse movement in screen pixels.

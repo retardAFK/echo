@@ -36,5 +36,5 @@ static func goal_key(role: GameSession.Role) -> String:
 static func controls(role: GameSession.Role) -> String:
 	var lines: Array[String] = []
 	for key in keys_for(role):
-		lines.append(TranslationServer.translate(key))
+		lines.append(Settings.fill(TranslationServer.translate(key)))
 	return "\n".join(lines)

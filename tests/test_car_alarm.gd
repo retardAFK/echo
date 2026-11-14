@@ -96,7 +96,7 @@ func test_player_sets_off_the_nearest_car_and_sees_the_hint() -> void:
 	await wait_process_frames(2)
 	assert_eq(player.get_interactable(), car)
 	assert_true(prompt.get_node("Label").visible)
-	assert_eq(prompt.get_node("Label").text, "HUD_INTERACT_CAR_ALARM")
+	assert_eq(prompt.get_node("Label").text, Settings.fill(tr("HUD_INTERACT_CAR_ALARM")))
 	player.interact()
 	assert_eq(car.state, CarAlarm.State.RINGING)
 

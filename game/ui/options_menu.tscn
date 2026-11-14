@@ -1,0 +1,79 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/ui/options_menu.gd" id="1_options"]
+[ext_resource type="Theme" path="res://game/ui/theme/echo_theme.tres" id="2_theme"]
+[ext_resource type="Script" path="res://game/ui/menu/menu_list.gd" id="3_list"]
+
+[node name="OptionsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_options")
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03, 0.027, 0.02, 0.6)
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 30.0
+offset_right = 334.0
+offset_bottom = 64.0
+theme_type_variation = &"HeadingLabel"
+text = "MENU_OPTIONS"
+uppercase = true
+
+[node name="Tabs" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 34.0
+offset_top = 70.0
+offset_right = 474.0
+offset_bottom = 90.0
+theme_override_constants/separation = 2
+
+[node name="Lines" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 34.0
+offset_top = 100.0
+offset_right = 474.0
+offset_bottom = 250.0
+theme_override_constants/separation = 3
+
+[node name="Actions" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 34.0
+offset_top = 268.0
+offset_right = 234.0
+offset_bottom = 320.0
+script = ExtResource("3_list")
+keys = PackedStringArray("OPTIONS_RESET", "MENU_BACK")
+small = true
+
+[node name="Foot" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 34.0
+offset_top = -26.0
+offset_right = -34.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_type_variation = &"FootLabel"
+text = "OPTIONS_HELP"
+uppercase = true

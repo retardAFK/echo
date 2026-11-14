@@ -10,6 +10,13 @@ extends WorldEnvironment
 
 func _ready() -> void:
 	apply()
+	Settings.changed.connect(_apply_brightness)
+
+
+## Brightness from the options (S-013, T-163); 1 is the night as designed.
+func _apply_brightness(_key: String) -> void:
+	environment.adjustment_enabled = true
+	environment.adjustment_brightness = float(Settings.get_value("brightness"))
 
 
 func apply() -> void:
@@ -28,6 +35,7 @@ func apply() -> void:
 		moon.light_color = settings.moon_color
 		moon.light_energy = settings.moon_energy
 		moon.shadow_enabled = false
+	_apply_brightness("")
 
 
 ## Darkens the sky and the fog while the monster scans a building (T-032),

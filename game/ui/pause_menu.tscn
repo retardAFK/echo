@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://game/ui/pause_menu.gd" id="1_pause"]
 [ext_resource type="Theme" path="res://game/ui/theme/echo_theme.tres" id="2_theme"]
 [ext_resource type="Script" path="res://game/ui/menu/menu_list.gd" id="3_list"]
+[ext_resource type="PackedScene" path="res://game/ui/options_menu.tscn" id="4_options"]
 
 [node name="PauseMenu" type="CanvasLayer"]
 layer = 40
@@ -26,6 +27,7 @@ grow_vertical = 2
 color = Color(0.024, 0.024, 0.02, 0.72)
 
 [node name="Band" type="PanelContainer" parent="Root"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 14
 anchor_top = 0.5
@@ -64,7 +66,7 @@ uppercase = true
 unique_name_in_owner = true
 layout_mode = 2
 script = ExtResource("3_list")
-keys = PackedStringArray("PAUSE_RESUME", "PAUSE_MENU")
+keys = PackedStringArray("PAUSE_RESUME", "PAUSE_OPTIONS", "PAUSE_MENU")
 
 [node name="Controls" type="Label" parent="Root/Band/Columns"]
 unique_name_in_owner = true
@@ -74,3 +76,8 @@ size_flags_vertical = 4
 theme_type_variation = &"HintLabel"
 theme_override_colors/font_color = Color(0.718, 0.686, 0.6, 1)
 autowrap_mode = 3
+
+[node name="Options" parent="Root" instance=ExtResource("4_options")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1

@@ -63,6 +63,8 @@ var _controls: LocalControls
 
 
 func _ready() -> void:
+	_apply_view_settings("")
+	Settings.changed.connect(_apply_view_settings)
 	inventory = Inventory.new(ruse_settings)
 	# Each player owns its capsule, so resizing it never touches another instance.
 	_capsule = _collision.shape.duplicate()
@@ -154,6 +156,11 @@ func _stay_down(delta: float) -> void:
 	move_and_slide()
 	_update_height(delta)
 	_hold.update(self, null, false, delta)  # Lets go of what it held.
+
+
+## Field of view from the options (S-013, T-163).
+func _apply_view_settings(_key: String) -> void:
+	_camera.fov = float(Settings.get_value("fov"))
 
 
 ## Turns the body (yaw) and the head (pitch) from a mouse movement in screen pixels.
