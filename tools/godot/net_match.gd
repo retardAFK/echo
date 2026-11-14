@@ -31,7 +31,9 @@ const AWAY_DISTANCE := 30.0
 const SAFE_DISTANCE := 20.0
 ## A fuse dropped closer than this is the one a freed hunted lost.
 const DROP_REACH := 4.0
-## How close the monster and a hunted it is not after may come.
+## A hunted waits while the monster it is not prey to is this close; the
+## monster steps back only within half of it, so it can walk past (and
+## from further when it stands away, so the waiting hunted can go on).
 const CLEARANCE := 6.0
 ## Seconds between two lines on what each player is doing.
 const STATUS_TIME := 10.0
@@ -303,8 +305,12 @@ func _keep_clear(delta: float) -> bool:
 		if seat == 2 and _phase == "hunt":
 			continue
 		var other := _read(seat)
+		if other.get("phase") == "captured":
+			continue  # A captured hunted cannot be caught again by touch.
 		var at := _unvec(other.get("at", []))
-		if other.has("at") and at.distance_to(here) < CLEARANCE:
+		# Standing away, it makes room for the hunted waiting on it.
+		var room := CLEARANCE + 1.0 if _phase == "away" else CLEARANCE * 0.5
+		if other.has("at") and at.distance_to(here) < room:
 			_face(here + (here - at))
 			_wanted["move_forward"] = true
 			_wanted["sprint"] = true
