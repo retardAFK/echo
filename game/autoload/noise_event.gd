@@ -3,9 +3,9 @@ extends RefCounted
 ## One noise heard in the world (spec S-002). Pure data, sent by NoiseBus.
 
 ## CALL and RESCUE: a captured hunted calling for help, a teammate freeing it
-## (S-010, T-107).
+## (S-010, T-107). DOOR: a door opened, closed or smashed (S-016).
 enum Type {
-	FOOTSTEP, BREATH, CAR_ALARM, FUSE, REPAIR, SIREN, THROW, IMPACT, DECOY, HIDE, CALL, RESCUE
+	FOOTSTEP, BREATH, CAR_ALARM, FUSE, REPAIR, SIREN, THROW, IMPACT, DECOY, HIDE, CALL, RESCUE, DOOR
 }
 
 var type: Type

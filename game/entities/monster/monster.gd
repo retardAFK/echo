@@ -12,6 +12,7 @@ signal hunted_caught(hunted: Node3D)
 
 ## Distance the chase target must move before the path is recomputed, in meters.
 const RETARGET_DISTANCE := 0.5
+const DOOR_SETTINGS := preload("res://game/data/door_settings.tres")
 const CONE_SEGMENTS := 16
 ## Lift above the floor so the debug cone does not flicker against it.
 const CONE_GROUND_OFFSET := 0.05
@@ -349,6 +350,7 @@ func _move(delta: float) -> void:
 			direction = direction.normalized()
 			horizontal = direction * MonsterBrain.speed_for(brain.get_pace(), settings)
 			look_at(global_position + direction, Vector3.UP)
+			_open_door(direction)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	if is_on_floor():
@@ -356,6 +358,17 @@ func _move(delta: float) -> void:
 	else:
 		velocity += get_gravity() * delta
 	move_and_slide()
+
+
+## A closed door on its way: smashed on the run, opened otherwise (S-016, Q2).
+func _open_door(direction: Vector3) -> void:
+	var door := Door.closed_ahead(get_tree(), global_position, direction, DOOR_SETTINGS.ai_reach)
+	if door == null:
+		return
+	if brain.get_pace() == MonsterBrain.Pace.RUN:
+		door.smash(self)
+	else:
+		door.open_by(self)
 
 
 ## Outline of the field of view on the ground, shown with F4 (noise debug).

@@ -8,7 +8,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-231 — Plan et tâches de S-016
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-230
-- [ ] T-232 — Portes mobiles
+- [x] T-232 — Portes mobiles
   - Résultat vérifiable : entité `Door`, `DoorSettings`, bruit `DOOR` (6 m debout, 2 m accroupi en 1 s), porte fermée qui coupe la vue et atténue le bruit, monstre qui ouvre et défonce en courant (12 m), quelques portes dans la greybox ; tests GUT. Reprend T-185 (S-014)
   - Dépend de : T-231
 - [ ] T-233 — Portes, IA et réseau
@@ -51,3 +51,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 ## Compte rendu
 - T-230 (15/11/2026) : spec validée par Maxime (« Tout valider »), PR #117.
 - T-231 (15/11/2026) : plan et tâches, PR #117. Les portes reprennent T-185 (S-014).
+- T-232 (15/11/2026) : `Door` (`game/entities/door/`), `DoorSettings`, bruit `DOOR`. Le battant fermé est sur la couche des murs : il coupe la vue et compte comme un mur pour le bruit, sans code de plus ; ouvert, il n'a plus de collision (plan B du plan, retenu d'emblée pour que rien n'accroche). Debout 6 m d'un coup, accroupi ou en rôdant 1 s pour 2 m, le monstre qui court la défonce (12 m). La porte s'ouvre du côté opposé à celui qui l'ouvre. Pas de marque de surbrillance sur les portes. Les IA ouvrent déjà les portes sur leur chemin (`Door.closed_ahead`), testées en T-233. Pas de porte dans la greybox : les tests en posent une. 10 tests GUT.

@@ -36,6 +36,8 @@ var _offsets := {}
 ## Whether the user would get a prompt from this thing now (it is useful to
 ## them), whatever the distance.
 static func is_useful(node: Node, user: Node) -> bool:
+	if node is Door:
+		return false  # Big and plain to see: no mark (S-016).
 	if node.has_method("wanted_by") and not node.wanted_by(user):
 		return false
 	var prompt: String = (
