@@ -313,7 +313,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-184 — Scan par aile ou par étage
   - Résultat vérifiable : la règle retenue en T-180 marche pour le monstre joueur et le monstre IA ; tests GUT
   - Dépend de : T-183
-- [ ] T-185 — Portes mobiles
+- [ ] T-185 — Portes mobiles (faites en S-016, T-232 à T-234 : l'hôpital les réutilise)
   - Résultat vérifiable : ouvrir et fermer une porte fait un bruit de 6 m (section 6.2) et coupe la vue ; le monstre les ouvre ; tests GUT
   - Dépend de : T-183
 - [ ] T-186 — Ventilation et moniteurs
@@ -397,9 +397,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [x] T-230 — Spec S-016
   - Résultat vérifiable : spec validée par Maxime (plans, portes, cachettes)
   - Dépend de : —
-- [ ] T-231 — Plan et tâches de S-016
+- [x] T-231 — Plan et tâches de S-016
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-230
+- T-232 à T-244 : détaillées dans [`S-016-interieurs/tasks.md`](S-016-interieurs/tasks.md)
 
 ---
 
