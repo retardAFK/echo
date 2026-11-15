@@ -24,6 +24,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 | 13 | S-013 | Interface, menus et options | T-160 à T-179 | Phase 12 |
 | 14 | S-014 | Deuxième map : l'hôpital | T-180 à T-209 | Phase 13 |
 | 15 | S-015 | Finition et publication | T-210 à T-229 | Phase 14 |
+| — | S-016 | Intérieurs des bâtiments de la cité (demande du 15/11/2026, hors ordre des phases) | T-230 à T-249 | S-006, S-008, S-010 |
 
 L'ordre suit D-013 (12/11/2026) : le multijoueur passe juste après le test à plusieurs, avant les personnages, l'audio et les menus. Tout ce qui est ajouté avant le réseau (animations, sons d'autres joueurs, menus) devrait sinon être repris pour être synchronisé.
 
@@ -312,7 +313,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-184 — Scan par aile ou par étage
   - Résultat vérifiable : la règle retenue en T-180 marche pour le monstre joueur et le monstre IA ; tests GUT
   - Dépend de : T-183
-- [ ] T-185 — Portes mobiles
+- [ ] T-185 — Portes mobiles (faites en S-016, T-232 à T-234 : l'hôpital les réutilise)
   - Résultat vérifiable : ouvrir et fermer une porte fait un bruit de 6 m (section 6.2) et coupe la vue ; le monstre les ouvre ; tests GUT
   - Dépend de : T-183
 - [ ] T-186 — Ventilation et moniteurs
@@ -386,6 +387,20 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-221 — Vérification finale de S-015
   - Résultat vérifiable : critères cochés, spec livrée
   - Dépend de : T-220
+
+---
+
+## Intérieurs des bâtiments de la cité (S-016)
+
+**But** : des bâtiments visitables moins vides, avec plusieurs issues, des escaliers, des portes qui font du bruit, des cachettes variées et du mobilier (demande de Maxime, 15/11/2026). Spec validée le 15/11/2026 : [`S-016-interieurs/spec.md`](S-016-interieurs/spec.md). Les portes mobiles de la tâche T-185 (hôpital) sont faites ici, et l'hôpital les réutilisera.
+
+- [x] T-230 — Spec S-016
+  - Résultat vérifiable : spec validée par Maxime (plans, portes, cachettes)
+  - Dépend de : —
+- [x] T-231 — Plan et tâches de S-016
+  - Résultat vérifiable : `plan.md` et `tasks.md`
+  - Dépend de : T-230
+- T-232 à T-244 : détaillées dans [`S-016-interieurs/tasks.md`](S-016-interieurs/tasks.md)
 
 ---
 
