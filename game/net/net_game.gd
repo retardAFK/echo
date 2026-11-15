@@ -396,6 +396,8 @@ func _entry(seat: int, node: Node3D) -> Array:
 func sees(viewer: Node3D, target: Node3D) -> bool:
 	var eye: Vector3 = viewer.get_eye_position()
 	var aim: Vector3 = target.get_eye_position()
+	if HidingSpot.is_revealed(target, eye, -viewer.global_basis.z):
+		return true  # Right beside a makeshift spot, facing it (S-016, Q6).
 	var target_hidden := HidingSpot.is_hidden(target)
 	if target_hidden or eye.distance_to(aim) > settings.sight_range:
 		return false  # No ray needed.
