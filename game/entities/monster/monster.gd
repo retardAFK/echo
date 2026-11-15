@@ -12,7 +12,14 @@ signal hunted_caught(hunted: Node3D)
 
 ## Distance the chase target must move before the path is recomputed, in meters.
 const RETARGET_DISTANCE := 0.5
+const DOOR_SETTINGS := preload("res://game/data/door_settings.tres")
 const CONE_SEGMENTS := 16
+## Caught on a corner (a door jamb) this long, it steps back from it.
+const STUCK_TIME := 0.3
+## How hard it steps back, as a share of its pace.
+const UNSTICK_PUSH := 0.7
+## How long it steps back, in seconds.
+const BACK_TIME := 0.4
 ## Lift above the floor so the debug cone does not flicker against it.
 const CONE_GROUND_OFFSET := 0.05
 
@@ -40,10 +47,19 @@ var open_target: HidingSpot
 var scan: ScanGauge
 ## Building it is scanning, or null.
 var scan_target: Building
+## Its last one-shot gesture: catching, crushing (S-011, T-127).
+var gesture := BodyGesture.new()
+## What its body shows: a gesture, else what its brain is doing.
+var body_action: MonsterBody.Action:
+	get = _get_action
 
 var _vision_timer := 0.0
 var _was_hidden := false
 var _noise: MonsterNoise
+## Time left standing still over a hunted it just caught (T-127).
+var _still_left := 0.0
+var _stuck_for := 0.0
+var _backing_for := 0.0  ## Time left stepping back from a jamb.
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 @onready var _body: MonsterBody = $Body
@@ -102,10 +118,32 @@ func reset_to_patrol(away_from: Vector3) -> void:
 
 func _process(_delta: float) -> void:
 	var speed := Vector2(velocity.x, velocity.z).length()
-	_body.show_state(speed, MonsterBody.action_for(brain.state))
+	_body.show_state(speed, body_action)
+
+
+func _get_action() -> MonsterBody.Action:
+	if gesture.kind != MonsterBody.Action.NONE:
+		return gesture.kind as MonsterBody.Action
+	return MonsterBody.action_for(brain.state)
+
+
+## Values of its body: the length of its gestures.
+func get_body_settings() -> MonsterBodySettings:
+	return _body.settings
+
+
+## Stays where it is for a time (seconds), the hunted it caught in its claws:
+## no move, no catch (T-127).
+func hold_still(duration: float) -> void:
+	_still_left = duration
+	velocity = Vector3.ZERO
 
 
 func _physics_process(delta: float) -> void:
+	gesture.update(delta)
+	if _still_left > 0.0:
+		_still_left -= delta
+		return
 	var arrived := _agent.is_navigation_finished()
 	var player_position := Vector3.ZERO
 	var distance := 0.0
@@ -127,13 +165,15 @@ func _physics_process(delta: float) -> void:
 	var before := global_position
 	_move(delta)
 	_make_noise(delta, before)
-	Decoy.crush_near(get_tree(), global_position, settings.catch_distance)  # S-008, Q4.
+	if Decoy.crush_near(get_tree(), global_position, settings.catch_distance) > 0:  # S-008, Q4.
+		gesture.play(MonsterBody.Action.CRUSH, _body.settings.crush_time)
 	for hunted in get_targets():
 		if (
 			not HidingSpot.is_hidden(hunted)
 			and brain.is_catch(hunted.global_position - global_position)
 		):
 			catch_count += 1
+			gesture.play(MonsterBody.Action.CATCH, _body.settings.catch_time)
 			hunted_caught.emit(hunted)
 			player_caught.emit()
 			break
@@ -193,6 +233,8 @@ func _update_sight(delta: float) -> void:
 		go_open(player.get("hiding_in"))  # It saw the hunted get in (S-008, Q7).
 	_was_hidden = hidden
 	sees_player = _can_see(player)
+	if hidden and sees_player and open_target == null:
+		go_open(player.get("hiding_in"))  # Seen behind its curtain (S-016, Q6).
 	if sees_player or others.is_empty():
 		return
 	# Lost sight of it: the nearest other hunted in sight becomes the target.
@@ -213,6 +255,8 @@ func _update_sight(delta: float) -> void:
 func _can_see(hunted: Node3D) -> bool:
 	var eye := get_ear_position()
 	var target: Vector3 = hunted.get_eye_position()
+	if HidingSpot.is_revealed(hunted, eye, -global_basis.z):
+		return true  # Right beside a makeshift spot, facing it (S-016, Q6).
 	return (
 		not HidingSpot.is_hidden(hunted)  # Hidden: never seen (S-008, Q6).
 		and MonsterVision.in_view_cone(eye, -global_basis.z, target, settings)
@@ -320,6 +364,8 @@ func guard_exit(points: Array[Vector3]) -> void:
 func _on_noise_emitted(event: NoiseEvent) -> void:
 	if event.source == self or not is_inside_tree():
 		return  # Its own noise, or removed from the map (monster role).
+	if event.source is Door and (event.source as Door).last_user == self:
+		return  # A door it opened itself (S-016).
 	if scan_reveals(event):
 		brain.remember(event.position)
 		brain.hear(event.position)  # Even a faint one, like a breath (D-009).
@@ -349,6 +395,8 @@ func _move(delta: float) -> void:
 			direction = direction.normalized()
 			horizontal = direction * MonsterBrain.speed_for(brain.get_pace(), settings)
 			look_at(global_position + direction, Vector3.UP)
+			_open_door(direction)
+	horizontal = _unstick(horizontal, delta)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	if is_on_floor():
@@ -356,6 +404,36 @@ func _move(delta: float) -> void:
 	else:
 		velocity += get_gravity() * delta
 	move_and_slide()
+
+
+## Held back without moving, as on a door jamb the path grazes: it steps
+## back the way it came a moment, then walks on.
+func _unstick(horizontal: Vector3, delta: float) -> Vector3:
+	var wanted := Vector2(horizontal.x, horizontal.z).length()
+	if _backing_for > 0.0:
+		_backing_for -= delta
+		return -horizontal.normalized() * wanted * UNSTICK_PUSH
+	var moved := Vector2(get_real_velocity().x, get_real_velocity().z).length()
+	if wanted < 0.01 or moved > 0.2 * wanted:
+		_stuck_for = 0.0
+		return horizontal
+	_stuck_for += delta
+	if _stuck_for < STUCK_TIME:
+		return horizontal
+	_stuck_for = 0.0
+	_backing_for = BACK_TIME
+	return -horizontal.normalized() * wanted * UNSTICK_PUSH
+
+
+## A closed door on its way: smashed on the run, opened otherwise (S-016, Q2).
+func _open_door(direction: Vector3) -> void:
+	var door := Door.closed_ahead(get_tree(), global_position, direction, DOOR_SETTINGS.ai_reach)
+	if door == null:
+		return
+	if brain.get_pace() == MonsterBrain.Pace.RUN:
+		door.smash(self)
+	else:
+		door.open_by(self)
 
 
 ## Outline of the field of view on the ground, shown with F4 (noise debug).

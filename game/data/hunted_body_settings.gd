@@ -16,3 +16,8 @@ extends Resource
 ## Bounds of the playback speed, so a slow or fast body still looks right.
 @export_range(0.1, 1.0, 0.05) var min_scale: float = 0.6
 @export_range(1.0, 3.0, 0.05) var max_scale: float = 1.6
+
+@export_group("Gestures")
+## Length of the one-shot gestures, as made by tools/blender/hunted.py (T-125).
+@export_range(0.1, 3.0, 0.05, "suffix:s") var throw_time: float = 0.7
+@export_range(0.1, 3.0, 0.05, "suffix:s") var pick_time: float = 0.9

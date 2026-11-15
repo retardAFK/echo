@@ -16,6 +16,8 @@ const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
 ## How far down an alarm clock looks for the ground in front of the player, in meters.
 const DECOY_GROUND_SEARCH := 2.5
+## Length of the gestures the others see (S-011, T-125).
+const BODY_SETTINGS := preload("res://game/data/hunted_body_settings.tres")
 
 @export var settings: PlayerSettings
 ## Values of the ruses: bottles, alarm clocks, hiding spots (S-008).
@@ -42,6 +44,13 @@ var capture: CaptureState
 ## Captured, on its knees (T-107): it neither moves nor acts. On the room it
 ## follows capture; on a client, what the room says.
 var held := false
+## What its hands do, as the others see it (S-011, T-125).
+var gesture := BodyGesture.new()
+## Caught (T-127): the head turns to the monster that seized it, the
+## controls stopped, for a moment (watch_catcher).
+var watching_catcher: bool:
+	get:
+		return _catcher_left > 0.0
 
 var _gait := PlayerMotion.Gait.WALK
 var _wants_crouch := false
@@ -55,6 +64,9 @@ var _hide_yaw := 0.0
 var _breathless_left := 0.0
 var _breath_timer := 0.0
 var _controls: LocalControls
+## Caught (S-011, T-127): time left looking at the monster, and its eyes.
+var _catcher_left := 0.0
+var _catcher_eyes := Vector3.ZERO
 
 @onready var _collision: CollisionShape3D = $CollisionShape3D
 @onready var _head: Node3D = $Head
@@ -87,6 +99,10 @@ func _physics_process(delta: float) -> void:
 		_controls.fill()
 	else:
 		set_look(commands.yaw, commands.pitch)  # Played from another machine (T-097).
+	gesture.update(delta)
+	if _catcher_left > 0.0:
+		_watch_catcher(delta)
+		return
 	apply_actions()
 	_update_breath(delta)
 	if held:
@@ -165,6 +181,8 @@ func _apply_view_settings(_key: String) -> void:
 
 ## Turns the body (yaw) and the head (pitch) from a mouse movement in screen pixels.
 func look(relative: Vector2) -> void:
+	if _catcher_left > 0.0:
+		return  # Caught: the head turns to the monster on its own (T-127).
 	var sensitivity := deg_to_rad(settings.mouse_sensitivity)
 	rotate_y(-relative.x * sensitivity)
 	_pitch = PlayerMotion.clamp_pitch(_pitch - relative.y * sensitivity, settings)
@@ -225,6 +243,8 @@ func interact() -> void:
 		return
 	if target is CarAlarm and target.can_interact(global_position):
 		ruse_used.emit(&"car_alarm")
+	if target is Pickup:
+		gesture.play(HuntedBody.Gesture.PICK, BODY_SETTINGS.pick_time)
 	target.interact(self)
 
 
@@ -241,6 +261,7 @@ func throw_bottle() -> ThrownBottle:
 	bottle.global_position = (_camera.global_position + forward * ruse_settings.throw_hand_offset)
 	bottle.linear_velocity = direction * ruse_settings.throw_speed
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	gesture.play(HuntedBody.Gesture.THROW, BODY_SETTINGS.throw_time)
 	ruse_used.emit(&"bottle")
 	return bottle
 
@@ -266,6 +287,7 @@ func place_decoy() -> Decoy:
 	get_parent().add_child(decoy)
 	decoy.global_position = spot
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	gesture.play(HuntedBody.Gesture.PICK, BODY_SETTINGS.pick_time)
 	ruse_used.emit(&"decoy")
 	return decoy
 
@@ -294,6 +316,36 @@ func leave_hiding() -> void:
 	hiding_in = null
 	_collision.disabled = false
 	velocity = Vector3.ZERO
+
+
+## What its hands do, as the others see it: working while it holds
+## "interact" on something, else the last gesture, for its length.
+func get_gesture() -> HuntedBody.Gesture:
+	if _hold.holding:
+		return HuntedBody.Gesture.WORK
+	return gesture.kind as HuntedBody.Gesture
+
+
+## Caught (S-011, T-127): for a duration (seconds), the controls stop and the
+## head turns to the monster's eyes; the caller then goes on (screen, respawn).
+func watch_catcher(eyes: Vector3, duration: float) -> void:
+	_catcher_eyes = eyes
+	_catcher_left = duration
+	velocity = Vector3.ZERO
+
+
+func _watch_catcher(delta: float) -> void:
+	_catcher_left = maxf(0.0, _catcher_left - delta)
+	commands.take_actions()  # Nothing done while caught.
+	commands.move = Vector2.ZERO
+	commands.interact = false
+	var want := PlayerMotion.look_angles(_head.global_position, _catcher_eyes)
+	var k := minf(1.0, settings.caught_turn_speed * delta)
+	rotation.y = lerp_angle(rotation.y, want.x, k)
+	_pitch = PlayerMotion.clamp_pitch(lerpf(_pitch, want.y, k), settings)
+	_head.rotation.x = _pitch
+	commands.yaw = rotation.y
+	commands.pitch = _pitch
 
 
 func is_hidden() -> bool:
@@ -339,6 +391,11 @@ func get_pitch() -> float:
 
 func get_gait() -> PlayerMotion.Gait:
 	return _gait
+
+
+## Crouched, a door opens slowly and quietly (S-016, Q1).
+func is_sneaking() -> bool:
+	return _gait == PlayerMotion.Gait.CROUCH
 
 
 func get_height() -> float:

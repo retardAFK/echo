@@ -59,8 +59,9 @@ func test_blocks_of_flats_have_entrance_doors() -> void:
 
 
 func test_visited_storeys_of_the_tower_have_open_windows() -> void:
-	# 4 storeys above the hall, 8 modules on each of the 4 sides.
-	assert_eq(_dressing.count_of(OPEN), 128)
+	# 4 storeys above the hall, 8 modules on each of the 4 sides, but the two
+	# around the door onto the fire escape (S-016).
+	assert_eq(_dressing.count_of(OPEN), 120)
 	for i in _dressing.panels.size():
 		if _dressing.variants[i] != OPEN:
 			continue
@@ -87,6 +88,7 @@ func test_panels_have_no_collision() -> void:
 
 func test_gallery_has_its_shop_fronts_and_machines() -> void:
 	var gallery := _map.get_node("GalleryDressing")
+	# The pharmacy, the laundrette, the tobacconist, the grocer, the baker.
 	assert_eq(gallery.find_children("Shop*", "", false, false).size(), 5)
 	assert_eq(gallery.find_children("Washers*", "", false, false).size(), 4)
 	assert_eq(gallery.find_children("*", "CollisionShape3D", true, false).size(), 0)

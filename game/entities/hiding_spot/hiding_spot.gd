@@ -6,16 +6,23 @@ extends Node3D
 ## invisible and makes no footstep, but their breath still reaches the scan.
 ## The monster opens it the same way: whoever is inside is caught.
 ## Its front faces +Z: the hunted gets out there, and looks out that way.
+## Four families (S-016, Q6) change the times and noises: CLOSET (closets and
+## dumpsters, above), LOW (2 s, 1 m), MAKESHIFT (0.5 s, silent, but seen by a
+## monster within 2 m looking at it) and METAL (6 m, the monster takes 2 s).
 
 ## Someone was inside when the monster opened it.
 signal found(occupant: Node3D, by: Node3D)
 signal opened(by: Node3D)
+
+## The family of the spot (S-016, Q6).
+enum Family { CLOSET, LOW, MAKESHIFT, METAL }
 
 const GROUP := &"hiding_spots"
 
 @export var settings: RuseSettings
 ## Whether the hidden one crouches (a dumpster) or stands (a closet).
 @export var crouched := false
+@export var family := Family.CLOSET
 
 ## The hunted inside, or null.
 var occupant: Node3D
@@ -39,6 +46,31 @@ static func is_monster(user: Node) -> bool:
 func _ready() -> void:
 	add_to_group(Interactable.GROUP)
 	add_to_group(GROUP)
+
+
+## Whether a monster's eye looking along `forward` misses a body: anyone not
+## hidden is not concealed (the usual sight rules apply); a hidden one is
+## concealed, except in a makeshift spot from a monster this close that faces
+## it (S-016, Q6).
+static func conceals(body: Node, eye: Vector3, forward: Vector3) -> bool:
+	if not is_hidden(body):
+		return false
+	var spot: HidingSpot = body.get("hiding_in")
+	if spot == null or spot.family != Family.MAKESHIFT:
+		return true
+	var gap := spot.global_position - eye
+	var flat := Vector2(gap.x, gap.z)
+	if flat.length() > spot.settings.makeshift_reveal_distance:
+		return true
+	var look := Vector2(forward.x, forward.z)
+	if flat.length() < 0.01 or look.length_squared() < 0.0001:
+		return false
+	return look.normalized().dot(flat.normalized()) < 0.0  # Looking away.
+
+
+## Whether a hidden body is in a makeshift spot and seen there.
+static func is_revealed(body: Node, eye: Vector3, forward: Vector3) -> bool:
+	return is_hidden(body) and not conceals(body, eye, forward)
 
 
 ## The hiding spot nearest to a position within a flat distance, or null.
@@ -108,7 +140,7 @@ func hold(user: Node, delta: float) -> bool:
 	if _wait_release or not wanted_by(user):
 		return false
 	_progress += delta
-	if _progress < settings.hide_time:
+	if _progress < time_for(user):
 		return false
 	_progress = 0.0
 	_wait_release = true  # Holding on does not get straight back out.
@@ -123,7 +155,33 @@ func release(user: Node) -> void:
 
 
 func get_hold_ratio() -> float:
-	return 0.0 if _wait_release else clampf(_progress / settings.hide_time, 0.0, 1.0)
+	if _wait_release or _holder == null:
+		return 0.0
+	return clampf(_progress / time_for(_holder), 0.0, 1.0)
+
+
+## How long this one holds "interact" to get in or out, or to open it.
+func time_for(user: Node) -> float:
+	if is_monster(user):
+		return settings.metal_open_time if family == Family.METAL else settings.hide_time
+	match family:
+		Family.LOW:
+			return settings.low_hide_time
+		Family.MAKESHIFT:
+			return settings.makeshift_hide_time
+	return settings.hide_time
+
+
+## Range of the noise of getting in or out, or of opening it.
+func noise_range() -> float:
+	match family:
+		Family.LOW:
+			return settings.low_noise_range
+		Family.MAKESHIFT:
+			return settings.makeshift_noise_range
+		Family.METAL:
+			return settings.metal_noise_range
+	return settings.hide_noise_range
 
 
 ## Online client (S-010, T-099): the door of the spot, opened in the room.
@@ -132,10 +190,9 @@ func voice() -> void:
 
 
 func _finish(user: Node) -> void:
-	NoiseBus.emit_noise(
-		NoiseEvent.Type.HIDE, global_position + Vector3.UP, settings.hide_noise_range, self
-	)
-	_creak.play()
+	if noise_range() > 0.0:
+		NoiseBus.emit_noise(NoiseEvent.Type.HIDE, global_position + Vector3.UP, noise_range(), self)
+		_creak.play()
 	if is_monster(user):
 		open(user)
 	elif occupant == user:

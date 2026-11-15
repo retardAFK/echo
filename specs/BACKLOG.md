@@ -24,6 +24,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 | 13 | S-013 | Interface, menus et options | T-160 à T-179 | Phase 12 |
 | 14 | S-014 | Deuxième map : l'hôpital | T-180 à T-209 | Phase 13 |
 | 15 | S-015 | Finition et publication | T-210 à T-229 | Phase 14 |
+| — | S-016 | Intérieurs des bâtiments de la cité (demande du 15/11/2026, hors ordre des phases) | T-230 à T-249 | S-006, S-008, S-010 |
 
 L'ordre suit D-013 (12/11/2026) : le multijoueur passe juste après le test à plusieurs, avant les personnages, l'audio et les menus. Tout ce qui est ajouté avant le réseau (animations, sons d'autres joueurs, menus) devrait sinon être repris pour être synchronisé.
 
@@ -185,25 +186,26 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : script dans `tools/blender/`, 2 500 triangles au plus, textures de 64 à 256 px ; rendus validés par Maxime
   - Dépend de : T-121
   - Fait le 14/11/2026 : le chasseur, piste B choisie par Maxime (masque blanc fêlé à deux yeux rouges, 2,30 m, bras griffus étirés), `tools/blender/hunter.py`, 2 438 triangles
-- [ ] T-123 — Squelette et animations du monstre
+- [x] T-123 — Squelette et animations du monstre
   - Résultat vérifiable : rôder, marcher, courir, scanner, ouvrir une cachette, écraser un réveil, attraper
   - Dépend de : T-122
-  - En cours : repos, rôder, marcher, courir, scanner, ouvrir une cachette, en jeu (IA et vue des chassés en ligne) ; restent écraser un réveil et attraper (avec T-127)
+  - Fait le 15/11/2026 : repos, rôder, marcher, courir, scanner, ouvrir une cachette, attraper, écraser un réveil, en jeu (IA et vue des chassés en ligne)
 - [x] T-124 — Modèles des chassés
   - Résultat vérifiable : une variante par chassé (Q-002), 800 à 2 500 triangles, base CC0 adaptée au style ; rendus validés par Maxime
   - Dépend de : T-121
   - Fait le 14/11/2026 (avancé à la demande de Maxime, avant la fin de S-010) : les trois chassés de « Le Réseau », sans nom (ambulancier, parka, masque), sur la base CC0 Universal Base Characters de Quaternius, 2 377 à 2 478 triangles, validés par Maxime le 14/11. Script unique `tools/blender/hunted.py` (sources CC0 dans `art_src/quaternius_ubc/`) qui écrit `assets/models/hunted/*.glb` : un seul maillage skinné par chassé, textures de tissu en vraies UV, filtrage Nearest
-- [ ] T-125 — Animations des chassés
+- [x] T-125 — Animations des chassés
   - Résultat vérifiable : marcher, courir, accroupi, lancer, ramasser, réparer, entrer et sortir d'une cachette
   - Dépend de : T-124
-  - En cours : repos, marche, course, accroupi (à l'arrêt et en marche) et à genoux (capturé), faits par `tools/blender/hunted.py` en tournant les os ; reste lancer, ramasser, réparer, cachette
-- [ ] T-126 — Intégration en jeu et en réseau
+  - Fait le 15/11/2026 : repos, marche, course, accroupi (à l'arrêt et en marche), à genoux (capturé), lancer, ramasser ou poser, travailler des mains (réparer, cachette, libérer), faits par `tools/blender/hunted.py` en tournant les os
+- [x] T-126 — Intégration en jeu et en réseau
   - Résultat vérifiable : arbres d'animation pilotés par l'état synchronisé (S-010) ; IA comprises ; tests GUT sur le choix de l'animation
   - Dépend de : T-123, T-125
-  - En cours : `HuntedBody` montre un des trois chassés (place 1 à 3 en ligne, ordre des proies IA hors ligne) et choisit l'animation selon l'allure (déjà dans l'instantané), la vitesse et la capture, réglages dans `hunted_body_settings.tres` ; branché sur `Prey` et `NetPuppet` ; corps caché dans la vue spectateur ; aucun modèle sur le serveur dédié ; 11 tests GUT
-- [ ] T-127 — Capture
+  - Fait le 15/11/2026 : `HuntedBody` montre un des trois chassés (place 1 à 3 en ligne, ordre des proies IA hors ligne) et choisit l'animation selon l'allure (déjà dans l'instantané), la vitesse et la capture, réglages dans `hunted_body_settings.tres` ; branché sur `Prey` et `NetPuppet` ; corps caché dans la vue spectateur ; aucun modèle sur le serveur dédié ; gestes envoyés dans l'instantané (un entier par joueur vu)
+- [x] T-127 — Capture
   - Résultat vérifiable : séquence de capture vue par le chassé, qui respecte la règle des 2 secondes (2.3)
   - Dépend de : T-126
+  - Fait le 15/11/2026 : la tête du chassé se tourne vers le monstre qui le saisit, 1,2 s, puis l'écran ; en solo et en ligne
 - [ ] T-128 — Vérification finale de S-011
   - Résultat vérifiable : critères cochés, mesure de performance avec 4 personnages animés, spec livrée
   - Dépend de : T-127
@@ -312,7 +314,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-184 — Scan par aile ou par étage
   - Résultat vérifiable : la règle retenue en T-180 marche pour le monstre joueur et le monstre IA ; tests GUT
   - Dépend de : T-183
-- [ ] T-185 — Portes mobiles
+- [ ] T-185 — Portes mobiles (faites en S-016, T-232 à T-234 : l'hôpital les réutilise)
   - Résultat vérifiable : ouvrir et fermer une porte fait un bruit de 6 m (section 6.2) et coupe la vue ; le monstre les ouvre ; tests GUT
   - Dépend de : T-183
 - [ ] T-186 — Ventilation et moniteurs
@@ -386,6 +388,20 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-221 — Vérification finale de S-015
   - Résultat vérifiable : critères cochés, spec livrée
   - Dépend de : T-220
+
+---
+
+## Intérieurs des bâtiments de la cité (S-016)
+
+**But** : des bâtiments visitables moins vides, avec plusieurs issues, des escaliers, des portes qui font du bruit, des cachettes variées et du mobilier (demande de Maxime, 15/11/2026). Spec validée le 15/11/2026 : [`S-016-interieurs/spec.md`](S-016-interieurs/spec.md). Les portes mobiles de la tâche T-185 (hôpital) sont faites ici, et l'hôpital les réutilisera.
+
+- [x] T-230 — Spec S-016
+  - Résultat vérifiable : spec validée par Maxime (plans, portes, cachettes)
+  - Dépend de : —
+- [x] T-231 — Plan et tâches de S-016
+  - Résultat vérifiable : `plan.md` et `tasks.md`
+  - Dépend de : T-230
+- T-232 à T-244 : détaillées dans [`S-016-interieurs/tasks.md`](S-016-interieurs/tasks.md)
 
 ---
 

@@ -16,8 +16,11 @@ signal ruse_used(kind: StringName)
 
 ## Distance the target must move before the path is recomputed, in meters.
 const RETARGET_DISTANCE := 0.5
+const DOOR_SETTINGS := preload("res://game/data/door_settings.tres")
 const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
+## Length of the gestures its body shows (S-011, T-125).
+const BODY_SETTINGS := preload("res://game/data/hunted_body_settings.tres")
 
 @export var settings: PreySettings
 ## Speeds of the hunted (S-001).
@@ -48,6 +51,8 @@ var capture: CaptureState
 ## Captured, on its knees (T-107): it neither moves nor acts.
 var held := false:
 	set = set_held
+## What its hands do, as its body and the players see it (S-011, T-125).
+var gesture := BodyGesture.new()
 
 var _heard_monster := false
 var _vision_timer := 0.0
@@ -70,6 +75,8 @@ var _hide_look_left := 0.0
 var _car_detour: CarAlarm
 var _flee_target := Vector3.ZERO
 var _was_fleeing := false
+## The last door it opened on its way (S-016), to close behind it in flight.
+var _opened_door: Door
 var _rng := RandomNumberGenerator.new()
 ## Online (T-101): a captured teammate it goes to free (its CaptureState), or
 ## a dropped fuse it goes to take, and where it stands for it.
@@ -175,10 +182,19 @@ func get_eye_position() -> Vector3:
 
 func _process(_delta: float) -> void:
 	var down := held or (capture != null and capture.state == CaptureState.State.CAPTURED)
-	_body.show_state(get_gait(), Vector2(velocity.x, velocity.z).length(), down)
+	_body.show_state(get_gait(), Vector2(velocity.x, velocity.z).length(), down, get_gesture())
+
+
+## What its hands do: working while it holds "interact" on something (a fuse
+## box, a hiding spot, a teammate), else its last gesture, for its length.
+func get_gesture() -> HuntedBody.Gesture:
+	if _hold.holding or _hide_hold.holding:
+		return HuntedBody.Gesture.WORK
+	return gesture.kind as HuntedBody.Gesture
 
 
 func _physics_process(delta: float) -> void:
+	gesture.update(delta)
 	if held:
 		_stay_down(delta)
 		return
@@ -197,6 +213,7 @@ func _physics_process(delta: float) -> void:
 		_agent.target_position = brain.target
 		_stuck_left = settings.stuck_time
 	_pant(delta)
+	_show_if_revealed()
 	if _update_hiding(delta):
 		return  # Inside a hiding spot, or getting out of it: no move.
 	if _errand != null and _hold.holding:
@@ -267,6 +284,7 @@ func _use_ruses(delta: float, threat: Vector3) -> void:
 	if fleeing and not _was_fleeing:
 		_on_flee_started(threat)
 	_was_fleeing = fleeing
+	_close_door_behind(fleeing)
 	if fleeing:
 		_set_off_car_alarms()
 		_look_for_hiding_spot(delta, threat)
@@ -277,6 +295,23 @@ func _use_ruses(delta: float, threat: Vector3) -> void:
 	if _detour == null:
 		_update_errand(delta)
 	_maybe_place_decoy()
+
+
+## In flight, it closes the door it just went through, if the monster does
+## not see it: the closed door cuts the monster's sight (S-016, plan).
+func _close_door_behind(fleeing: bool) -> void:
+	if _opened_door == null or not is_instance_valid(_opened_door):
+		_opened_door = null
+		return
+	var gap := _opened_door.global_position - global_position
+	var past := Vector2(gap.x, gap.z).length() >= DOOR_SETTINGS.close_behind_distance
+	if not past:
+		return
+	var heading := -global_basis.z
+	var behind := Vector2(heading.x, heading.z).dot(Vector2(gap.x, gap.z)) < 0.0
+	if fleeing and behind and _opened_door.is_open and not sees_monster:
+		_opened_door.toggle(self, DOOR_SETTINGS.open_range)
+	_opened_door = null  # Once past it, it forgets it either way.
 
 
 func _on_flee_started(threat: Vector3) -> void:
@@ -366,6 +401,7 @@ func throw_bottle_to(point: Vector3) -> ThrownBottle:
 	bottle.global_position = get_eye_position() + direction * ruse_settings.throw_hand_offset
 	bottle.linear_velocity = launch * speed
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	gesture.play(HuntedBody.Gesture.THROW, BODY_SETTINGS.throw_time)
 	_count_ruse(&"bottle")
 	return bottle
 
@@ -378,6 +414,7 @@ func place_decoy() -> Decoy:
 	get_parent().add_child(decoy)
 	decoy.global_position = global_position
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	gesture.play(HuntedBody.Gesture.PICK, BODY_SETTINGS.pick_time)
 	_count_ruse(&"decoy")
 	_decoy = decoy
 	return decoy
@@ -440,6 +477,7 @@ func _update_detour(delta: float) -> void:
 		):
 			_end_detour()
 		elif _detour.can_interact(global_position):
+			gesture.play(HuntedBody.Gesture.PICK, BODY_SETTINGS.pick_time)
 			_detour.interact(self)
 			_end_detour()
 		return
@@ -627,6 +665,16 @@ func is_hidden() -> bool:
 	return hiding_in != null
 
 
+## Behind a curtain or boxes, the body shows to a monster close by that looks
+## at it (S-016, Q6): the playable monster sees it, and may open the spot.
+func _show_if_revealed() -> void:
+	if hiding_in == null or hiding_in.family != HidingSpot.Family.MAKESHIFT or monster == null:
+		return
+	$Body.visible = HidingSpot.is_revealed(
+		self, monster.get_ear_position(), -monster.global_basis.z
+	)
+
+
 func _count_ruse(kind: StringName) -> void:
 	ruse_counts[kind] = ruse_counts.get(kind, 0) + 1
 	ruse_used.emit(kind)
@@ -728,6 +776,13 @@ func _move(delta: float) -> void:
 			direction = direction.normalized()
 			horizontal = direction * PlayerMotion.speed_for_gait(motion, brain.get_gait())
 			look_at(global_position + direction, Vector3.UP)
+			# A closed door on its way: it opens it, standing (S-016).
+			var door := Door.closed_ahead(
+				get_tree(), global_position, direction, DOOR_SETTINGS.ai_reach
+			)
+			if door != null:
+				door.open_by(self)
+				_opened_door = door
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	if is_on_floor():

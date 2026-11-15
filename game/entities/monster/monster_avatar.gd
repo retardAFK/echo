@@ -20,6 +20,9 @@ enum ScanMiss { NOTHING, TOO_FAR, GAUGE_LOW }
 ## A wall this close to a building's box (its facade may stand a little
 ## outside the box) belongs to it, for aim_far_building().
 const FAR_AIM_WALL_MARGIN := 4.0
+const DOOR_SETTINGS := preload("res://game/data/door_settings.tres")
+## Length of the gestures the hunted see (S-011, T-127).
+const BODY_SETTINGS := preload("res://game/data/monster_body_settings.tres")
 
 @export var settings: MonsterSettings
 ## Mouse sensitivity, look limit and acceleration are shared with the hunted.
@@ -45,6 +48,12 @@ var local_controls := true
 ## progress the room says.
 var mirror_world := false
 var remote_hold_ratio := 0.0
+## Its last one-shot gesture, as the hunted see it: catching, crushing (T-127).
+var gesture := BodyGesture.new()
+## What the hunted see it do (S-011, T-127): a gesture, else scanning, else
+## opening a hiding spot or a door (holding "interact" on it).
+var body_action: MonsterBody.Action:
+	get = _get_action
 
 var _pace := MonsterBrain.Pace.WALK
 var _prowling := false
@@ -87,6 +96,7 @@ func _physics_process(delta: float) -> void:
 		_controls.fill()
 	else:
 		set_look(commands.yaw, commands.pitch)  # Played from another machine (T-097).
+	gesture.update(delta)
 	apply_actions()
 	update_aim()
 	update_scan(delta, commands.scan)
@@ -103,15 +113,17 @@ func apply_actions() -> void:
 			toggle_prowl()
 
 
-## The hiding spot in reach in front of the crosshair, that it can open by
-## holding "interact" (S-008, Q7), or null.
+## The hiding spot (S-008, Q7) or the door (S-016) in reach in front of the
+## crosshair, that it can use by holding "interact", or null.
 func get_interactable() -> Node:
 	var best: Node = null
 	var best_distance := INF
 	var forward := -_camera.global_basis.z
 	var aim := Vector2(forward.x, forward.z).normalized()
-	for node in get_tree().get_nodes_in_group(HidingSpot.GROUP):
-		var spot := node as HidingSpot
+	var usable := get_tree().get_nodes_in_group(HidingSpot.GROUP)
+	usable.append_array(get_tree().get_nodes_in_group(Door.GROUP))
+	for node in usable:
+		var spot := node as Node3D
 		if not spot.can_interact(global_position):
 			continue
 		var gap := spot.global_position - global_position
@@ -124,7 +136,7 @@ func get_interactable() -> Node:
 	return best
 
 
-## Progress of the hiding spot it is opening, from 0 to 1.
+## Progress of the hiding spot or door it is opening, from 0 to 1.
 func get_hold_ratio() -> float:
 	return remote_hold_ratio if mirror_world else _hold.get_ratio()
 
@@ -142,12 +154,31 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 	)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
+	if _pace == MonsterBrain.Pace.RUN and not mirror_world:
+		_smash_door(horizontal)
 	var before := global_position
 	move_and_slide()
 	var moved := Vector2(global_position.x - before.x, global_position.z - before.z).length()
 	_noise.update(delta, moved, _pace, global_position, get_ear_position(), self)
-	if not mirror_world:
-		Decoy.crush_near(get_tree(), global_position, settings.catch_distance)  # S-008, Q4.
+	if not mirror_world and Decoy.crush_near(get_tree(), global_position, settings.catch_distance):
+		gesture.play(MonsterBody.Action.CRUSH, BODY_SETTINGS.crush_time)  # S-008, Q4.
+
+
+func _get_action() -> MonsterBody.Action:
+	if gesture.kind != MonsterBody.Action.NONE:
+		return gesture.kind as MonsterBody.Action
+	if scan.active:
+		return MonsterBody.Action.SCAN
+	if _hold.holding:
+		return MonsterBody.Action.OPEN
+	return MonsterBody.Action.NONE
+
+
+## Running, a closed door just ahead bursts open (S-016, Q2).
+func _smash_door(heading: Vector3) -> void:
+	var door := Door.closed_ahead(get_tree(), global_position, heading, DOOR_SETTINGS.smash_reach)
+	if door != null:
+		door.smash(self)
 
 
 ## Field of view from the options (S-013, T-163).
@@ -255,6 +286,11 @@ func scan_reveals(event: NoiseEvent) -> bool:
 
 func toggle_prowl() -> void:
 	_prowling = not _prowling
+
+
+## Prowling, a door opens slowly and quietly (S-016, Q1).
+func is_sneaking() -> bool:
+	return _prowling
 
 
 ## Head pitch in radians, for the commands sent over the network.

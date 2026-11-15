@@ -25,6 +25,7 @@ func _pickups(map: Node, kind: Inventory.Kind) -> Array[Pickup]:
 func _nav_map() -> RID:
 	var nav_map := _map.get_world_3d().navigation_map
 	var spawn: Vector3 = _map.get_spawn_points()[0]
+	await wait_until(func() -> bool: return NavigationServer3D.map_get_iteration_id(nav_map) > 0, 5)
 	await wait_until(
 		func() -> bool:
 			var closest := NavigationServer3D.map_get_closest_point(nav_map, spawn)
@@ -57,10 +58,15 @@ func test_a_game_keeps_four_alarm_clocks_and_every_bottle() -> void:
 func test_three_closets_in_each_visitable_building_and_six_dumpsters_outside() -> void:
 	_add_map()
 	var spots := _map.get_hiding_spots()
-	assert_eq(spots.size(), 18)
+	var closet_family := spots.filter(
+		func(spot: HidingSpot) -> bool: return spot.family == HidingSpot.Family.CLOSET
+	)
+	assert_eq(closet_family.size(), 18, "the other families come on top (S-016)")
 	var closets := {}
 	var outside := 0
 	for spot in spots:
+		if spot.family != HidingSpot.Family.CLOSET:
+			continue
 		var inside := ""
 		for building in _map.get_buildings():
 			if building.contains(spot.global_position + Vector3.UP * 0.5):

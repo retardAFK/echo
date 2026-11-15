@@ -24,6 +24,8 @@ const MAP := "res://game/maps/tilleuls/tilleuls.tscn"
 const WAYPOINT_REACH := 0.6
 ## Seconds between two paths, and without progress before trying around.
 const REPATH_TIME := 1.0
+## A closed door this close ahead on the path: the player opens it (S-016).
+const DOOR_REACH := 1.2
 const STUCK_TIME := 1.5
 ## The monster walks at least that far from the hunted it caught.
 const AWAY_DISTANCE := 30.0
@@ -398,6 +400,11 @@ func _go_to(target: Vector3, delta: float, reach := 0.8) -> bool:
 		_path_index += 1
 	var next := _path[_path_index] if _path_index < _path.size() else target
 	_face(next)
+	var door := Door.closed_ahead(get_tree(), here, next - here, DOOR_REACH)
+	if door != null and door.can_use(_net.own):
+		var leaf := door.closest_flat_point(here)
+		_face(Vector3(leaf.x, here.y, leaf.y))
+		_wanted["interact"] = true  # Standing: it opens at once.
 	_wanted["move_forward"] = true
 	_wanted["sprint"] = true
 	_unstick(delta, here)

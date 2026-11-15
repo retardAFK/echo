@@ -8,7 +8,9 @@ extends Node
 ## to the room's position; the others are NetPuppets moved between snapshots.
 ## Snapshot: {"ack": last command applied, "you": [position, velocity, yaw,
 ## gait, hidden, hold ratio, bottles, alarm clocks, hiding spot index, held],
-## "others": [[seat, position, yaw, gait, down], ...]}.
+## "others": [[seat, position, yaw, gait, down, gesture], ...]}; gesture is
+## what its body shows (S-011): a HuntedBody.Gesture, or for the monster a
+## MonsterBody.Action.
 ## A spectator (a hunted out of the game, T-107) gets instead what the
 ## teammate it watches sees: {"ack", "watch": seat, "pitch": its head pitch,
 ## "others": that teammate first, then those it sees}; it presses "interact"
@@ -195,6 +197,7 @@ func _check_catches() -> void:
 			and absf(gap.y) <= monster.settings.catch_height
 		):
 			monster.catch_count += 1
+			monster.gesture.play(MonsterBody.Action.CATCH, MonsterAvatar.BODY_SETTINGS.catch_time)
 			hunted_caught.emit(hunted)  # GameMap applies the capture rule and tells everyone.
 
 
@@ -389,13 +392,22 @@ func _seen_by(viewer: Node3D) -> Array:
 
 
 func _entry(seat: int, node: Node3D) -> Array:
-	return [seat, node.global_position, node.rotation.y, _gait(node), node.get("held") == true]
+	return [
+		seat,
+		node.global_position,
+		node.rotation.y,
+		_gait(node),
+		node.get("held") == true,
+		_gesture(node),
+	]
 
 
 ## Room side: whether viewer sees target, walls and hiding spots included.
 func sees(viewer: Node3D, target: Node3D) -> bool:
 	var eye: Vector3 = viewer.get_eye_position()
 	var aim: Vector3 = target.get_eye_position()
+	if HidingSpot.is_revealed(target, eye, -viewer.global_basis.z):
+		return true  # Right beside a makeshift spot, facing it (S-016, Q6).
 	var target_hidden := HidingSpot.is_hidden(target)
 	if target_hidden or eye.distance_to(aim) > settings.sight_range:
 		return false  # No ray needed.
@@ -417,6 +429,15 @@ func _entities() -> Array:
 	if ai_monster != null:
 		found.append([LobbyState.MONSTER_SEAT, ai_monster])
 	return found
+
+
+## What its body shows: a hunted's gesture, or the monster's action.
+func _gesture(node: Node3D) -> int:
+	if node.has_method("get_gesture"):
+		return node.get_gesture()
+	if "body_action" in node:
+		return node.body_action
+	return 0
 
 
 func _gait(node: Node3D) -> int:
@@ -458,6 +479,7 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 		if entry.size() >= 4:
 			puppet.gait = entry[3]
 		puppet.set_down(entry.size() >= 5 and entry[4])
+		puppet.gesture = entry[5] if entry.size() >= 6 else 0
 	for seat in puppets:
 		if not seen.has(seat):
 			puppets[seat].visible = false

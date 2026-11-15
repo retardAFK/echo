@@ -7,6 +7,7 @@ const SETTINGS := preload("res://game/data/hunted_body_settings.tres")
 const WALK := PlayerMotion.Gait.WALK
 const CROUCH := PlayerMotion.Gait.CROUCH
 const SPRINT := PlayerMotion.Gait.SPRINT
+const PREY_SCENE := preload("res://game/entities/prey/prey.tscn")
 
 
 func test_still_hunted_idles_in_every_gait_but_crouch() -> void:
@@ -24,6 +25,64 @@ func test_moving_hunted_walks_runs_or_creeps() -> void:
 func test_captured_hunted_kneels_whatever_it_does() -> void:
 	for gait: PlayerMotion.Gait in [WALK, CROUCH, SPRINT]:
 		assert_eq(HuntedBody.pick(gait, 4.0, true, SETTINGS), HuntedBody.KNEEL)
+
+
+func test_a_gesture_shows_unless_captured() -> void:
+	var gestures := {
+		HuntedBody.Gesture.THROW: HuntedBody.THROW,
+		HuntedBody.Gesture.PICK: HuntedBody.PICK,
+		HuntedBody.Gesture.WORK: HuntedBody.WORK,
+	}
+	for gesture: HuntedBody.Gesture in gestures:
+		assert_eq(HuntedBody.pick(SPRINT, 5.0, false, SETTINGS, gesture), gestures[gesture])
+		assert_eq(HuntedBody.pick(CROUCH, 0.0, false, SETTINGS, gesture), gestures[gesture])
+		assert_eq(HuntedBody.pick(WALK, 0.0, true, SETTINGS, gesture), HuntedBody.KNEEL)
+
+
+func test_a_gesture_lasts_its_length() -> void:
+	var gesture := BodyGesture.new()
+	gesture.play(HuntedBody.Gesture.THROW, 0.5)
+	gesture.update(0.3)
+	assert_eq(gesture.kind, HuntedBody.Gesture.THROW)
+	gesture.update(0.3)
+	assert_eq(gesture.kind, HuntedBody.Gesture.NONE)
+
+
+func test_one_shots_last_as_long_as_their_animation() -> void:
+	var model: Node = (load(HuntedBody.MODELS[HuntedBody.Role.PARKA]) as PackedScene).instantiate()
+	var player: AnimationPlayer = model.find_children("*", "AnimationPlayer", true, false)[0]
+	assert_almost_eq(player.get_animation(HuntedBody.THROW).length, SETTINGS.throw_time, 0.05)
+	assert_almost_eq(player.get_animation(HuntedBody.PICK).length, SETTINGS.pick_time, 0.05)
+	model.free()
+
+
+func test_a_hunted_throwing_or_working_shows_it() -> void:
+	var player: Player = (
+		(load("res://game/entities/player/player.tscn") as PackedScene).instantiate()
+	)
+	add_child_autofree(player)
+	assert_eq(player.get_gesture(), HuntedBody.Gesture.NONE)
+	player.inventory.take(Inventory.Kind.BOTTLE)
+	player.throw_bottle()
+	assert_eq(player.get_gesture(), HuntedBody.Gesture.THROW)
+	player.gesture.update(SETTINGS.throw_time + 0.01)
+	assert_eq(player.get_gesture(), HuntedBody.Gesture.NONE)
+	var prey: Prey = PREY_SCENE.instantiate()
+	add_child_autofree(prey)
+	prey.inventory.take(Inventory.Kind.DECOY)
+	prey.place_decoy()
+	assert_eq(prey.get_gesture(), HuntedBody.Gesture.PICK)
+
+
+func test_puppet_shows_the_gesture_the_room_sends() -> void:
+	var puppet := NetPuppet.new()
+	puppet.seat = 2
+	add_child_autofree(puppet)
+	var body: HuntedBody = puppet.find_children("*", "HuntedBody", true, false)[0]
+	puppet.buffer.push(0.0, Vector3.ZERO, 0.0)
+	puppet.gesture = HuntedBody.Gesture.WORK
+	puppet.show_at(0.0, 0.1)
+	assert_eq(body.animation, HuntedBody.WORK)
 
 
 func test_playback_follows_speed_within_bounds() -> void:
@@ -54,7 +113,10 @@ func test_every_character_has_its_model_and_animations() -> void:
 			HuntedBody.RUN,
 			HuntedBody.CROUCH,
 			HuntedBody.CROUCH_IDLE,
-			HuntedBody.KNEEL
+			HuntedBody.KNEEL,
+			HuntedBody.THROW,
+			HuntedBody.PICK,
+			HuntedBody.WORK
 		]:
 			assert_true(player.has_animation(anim), "%s in %s" % [anim, HuntedBody.MODELS[role]])
 		model.free()
@@ -85,9 +147,23 @@ func test_monster_puppet_has_no_hunted_body() -> void:
 
 
 func test_prey_wears_a_hunted_body() -> void:
-	var prey: Prey = (load("res://game/entities/prey/prey.tscn") as PackedScene).instantiate()
+	var prey: Prey = PREY_SCENE.instantiate()
 	assert_true(prey.get_node("Body") is HuntedBody)
 	prey.free()
+
+
+func test_each_character_draws_in_three_calls_at_most() -> void:
+	# Final textures (T-124): one baked atlas, plus its lights.
+	var paths: Array = HuntedBody.MODELS.values() + [MonsterBody.MODEL]
+	for path: String in paths:
+		var model: Node = (load(path) as PackedScene).instantiate()
+		var meshes := model.find_children("*", "MeshInstance3D", true, false)
+		assert_eq(meshes.size(), 1, path)
+		var mesh: Mesh = (meshes[0] as MeshInstance3D).mesh
+		assert_lte(mesh.get_surface_count(), 3, path)
+		var atlas := (mesh.surface_get_material(0) as BaseMaterial3D).albedo_texture
+		assert_lte(atlas.get_width(), 512, "512 px at most (2.3)")
+		model.free()
 
 
 func test_every_character_faces_forward() -> void:

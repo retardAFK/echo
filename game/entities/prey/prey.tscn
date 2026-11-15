@@ -15,6 +15,7 @@ height = 1.75
 [node name="Prey" type="CharacterBody3D"]
 collision_layer = 4
 collision_mask = 3
+wall_min_slide_angle = 0.0
 script = ExtResource("1_prey")
 settings = ExtResource("2_settings")
 motion = ExtResource("3_motion")
@@ -27,6 +28,7 @@ shape = SubResource("Shape_body")
 [node name="Body" parent="." instance=ExtResource("7_body")]
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_search_max_polygons = 0
 path_desired_distance = 0.5
 path_postprocessing = 1
 target_desired_distance = 0.6

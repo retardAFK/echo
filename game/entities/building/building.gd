@@ -16,6 +16,9 @@ const SCAN_LAYER := 1 << 4
 @export var size := Vector3.ONE
 ## Key of the building's name in strings.csv, shown by the scan reticle (T-086).
 @export var display_key := "BUILDING_DEFAULT"
+## More boxes that belong to the building, in its own space: the cellar
+## stairs of the tower, the corridor of the car park (S-016, Q5).
+@export var extra_boxes: Array[AABB] = []
 
 var scanned := false:
 	set(value):
@@ -79,7 +82,13 @@ func contains(point: Vector3) -> bool:
 	var box: BoxShape3D = _shape.shape
 	var local := _shape.global_transform.affine_inverse() * point
 	var half := box.size / 2.0
-	return absf(local.x) <= half.x and absf(local.y) <= half.y and absf(local.z) <= half.z
+	if absf(local.x) <= half.x and absf(local.y) <= half.y and absf(local.z) <= half.z:
+		return true
+	var own := global_transform.affine_inverse() * point
+	for extra in extra_boxes:
+		if extra.has_point(own):
+			return true
+	return false
 
 
 ## Distance from a world position to the building's volume, 0 inside, in meters.
@@ -88,7 +97,12 @@ func distance_to(point: Vector3) -> float:
 	var local := _shape.global_transform.affine_inverse() * point
 	var half := box.size / 2.0
 	var outside := (local.abs() - half).max(Vector3.ZERO)
-	return outside.length()
+	var best := outside.length()
+	var own := global_transform.affine_inverse() * point
+	for extra in extra_boxes:
+		var gap := (extra.position - own).max(own - extra.end).max(Vector3.ZERO)
+		best = minf(best, gap.length())
+	return best
 
 
 func _restore_lights() -> void:

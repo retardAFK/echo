@@ -20,3 +20,8 @@ extends Resource
 ## Bounds of the playback speed.
 @export_range(0.1, 1.0, 0.05) var min_scale: float = 0.6
 @export_range(1.0, 3.0, 0.05) var max_scale: float = 1.6
+
+@export_group("Gestures")
+## Length of the one-shot gestures, as made by tools/blender/hunter.py (T-127).
+@export_range(0.1, 3.0, 0.05, "suffix:s") var catch_time: float = 0.9
+@export_range(0.1, 3.0, 0.05, "suffix:s") var crush_time: float = 0.8

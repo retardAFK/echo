@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/hiding_spot/hiding_spot.gd" id="1_spot"]
+[ext_resource type="Resource" path="res://game/data/ruse_settings.tres" id="2_settings"]
+[ext_resource type="AudioStream" path="res://assets/audio/interiors/crawl.wav" id="3_creak"]
+[ext_resource type="Material" path="res://game/fx/materials/concrete_obstacle.tres" id="4_material"]
+
+[sub_resource type="BoxMesh" id="Mesh_model"]
+size = Vector3(1.0, 0.55, 2.0)
+
+[sub_resource type="BoxShape3D" id="Shape_body"]
+size = Vector3(1.0, 0.55, 2.0)
+
+[node name="LowSpot" type="Node3D"]
+script = ExtResource("1_spot")
+settings = ExtResource("2_settings")
+crouched = true
+family = 1
+
+[node name="Model" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.275, 0)
+mesh = SubResource("Mesh_model")
+material_override = ExtResource("4_material")
+
+[node name="Body" type="StaticBody3D" parent="."]
+collision_layer = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.275, 0)
+shape = SubResource("Shape_body")
+
+[node name="Creak" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+stream = ExtResource("3_creak")
+max_distance = 15.0
