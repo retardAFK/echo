@@ -169,3 +169,14 @@ func test_the_image_tab_offers_fullscreen() -> void:
 	for row in options.get_rows():
 		settings.append(row.setting)
 	assert_has(settings, "fullscreen")
+
+
+func test_the_buses_come_from_the_project_layout() -> void:
+	# Buses added while the game ran were silent in the browser (T-163).
+	var layout: AudioBusLayout = load("res://default_bus_layout.tres")
+	for key: String in UserSettings.BUSES:
+		if key != "volume_master":
+			assert_eq(
+				layout.get("bus/%d/name" % (UserSettings.BUSES.keys().find(key))),
+				StringName(UserSettings.BUSES[key])
+			)

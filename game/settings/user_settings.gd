@@ -26,7 +26,8 @@ const FLAGS := {"invert_y": false, "fullscreen": false}
 const FULLSCREEN := "fullscreen"
 ## Settings picked in a list; the first one is the default.
 const CHOICES := {"keyboard": ["azerty", "qwerty"]}
-## Audio bus of each volume. Buses other than Master are made at start.
+## Audio bus of each volume. The buses come from default_bus_layout.tres: in a
+## browser, a bus added while the game runs stays silent.
 const BUSES := {
 	"volume_master": "Master",
 	"volume_effects": "Effets",
