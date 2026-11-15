@@ -43,6 +43,7 @@ const REMAPPABLE: Array[String] = [
 	"sprint",
 	"crouch",
 	"interact",
+	"map",
 ]
 ## Tokens of the texts that name a key, and the actions they name.
 const TOKENS := {
@@ -50,6 +51,7 @@ const TOKENS := {
 	"{sprint}": ["sprint"],
 	"{crouch}": ["crouch"],
 	"{interact}": ["interact"],
+	"{map}": ["map"],
 }
 ## What an AZERTY keyboard prints on the keys that differ from QWERTY.
 const AZERTY := {
