@@ -26,6 +26,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 | 15 | S-015 | Finition et publication | T-210 à T-229 | Phase 14 |
 | — | S-016 | Intérieurs des bâtiments de la cité (demande du 15/11/2026, hors ordre des phases) | T-230 à T-249 | S-006, S-008, S-010 |
 | — | S-017 | Carte des chassés (demande du 15/11/2026, hors ordre des phases) | T-250 à T-259 | S-006, S-010 |
+| — | S-018 | Prison et réseau de la cité : terminaux, caméras, leurres à distance, quêtes tirées au sort (demande du 15/11/2026, hors ordre des phases) | T-260 à T-289 | S-010, S-016 |
 
 L'ordre suit D-013 (12/11/2026) : le multijoueur passe juste après le test à plusieurs, avant les personnages, l'audio et les menus. Tout ce qui est ajouté avant le réseau (animations, sons d'autres joueurs, menus) devrait sinon être repris pour être synchronisé.
 
@@ -298,7 +299,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 **Règles de zone** (section 6.4) : ventilation qui couvre les petits bruits, moniteurs qui bipent, brancards et fauteuils roulants bruyants, nombreuses cachettes (lits, placards).
 
-**Ce qui doit le rendre effrayant** (à préciser dans la spec, rendus montrés à Maxime) : néons verts qui grésillent ou meurent, longs couloirs où la vue porte loin mais où l'on ne voit pas le bout, sous-sols (morgue, chambres d'isolement), traces d'évacuation précipitée, sons lointains qui ne viennent de nulle part, très peu de lumière.
+**Ce qui doit le rendre effrayant** (à préciser dans la spec, rendus montrés à Maxime) : néons verts qui grésillent ou meurent, longs couloirs où la vue porte loin mais où l'on ne voit pas le bout, sous-sols (morgue, chambres d'isolement), traces d'évacuation précipitée, sons lointains qui ne viennent de nulle part, très peu de lumière. Planche d'ambiance du 15/11/2026 (façade, couloir, morgue, chambre d'isolement) : rendus de `tools/blender/hospital_mood.py`, validés par Maxime (« toutes les ambiances me conviennent »).
 
 **Terminé quand** : une partie complète dans la cité avec l'hôpital se joue en solo et en ligne, sous le budget de performance.
 
@@ -415,6 +416,48 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [x] T-250 — Spec S-017
 - [x] T-251 — Plan de la cité
 - [x] T-252 — Écran carte, solo et en ligne
+
+---
+
+## Prison et réseau de la cité (S-018)
+
+**But** : une prison d'où un coéquipier libère les chassés attrapés, sur place ou à distance depuis un terminal, et un réseau de vieux terminaux (caméras, haut-parleurs, rideaux métalliques) qui sert de ruse à distance et fait varier les quêtes d'une partie à l'autre (demande de Maxime, 15/11/2026, D-020). Spec : [`S-018-prison-et-reseau/spec.md`](S-018-prison-et-reseau/spec.md). Commence après la fin de S-016, qui touche aussi la cité.
+
+**Terminé quand** : en ligne, un chassé attrapé va en prison et peut être libéré des deux façons ; les terminaux marchent pour les chassés et le monstre sait les contrer ; chaque partie tire 3 objectifs ; 20 parties simulées sans blocage, budget tenu.
+
+- [x] T-260 — Spec S-018
+  - Résultat vérifiable : spec validée par Maxime (libération sur place ou à distance, outils et quêtes tirées au sort)
+  - Dépend de : —
+- [ ] T-261 — Plan et tâches de S-018
+  - Résultat vérifiable : `plan.md` et `tasks.md`, emplacements des cages, des terminaux, des caméras, des haut-parleurs et des rideaux sur le plan de la cité
+  - Dépend de : T-260, fin de S-016
+- [ ] T-262 — La prison
+  - Résultat vérifiable : capture → écran noir → cage ; libération sur place (E 4 s, une cage) ; séjours de 120 s puis 60 s, élimination à la 3e prise, chrono arrêté quand le monstre est à moins de 15 m ; victoire du monstre quand tous sont en prison ou éliminés ; solo inchangé ; tests GUT
+  - Dépend de : T-261
+- [ ] T-263 — Terminaux et caméras
+  - Résultat vérifiable : s'installer à un terminal (E 1 s, bruit de clavier, écran qui éclaire), voir une caméra ; lumière rouge visible du monstre, caméra cassée par le monstre ; vue des caméras pour le prisonnier ; tests GUT
+  - Dépend de : T-262
+- [ ] T-264 — Terminal du gardien
+  - Résultat vérifiable : ouvre toutes les cages en 10 s, sonnerie à la prison ; tests GUT
+  - Dépend de : T-263
+- [ ] T-265 — Haut-parleurs et rideaux métalliques
+  - Résultat vérifiable : leurres à distance (une fois chacun) et rideaux baissés 20 s (recharge 60 s), selon la spec ; le monstre éteint les terminaux ; tests GUT
+  - Dépend de : T-263
+- [ ] T-266 — Quêtes tirées au sort
+  - Résultat vérifiable : 3 objectifs par partie parmi fusible, code, téléchargement et relais ; liste sur l'écran de la carte (Tab), sans position ; solo et en ligne ; tests GUT
+  - Dépend de : T-263
+- [ ] T-267 — Synchronisation en ligne
+  - Résultat vérifiable : prison, terminaux, caméras, rideaux et objectifs synchronisés ; un chassé ne reçoit jamais la position d'un autre, sauf ce qu'il voit sur une caméra ; test à 4 clients
+  - Dépend de : T-264, T-265, T-266
+- [ ] T-268 — IA
+  - Résultat vérifiable : le monstre IA éteint les terminaux et passe voir la prison ; la proie IA fait les nouveaux objectifs et utilise les leurres à distance ; 20 parties simulées sans blocage
+  - Dépend de : T-266
+- [ ] T-269 — Modèles et sons
+  - Résultat vérifiable : terminal, caméra, haut-parleur, rideau, cages ; clavier, disque dur, sonnerie, rideau ; montrés à Maxime avant intégration
+  - Dépend de : T-261
+- [ ] T-270 — Vérification finale de S-018
+  - Résultat vérifiable : critères cochés, budget de 300 appels de dessin et 60 images/s tenus
+  - Dépend de : T-267, T-268, T-269
 
 ---
 
