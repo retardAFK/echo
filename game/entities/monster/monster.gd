@@ -43,6 +43,9 @@ var scan: ScanGauge
 var scan_target: Building
 ## Its last one-shot gesture: catching, crushing (S-011, T-127).
 var gesture := BodyGesture.new()
+## What its body shows: a gesture, else what its brain is doing.
+var body_action: MonsterBody.Action:
+	get = _get_action
 
 var _vision_timer := 0.0
 var _was_hidden := false
@@ -107,11 +110,10 @@ func reset_to_patrol(away_from: Vector3) -> void:
 
 func _process(_delta: float) -> void:
 	var speed := Vector2(velocity.x, velocity.z).length()
-	_body.show_state(speed, get_action())
+	_body.show_state(speed, body_action)
 
 
-## What its body shows: a gesture, else what its brain is doing.
-func get_action() -> MonsterBody.Action:
+func _get_action() -> MonsterBody.Action:
 	if gesture.kind != MonsterBody.Action.NONE:
 		return gesture.kind as MonsterBody.Action
 	return MonsterBody.action_for(brain.state)

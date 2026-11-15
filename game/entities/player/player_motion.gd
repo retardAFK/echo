@@ -69,3 +69,12 @@ static func head_bob_amplitude(settings: PlayerSettings, gait: Gait) -> float:
 ## Camera offset for a head bob phase (radians): a figure-eight sway.
 static func head_bob_offset(phase: float, amplitude: float) -> Vector3:
 	return Vector3(cos(phase) * amplitude * 0.5, absf(sin(phase)) * amplitude, 0.0)
+
+
+## Yaw and pitch (radians) of a look from one point to another (S-011, T-127).
+static func look_angles(from: Vector3, to: Vector3) -> Vector2:
+	var gap := to - from
+	var flat := Vector2(gap.x, gap.z).length()
+	if flat < 0.0001 and absf(gap.y) < 0.0001:
+		return Vector2.ZERO
+	return Vector2(atan2(-gap.x, -gap.z), atan2(gap.y, flat))

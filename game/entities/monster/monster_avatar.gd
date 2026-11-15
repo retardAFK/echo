@@ -50,6 +50,10 @@ var mirror_world := false
 var remote_hold_ratio := 0.0
 ## Its last one-shot gesture, as the hunted see it: catching, crushing (T-127).
 var gesture := BodyGesture.new()
+## What the hunted see it do (S-011, T-127): a gesture, else scanning, else
+## opening a hiding spot or a door (holding "interact" on it).
+var body_action: MonsterBody.Action:
+	get = _get_action
 
 var _pace := MonsterBrain.Pace.WALK
 var _prowling := false
@@ -160,9 +164,7 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 		gesture.play(MonsterBody.Action.CRUSH, BODY_SETTINGS.crush_time)  # S-008, Q4.
 
 
-## What the hunted see it do (S-011, T-127): a gesture, else scanning, else
-## opening a hiding spot (holding "interact" on it).
-func get_action() -> MonsterBody.Action:
+func _get_action() -> MonsterBody.Action:
 	if gesture.kind != MonsterBody.Action.NONE:
 		return gesture.kind as MonsterBody.Action
 	if scan.active:

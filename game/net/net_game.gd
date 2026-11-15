@@ -433,8 +433,8 @@ func _entities() -> Array:
 func _gesture(node: Node3D) -> int:
 	if node.has_method("get_gesture"):
 		return node.get_gesture()
-	if node.has_method("get_action"):
-		return node.get_action()
+	if "body_action" in node:
+		return node.body_action
 	return 0
 
 

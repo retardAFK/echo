@@ -726,7 +726,7 @@ func _pick_spawn() -> void:
 ## eyes, for catch_show_time (2 s at most, 2.3); then the end of the game, or
 ## the "caught" screen and a respawn outside the game loop.
 func _on_player_caught() -> void:
-	if _player.is_watching_catcher():
+	if _player.watching_catcher:
 		return  # Already in its claws.
 	var show := _monster.settings.catch_show_time
 	_monster.gesture.play(MonsterBody.Action.CATCH, _monster.get_body_settings().catch_time)

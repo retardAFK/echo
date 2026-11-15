@@ -46,6 +46,11 @@ var capture: CaptureState
 var held := false
 ## What its hands do, as the others see it (S-011, T-125).
 var gesture := BodyGesture.new()
+## Caught (T-127): the head turns to the monster that seized it, the
+## controls stopped, for a moment (watch_catcher).
+var watching_catcher: bool:
+	get:
+		return _catcher_left > 0.0
 
 var _gait := PlayerMotion.Gait.WALK
 var _wants_crouch := false
@@ -329,25 +334,12 @@ func watch_catcher(eyes: Vector3, duration: float) -> void:
 	velocity = Vector3.ZERO
 
 
-func is_watching_catcher() -> bool:
-	return _catcher_left > 0.0
-
-
-## Yaw and pitch (radians) of a look from one point to another.
-static func look_angles(from: Vector3, to: Vector3) -> Vector2:
-	var gap := to - from
-	var flat := Vector2(gap.x, gap.z).length()
-	if flat < 0.0001 and absf(gap.y) < 0.0001:
-		return Vector2.ZERO
-	return Vector2(atan2(-gap.x, -gap.z), atan2(gap.y, flat))
-
-
 func _watch_catcher(delta: float) -> void:
 	_catcher_left = maxf(0.0, _catcher_left - delta)
 	commands.take_actions()  # Nothing done while caught.
 	commands.move = Vector2.ZERO
 	commands.interact = false
-	var want := look_angles(_head.global_position, _catcher_eyes)
+	var want := PlayerMotion.look_angles(_head.global_position, _catcher_eyes)
 	var k := minf(1.0, settings.caught_turn_speed * delta)
 	rotation.y = lerp_angle(rotation.y, want.x, k)
 	_pitch = PlayerMotion.clamp_pitch(lerpf(_pitch, want.y, k), settings)

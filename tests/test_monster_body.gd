@@ -36,11 +36,11 @@ func test_the_catch_shows_the_monster_two_seconds_at_most() -> void:
 
 
 func test_the_head_turns_to_the_catcher() -> void:
-	var ahead := Player.look_angles(Vector3.ZERO, Vector3(0, 0, -5))
+	var ahead := PlayerMotion.look_angles(Vector3.ZERO, Vector3(0, 0, -5))
 	assert_almost_eq(ahead, Vector2.ZERO, Vector2.ONE * 0.001)
-	var right := Player.look_angles(Vector3.ZERO, Vector3(5, 0, 0))
+	var right := PlayerMotion.look_angles(Vector3.ZERO, Vector3(5, 0, 0))
 	assert_almost_eq(right.x, -PI / 2.0, 0.001, "to the right: yaw turns clockwise")
-	var up := Player.look_angles(Vector3.ZERO, Vector3(0, 1, -1))
+	var up := PlayerMotion.look_angles(Vector3.ZERO, Vector3(0, 1, -1))
 	assert_almost_eq(up.y, PI / 4.0, 0.001, "eyes above: the head tilts up")
 
 

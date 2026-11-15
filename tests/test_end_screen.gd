@@ -31,8 +31,8 @@ func test_a_caught_hunted_loses_after_the_catch() -> void:
 	var monster: Monster = map.get_node("Monster")
 	monster.player_caught.emit()
 	assert_false(map.game_loop.is_over, "first the monster seizes it (T-127)")
-	assert_true(player.is_watching_catcher())
-	assert_eq(monster.get_action(), MonsterBody.Action.CATCH)
+	assert_true(player.watching_catcher)
+	assert_eq(monster.body_action, MonsterBody.Action.CATCH)
 	# A timer that runs on while the end screen pauses the game (GUT's waits stop).
 	await get_tree().create_timer(monster.settings.catch_show_time + 0.2, true).timeout
 	assert_true(map.game_loop.is_over)
