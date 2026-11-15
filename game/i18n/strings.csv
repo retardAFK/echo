@@ -32,6 +32,8 @@ HUD_CARRY_DECOY,Réveil
 HUD_INTERACT_HIDE,Maintenir {interact} : se cacher
 HUD_INTERACT_LEAVE,Maintenir {interact} : sortir
 HUD_INTERACT_OPEN,Maintenir {interact} : ouvrir
+HUD_INTERACT_DOOR_OPEN,{interact} : ouvrir la porte
+HUD_INTERACT_DOOR_CLOSE,{interact} : fermer la porte
 BENCH_LOADING,Banc d'essai : chargement…
 BENCH_RUNNING,Banc d'essai : encore %d s
 BENCH_DONE,Banc d'essai terminé

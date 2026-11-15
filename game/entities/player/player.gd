@@ -401,6 +401,11 @@ func get_gait() -> PlayerMotion.Gait:
 	return _gait
 
 
+## Crouched, a door opens slowly and quietly (S-016, Q1).
+func is_sneaking() -> bool:
+	return _gait == PlayerMotion.Gait.CROUCH
+
+
 func get_height() -> float:
 	return _height
 
