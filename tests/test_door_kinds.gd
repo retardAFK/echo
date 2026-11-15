@@ -1,0 +1,126 @@
+extends GutTest
+## Fire doors, emergency exits and metal floors (spec S-016, Q3 and Q9, T-234).
+
+const DOOR_SCENE := preload("res://game/entities/door/door.tscn")
+const METAL_SCENE := preload("res://game/entities/metal_floor/metal_floor.tscn")
+const SETTINGS := preload("res://game/data/door_settings.tres")
+const NOISE := preload("res://game/data/noise_settings.tres")
+
+
+## Someone standing somewhere, who does not sneak.
+class Walker:
+	extends Node3D
+
+
+var _noises: Array[NoiseEvent] = []
+
+
+func before_each() -> void:
+	_noises.clear()
+	NoiseBus.noise_emitted.connect(_record)
+
+
+func after_each() -> void:
+	NoiseBus.noise_emitted.disconnect(_record)
+	NoiseBus.mirror = false
+
+
+func _record(event: NoiseEvent) -> void:
+	if event.type == NoiseEvent.Type.DOOR:
+		_noises.append(event)
+
+
+func _door(kind: Door.Kind) -> Door:
+	var door: Door = DOOR_SCENE.instantiate()
+	door.kind = kind
+	add_child_autofree(door)
+	return door
+
+
+func _walker(at: Vector3) -> Walker:
+	var walker := Walker.new()
+	add_child_autofree(walker)
+	walker.global_position = at
+	return walker
+
+
+func test_settings_follow_the_spec() -> void:
+	assert_eq(SETTINGS.fire_close_delay, 3.0, "Q3: closes 3 s after")
+	assert_eq(SETTINGS.slam_range, 5.0, "Q3: slams at 5 m")
+	assert_eq(SETTINGS.emergency_range, 10.0, "Q3: crash bar at 10 m")
+	assert_eq(NOISE.metal_walk_range, 6.0, "Q9: walking on metal, 6 m")
+	assert_eq(NOISE.metal_sprint_range, 18.0, "Q9: running on metal, 18 m")
+
+
+func test_a_fire_door_slams_shut_on_its_own() -> void:
+	var door := _door(Door.Kind.FIRE)
+	var walker := _walker(Vector3(0, 0, 1))
+	assert_true(door.hold(walker, 0.016))
+	assert_true(door.is_open)
+	await wait_seconds(SETTINGS.fire_close_delay - 0.5)
+	assert_true(door.is_open, "not yet")
+	await wait_seconds(1.0)
+	assert_false(door.is_open, "closed on its own")
+	assert_eq(_noises.size(), 2)
+	assert_eq(_noises[1].noise_range, 5.0, "the slam")
+	assert_null(_noises[1].source.last_user, "nobody closed it")
+
+
+func test_on_an_online_client_the_room_closes_it() -> void:
+	var door := _door(Door.Kind.FIRE)
+	NoiseBus.mirror = true
+	door.mirror(true)
+	await wait_seconds(SETTINGS.fire_close_delay + 0.5)
+	assert_true(door.is_open, "the client waits for the room")
+
+
+func test_a_normal_door_stays_open() -> void:
+	var door := _door(Door.Kind.NORMAL)
+	door.open_by(null)
+	await wait_seconds(SETTINGS.fire_close_delay + 0.5)
+	assert_true(door.is_open)
+
+
+func test_an_emergency_exit_opens_from_inside_only_and_stays_open() -> void:
+	var door := _door(Door.Kind.EMERGENCY)
+	var outside := _walker(Vector3(0, 0, 1))
+	var inside := _walker(Vector3(0, 0, -1))
+	assert_eq(door.get_prompt_for(outside), "", "no handle outside")
+	assert_false(door.hold(outside, 0.016))
+	door.open_by(outside)
+	assert_false(door.is_open, "the AI cannot open it from outside either")
+	assert_eq(door.get_prompt_for(inside), "HUD_INTERACT_DOOR_OPEN")
+	assert_true(door.hold(inside, 0.016))
+	assert_true(door.is_open)
+	assert_eq(_noises[0].noise_range, 10.0, "Q3: the crash bar")
+	door.release(inside)
+	assert_false(door.hold(inside, 0.016), "it stays open")
+	assert_eq(door.get_prompt_for(inside), "")
+	assert_true(door.is_open)
+
+
+func test_the_monster_smashes_an_emergency_exit_from_outside() -> void:
+	var door := _door(Door.Kind.EMERGENCY)
+	var outside := _walker(Vector3(0, 0, 1))
+	door.smash(outside)
+	assert_true(door.is_open)
+	assert_eq(_noises[0].noise_range, SETTINGS.smash_range)
+
+
+func test_footsteps_on_metal_carry_farther() -> void:
+	assert_eq(NoiseMath.range_for_gait(NOISE, PlayerMotion.Gait.WALK, true), 6.0)
+	assert_eq(NoiseMath.range_for_gait(NOISE, PlayerMotion.Gait.SPRINT, true), 18.0)
+	assert_eq(
+		NoiseMath.range_for_gait(NOISE, PlayerMotion.Gait.CROUCH, true), 1.0, "crouched: silent"
+	)
+	assert_eq(NoiseMath.range_for_gait(NOISE, PlayerMotion.Gait.WALK), 4.0)
+
+
+func test_metal_floor_covers_its_box() -> void:
+	var metal: MetalFloor = METAL_SCENE.instantiate()
+	metal.size = Vector3(2, 3, 4)
+	add_child_autofree(metal)
+	metal.global_position = Vector3(10, 0, 0)
+	assert_true(MetalFloor.under(get_tree(), Vector3(10.5, 1, 1.5)))
+	assert_false(MetalFloor.under(get_tree(), Vector3(11.5, 1, 0)), "beside")
+	assert_false(MetalFloor.under(get_tree(), Vector3(10, 2, 0)), "above")

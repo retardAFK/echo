@@ -10,6 +10,10 @@ extends Resource
 @export_range(0.0, 50.0, 0.1, "suffix:m") var walk_range: float = 4.0
 ## Range of a sprinting footstep, in meters.
 @export_range(0.0, 50.0, 0.1, "suffix:m") var sprint_range: float = 14.0
+## Walking on metal (fire escape stairs, steel steps), in meters (S-016, Q9).
+@export_range(0.0, 50.0, 0.1, "suffix:m") var metal_walk_range: float = 6.0
+## Running on metal, in meters (S-016, Q9). Crouched stays at crouch_range.
+@export_range(0.0, 50.0, 0.1, "suffix:m") var metal_sprint_range: float = 18.0
 
 @export_group("Strides")
 ## Distance between two crouched footsteps, in meters.

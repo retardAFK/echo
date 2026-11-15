@@ -9,14 +9,24 @@ extends Node3D
 ## Hold "interact" in reach: standing, it opens or closes at once with a noise
 ## of 6 m; crouched (or prowling, for the monster) it takes 1 s for 2 m. The
 ## monster running into a closed door smashes it open: 12 m.
+## Two special kinds (Q3): a FIRE door closes on its own fire_close_delay after
+## it was opened, with a slam; an EMERGENCY exit opens only from inside (its
+## -Z side) with a loud crash bar, and stays open. A closed emergency exit is
+## a wall for the navigation mesh (the map adds it to navigation_source): the
+## AIs never plan through a door they could not open.
 
 signal toggled(is_open: bool, by: Node)
+
+## NORMAL: opened and closed by hand. FIRE: closes itself. EMERGENCY: opens
+## from inside only, and stays open.
+enum Kind { NORMAL, FIRE, EMERGENCY }
 
 const GROUP := &"doors"
 ## Physics layer 2, "walls": a closed door is a wall (see the project settings).
 const WALLS_LAYER := 1 << 1
 
 @export var settings: DoorSettings
+@export var kind := Kind.NORMAL
 ## Width and height of the doorway it closes, in meters.
 @export var width := 1.2
 @export var height := 2.4
@@ -31,6 +41,7 @@ var _progress := 0.0
 var _holder: Node
 var _wait_release := false
 var _swing := 1.0  ## Which way it opens: 1 or -1 (away from the opener).
+var _open_for := 0.0  ## Seconds since it was opened (fire doors).
 var _tween: Tween
 
 @onready var _hinge: Node3D = $Hinge
@@ -52,6 +63,19 @@ func _ready() -> void:
 	mesh.size = box.size
 	_mesh.mesh = mesh
 	_set_open(start_open, false)
+
+
+func _physics_process(delta: float) -> void:
+	if kind != Kind.FIRE or not is_open or NoiseBus.mirror:
+		return  # On an online client, the room closes it (S-010).
+	_open_for += delta
+	if _open_for >= settings.fire_close_delay:
+		last_user = null
+		_set_open(false, true)
+		NoiseBus.emit_noise(
+			NoiseEvent.Type.DOOR, global_position + Vector3.UP, settings.slam_range, self
+		)
+		toggled.emit(false, null)
 
 
 ## Whether the one using it does it the slow, quiet way: crouched, or the
@@ -93,8 +117,18 @@ func get_prompt() -> String:
 	return "HUD_INTERACT_DOOR_CLOSE" if is_open else "HUD_INTERACT_DOOR_OPEN"
 
 
-func get_prompt_for(_user: Node) -> String:
-	return get_prompt()
+func get_prompt_for(user: Node) -> String:
+	return get_prompt() if can_use(user) else ""
+
+
+## Whether this one may open or close it now: an emergency exit opens from
+## inside only (the monster may smash it from outside) and is never closed.
+func can_use(user: Node) -> bool:
+	if kind != Kind.EMERGENCY:
+		return true
+	if is_open:
+		return false
+	return user is Node3D and to_local((user as Node3D).global_position).z < 0.0
 
 
 ## Whether a body standing at this position is in reach of the doorway.
@@ -115,9 +149,11 @@ func hold(user: Node, delta: float) -> bool:
 		_holder = user
 		_progress = 0.0
 		_wait_release = false
-	if _wait_release:
+	if _wait_release or not can_use(user):
 		return false
-	if sneaks(user):
+	if kind == Kind.EMERGENCY:
+		toggle(user, settings.emergency_range)  # The crash bar: no quiet way.
+	elif sneaks(user):
 		_progress += delta
 		if _progress < settings.quiet_time:
 			return false
@@ -146,6 +182,7 @@ func toggle(user: Node, noise_range: float) -> void:
 	if not is_open and user is Node3D:
 		_swing_away_from((user as Node3D).global_position)
 	_set_open(not is_open, true)
+	_open_for = 0.0
 	last_user = user
 	NoiseBus.emit_noise(NoiseEvent.Type.DOOR, global_position + Vector3.UP, noise_range, self)
 	toggled.emit(is_open, user)
@@ -153,8 +190,9 @@ func toggle(user: Node, noise_range: float) -> void:
 
 ## Opens it on the way, standing (the AIs).
 func open_by(user: Node) -> void:
-	if not is_open:
-		toggle(user, settings.open_range)
+	if is_open or not can_use(user):
+		return
+	toggle(user, settings.emergency_range if kind == Kind.EMERGENCY else settings.open_range)
 
 
 ## The running monster bursts it open without stopping (Q2).

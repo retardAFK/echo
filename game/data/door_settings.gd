@@ -11,9 +11,16 @@ extends Resource
 ## The monster smashing it open on the run, in meters (Q2).
 @export_range(0.5, 50.0, 0.5, "suffix:m") var smash_range: float = 12.0
 
+## A fire door slamming shut on its own, in meters (Q3).
+@export_range(0.5, 50.0, 0.5, "suffix:m") var slam_range: float = 5.0
+## An emergency exit's crash bar, in meters (Q3).
+@export_range(0.5, 50.0, 0.5, "suffix:m") var emergency_range: float = 10.0
+
 @export_group("Timing")
 ## How long the slow, quiet way takes, in seconds (Q1).
 @export_range(0.1, 5.0, 0.1, "suffix:s") var quiet_time: float = 1.0
+## A fire door closes on its own this long after it was opened, in seconds (Q3).
+@export_range(0.5, 20.0, 0.5, "suffix:s") var fire_close_delay: float = 3.0
 ## How long the leaf takes to swing, in seconds.
 @export_range(0.05, 2.0, 0.05, "suffix:s") var swing_time: float = 0.3
 
