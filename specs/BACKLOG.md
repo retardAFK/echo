@@ -299,7 +299,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 **Règles de zone** (section 6.4) : ventilation qui couvre les petits bruits, moniteurs qui bipent, brancards et fauteuils roulants bruyants, nombreuses cachettes (lits, placards).
 
-**Ce qui doit le rendre effrayant** (à préciser dans la spec, rendus montrés à Maxime) : néons verts qui grésillent ou meurent, longs couloirs où la vue porte loin mais où l'on ne voit pas le bout, sous-sols (morgue, chambres d'isolement), traces d'évacuation précipitée, sons lointains qui ne viennent de nulle part, très peu de lumière. Planche d'ambiance du 15/11/2026 (façade, couloir, morgue, chambre d'isolement) : rendus de `tools/blender/hospital_mood.py`, montrés à Maxime.
+**Ce qui doit le rendre effrayant** (à préciser dans la spec, rendus montrés à Maxime) : néons verts qui grésillent ou meurent, longs couloirs où la vue porte loin mais où l'on ne voit pas le bout, sous-sols (morgue, chambres d'isolement), traces d'évacuation précipitée, sons lointains qui ne viennent de nulle part, très peu de lumière. Planche d'ambiance du 15/11/2026 (façade, couloir, morgue, chambre d'isolement) : rendus de `tools/blender/hospital_mood.py`, validés par Maxime (« toutes les ambiances me conviennent »).
 
 **Terminé quand** : une partie complète dans la cité avec l'hôpital se joue en solo et en ligne, sous le budget de performance.
 
