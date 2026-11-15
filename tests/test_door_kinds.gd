@@ -5,6 +5,7 @@ const DOOR_SCENE := preload("res://game/entities/door/door.tscn")
 const METAL_SCENE := preload("res://game/entities/metal_floor/metal_floor.tscn")
 const SETTINGS := preload("res://game/data/door_settings.tres")
 const NOISE := preload("res://game/data/noise_settings.tres")
+const DOORS_TEST := preload("res://tests/test_doors.gd")
 
 
 ## Someone standing somewhere, who does not sneak.
@@ -141,3 +142,35 @@ func test_a_fire_door_waits_for_the_doorway_to_be_clear() -> void:
 	body.global_position = Vector3(0, 1, 3)
 	await wait_seconds(0.3)
 	assert_false(door.is_open, "clear: it shuts")
+
+
+func test_a_shutter_rolls_up_loudly_even_crouched() -> void:
+	var door := _door(Door.Kind.SHUTTER)
+	var sneaker := Node3D.new()
+	sneaker.set_script(DOORS_TEST.Sneaker)
+	add_child_autofree(sneaker)
+	sneaker.global_position = Vector3(0, 0, 1)
+	assert_eq(door.get_prompt(), "HUD_INTERACT_SHUTTER_OPEN")
+	assert_true(door.hold(sneaker, 0.016), "at once, no quiet way")
+	assert_eq(_noises[0].noise_range, SETTINGS.shutter_range)
+	assert_eq(SETTINGS.shutter_range, 12.0)
+	await wait_seconds(SETTINGS.swing_time + 0.1)
+	var hinge: Node3D = door.get_node("Hinge")
+	assert_almost_eq(hinge.position.y, door.height - SETTINGS.shutter_hang, 0.01, "rolled up")
+	assert_almost_eq(hinge.rotation.y, 0.0, 0.001, "it does not swing")
+
+
+func test_a_bell_rings_when_the_door_opens_even_slowly() -> void:
+	var door := _door(Door.Kind.NORMAL)
+	door.bell = true
+	var sneaker := Node3D.new()
+	sneaker.set_script(DOORS_TEST.Sneaker)
+	add_child_autofree(sneaker)
+	sneaker.global_position = Vector3(0, 0, 1)
+	door.hold(sneaker, 0.5)
+	assert_true(door.hold(sneaker, 0.6))
+	assert_eq(_noises[0].noise_range, SETTINGS.bell_range, "the bell, not the quiet 2 m")
+	door.release(sneaker)
+	door.hold(sneaker, 0.5)
+	door.hold(sneaker, 0.6)
+	assert_eq(_noises[1].noise_range, SETTINGS.quiet_range, "closing it slowly: no bell")

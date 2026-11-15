@@ -204,6 +204,22 @@ const GALLERY_SHOPS := 5
 const GALLERY_BACK_CORRIDOR := 2.0
 ## The half-raised shutter: only a crouching hunted gets under it.
 const SHUTTER_TOP := 1.1
+## Shop fronts of the gallery, west to east (S-016): pharmacy, laundrette,
+## tobacconist (shutter to roll up), grocer (shutter half down), baker.
+const GALLERY_FRONTS := [
+	Vector2(45.8, 47.0), Vector2(55.4, 57.8), Vector2(63.8, 67.8), Vector2(72.2, 75.2), Vector2(80.6, 81.8),
+]
+const GALLERY_HALF_SHUTTER := 3
+## Counters and shelves of the shops.
+const GALLERY_COUNTERS := [
+	Rect2(46, 143, 5, 0.8), Rect2(62.5, 142, 0.8, 4), Rect2(66, 142, 0.8, 4),
+	Rect2(71, 143, 6, 0.8), Rect2(79.5, 142, 5, 0.8),
+]
+## Steep metal stairs up to the roof: behind the back wall (x from, x to)
+## and along the east wall (y from, y to), their width.
+const GALLERY_BACK_STAIRS := Vector2(60.0, 66.5)
+const GALLERY_EAST_STAIRS := Vector2(139.0, 145.0)
+const GALLERY_ROOF_STAIR_WIDTH := 1.2
 
 const CAR_PARK := Rect2(140, 95, 40, 22)
 const CAR_PARK_DEPTH := 3.0
@@ -281,7 +297,7 @@ const SPOT_RAY_HEIGHT := 0.5
 const CLOSETS := [
 	Vector3(93, 0, 109), Vector3(93.5, 3, 90), Vector3(103, 9, 109.5),  # Tower: bin room, flats.
 	Vector3(164.2, 0, 61.5), Vector3(148, 0, 61), Vector3(176.8, 0, 82.5),  # Social centre.
-	Vector3(54.2, 0, 141), Vector3(77.8, 0, 141), Vector3(45.8, 0, 148),  # Gallery.
+	Vector3(54.2, 0, 141), Vector3(77.8, 0, 141), Vector3(45.8, 0, 141),  # Gallery.
 	Vector3(141, -3, 112), Vector3(179, -3, 106), Vector3(152, -3, 95.8),  # Car park.
 ]
 ## The other families (S-016, Q6): low (under a bed), makeshift (behind a
@@ -295,6 +311,8 @@ const FAMILY_SPOTS := [
 	["Low", Vector3(143, 0, 73.5), Vector2.RIGHT],  # Social centre: under the stage,
 	["Makeshift", Vector3(140.85, 0, 65)], ["Makeshift", Vector3(158.2, 0, 63)],  # the wings, the chairs,
 	["Metal", Vector3(153.5, 0, 83)],  # the kitchen's cold cabinet.
+	["Low", Vector3(48.5, 0, 144.5)], ["Metal", Vector3(54, 0, 143.5)],  # Gallery: pharmacy, dryer,
+	["Makeshift", Vector3(68.4, 0, 145.5)], ["Metal", Vector3(85.5, 0, 145.3)],  # boxes, oven.
 ]
 ## 6 dumpsters outside, against the blocks of flats (Q5).
 const DUMPSTERS := [
@@ -670,8 +688,8 @@ func _build_cellars() -> void:
 
 ## Records a door to place once the structures are built (S-016): at a plan
 ## point (x, height, y), its leaf turned by yaw degrees (0: across X).
-func _door(at: Vector3, yaw: float, width: float, kind := Door.Kind.NORMAL) -> void:
-	_doors.append([at, yaw, width, kind])
+func _door(at: Vector3, yaw: float, width: float, kind := Door.Kind.NORMAL, bell := false) -> void:
+	_doors.append([at, yaw, width, kind, bell])
 
 
 ## The doors and the metal floors. Doors are not navigation sources: the
@@ -694,6 +712,7 @@ func _add_doors() -> void:
 		door.rotation_degrees.y = entry[1]
 		door.width = entry[2]
 		door.kind = entry[3]
+		door.bell = entry[4]
 		var parent := exits if door.kind == Door.Kind.EMERGENCY else doors
 		parent.add_child(door)
 		door.owner = _root
@@ -787,6 +806,7 @@ func _build_gallery() -> void:
 	var front := r.position.y + GALLERY_ARCADE_DEPTH
 	var back := r.end.y - GALLERY_BACK_CORRIDOR
 	var width := r.size.x / GALLERY_SHOPS
+	var corridor := Vector2(back + 0.2, r.end.y - 0.3)
 	# Arcade roof on pillars.
 	kit.box(s, r.position.x, r.position.y, r.end.x, front, h - SLAB, h, MAT_OBSTACLE, MapKit.Kind.FLOOR)
 	var x := r.position.x + 0.3
@@ -794,24 +814,87 @@ func _build_gallery() -> void:
 		kit.box(s, x - 0.2, r.position.y + 0.1, x + 0.2, r.position.y + 0.5, 0, h - SLAB, MAT_CONCRETE)
 		x += width
 	kit.box(s, r.end.x - 0.5, r.position.y + 0.1, r.end.x - 0.1, r.position.y + 0.5, 0, h - SLAB, MAT_CONCRETE)
-	# Shop fronts: the laundrette (2nd) is open, the 4th has its shutter half up.
-	var laundrette := r.position.x + width
-	var shutter := r.position.x + 3 * width
-	kit.wall_x(s, r.position.x, r.end.x, front, 0, h, WALL, MAT_CONCRETE, [[laundrette + 2.0, laundrette + 4.4, DOOR_TOP], [shutter + 2.0, shutter + 5.0, SHUTTER_TOP]])
-	# Back wall, east and west walls, roof.
+	# Shop fronts (S-016): the pharmacy's door, the laundrette's double door,
+	# the tobacconist's shutter to roll up, the grocer's shutter half down, the
+	# baker's door with its bell.
+	var fronts: Array = []
+	for i in GALLERY_SHOPS:
+		var gap: Vector2 = GALLERY_FRONTS[i]
+		var top := SHUTTER_TOP if i == GALLERY_HALF_SHUTTER else DOOR_TOP
+		fronts.append([gap.x, gap.y, top])
+	kit.wall_x(s, r.position.x, r.end.x, front, 0, h, WALL, MAT_CONCRETE, fronts)
+	var mid := func(i: int) -> Vector3:
+		return Vector3((GALLERY_FRONTS[i].x + GALLERY_FRONTS[i].y) / 2.0, 0, front)
+	var span := func(i: int) -> float:
+		return GALLERY_FRONTS[i].y - GALLERY_FRONTS[i].x
+	_door(mid.call(0), 0.0, span.call(0))
+	_double_door(mid.call(1), 0.0, span.call(1))
+	_door(mid.call(2), 0.0, span.call(2), Door.Kind.SHUTTER)
+	_door(mid.call(4), 0.0, span.call(4), Door.Kind.NORMAL, true)
+	# Back wall, east and west walls, roof. The delivery corridor opens at
+	# both ends: a fire door east, an emergency exit west (Q4).
 	kit.wall_x(s, r.position.x, r.end.x, r.end.y - WALL / 2, 0, h, WALL, MAT_CONCRETE)
-	kit.wall_y(s, front, r.end.y, r.position.x + WALL / 2, 0, h, WALL, MAT_CONCRETE)
-	kit.wall_y(s, front, r.end.y, r.end.x - WALL / 2, 0, h, WALL, MAT_CONCRETE, [[back + 0.2, r.end.y - 0.3, DOOR_TOP]])
+	kit.wall_y(s, front, r.end.y, r.position.x + WALL / 2, 0, h, WALL, MAT_CONCRETE, [[corridor.x, corridor.y, DOOR_TOP]])
+	kit.wall_y(s, front, r.end.y, r.end.x - WALL / 2, 0, h, WALL, MAT_CONCRETE, [[corridor.x, corridor.y, DOOR_TOP]])
+	var corridor_mid := (corridor.x + corridor.y) / 2.0
+	_door(Vector3(r.end.x - WALL / 2, 0, corridor_mid), 90.0, corridor.y - corridor.x, Door.Kind.FIRE)
+	_door(Vector3(r.position.x + WALL / 2, 0, corridor_mid), -90.0, corridor.y - corridor.x, Door.Kind.EMERGENCY)
 	kit.box(s, r.position.x, front, r.end.x, r.end.y, h, h + SLAB, MAT_OBSTACLE, MapKit.Kind.FLOOR)
-	# Shops side by side, a delivery corridor behind them.
+	# Shops side by side, each with a back door onto the corridor; a door
+	# between the grocer's and the baker's stockrooms.
 	for i in range(1, GALLERY_SHOPS):
-		kit.wall_y(s, front, back, r.position.x + i * width, 0, h, WALL, MAT_CONCRETE)
-	var back_doors: Array = [[laundrette + 6.0, laundrette + 7.2, DOOR_TOP], [shutter + 6.0, shutter + 7.2, DOOR_TOP]]
+		var gaps: Array = []
+		if i == GALLERY_SHOPS - 1:
+			gaps.append([144.5, 145.7, DOOR_TOP])
+			_door(Vector3(r.position.x + i * width, 0, 145.1), 90.0, 1.2)
+		kit.wall_y(s, front, back, r.position.x + i * width, 0, h, WALL, MAT_CONCRETE, gaps)
+	var back_doors: Array = []
+	for i in GALLERY_SHOPS:
+		var at := r.position.x + i * width + 5.5
+		back_doors.append([at, at + 1.2, DOOR_TOP])
+		_door(Vector3(at + 0.6, 0, back), 0.0, 1.2)
 	kit.wall_x(s, r.position.x, r.end.x, back, 0, h, WALL, MAT_CONCRETE, back_doors)
 	# Washing machines along the laundrette walls.
+	var laundrette := r.position.x + width
 	for i in 4:
 		var mx := laundrette + 1.0 + i * 1.6
 		kit.box(s, mx - 0.6, back - 1.0, mx + 0.6, back - 0.2, 0, 0.9, null, MapKit.Kind.FLOOR)
+	# Counters and shelves (models in T-240).
+	for c: Rect2 in GALLERY_COUNTERS:
+		kit.box(s, c.position.x, c.position.y, c.end.x, c.end.y, 0, 1.0, null, MapKit.Kind.FLOOR)
+	_gallery_roof_stairs(s)
+
+
+## Two steep metal flights up to the roof (S-016, Q4: they stand for the
+## ladders), one behind the back wall, one along the east wall.
+func _gallery_roof_stairs(s: MapKit.Structure) -> void:
+	var r := GALLERY
+	var metal := _material("metal")
+	var roof := GALLERY_HEIGHT + SLAB
+	var w := GALLERY_ROOF_STAIR_WIDTH
+	# Behind: rising east along the back wall, a landing onto the roof.
+	var b := GALLERY_BACK_STAIRS
+	kit.ramp(s, b.x, r.end.y, b.y, r.end.y + w, 0, roof, true, metal)
+	kit.box(s, b.y, r.end.y, b.y + 1.5, r.end.y + w, roof - SLAB, roof, metal, MapKit.Kind.FLOOR)
+	kit.wall_x(s, b.x, b.y + 1.5, r.end.y + w + 0.05, 0, roof + PARAPET, 0.1, metal)
+	_metal_floor("GalleryBackStairs", Rect2(b.x, r.end.y, b.y + 1.5 - b.x, w), roof)
+	# East: rising south along the east wall, a landing onto the roof.
+	var e := GALLERY_EAST_STAIRS
+	kit.ramp(s, r.end.x, e.x, r.end.x + w, e.y, 0, roof, false, metal)
+	kit.box(s, r.end.x, e.y, r.end.x + w, e.y + 1.5, roof - SLAB, roof, metal, MapKit.Kind.FLOOR)
+	kit.wall_y(s, e.x, e.y + 1.5, r.end.x + w + 0.05, 0, roof + PARAPET, 0.1, metal)
+	_metal_floor("GalleryEastStairs", Rect2(r.end.x, e.x, w, e.y + 1.5 - e.x), roof)
+
+
+## A metal floor over a plan rectangle, from the ground to a little above
+## the height.
+func _metal_floor(node_name: String, rect: Rect2, top: float) -> void:
+	var floor_box := MetalFloor.new()
+	floor_box.name = node_name
+	floor_box.size = Vector3(rect.size.x, top + 2.0, rect.size.y)
+	var c := rect.get_center()
+	floor_box.position = kit.world(c.x, c.y, floor_box.size.y / 2.0 - 0.5)
+	_metal_floors.append(floor_box)
 
 
 func _build_car_park() -> void:
@@ -1223,8 +1306,10 @@ func _add_gallery_dressing() -> void:
 	var r := GALLERY
 	var width := r.size.x / GALLERY_SHOPS
 	var front := r.position.y + GALLERY_ARCADE_DEPTH - WALL / 2 - FACADE_OFFSET
-	var scenes := [SHOP_SHUTTER, LAUNDRETTE, SHOP_SHUTTER, SHOP_HALF, SHOP_SHUTTER]
-	for i in GALLERY_SHOPS:
+	# The pharmacy, the tobacconist and the baker open now (S-016): their
+	# closed shop fronts wait for new models (T-240).
+	var scenes := {1: LAUNDRETTE, 3: SHOP_HALF}
+	for i: int in scenes:
 		var east := r.position.x + (i + 1) * width
 		_place_model(node, scenes[i], "Shop%d" % (i + 1), Vector2(east, front), Vector2.UP)
 	var laundrette := r.position.x + width

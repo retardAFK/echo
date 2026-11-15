@@ -14,12 +14,14 @@ extends Node3D
 ## -Z side) with a loud crash bar, and stays open. A closed emergency exit is
 ## a wall for the navigation mesh (the map adds it to navigation_source): the
 ## AIs never plan through a door they could not open.
+## A SHUTTER (a shop's metal shutter) rolls up instead of swinging, always
+## loudly; a door with a bell rings it when it is opened, even slowly.
 
 signal toggled(is_open: bool, by: Node)
 
 ## NORMAL: opened and closed by hand. FIRE: closes itself. EMERGENCY: opens
 ## from inside only, and stays open.
-enum Kind { NORMAL, FIRE, EMERGENCY }
+enum Kind { NORMAL, FIRE, EMERGENCY, SHUTTER }
 
 const GROUP := &"doors"
 ## Physics layer 2, "walls": a closed door is a wall (see the project settings).
@@ -35,6 +37,8 @@ const BODIES_LAYERS := (1 << 2) | (1 << 3)
 @export var height := 2.4
 ## Whether it starts open.
 @export var start_open := false
+## A bell over the door rings when it opens (bell_range).
+@export var bell := false
 
 var is_open := false
 ## The last one who opened or closed it, or null.
@@ -126,6 +130,8 @@ func closest_flat_point(at: Vector3) -> Vector2:
 
 
 func get_prompt() -> String:
+	if kind == Kind.SHUTTER:
+		return "HUD_INTERACT_SHUTTER_CLOSE" if is_open else "HUD_INTERACT_SHUTTER_OPEN"
 	return "HUD_INTERACT_DOOR_CLOSE" if is_open else "HUD_INTERACT_DOOR_OPEN"
 
 
@@ -165,6 +171,8 @@ func hold(user: Node, delta: float) -> bool:
 		return false
 	if kind == Kind.EMERGENCY:
 		toggle(user, settings.emergency_range)  # The crash bar: no quiet way.
+	elif kind == Kind.SHUTTER:
+		toggle(user, settings.shutter_range)  # No quiet way either.
 	elif sneaks(user):
 		_progress += delta
 		if _progress < settings.quiet_time:
@@ -196,6 +204,8 @@ func toggle(user: Node, noise_range: float) -> void:
 	_set_open(not is_open, true)
 	_open_for = 0.0
 	last_user = user
+	if bell and is_open:
+		noise_range = maxf(noise_range, settings.bell_range)
 	NoiseBus.emit_noise(NoiseEvent.Type.DOOR, global_position + Vector3.UP, noise_range, self)
 	toggled.emit(is_open, user)
 
@@ -204,7 +214,17 @@ func toggle(user: Node, noise_range: float) -> void:
 func open_by(user: Node) -> void:
 	if is_open or not can_use(user):
 		return
-	toggle(user, settings.emergency_range if kind == Kind.EMERGENCY else settings.open_range)
+	toggle(user, _loud_range())
+
+
+## The range of opening it standing: the crash bar, the shutter or the plain way.
+func _loud_range() -> float:
+	match kind:
+		Kind.EMERGENCY:
+			return settings.emergency_range
+		Kind.SHUTTER:
+			return settings.shutter_range
+	return settings.open_range
 
 
 ## The running monster bursts it open without stopping (Q2).
@@ -240,12 +260,16 @@ func _swing_away_from(at: Vector3) -> void:
 func _set_open(open: bool, animate: bool) -> void:
 	is_open = open
 	_leaf.collision_layer = 0 if open else WALLS_LAYER
-	var angle := deg_to_rad(settings.open_angle) * _swing if open else 0.0
+	var property := "rotation:y"
+	var value := deg_to_rad(settings.open_angle) * _swing if open else 0.0
+	if kind == Kind.SHUTTER:
+		property = "position:y"  # Rolled up under the lintel.
+		value = height - settings.shutter_hang if open else 0.0
 	if _tween != null:
 		_tween.kill()
 	if animate and is_inside_tree():
 		_creak.play()
 		_tween = create_tween()
-		_tween.tween_property(_hinge, "rotation:y", angle, settings.swing_time)
+		_tween.tween_property(_hinge, property, value, settings.swing_time)
 	else:
-		_hinge.rotation.y = angle
+		_hinge.set_indexed(property, value)
