@@ -71,6 +71,8 @@ var _hide_look_left := 0.0
 var _car_detour: CarAlarm
 var _flee_target := Vector3.ZERO
 var _was_fleeing := false
+## The last door it opened on its way (S-016), to close behind it in flight.
+var _opened_door: Door
 var _rng := RandomNumberGenerator.new()
 ## Online (T-101): a captured teammate it goes to free (its CaptureState), or
 ## a dropped fuse it goes to take, and where it stands for it.
@@ -268,6 +270,7 @@ func _use_ruses(delta: float, threat: Vector3) -> void:
 	if fleeing and not _was_fleeing:
 		_on_flee_started(threat)
 	_was_fleeing = fleeing
+	_close_door_behind(fleeing)
 	if fleeing:
 		_set_off_car_alarms()
 		_look_for_hiding_spot(delta, threat)
@@ -278,6 +281,23 @@ func _use_ruses(delta: float, threat: Vector3) -> void:
 	if _detour == null:
 		_update_errand(delta)
 	_maybe_place_decoy()
+
+
+## In flight, it closes the door it just went through, if the monster does
+## not see it: the closed door cuts the monster's sight (S-016, plan).
+func _close_door_behind(fleeing: bool) -> void:
+	if _opened_door == null or not is_instance_valid(_opened_door):
+		_opened_door = null
+		return
+	var gap := _opened_door.global_position - global_position
+	var past := Vector2(gap.x, gap.z).length() >= DOOR_SETTINGS.close_behind_distance
+	if not past:
+		return
+	var heading := -global_basis.z
+	var behind := Vector2(heading.x, heading.z).dot(Vector2(gap.x, gap.z)) < 0.0
+	if fleeing and behind and _opened_door.is_open and not sees_monster:
+		_opened_door.toggle(self, DOOR_SETTINGS.open_range)
+	_opened_door = null  # Once past it, it forgets it either way.
 
 
 func _on_flee_started(threat: Vector3) -> void:
@@ -735,6 +755,7 @@ func _move(delta: float) -> void:
 			)
 			if door != null:
 				door.open_by(self)
+				_opened_door = door
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	if is_on_floor():

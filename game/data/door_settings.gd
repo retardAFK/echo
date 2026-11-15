@@ -24,6 +24,8 @@ extends Resource
 @export_range(0.2, 5.0, 0.1, "suffix:m") var smash_reach: float = 1.2
 ## How far ahead on its way an AI opens a closed door, in meters.
 @export_range(0.2, 5.0, 0.1, "suffix:m") var ai_reach: float = 1.5
+## The fleeing AI prey closes a door behind it once this far past it, in meters.
+@export_range(0.5, 5.0, 0.1, "suffix:m") var close_behind_distance: float = 2.0
 ## Most height between a body and the doorway to use it, in meters.
 @export_range(0.2, 5.0, 0.1, "suffix:m") var reach_height: float = 1.2
 
