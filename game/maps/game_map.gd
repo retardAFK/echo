@@ -182,6 +182,10 @@ func _setup_online() -> void:
 	add_child(net)
 	_setup_game_loop()
 	net.world.game_loop = game_loop
+	if not net.is_room:
+		# Escape opens the pause, the game goes on (S-013, Q6, T-164).
+		pause_menu = PAUSE_MENU_SCENE.instantiate()
+		add_child(pause_menu)
 	if net.is_room:
 		for spot in get_hiding_spots():
 			spot.found.connect(_on_online_hidden_found)
