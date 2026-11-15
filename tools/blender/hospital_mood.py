@@ -440,4 +440,5 @@ def main():
         print("rendered", sc.render.filepath)
 
 
-main()
+if __name__ == "__main__":
+    main()
