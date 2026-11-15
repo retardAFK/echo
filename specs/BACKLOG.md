@@ -392,9 +392,9 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 ## Intérieurs des bâtiments de la cité (S-016)
 
-**But** : des bâtiments visitables moins vides, avec plusieurs issues, des escaliers, des portes qui font du bruit, des cachettes variées et du mobilier (demande de Maxime, 15/11/2026). Spec en clarification : [`S-016-interieurs/spec.md`](S-016-interieurs/spec.md). Les portes mobiles de la tâche T-185 (hôpital) sont faites ici, et l'hôpital les réutilisera.
+**But** : des bâtiments visitables moins vides, avec plusieurs issues, des escaliers, des portes qui font du bruit, des cachettes variées et du mobilier (demande de Maxime, 15/11/2026). Spec validée le 15/11/2026 : [`S-016-interieurs/spec.md`](S-016-interieurs/spec.md). Les portes mobiles de la tâche T-185 (hôpital) sont faites ici, et l'hôpital les réutilisera.
 
-- [ ] T-230 — Spec S-016
+- [x] T-230 — Spec S-016
   - Résultat vérifiable : spec validée par Maxime (plans, portes, cachettes)
   - Dépend de : —
 - [ ] T-231 — Plan et tâches de S-016
