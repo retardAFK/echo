@@ -91,7 +91,7 @@ const CLIMBING_FRAME := preload("res://assets/models/climbing_frame.glb")
 const STADIUM_BOARD := preload("res://assets/models/stadium_board.glb")
 const STADIUM_GOAL := preload("res://assets/models/stadium_goal.glb")
 const STADIUM_BOARD_WIDTH := 2.0
-const CAR_PARK_WRECKS := [Vector2(146, 98.5), Vector2(160, 113.5), Vector2(176, 98.5)]
+const CAR_PARK_WRECKS := [Vector2(154, 98.5), Vector2(160, 113.5), Vector2(166, 101)]
 ## Facade modules of S-005 (3 x 3 m, front toward +Z), in FacadeDressing order.
 const FACADE_MODELS := [
 	preload("res://assets/models/facade_hlm_plain.glb"),
@@ -225,6 +225,10 @@ const CAR_PARK := Rect2(140, 95, 40, 22)
 const CAR_PARK_DEPTH := 3.0
 const CAR_PARK_RAMP := Rect2(128, 100, 12, 4)
 const CAR_PARK_STAIRS := Rect2(172, 112, 6, 2.5)
+## The new north stairs (S-016, Q4): up to the west, a fire door at their foot.
+const CAR_PARK_NORTH_STAIRS := Rect2(170, 95.4, 6, 2.5)
+## The technical room on the east wall, its door to the west.
+const CAR_PARK_TECHNICAL := Rect2(174, 102, 6, 6)
 const CAR_PARK_PILLAR_STEP := 8.0
 const PARAPET := 1.0
 
@@ -313,6 +317,9 @@ const FAMILY_SPOTS := [
 	["Metal", Vector3(153.5, 0, 83)],  # the kitchen's cold cabinet.
 	["Low", Vector3(48.5, 0, 144.5)], ["Metal", Vector3(54, 0, 143.5)],  # Gallery: pharmacy, dryer,
 	["Makeshift", Vector3(68.4, 0, 145.5)], ["Metal", Vector3(85.5, 0, 145.3)],  # boxes, oven.
+	["Metal", Vector3(154, -3, 101.05), Vector2.DOWN],  # Car park: a wreck's boot,
+	["Low", Vector3(160, -3, 113.5), Vector2.LEFT],  # under a wreck,
+	["Makeshift", Vector3(129.2, -3, 94.6)],  # boxes in the open cellar cage.
 ]
 ## 6 dumpsters outside, against the blocks of flats (Q5).
 const DUMPSTERS := [
@@ -404,7 +411,7 @@ func _ready() -> void:
 
 
 func _build_ground() -> void:
-	var holes: Array[Rect2] = [CAR_PARK_RAMP, CAR_PARK_STAIRS, CELLAR_STAIRS]
+	var holes: Array[Rect2] = [CAR_PARK_RAMP, CAR_PARK_STAIRS, CAR_PARK_NORTH_STAIRS, CELLAR_STAIRS]
 	kit.slab_tiles(
 		"Tile", Rect2(0, 0, MAP_SIZE, MAP_SIZE), holes, -GROUND_THICKNESS, 0.0, MAT_DIRT,
 		GROUND_TILE
@@ -925,6 +932,24 @@ func _build_car_park() -> void:
 	kit.wall_x(s, stairs.position.x - WALL, stairs.end.x, stairs.position.y - WALL / 2, floor_h, PARAPET, WALL, MAT_CONCRETE)
 	kit.wall_x(s, stairs.position.x - WALL, stairs.end.x, stairs.end.y + WALL / 2, floor_h, PARAPET, WALL, MAT_CONCRETE)
 	kit.wall_y(s, stairs.position.y, stairs.end.y, stairs.position.x - WALL / 2, 0, PARAPET, WALL, MAT_CONCRETE)
+	# North stairs (S-016): from the ground at their west end down to the
+	# floor, closed under the flight, a railing around the hole, a fire door
+	# at their foot.
+	var north := CAR_PARK_NORTH_STAIRS
+	kit.ramp(s, north.position.x, north.position.y, north.end.x, north.end.y, 0, floor_h, true, MAT_OBSTACLE)
+	kit.wall_x(s, north.position.x, north.end.x + WALL, north.end.y + WALL / 2, floor_h, PARAPET, WALL, MAT_CONCRETE)
+	kit.wall_x(s, north.position.x, north.end.x + WALL, north.position.y - WALL / 2, 0, PARAPET, WALL, MAT_CONCRETE)
+	kit.wall_y(s, north.position.y, north.end.y, north.end.x + WALL / 2, 0, PARAPET, WALL, MAT_CONCRETE)
+	kit.wall_y(s, north.position.y, north.end.y, north.position.x - WALL / 2, floor_h, -GROUND_THICKNESS, WALL, MAT_CONCRETE)
+	kit.wall_y(s, north.position.y - WALL, north.end.y + WALL, north.end.x + WALL / 2, floor_h + DOOR_TOP, ceiling, WALL, MAT_CONCRETE)
+	_double_door(Vector3(north.end.x + WALL / 2, floor_h, north.get_center().y), 90.0, north.size.y, Door.Kind.FIRE)
+	# The technical room, east, with its door.
+	var room := CAR_PARK_TECHNICAL
+	var room_door := [[104.0, 105.2, floor_h + DOOR_TOP]]
+	kit.wall_x(s, room.position.x, room.end.x, room.position.y, floor_h, ceiling, WALL, MAT_CONCRETE)
+	kit.wall_x(s, room.position.x, room.end.x, room.end.y, floor_h, ceiling, WALL, MAT_CONCRETE)
+	kit.wall_y(s, room.position.y, room.end.y, room.position.x, floor_h, ceiling, WALL, MAT_CONCRETE, room_door)
+	_door(Vector3(room.position.x, floor_h, 104.6), 90.0, 1.2)
 	# Parked wrecks to hide behind.
 	for c: Vector2 in CAR_PARK_WRECKS:
 		kit.box(s, c.x - 1.0, c.y - 2.1, c.x + 1.0, c.y + 2.1, floor_h, floor_h + 1.3, null, MapKit.Kind.FLOOR)

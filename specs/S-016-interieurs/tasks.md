@@ -29,7 +29,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-238 — La galerie
   - Résultat vérifiable : 5 boutiques ouvertes, réserves, couloir ouvert aux deux bouts, rideau à lever (12 m), clochette, toit par échelles ; tests GUT
   - Dépend de : T-236
-- [ ] T-239 — Le parking et le couloir des caves
+- [x] T-239 — Le parking et le couloir des caves
   - Résultat vérifiable : escalier nord, couloir des caves vers la tour avec caves grillagées, scan étendu ; IA qui empruntent le couloir ; tests GUT
   - Dépend de : T-236
 - [ ] T-240 — Mobilier et portes en 3D
@@ -58,3 +58,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - T-236 (15/11/2026) : la tour. Doubles portes au hall nord et sud ; à chaque étage, une double porte coupe-feu de part et d'autre du palier de l'escalier (une porte au pied des volées aurait coupé l'escalier à chaque demi-tour) ; les 4 appartements ouverts à chaque étage, chacun derrière sa porte, avec une salle de bains et un trou dans la cloison entre les deux appartements sud ; porte coupe-feu au bout de chaque couloir vers l'escalier de secours métallique extérieur (est) ; ascenseur bloqué (cachette en métal) ; la salle technique devient l'escalier des caves, puis le couloir des caves (sous la rue) jusqu'au parking, avec deux portes coupe-feu et des caves grillagées. `Building.extra_boxes` : l'escalier des caves compte dans la tour, le couloir dans le parking (jusqu'à son plafond, pas la rue au-dessus). Le monstre IA ignore le bruit des portes qu'il ouvre lui-même ; `Door.closed_ahead` mesure jusqu'au bord du battant (doubles portes) ; une porte coupe-feu attend que l'embrasure soit libre. Point d'apparition (124, 96) décalé en (127, 96), à l'écart de l'escalier de secours. 7 tests GUT.
 - T-237 : 4 issues (deux doubles portes, porte de service de la cuisine, issue de secours au bout du couloir), cuisine et passe-plat, bureaux reliés entre eux, scène et coulisses.
 - T-238 : chaque boutique a sa porte de derrière, couloir de livraison avec porte coupe-feu à l'est et issue de secours à l'ouest, rideau du tabac à lever (12 m), clochette de la boulangerie (8 m), deux escaliers métalliques vers le toit (à la place des échelles). Les devantures fermées de la pharmacie, du tabac et de la boulangerie sont retirées en attendant leurs modèles (T-240).
+- T-239 : escalier nord du parking (de la rue à -3 m) avec double porte coupe-feu, local technique, épaves déplacées ; cachettes métal (épave), basse (sous une épave) et de fortune (cages des caves).
