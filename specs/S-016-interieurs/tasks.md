@@ -11,7 +11,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-232 — Portes mobiles
   - Résultat vérifiable : entité `Door`, `DoorSettings`, bruit `DOOR` (6 m debout, 2 m accroupi en 1 s), porte fermée qui coupe la vue et atténue le bruit, monstre qui ouvre et défonce en courant (12 m), quelques portes dans la greybox ; tests GUT. Reprend T-185 (S-014)
   - Dépend de : T-231
-- [ ] T-233 — Portes, IA et réseau
+- [x] T-233 — Portes, IA et réseau
   - Résultat vérifiable : `DoorPath` ; le monstre IA ouvre et défonce, la proie IA ouvre et referme en fuite ; état des portes dans `NetWorld` ; tests GUT et `net_walk` étendu
   - Dépend de : T-232
 - [ ] T-234 — Coupe-feu, issues de secours, métal et échelles
@@ -52,3 +52,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - T-230 (15/11/2026) : spec validée par Maxime (« Tout valider »), PR #117.
 - T-231 (15/11/2026) : plan et tâches, PR #117. Les portes reprennent T-185 (S-014).
 - T-232 (15/11/2026) : `Door` (`game/entities/door/`), `DoorSettings`, bruit `DOOR`. Le battant fermé est sur la couche des murs : il coupe la vue et compte comme un mur pour le bruit, sans code de plus ; ouvert, il n'a plus de collision (plan B du plan, retenu d'emblée pour que rien n'accroche). Debout 6 m d'un coup, accroupi ou en rôdant 1 s pour 2 m, le monstre qui court la défonce (12 m). La porte s'ouvre du côté opposé à celui qui l'ouvre. Pas de marque de surbrillance sur les portes. Les IA ouvrent déjà les portes sur leur chemin (`Door.closed_ahead`), testées en T-233. Pas de porte dans la greybox : les tests en posent une. 10 tests GUT.
+- T-233 (15/11/2026) : le monstre IA ouvre les portes sur son chemin (il les défonce en poursuite), la proie IA les ouvre et, en fuite, referme derrière elle la porte qu'elle vient de passer si le monstre ne la voit pas (`close_behind_distance` 2 m). `NetWorld` liste les portes et envoie leur état (`state()[5]`) ; le client les fait bouger avec leur son, sans bruit dans `NoiseBus`. Le maillage passe par les baies, porte ouverte ou fermée. 5 tests GUT dans la greybox.
