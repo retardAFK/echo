@@ -58,7 +58,10 @@ func test_a_game_keeps_four_alarm_clocks_and_every_bottle() -> void:
 func test_three_closets_in_each_visitable_building_and_six_dumpsters_outside() -> void:
 	_add_map()
 	var spots := _map.get_hiding_spots()
-	assert_eq(spots.size(), 25, "and 7 of the other families (S-016)")
+	var closet_family := spots.filter(
+		func(spot: HidingSpot) -> bool: return spot.family == HidingSpot.Family.CLOSET
+	)
+	assert_eq(closet_family.size(), 18, "the other families come on top (S-016)")
 	var closets := {}
 	var outside := 0
 	for spot in spots:
