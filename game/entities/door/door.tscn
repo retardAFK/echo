@@ -1,0 +1,27 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/door/door.gd" id="1_door"]
+[ext_resource type="Resource" path="res://game/data/door_settings.tres" id="2_settings"]
+[ext_resource type="AudioStream" path="res://assets/audio/ruses/locker_door.wav" id="3_creak"]
+[ext_resource type="Material" path="res://game/fx/materials/concrete_obstacle.tres" id="4_material"]
+
+[node name="Door" type="Node3D"]
+script = ExtResource("1_door")
+settings = ExtResource("2_settings")
+
+[node name="Hinge" type="Node3D" parent="."]
+
+[node name="Leaf" type="AnimatableBody3D" parent="Hinge"]
+collision_layer = 2
+collision_mask = 0
+sync_to_physics = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hinge/Leaf"]
+
+[node name="Mesh" type="MeshInstance3D" parent="Hinge/Leaf"]
+material_override = ExtResource("4_material")
+
+[node name="Creak" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+stream = ExtResource("3_creak")
+max_distance = 20.0

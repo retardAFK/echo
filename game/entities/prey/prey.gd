@@ -16,6 +16,7 @@ signal ruse_used(kind: StringName)
 
 ## Distance the target must move before the path is recomputed, in meters.
 const RETARGET_DISTANCE := 0.5
+const DOOR_SETTINGS := preload("res://game/data/door_settings.tres")
 const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
 
@@ -728,6 +729,12 @@ func _move(delta: float) -> void:
 			direction = direction.normalized()
 			horizontal = direction * PlayerMotion.speed_for_gait(motion, brain.get_gait())
 			look_at(global_position + direction, Vector3.UP)
+			# A closed door on its way: it opens it, standing (S-016).
+			var door := Door.closed_ahead(
+				get_tree(), global_position, direction, DOOR_SETTINGS.ai_reach
+			)
+			if door != null:
+				door.open_by(self)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	if is_on_floor():

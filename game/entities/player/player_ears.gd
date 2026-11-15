@@ -9,7 +9,7 @@ extends Node3D
 const VOICES := 4
 ## Noises whose maker plays its own sound where it is (S-007): the fuse boxes,
 ## the transformer and its siren, a breaking bottle and a ringing alarm clock, a
-## hiding spot's door (S-008). The ears add nothing.
+## hiding spot's door (S-008), a door (S-016). The ears add nothing.
 const SELF_VOICED := [
 	NoiseEvent.Type.FUSE,
 	NoiseEvent.Type.REPAIR,
@@ -17,6 +17,7 @@ const SELF_VOICED := [
 	NoiseEvent.Type.IMPACT,
 	NoiseEvent.Type.DECOY,
 	NoiseEvent.Type.HIDE,
+	NoiseEvent.Type.DOOR,
 ]
 
 var heard_count := 0
