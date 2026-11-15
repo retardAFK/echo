@@ -67,6 +67,24 @@ const SHOP_PHARMACIE := preload("res://assets/models/shop_pharmacie.glb")
 const SHOP_TABAC := preload("res://assets/models/shop_tabac.glb")
 const SHOP_BOULANGERIE := preload("res://assets/models/shop_boulangerie.glb")
 const WASHERS := preload("res://assets/models/gallery_washers.glb")
+## Furniture of the interiors (S-016, Q7, T-240, tools/blender/interiors.py):
+## centred on its footprint, its front toward +Z.
+const FURNITURE_SCRIPT := preload("res://game/maps/furniture.gd")
+const FURNITURE_MODELS := {
+	"bed": preload("res://assets/models/bed.glb"),
+	"sofa": preload("res://assets/models/sofa.glb"),
+	"kitchen_table": preload("res://assets/models/kitchen_table.glb"),
+	"fridge": preload("res://assets/models/fridge.glb"),
+	"boxes": preload("res://assets/models/boxes.glb"),
+	"chairs_stacked": preload("res://assets/models/chairs_stacked.glb"),
+	"stage_curtain": preload("res://assets/models/stage_curtain.glb"),
+	"oven": preload("res://assets/models/oven.glb"),
+	"counter": preload("res://assets/models/counter.glb"),
+	"shelves": preload("res://assets/models/shelves.glb"),
+	"lift_doors": preload("res://assets/models/lift_doors.glb"),
+}
+## What only shows, and stops nobody: the curtain, the lift doors on its shaft.
+const FURNITURE_GHOSTS := ["stage_curtain", "lift_doors"]
 const CENTRE_WINDOW := preload("res://assets/models/centre_window.glb")
 const CENTRE_ENTRANCE := preload("res://assets/models/centre_entrance.glb")
 const FOLDING_TABLE := preload("res://assets/models/folding_table.glb")
@@ -212,11 +230,6 @@ const GALLERY_FRONTS := [
 	Vector2(45.8, 47.0), Vector2(55.4, 57.8), Vector2(63.8, 67.8), Vector2(72.2, 75.2), Vector2(80.6, 81.8),
 ]
 const GALLERY_HALF_SHUTTER := 3
-## Counters and shelves of the shops.
-const GALLERY_COUNTERS := [
-	Rect2(46, 143, 5, 0.8), Rect2(62.5, 142, 0.8, 4), Rect2(66, 142, 0.8, 4),
-	Rect2(71, 143, 6, 0.8), Rect2(79.5, 142, 5, 0.8),
-]
 ## Steep metal stairs up to the roof: behind the back wall (x from, x to)
 ## and along the east wall (y from, y to), their width.
 const GALLERY_BACK_STAIRS := Vector2(60.0, 66.5)
@@ -323,6 +336,47 @@ const FAMILY_SPOTS := [
 	["Low", Vector3(160, -3, 113.5), Vector2.LEFT],  # under a wreck,
 	["Makeshift", Vector3(129.2, -3, 94.6)],  # boxes in the open cellar cage.
 ]
+## Furniture of every visited storey of the tower (S-016, Q7): model, plan
+## point, its front toward that plan direction. North-west, north-east,
+## south-west and south-east flats.
+const FLAT_FURNITURE := [
+	["bed", Vector2(93.3, 95.5), Vector2.RIGHT], ["sofa", Vector2(98.0, 88.55), Vector2.DOWN],
+	["boxes", Vector2(100.0, 95.5), Vector2.LEFT], ["lift_doors", Vector2(100.0, 91.0), Vector2.DOWN],
+	["bed", Vector2(114.8, 95.5), Vector2.LEFT], ["kitchen_table", Vector2(108.3, 92.5), Vector2.DOWN],
+	["fridge", Vector2(106.1, 88.45), Vector2.DOWN],
+	["sofa", Vector2(95.5, 106.45), Vector2.UP], ["boxes", Vector2(102.6, 102.9), Vector2.LEFT],
+	["bed", Vector2(100.6, 110.85), Vector2.UP],
+	["sofa", Vector2(115.45, 104.6), Vector2.LEFT], ["kitchen_table", Vector2(109.6, 104.2), Vector2.DOWN],
+	["bed", Vector2(106.0, 110.85), Vector2.UP], ["fridge", Vector2(115.58, 102.0), Vector2.LEFT],
+]
+## The other furniture: model, plan point (x, height, y), front toward that
+## plan direction, and a scale along the model's width if it is stretched.
+const FURNITURE := [
+	# Social centre: the stage curtain (a gap for the west doors), the stacked
+	# chairs, the kitchen's range, the offices.
+	["stage_curtain", Vector3(141.45, 0.6, 65.3), Vector2.RIGHT],
+	["stage_curtain", Vector3(141.45, 0.6, 67.9), Vector2.RIGHT],
+	["stage_curtain", Vector3(141.45, 0.6, 74.7), Vector2.RIGHT],
+	["chairs_stacked", Vector3(157.7, 0, 61.1), Vector2.DOWN],
+	["chairs_stacked", Vector3(158.9, 0, 61.1), Vector2.DOWN],
+	["oven", Vector3(159.45, 0, 82.9), Vector2.LEFT],
+	["shelves", Vector3(168, 0, 67.6), Vector2.UP], ["boxes", Vector3(166, 0, 75.2), Vector2.UP],
+	# Gallery: counters of the pharmacy, the grocer and the baker, the
+	# tobacconist's shelves.
+	["counter", Vector3(48.5, 0, 143.4), Vector2.UP, 5.0 / 2.1],
+	["shelves", Vector3(62.9, 0, 143), Vector2.RIGHT], ["shelves", Vector3(62.9, 0, 145), Vector2.RIGHT],
+	["shelves", Vector3(66.4, 0, 143), Vector2.LEFT], ["shelves", Vector3(66.4, 0, 145), Vector2.LEFT],
+	["counter", Vector3(74, 0, 143.4), Vector2.UP, 6.0 / 2.1],
+	["counter", Vector3(82, 0, 142.4), Vector2.UP, 5.0 / 2.1],
+	# Car park: the technical room.
+	["shelves", Vector3(177, -3, 107.6), Vector2.UP],
+]
+## A piece of furniture keeps this far, on the ground plan, from a hiding
+## spot, a pickup, a fuse slot or a point of the AIs on its level.
+const FURNITURE_CLEARANCE := 0.5
+## Furniture taller than this leaves no room on top for the navigation mesh.
+const FURNITURE_TALL := 1.5
+
 ## 6 dumpsters outside, against the blocks of flats (Q5).
 const DUMPSTERS := [
 	Vector3(30, 0, 35), Vector3(28, 0, 110), Vector3(180, 0, 35),
@@ -371,6 +425,7 @@ func _ready() -> void:
 	_build_car_park()
 	_build_cellars()
 	_build_garages()
+	_build_furniture()
 	kit.build(_root)
 	_add_doors()
 	_add_buildings()
@@ -381,6 +436,7 @@ func _ready() -> void:
 	_add_social_centre_dressing()
 	_add_car_park_dressing()
 	_add_outdoor_dressing()
+	_add_furniture()
 	_add_ambience()
 	get_tree().root.add_child.call_deferred(_root)
 	await get_tree().physics_frame
@@ -792,10 +848,9 @@ func _build_social_centre() -> void:
 	# The stage, west of the hall, its wings behind a curtain.
 	var stage := CENTRE_STAGE
 	kit.box(s, stage.position.x, stage.position.y, stage.end.x, stage.end.y, 0, 0.6, MAT_OBSTACLE, MapKit.Kind.FLOOR)
-	# Tables in the hall, stacked chairs, desks in the offices.
+	# Tables in the hall, desks in the offices (the stacked chairs: FURNITURE).
 	for t: Vector2 in [Vector2(149, 66), Vector2(155, 66), Vector2(149, 77), Vector2(155, 77)]:
 		kit.box(s, t.x - 1.0, t.y - 0.5, t.x + 1.0, t.y + 0.5, 0, 0.75, null, MapKit.Kind.FLOOR)
-	kit.box(s, 157.0, 60.5, 159.5, 61.7, 0, 1.4, MAT_OBSTACLE, MapKit.Kind.FLOOR)
 	for d: Vector2 in [Vector2(172, 64), Vector2(172, 72), Vector2(172, 80)]:
 		kit.box(s, d.x - 0.8, d.y - 0.4, d.x + 0.8, d.y + 0.4, 0, 0.75, null, MapKit.Kind.FLOOR)
 
@@ -868,9 +923,7 @@ func _build_gallery() -> void:
 	for i in 4:
 		var mx := laundrette + 1.0 + i * 1.6
 		kit.box(s, mx - 0.6, back - 1.0, mx + 0.6, back - 0.2, 0, 0.9, null, MapKit.Kind.FLOOR)
-	# Counters and shelves (models in T-240).
-	for c: Rect2 in GALLERY_COUNTERS:
-		kit.box(s, c.position.x, c.position.y, c.end.x, c.end.y, 0, 1.0, null, MapKit.Kind.FLOOR)
+	# Counters and shelves: FURNITURE (T-241).
 	_gallery_roof_stairs(s)
 
 
@@ -1366,6 +1419,117 @@ func _add_social_centre_dressing() -> void:
 		_place_model(node, FOLDING_TABLE, "Table%d" % (i + 1), tables[i], Vector2.UP)
 	for i in 3:  # Office desks, smaller.
 		_place_model(node, FOLDING_TABLE, "Desk%d" % (i + 1), Vector2(172, 64 + 8 * i), Vector2.UP, Vector3(0.8, 1, 0.8))
+
+
+## Every piece of furniture once (S-016, T-241): [model, plan point (x, height,
+## y), facing, width scale], those of the flats on each visited storey, less
+## those that would stand on a hiding spot, a pickup, a fuse slot or a point of
+## the AIs.
+func _furniture_pieces() -> Array:
+	var pieces: Array = []
+	for level in range(1, TOWER_VISITED_STOREYS):
+		for piece: Array in FLAT_FURNITURE:
+			var at: Vector2 = piece[1]
+			pieces.append([piece[0], Vector3(at.x, level * STOREY, at.y), piece[2], 1.0])
+	for piece: Array in FURNITURE:
+		pieces.append([piece[0], piece[1], piece[2], piece[3] if piece.size() > 3 else 1.0])
+	var keep_clear: Array = CLOSETS + BOTTLES + DECOYS + HIDING_SPOTS + PREY_ROUTE + PATROL_ROUTE
+	for spot: Array in FAMILY_SPOTS:
+		keep_clear.append(spot[1])
+	for entry: Array in _buildings().values():
+		keep_clear.append_array(entry[4])
+	var kept: Array = []
+	for piece: Array in pieces:
+		var at: Vector3 = piece[1]
+		var area := _footprint(piece).grow(FURNITURE_CLEARANCE)
+		var free := true
+		for point: Vector3 in keep_clear:
+			if absf(point.y - at.y) < 1.0 and area.has_point(Vector2(point.x, point.z)):
+				free = false
+				break
+		if free:
+			kept.append(piece)
+	return kept
+
+
+## The ground plan rectangle a piece of furniture covers, and its height in
+## the third value of the model's box.
+func _footprint(piece: Array) -> Rect2:
+	var box := _model_box(FURNITURE_MODELS[piece[0]])
+	var at: Vector3 = piece[1]
+	var facing: Vector2 = piece[2]
+	var side := Vector2(facing.y, -facing.x)  # The model's +X on the plan (_place_model).
+	var lo := Vector2(INF, INF)
+	var hi := -lo
+	for x: float in [box.position.x * piece[3], box.end.x * piece[3]]:
+		for z: float in [box.position.z, box.end.z]:
+			var corner := Vector2(at.x, at.z) + side * x + facing * z
+			lo = lo.min(corner)
+			hi = hi.max(corner)
+	return Rect2(lo, hi - lo)
+
+
+## The box around a model's meshes, in its own space.
+func _model_box(scene: PackedScene) -> AABB:
+	var model: Node3D = scene.instantiate()
+	var box := AABB()
+	var first := true
+	for node in model.find_children("*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		var part := mesh.transform * mesh.get_aabb()
+		box = part if first else box.merge(part)
+		first = false
+	model.free()
+	return box
+
+
+## The furniture stops bodies, sight and the navigation mesh like a low
+## obstacle (S-016, Q7): a box around each model.
+func _build_furniture() -> void:
+	var s := kit.structure("Furniture")
+	for piece: Array in _furniture_pieces():
+		if FURNITURE_GHOSTS.has(piece[0]):
+			continue
+		var area := _footprint(piece)
+		var at: Vector3 = piece[1]
+		var height := _model_box(FURNITURE_MODELS[piece[0]]).end.y
+		kit.box(s, area.position.x, area.position.y, area.end.x, area.end.y, at.y, at.y + height, null, MapKit.Kind.FLOOR)
+
+
+func _add_furniture() -> void:
+	var node: Node3D = FURNITURE_SCRIPT.new()
+	node.name = "Furniture"
+	_add(node)
+	var counts := {}
+	for piece: Array in _furniture_pieces():
+		var key: String = piece[0]
+		counts[key] = counts.get(key, 0) + 1
+		var at: Vector3 = piece[1]
+		var node_name := "%s%d" % [key.to_pascal_case(), counts[key]]
+		var scale := Vector3(piece[3], 1, 1)
+		_place_model(node, FURNITURE_MODELS[key], node_name, Vector2(at.x, at.z), piece[2], scale, at.y)
+	# No navigation mesh on top of the low furniture either: the AIs would aim
+	# for islands they cannot reach. Over the tall pieces, there is no room.
+	var obstacles := _group("FurnitureObstacles")
+	obstacles.add_to_group("navigation_source", true)
+	for piece: Array in _furniture_pieces():
+		if FURNITURE_GHOSTS.has(piece[0]):
+			continue
+		var height := _model_box(FURNITURE_MODELS[piece[0]]).end.y
+		if height > FURNITURE_TALL:
+			continue
+		var area := _footprint(piece)
+		var at: Vector3 = piece[1]
+		var obstacle := NavigationObstacle3D.new()
+		obstacle.position = kit.world(area.position.x, area.position.y, at.y - 0.1)
+		obstacle.vertices = PackedVector3Array([
+			Vector3.ZERO, Vector3(area.size.x, 0, 0), Vector3(area.size.x, 0, area.size.y), Vector3(0, 0, area.size.y),
+		])
+		obstacle.height = height + 0.6
+		obstacle.affect_navigation_mesh = true
+		obstacle.avoidance_enabled = false
+		obstacles.add_child(obstacle)
+		obstacle.owner = _root
 
 
 ## Wrecks, pillars, dead neons, the "P" sign and the garage doors (T-047).

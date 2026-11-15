@@ -22,6 +22,7 @@ shape = SubResource("Shape_body")
 [node name="Body" parent="." instance=ExtResource("3_body")]
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_search_max_polygons = 0
 path_desired_distance = 1.0
 path_postprocessing = 1
 target_desired_distance = 0.6

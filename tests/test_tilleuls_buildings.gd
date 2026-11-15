@@ -105,7 +105,17 @@ func test_tower_top_landing_is_closed_by_a_grille() -> void:
 	var nav_map: RID = await _nav_map()
 	var start: Vector3 = _map.get_spawn_points()[0]
 	var above := Vector3(102, 13.5, 92) - ORIGIN
-	var path := NavigationServer3D.map_get_path(nav_map, start, above, true)
+	# No limit on the search: the target is unreachable, every polygon is
+	# visited before the path falls back to the nearest reachable point.
+	var query := NavigationPathQueryParameters3D.new()
+	query.map = nav_map
+	query.start_position = start
+	query.target_position = above
+	query.path_search_max_polygons = 0
+	var result := NavigationPathQueryResult3D.new()
+	NavigationServer3D.query_path(query, result)
+	var path := result.path
+	assert_gt(path.size(), 1, "a path toward the grille")
 	var end := path[path.size() - 1] if path.size() > 0 else start
 	assert_lt(end.y, 12.5, "the grille stops the climb at the 4th floor")
 
