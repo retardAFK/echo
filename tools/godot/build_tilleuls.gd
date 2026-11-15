@@ -188,6 +188,15 @@ const CELLAR_CAGE_DEPTH := 1.8
 
 const SOCIAL_CENTRE := Rect2(140, 60, 38, 24)
 const SOCIAL_CENTRE_HEIGHT := 4.0
+## Doorways of the social centre (S-016): north and west entrances, the
+## emergency exit at the end of the corridor, the kitchen's back door.
+const CENTRE_NORTH_DOORS := Vector2(160.4, 162.6)
+const CENTRE_WEST_DOORS := Vector2(70.0, 73.0)
+const CENTRE_EMERGENCY_EXIT := Vector2(160.4, 162.6)
+const CENTRE_KITCHEN_DOOR := Vector2(157.0, 158.2)
+const CENTRE_KITCHEN := Rect2(152, 78, 8, 6)
+## The stage: the curtain runs along its west edge, the wings behind it.
+const CENTRE_STAGE := Rect2(141.4, 64, 2.6, 12)
 const GALLERY := Rect2(45, 135, 42, 14)
 const GALLERY_HEIGHT := 3.5
 const GALLERY_ARCADE_DEPTH := 4.0
@@ -276,12 +285,16 @@ const CLOSETS := [
 	Vector3(141, -3, 112), Vector3(179, -3, 106), Vector3(152, -3, 95.8),  # Car park.
 ]
 ## The other families (S-016, Q6): low (under a bed), makeshift (behind a
-## curtain), metal (the stuck lift).
+## curtain), metal (the stuck lift). A third value places the spot there,
+## its front toward that plan direction, instead of against the nearest wall.
 const FAMILY_SPOTS := [
 	["Metal", Vector3(100, 0, 91.6)],  # Tower: the lift cabin.
 	["Low", Vector3(113, 3, 90)], ["Low", Vector3(101, 6, 110.5)], ["Low", Vector3(113, 9, 104.5)],
 	["Makeshift", Vector3(92.6, 3, 103)], ["Makeshift", Vector3(115.6, 6, 104)],
 	["Makeshift", Vector3(110, 12, 88.6)],
+	["Low", Vector3(143, 0, 73.5), Vector2.RIGHT],  # Social centre: under the stage,
+	["Makeshift", Vector3(140.85, 0, 65)], ["Makeshift", Vector3(158.2, 0, 63)],  # the wings, the chairs,
+	["Metal", Vector3(153.5, 0, 83)],  # the kitchen's cold cabinet.
 ]
 ## 6 dumpsters outside, against the blocks of flats (Q5).
 const DUMPSTERS := [
@@ -706,24 +719,65 @@ func _build_social_centre() -> void:
 	var h := SOCIAL_CENTRE_HEIGHT
 	var hall_east := 160.0
 	var office_west := 163.0
-	# Outer walls: entrances north (corridor) and west (great hall), windows.
-	kit.wall_x(s, r.position.x, r.end.x, r.position.y + WALL / 2, 0, h, WALL, MAT_CONCRETE, [[160.4, 162.6, DOOR_TOP], [144.0, 146.0, 2.4, 1.0], [150.0, 152.0, 2.4, 1.0], [166.0, 168.0, 2.4, 1.0], [172.0, 174.0, 2.4, 1.0]])
-	kit.wall_x(s, r.position.x, r.end.x, r.end.y - WALL / 2, 0, h, WALL, MAT_CONCRETE, [[144.0, 146.0, 2.4, 1.0], [152.0, 154.0, 2.4, 1.0], [168.0, 170.0, 2.4, 1.0]])
-	kit.wall_y(s, r.position.y, r.end.y, r.position.x + WALL / 2, 0, h, WALL, MAT_CONCRETE, [[70.0, 73.0, DOOR_TOP]])
+	var kitchen := CENTRE_KITCHEN
+	# Outer walls (S-016, Q4): entrances north (corridor) and west (great hall),
+	# the emergency exit at the south end of the corridor, the kitchen's back
+	# door, windows.
+	var north := CENTRE_NORTH_DOORS
+	var west := CENTRE_WEST_DOORS
+	var exit := CENTRE_EMERGENCY_EXIT
+	var back := CENTRE_KITCHEN_DOOR
+	kit.wall_x(s, r.position.x, r.end.x, r.position.y + WALL / 2, 0, h, WALL, MAT_CONCRETE, [[north.x, north.y, DOOR_TOP], [144.0, 146.0, 2.4, 1.0], [150.0, 152.0, 2.4, 1.0], [166.0, 168.0, 2.4, 1.0], [172.0, 174.0, 2.4, 1.0]])
+	kit.wall_x(s, r.position.x, r.end.x, r.end.y - WALL / 2, 0, h, WALL, MAT_CONCRETE, [[144.0, 146.0, 2.4, 1.0], [152.0, 154.0, 2.4, 1.0], [back.x, back.y, DOOR_TOP], [exit.x, exit.y, DOOR_TOP], [168.0, 170.0, 2.4, 1.0]])
+	kit.wall_y(s, r.position.y, r.end.y, r.position.x + WALL / 2, 0, h, WALL, MAT_CONCRETE, [[west.x, west.y, DOOR_TOP]])
 	kit.wall_y(s, r.position.y, r.end.y, r.end.x - WALL / 2, 0, h, WALL, MAT_CONCRETE, [[64.0, 65.5, 2.4, 1.0], [72.0, 73.5, 2.4, 1.0], [80.0, 81.5, 2.4, 1.0]])
 	kit.box(s, r.position.x, r.position.y, r.end.x, r.end.y, h, h + SLAB, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+	_double_door(Vector3((north.x + north.y) / 2.0, 0, r.position.y + WALL / 2), 0.0, north.y - north.x)
+	_double_door(Vector3(r.position.x + WALL / 2, 0, (west.x + west.y) / 2.0), 90.0, west.y - west.x)
+	_door(Vector3((exit.x + exit.y) / 2.0, 0, r.end.y - WALL / 2), 0.0, exit.y - exit.x, Door.Kind.EMERGENCY)
+	_door(Vector3((back.x + back.y) / 2.0, 0, r.end.y - WALL / 2), 0.0, back.y - back.x)
 	# Great hall and corridor, double doors between them.
-	kit.wall_y(s, r.position.y, r.end.y, hall_east, 0, h, WALL, MAT_CONCRETE, [[66.0, 68.0, DOOR_TOP], [76.0, 78.0, DOOR_TOP]])
-	# Offices along the corridor.
-	kit.wall_y(s, r.position.y, r.end.y, office_west, 0, h, WALL, MAT_CONCRETE, [[63.0, 64.2, DOOR_TOP], [71.0, 72.2, DOOR_TOP], [79.0, 80.2, DOOR_TOP]])
-	kit.wall_x(s, office_west, r.end.x, 68.0, 0, h, WALL, MAT_CONCRETE)
-	kit.wall_x(s, office_west, r.end.x, 76.0, 0, h, WALL, MAT_CONCRETE)
-	# Few hiding places in the hall: a stage and four tables.
-	kit.box(s, 140.3, 64.0, 144.0, 80.0, 0, 0.6, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+	var hall_doors := [Vector2(66.0, 68.0), Vector2(73.0, 75.0)]
+	var hall_gaps: Array = []
+	for d: Vector2 in hall_doors:
+		hall_gaps.append([d.x, d.y, DOOR_TOP])
+		_double_door(Vector3(hall_east, 0, (d.x + d.y) / 2.0), 90.0, d.y - d.x)
+	hall_gaps.append([80.0, 81.2, DOOR_TOP])  # The kitchen, from the corridor.
+	_door(Vector3(hall_east, 0, 80.6), 90.0, 1.2)
+	kit.wall_y(s, r.position.y, r.end.y, hall_east, 0, h, WALL, MAT_CONCRETE, hall_gaps)
+	# Offices along the corridor, each with its door, and a door between
+	# neighbours: no dead end (Q4).
+	var office_gaps: Array = []
+	for y: float in [63.0, 71.0, 79.0]:
+		office_gaps.append([y, y + 1.2, DOOR_TOP])
+		_door(Vector3(office_west, 0, y + 0.6), 90.0, 1.2)
+	kit.wall_y(s, r.position.y, r.end.y, office_west, 0, h, WALL, MAT_CONCRETE, office_gaps)
+	for y: float in [68.0, 76.0]:
+		kit.wall_x(s, office_west, r.end.x, y, 0, h, WALL, MAT_CONCRETE, [[172.0, 173.2, DOOR_TOP]])
+		_door(Vector3(172.6, 0, y), 0.0, 1.2)
+	# The kitchen, south-east of the great hall: a door to the hall, a hatch
+	# over the counter.
+	kit.wall_x(s, kitchen.position.x, kitchen.end.x, kitchen.position.y, 0, h, WALL, MAT_CONCRETE, [[154.0, 156.4, 2.0, 1.0]])
+	kit.wall_y(s, kitchen.position.y, r.end.y, kitchen.position.x, 0, h, WALL, MAT_CONCRETE, [[80.0, 81.2, DOOR_TOP]])
+	_door(Vector3(kitchen.position.x, 0, 80.6), 90.0, 1.2)
+	kit.box(s, 154.0, kitchen.position.y + WALL / 2, 156.4, kitchen.position.y + 0.8, 0, 1.0, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+	# The stage, west of the hall, its wings behind a curtain.
+	var stage := CENTRE_STAGE
+	kit.box(s, stage.position.x, stage.position.y, stage.end.x, stage.end.y, 0, 0.6, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+	# Tables in the hall, stacked chairs, desks in the offices.
 	for t: Vector2 in [Vector2(149, 66), Vector2(155, 66), Vector2(149, 77), Vector2(155, 77)]:
 		kit.box(s, t.x - 1.0, t.y - 0.5, t.x + 1.0, t.y + 0.5, 0, 0.75, null, MapKit.Kind.FLOOR)
+	kit.box(s, 157.0, 60.5, 159.5, 61.7, 0, 1.4, MAT_OBSTACLE, MapKit.Kind.FLOOR)
 	for d: Vector2 in [Vector2(172, 64), Vector2(172, 72), Vector2(172, 80)]:
 		kit.box(s, d.x - 0.8, d.y - 0.4, d.x + 0.8, d.y + 0.4, 0, 0.75, null, MapKit.Kind.FLOOR)
+
+
+## Two leaves meeting in the middle of a doorway this wide.
+func _double_door(at: Vector3, yaw: float, width: float, kind := Door.Kind.NORMAL) -> void:
+	var leaf := width / 2.0
+	var along := Vector3(leaf / 2.0, 0, 0) if is_zero_approx(yaw) else Vector3(0, 0, leaf / 2.0)
+	_door(at - along, yaw, leaf, kind)
+	_door(at + along, yaw, leaf, kind)
 
 
 func _build_gallery() -> void:
@@ -1038,7 +1092,18 @@ func _place_ruses() -> void:
 	var counts := {}
 	for entry: Array in FAMILY_SPOTS:
 		counts[entry[0]] = counts.get(entry[0], 0) + 1
-		_place_spot(spots, families[entry[0]], "%s%d" % [entry[0], counts[entry[0]]], entry[1])
+		var node_name := "%s%d" % [entry[0], counts[entry[0]]]
+		if entry.size() > 2:
+			var spot: Node3D = families[entry[0]].instantiate()
+			spot.name = node_name
+			spots.add_child(spot)
+			spot.owner = _root
+			var at: Vector3 = entry[1]
+			var front: Vector2 = entry[2]
+			spot.position = kit.world(at.x, at.z, at.y)
+			spot.rotation.y = atan2(front.x, front.y)
+		else:
+			_place_spot(spots, families[entry[0]], node_name, entry[1])
 	var pickups := _group("Pickups")
 	for kind: Array in [["Bottles", BOTTLE, "Bottle", BOTTLES], ["Decoys", DECOY, "Decoy", DECOYS]]:
 		var parent := Node3D.new()
