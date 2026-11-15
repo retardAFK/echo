@@ -26,6 +26,15 @@ enum Kind { NORMAL, FIRE, EMERGENCY, SHUTTER }
 const GROUP := &"doors"
 ## Physics layer 2, "walls": a closed door is a wall (see the project settings).
 const WALLS_LAYER := 1 << 1
+## What it sounds like (T-242), by what happens to it.
+const SOUND_OPEN := preload("res://assets/audio/interiors/door_open.wav")
+const SOUND_QUIET := preload("res://assets/audio/interiors/door_quiet.wav")
+const SOUND_CLOSE := preload("res://assets/audio/interiors/door_close.wav")
+const SOUND_SMASH := preload("res://assets/audio/interiors/door_smash.wav")
+const SOUND_FIRE_SLAM := preload("res://assets/audio/interiors/fire_door_slam.wav")
+const SOUND_CRASH_BAR := preload("res://assets/audio/interiors/crash_bar.wav")
+const SOUND_SHUTTER := preload("res://assets/audio/interiors/shutter_roll.wav")
+const SOUND_BELL := preload("res://assets/audio/interiors/shop_bell.wav")
 ## Physics layers 3 and 4, the hunted and the monster: a fire door waits for
 ## the doorway to be clear before it closes.
 const BODIES_LAYERS := (1 << 2) | (1 << 3)
@@ -56,6 +65,7 @@ var _tween: Tween
 @onready var _shape: CollisionShape3D = $Hinge/Leaf/CollisionShape3D
 @onready var _mesh: MeshInstance3D = $Hinge/Leaf/Mesh
 @onready var _creak: AudioStreamPlayer3D = $Creak
+@onready var _bell: AudioStreamPlayer3D = $Bell
 
 
 func _ready() -> void:
@@ -78,7 +88,7 @@ func _physics_process(delta: float) -> void:
 	_open_for += delta
 	if _open_for >= settings.fire_close_delay and not _doorway_busy():
 		last_user = null
-		_set_open(false, true)
+		_set_open(false, true, SOUND_FIRE_SLAM)
 		NoiseBus.emit_noise(
 			NoiseEvent.Type.DOOR, global_position + Vector3.UP, settings.slam_range, self
 		)
@@ -201,7 +211,7 @@ func get_hold_ratio() -> float:
 func toggle(user: Node, noise_range: float) -> void:
 	if not is_open and user is Node3D:
 		_swing_away_from((user as Node3D).global_position)
-	_set_open(not is_open, true)
+	_set_open(not is_open, true, sound_for(not is_open, noise_range))
 	_open_for = 0.0
 	last_user = user
 	if bell and is_open:
@@ -236,7 +246,7 @@ func smash(user: Node) -> void:
 ## Online client (S-010): shows the room's state, with the sound.
 func mirror(open: bool) -> void:
 	if open != is_open:
-		_set_open(open, true)
+		_set_open(open, true, sound_for(open, settings.open_range))
 
 
 ## Whether someone stands in the doorway, where the leaf would close on them.
@@ -257,7 +267,22 @@ func _swing_away_from(at: Vector3) -> void:
 	_swing = 1.0 if local.z > 0.0 else -1.0  # +angle swings the leaf to -Z.
 
 
-func _set_open(open: bool, animate: bool) -> void:
+## The sound of opening or closing it with a noise of this range: the crash
+## bar, the shutter, a smash, the quiet way or the plain one. A fire door
+## slamming on its own has its own sound.
+func sound_for(open: bool, noise_range: float) -> AudioStream:
+	if kind == Kind.EMERGENCY:
+		return SOUND_CRASH_BAR
+	if kind == Kind.SHUTTER:
+		return SOUND_SHUTTER
+	if open and noise_range >= settings.smash_range:
+		return SOUND_SMASH
+	if noise_range <= settings.quiet_range:
+		return SOUND_QUIET
+	return SOUND_OPEN if open else SOUND_CLOSE
+
+
+func _set_open(open: bool, animate: bool, sound: AudioStream = null) -> void:
 	is_open = open
 	_leaf.collision_layer = 0 if open else WALLS_LAYER
 	var property := "rotation:y"
@@ -268,7 +293,11 @@ func _set_open(open: bool, animate: bool) -> void:
 	if _tween != null:
 		_tween.kill()
 	if animate and is_inside_tree():
-		_creak.play()
+		if sound != null:
+			_creak.stream = sound
+			_creak.play()
+		if bell and open:
+			_bell.play()
 		_tween = create_tween()
 		_tween.tween_property(_hinge, property, value, settings.swing_time)
 	else:

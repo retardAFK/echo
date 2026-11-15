@@ -174,3 +174,27 @@ func test_a_bell_rings_when_the_door_opens_even_slowly() -> void:
 	door.hold(sneaker, 0.5)
 	door.hold(sneaker, 0.6)
 	assert_eq(_noises[1].noise_range, SETTINGS.quiet_range, "closing it slowly: no bell")
+
+
+func test_each_way_of_moving_a_door_has_its_sound() -> void:
+	var door := _door(Door.Kind.NORMAL)
+	assert_eq(door.sound_for(true, SETTINGS.open_range), Door.SOUND_OPEN)
+	assert_eq(door.sound_for(false, SETTINGS.open_range), Door.SOUND_CLOSE)
+	assert_eq(door.sound_for(true, SETTINGS.quiet_range), Door.SOUND_QUIET, "crouched")
+	assert_eq(door.sound_for(true, SETTINGS.smash_range), Door.SOUND_SMASH, "the monster running")
+	assert_eq(
+		_door(Door.Kind.EMERGENCY).sound_for(true, SETTINGS.emergency_range), Door.SOUND_CRASH_BAR
+	)
+	assert_eq(_door(Door.Kind.SHUTTER).sound_for(false, SETTINGS.shutter_range), Door.SOUND_SHUTTER)
+
+
+func test_the_sound_played_follows_the_door() -> void:
+	var door := _door(Door.Kind.FIRE)
+	var creak: AudioStreamPlayer3D = door.get_node("Creak")
+	var walker := _walker(Vector3(0, 0, 1))
+	door.hold(walker, 0.016)
+	assert_eq(creak.stream, Door.SOUND_OPEN)
+	door.release(walker)
+	await wait_seconds(SETTINGS.fire_close_delay + 0.2)
+	assert_false(door.is_open)
+	assert_eq(creak.stream, Door.SOUND_FIRE_SLAM, "it slams on its own")

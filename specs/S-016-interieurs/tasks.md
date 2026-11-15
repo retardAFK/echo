@@ -38,7 +38,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [ ] T-241 — Habillage, éclairage et performance
   - Résultat vérifiable : intérieurs meublés, éclairage précalculé, 300 appels de dessin au pire endroit
   - Dépend de : T-237, T-238, T-239, T-240
-- [ ] T-242 — Sons des intérieurs
+- [x] T-242 — Sons des intérieurs
   - Résultat vérifiable : `tools/audio/interior_sounds.py`, sons montrés à Maxime puis intégrés
   - Dépend de : T-232
 - [ ] T-243 — Fusibles, ruses et équilibre
@@ -59,3 +59,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - T-237 : 4 issues (deux doubles portes, porte de service de la cuisine, issue de secours au bout du couloir), cuisine et passe-plat, bureaux reliés entre eux, scène et coulisses.
 - T-238 : chaque boutique a sa porte de derrière, couloir de livraison avec porte coupe-feu à l'est et issue de secours à l'ouest, rideau du tabac à lever (12 m), clochette de la boulangerie (8 m), deux escaliers métalliques vers le toit (à la place des échelles). Les devantures fermées de la pharmacie, du tabac et de la boulangerie sont retirées en attendant leurs modèles (T-240).
 - T-239 : escalier nord du parking (de la rue à -3 m) avec double porte coupe-feu, local technique, épaves déplacées ; cachettes métal (épave), basse (sous une épave) et de fortune (cages des caves).
+- T-242 : 11 sons synthétisés (tools/audio/interior_sounds.py), validés par Maxime : porte ouverte debout, accroupi, fermée, défoncée, coupe-feu qui claque, barre anti-panique, rideau métallique, clochette ; cachettes basse, de fortune et en métal.
