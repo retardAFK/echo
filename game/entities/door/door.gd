@@ -35,6 +35,14 @@ const SOUND_FIRE_SLAM := preload("res://assets/audio/interiors/fire_door_slam.wa
 const SOUND_CRASH_BAR := preload("res://assets/audio/interiors/crash_bar.wav")
 const SOUND_SHUTTER := preload("res://assets/audio/interiors/shutter_roll.wav")
 const SOUND_BELL := preload("res://assets/audio/interiors/shop_bell.wav")
+## The leaf of each kind (T-240): 1 x 2.4 m models, scaled to the doorway.
+const LEAF_MODELS := {
+	Kind.NORMAL: preload("res://assets/models/door_leaf.glb"),
+	Kind.FIRE: preload("res://assets/models/fire_door_leaf.glb"),
+	Kind.EMERGENCY: preload("res://assets/models/emergency_leaf.glb"),
+	Kind.SHUTTER: preload("res://assets/models/shutter_leaf.glb"),
+}
+const LEAF_MODEL_SIZE := Vector3(1.0, 2.4, 0.06)
 ## Physics layers 3 and 4, the hunted and the monster: a fire door waits for
 ## the doorway to be clear before it closes.
 const BODIES_LAYERS := (1 << 2) | (1 << 3)
@@ -63,7 +71,6 @@ var _tween: Tween
 @onready var _hinge: Node3D = $Hinge
 @onready var _leaf: AnimatableBody3D = $Hinge/Leaf
 @onready var _shape: CollisionShape3D = $Hinge/Leaf/CollisionShape3D
-@onready var _mesh: MeshInstance3D = $Hinge/Leaf/Mesh
 @onready var _creak: AudioStreamPlayer3D = $Creak
 @onready var _bell: AudioStreamPlayer3D = $Bell
 
@@ -76,9 +83,10 @@ func _ready() -> void:
 	var box := BoxShape3D.new()
 	box.size = Vector3(width, height, settings.leaf_thickness)
 	_shape.shape = box
-	var mesh := BoxMesh.new()
-	mesh.size = box.size
-	_mesh.mesh = mesh
+	var leaf: Node3D = LEAF_MODELS[kind].instantiate()
+	leaf.name = "Model"
+	leaf.scale = box.size / LEAF_MODEL_SIZE
+	_leaf.add_child(leaf)
 	_set_open(start_open, false)
 
 

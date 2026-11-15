@@ -32,7 +32,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-239 — Le parking et le couloir des caves
   - Résultat vérifiable : escalier nord, couloir des caves vers la tour avec caves grillagées, scan étendu ; IA qui empruntent le couloir ; tests GUT
   - Dépend de : T-236
-- [ ] T-240 — Mobilier et portes en 3D
+- [x] T-240 — Mobilier et portes en 3D
   - Résultat vérifiable : `tools/blender/interiors.py`, rendus montrés à Maxime puis intégrés
   - Dépend de : T-231
 - [ ] T-241 — Habillage, éclairage et performance
@@ -60,3 +60,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - T-238 : chaque boutique a sa porte de derrière, couloir de livraison avec porte coupe-feu à l'est et issue de secours à l'ouest, rideau du tabac à lever (12 m), clochette de la boulangerie (8 m), deux escaliers métalliques vers le toit (à la place des échelles). Les devantures fermées de la pharmacie, du tabac et de la boulangerie sont retirées en attendant leurs modèles (T-240).
 - T-239 : escalier nord du parking (de la rue à -3 m) avec double porte coupe-feu, local technique, épaves déplacées ; cachettes métal (épave), basse (sous une épave) et de fortune (cages des caves).
 - T-242 : 11 sons synthétisés (tools/audio/interior_sounds.py), validés par Maxime : porte ouverte debout, accroupi, fermée, défoncée, coupe-feu qui claque, barre anti-panique, rideau métallique, clochette ; cachettes basse, de fortune et en métal.
+- T-240 : 19 modèles (tools/blender/interiors.py) validés par Maxime : lit, canapé, table, frigo, cartons, chaises empilées, rideau de scène, piano de cuisson, armoire froide, comptoir, rayonnages, portes d'ascenseur, devantures pharmacie/tabac/boulangerie, vantaux des portes (normale, coupe-feu, secours, rideau). Vantaux et devantures intégrés ici, le reste du mobilier placé en T-241.
