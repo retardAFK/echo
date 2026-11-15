@@ -59,16 +59,16 @@ func test_facades_are_not_scannable() -> void:
 			assert_false(building.contains(center), "%s is not in %s" % [facade, building.name])
 
 
-func test_each_visitable_building_has_four_fuse_slots_inside() -> void:
+func test_each_visitable_building_has_six_fuse_slots_inside() -> void:
 	for building_name in VISITABLE:
 		var slots := _slots(building_name)
-		assert_eq(slots.size(), 4, building_name)
+		assert_eq(slots.size(), 6, building_name)
 		for slot in slots:
 			assert_true(
 				_building(building_name).contains(slot + Vector3.UP * 0.5),
 				"%s slot %s" % [building_name, slot + ORIGIN]
 			)
-	assert_eq(get_tree().get_nodes_in_group("fuse_slot").size(), 16)
+	assert_eq(get_tree().get_nodes_in_group("fuse_slot").size(), 24)
 
 
 func test_no_hiding_spot_stands_between_a_hunted_and_its_fuse_box() -> void:

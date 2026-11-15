@@ -202,6 +202,8 @@ const LIFT_SHAFT := Rect2(99.15, 88.3, 1.7, 2.7)
 ## Cellars (Q5): stairs down from the tower, a corridor to the car park, the
 ## cages along it in alcoves to the north.
 const CELLAR_STAIRS := Rect2(92.6, 96.0, 6.0, 2.4)
+## Flat top of the cellar stairs, open to the north, in meters.
+const CELLAR_LANDING := 1.4
 const CELLAR_CORRIDOR := Rect2(92.6, 96.0, 47.4, 2.4)
 const CELLAR_FIRE_DOORS := [116.5, 139.0]
 const CELLAR_CAGES := Vector2(118, 136)
@@ -327,14 +329,17 @@ const FAMILY_SPOTS := [
 	["Metal", Vector3(100, 0, 91.6)],  # Tower: the lift cabin.
 	["Low", Vector3(113, 3, 90)], ["Low", Vector3(101, 6, 110.5)], ["Low", Vector3(113, 9, 104.5)],
 	["Makeshift", Vector3(92.6, 3, 103)], ["Makeshift", Vector3(115.6, 6, 104)],
-	["Makeshift", Vector3(110, 12, 88.6)],
+	["Makeshift", Vector3(110, 12, 88.6)], ["Low", Vector3(101, 12, 110.5)],
+	["Makeshift", Vector3(92.6, 9, 103)],
 	["Low", Vector3(143, 0, 73.5), Vector2.RIGHT],  # Social centre: under the stage,
+	["Low", Vector3(143, 0, 67), Vector2.RIGHT],
 	["Makeshift", Vector3(140.85, 0, 65)], ["Makeshift", Vector3(158.2, 0, 63)],  # the wings, the chairs,
 	["Metal", Vector3(153.5, 0, 83)],  # the kitchen's cold cabinet.
 	["Low", Vector3(48.5, 0, 144.5)], ["Metal", Vector3(54, 0, 145.5)],  # Gallery: pharmacy, dryer,
 	["Makeshift", Vector3(68.4, 0, 145.5)], ["Metal", Vector3(85.5, 0, 145.3)],  # boxes, oven.
 	["Metal", Vector3(154, -3, 101.05), Vector2.DOWN],  # Car park: a wreck's boot,
 	["Low", Vector3(160, -3, 113.5), Vector2.LEFT],  # under a wreck,
+	["Metal", Vector3(166, -3, 103.55), Vector2.DOWN],  # another boot,
 	["Makeshift", Vector3(129.2, -3, 94.6)],  # boxes in the open cellar cage.
 ]
 ## Furniture of every visited storey of the tower (S-016, Q7): model, plan
@@ -643,7 +648,7 @@ func _tower_ground_floor(s: MapKit.Structure) -> void:
 	_door(Vector3(99.0, 0, (door.x + door.y) / 2.0), 90.0, door.y - door.x, Door.Kind.FIRE)
 	# A railing along the open side of the stairs, but at their top.
 	var c := CELLAR_STAIRS
-	kit.wall_x(s, c.position.x + 1.4, c.end.x, c.position.y - 0.1, 0, PARAPET, 0.2, MAT_CONCRETE)
+	kit.wall_x(s, c.position.x + CELLAR_LANDING, c.end.x, c.position.y - 0.1, 0, PARAPET, 0.2, MAT_CONCRETE)
 	kit.wall_y(s, c.position.y - 0.2, c.end.y, c.end.x + 0.1, 0, PARAPET, 0.2, MAT_CONCRETE)
 	# Bin room, south-west, with its door.
 	kit.wall_x(s, r.position.x, 99.0, 104.0, 0, STOREY, WALL, MAT_CONCRETE, [[95.0, 96.2, DOOR_TOP]])
@@ -722,8 +727,12 @@ func _build_cellars() -> void:
 	var corridor := CELLAR_CORRIDOR
 	var floor_h := -CAR_PARK_DEPTH
 	var ceiling := -GROUND_THICKNESS
-	# Stairs down from the west (top) to the east (bottom), in their shaft.
-	kit.ramp(s, c.position.x, c.position.y, c.end.x, c.end.y, 0, floor_h, true, MAT_OBSTACLE)
+	# Stairs down from the west (top) to the east (bottom), in their shaft,
+	# after a flat landing at the top: turning onto a slope at once, an AI
+	# body caught on the shaft's edge there and stayed (T-243).
+	var landing := c.position.x + CELLAR_LANDING
+	kit.box(s, c.position.x, c.position.y, landing, c.end.y, -SLAB, 0, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+	kit.ramp(s, landing, c.position.y, c.end.x, c.end.y, 0, floor_h, true, MAT_OBSTACLE)
 	kit.wall_x(s, c.position.x, c.end.x, c.position.y - WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE)
 	kit.wall_y(s, c.position.y - WALL, corridor.end.y + WALL, c.position.x - WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE)
 	# The corridor, from the foot of the stairs to the car park.
@@ -1094,16 +1103,20 @@ func _buildings() -> Dictionary:
 	return {
 		"Tower": [TOWER, 0.0, tower_top,
 			[[Vector3(104, 2.6, 92), 6.0], [Vector3(96, 8.6, 100), 6.0], [Vector3(112, 14.6, 100), 6.0]],
-			[Vector3(95.5, 0, 108), Vector3(113, 6, 93), Vector3(96, 9, 109), Vector3(113, 12, 108)]],
+			[Vector3(95.5, 0, 108), Vector3(113, 6, 93), Vector3(96, 9, 109), Vector3(113, 12, 108),
+				Vector3(113, 3, 110.5), Vector3(94, 6, 90.5)]],
 		"SocialCentre": [SOCIAL_CENTRE, 0.0, SOCIAL_CENTRE_HEIGHT,
 			[[Vector3(151, 3.4, 72), 9.0], [Vector3(161.5, 3.4, 72), 5.0]],
-			[Vector3(142, 0, 62), Vector3(176, 0, 62), Vector3(176, 0, 74), Vector3(170, 0, 82)]],
+			[Vector3(142, 0, 62), Vector3(176, 0, 62), Vector3(176, 0, 74), Vector3(170, 0, 82),
+				Vector3(156, 0, 80.5), Vector3(170, 0, 70.5)]],
 		"Gallery": [GALLERY, 0.0, GALLERY_HEIGHT,
 			[[Vector3(58, 2.9, 143), 5.0], [Vector3(66, 2.8, 137), 6.0]],
-			[Vector3(55, 0, 143), Vector3(61, 0, 145), Vector3(76, 0, 142), Vector3(84, 0, 148)]],
+			[Vector3(55, 0, 143), Vector3(61, 0, 145), Vector3(76, 0, 142), Vector3(84, 0, 148),
+				Vector3(47.5, 0, 148), Vector3(71, 0, 146)]],
 		"CarPark": [CAR_PARK, -CAR_PARK_DEPTH, 0.0,
 			[[Vector3(152, -0.6, 106), 7.0], [Vector3(170, -0.6, 106), 7.0]],
-			[Vector3(142, -3, 97), Vector3(178, -3, 97), Vector3(142, -3, 115), Vector3(166, -3, 115)]],
+			[Vector3(142, -3, 97), Vector3(178, -3, 97), Vector3(142, -3, 115), Vector3(166, -3, 115),
+				Vector3(178.5, -3, 111), Vector3(110, -3, 97.2)]],
 		"Garages": [GARAGES, 0.0, GARAGE_HEIGHT, [], []],
 	}
 

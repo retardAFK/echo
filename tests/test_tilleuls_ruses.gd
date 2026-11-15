@@ -62,6 +62,7 @@ func test_three_closets_in_each_visitable_building_and_six_dumpsters_outside() -
 		func(spot: HidingSpot) -> bool: return spot.family == HidingSpot.Family.CLOSET
 	)
 	assert_eq(closet_family.size(), 18, "the other families come on top (S-016)")
+	assert_eq(spots.size(), 40, "about 40 hiding spots in all (S-016, Q6)")
 	var closets := {}
 	var outside := 0
 	for spot in spots:

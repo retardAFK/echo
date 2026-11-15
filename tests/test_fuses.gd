@@ -156,7 +156,7 @@ func test_the_cite_draws_three_fuses_in_three_buildings() -> void:
 	var map: GameMap = MAP_SCENE.instantiate()
 	add_child_autofree(map)
 	var boxes := map.get_fuse_boxes()
-	assert_eq(boxes.size(), 16, "a box on each fuse slot")
+	assert_eq(boxes.size(), 24, "a box on each fuse slot")
 	assert_not_null(map.game_loop)
 	var full := boxes.filter(func(box: FuseBox) -> bool: return box.has_fuse)
 	assert_eq(full.size(), 3)
