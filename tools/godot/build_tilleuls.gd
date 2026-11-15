@@ -61,9 +61,11 @@ const TREE_BARE := preload("res://game/entities/props/tree_bare.tscn")
 const FACADE_DRESSING := preload("res://game/maps/facade_dressing.gd")
 ## Models of the gallery and the social centre (T-046, tools/blender/gallery.py),
 ## front toward +Z, origin at the bottom corner on the left seen from outside.
-const SHOP_SHUTTER := preload("res://assets/models/gallery_shop_shutter.glb")
 const SHOP_HALF := preload("res://assets/models/gallery_shop_half.glb")
 const LAUNDRETTE := preload("res://assets/models/gallery_laundrette.glb")
+const SHOP_PHARMACIE := preload("res://assets/models/shop_pharmacie.glb")
+const SHOP_TABAC := preload("res://assets/models/shop_tabac.glb")
+const SHOP_BOULANGERIE := preload("res://assets/models/shop_boulangerie.glb")
 const WASHERS := preload("res://assets/models/gallery_washers.glb")
 const CENTRE_WINDOW := preload("res://assets/models/centre_window.glb")
 const CENTRE_ENTRANCE := preload("res://assets/models/centre_entrance.glb")
@@ -1331,9 +1333,8 @@ func _add_gallery_dressing() -> void:
 	var r := GALLERY
 	var width := r.size.x / GALLERY_SHOPS
 	var front := r.position.y + GALLERY_ARCADE_DEPTH - WALL / 2 - FACADE_OFFSET
-	# The pharmacy, the tobacconist and the baker open now (S-016): their
-	# closed shop fronts wait for new models (T-240).
-	var scenes := {1: LAUNDRETTE, 3: SHOP_HALF}
+	# The pharmacy, the tobacconist and the baker open since S-016 (T-240).
+	var scenes := {0: SHOP_PHARMACIE, 1: LAUNDRETTE, 2: SHOP_TABAC, 3: SHOP_HALF, 4: SHOP_BOULANGERIE}
 	for i: int in scenes:
 		var east := r.position.x + (i + 1) * width
 		_place_model(node, scenes[i], "Shop%d" % (i + 1), Vector2(east, front), Vector2.UP)

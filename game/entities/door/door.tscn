@@ -4,7 +4,6 @@
 [ext_resource type="Resource" path="res://game/data/door_settings.tres" id="2_settings"]
 [ext_resource type="AudioStream" path="res://assets/audio/interiors/door_open.wav" id="3_creak"]
 [ext_resource type="AudioStream" path="res://assets/audio/interiors/shop_bell.wav" id="5_bell"]
-[ext_resource type="Material" path="res://game/fx/materials/concrete_obstacle.tres" id="4_material"]
 
 [node name="Door" type="Node3D"]
 script = ExtResource("1_door")
@@ -18,9 +17,6 @@ collision_mask = 0
 sync_to_physics = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hinge/Leaf"]
-
-[node name="Mesh" type="MeshInstance3D" parent="Hinge/Leaf"]
-material_override = ExtResource("4_material")
 
 [node name="Creak" type="AudioStreamPlayer3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
