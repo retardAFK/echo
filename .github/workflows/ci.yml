@@ -98,10 +98,13 @@ jobs:
 
       - name: Upload test results
         if: always()
+        # Artifacts are a convenience: a full storage quota must not fail CI.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: test-results
           path: build/test-results/
+          retention-days: 3
           if-no-files-found: warn
 
       - name: Stamp the game version
@@ -142,11 +145,13 @@ jobs:
           fi
 
       - name: Upload web build
+        # Artifacts are a convenience: a full storage quota must not fail CI.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: web-build
           path: build/web/
-          retention-days: 14
+          retention-days: 5
 
       # S-010, T-094: the dedicated server is the same project exported for
       # Linux without visuals. It is started as the lobby, and 4 players
@@ -204,23 +209,27 @@ jobs:
 
       - name: Upload online test logs
         if: failure()
+        # Artifacts are a convenience: a full storage quota must not fail CI.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: online-test-logs
           path: |
             build/server/*.log
             build/server/match/
-          retention-days: 14
+          retention-days: 5
           if-no-files-found: ignore
 
       - name: Upload server build
+        # Artifacts are a convenience: a full storage quota must not fail CI.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: server-build
           path: |
             build/server/echo_server.x86_64
             build/server/echo_server.arm64
-          retention-days: 14
+          retention-days: 5
 
       # T-108: every merge to main goes to the online server (tools/server),
       # with the same version as the itch.io build. Needs the variable

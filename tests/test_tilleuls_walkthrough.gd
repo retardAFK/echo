@@ -9,6 +9,8 @@ const ORIGIN := Vector3(110, 0, 110)
 const WAYPOINT_REACH := 0.6
 ## The leg is done when the feet are this close to the goal.
 const GOAL_REACH := 1.2
+## The bot opens a closed door this close in front of it.
+const DOOR_REACH := 1.2
 
 var _map: GameMap
 var _player: Player
@@ -46,7 +48,7 @@ func _world(plan: Vector3) -> Vector3:
 	return plan - ORIGIN
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if _goal == Vector3.ZERO or not is_instance_valid(_player):
 		return
 	var aim := _goal
@@ -62,6 +64,11 @@ func _physics_process(_delta: float) -> void:
 	var to := aim - _player.global_position
 	if Vector2(to.x, to.z).length() > 0.05:
 		_player.rotation.y = atan2(-to.x, -to.z)
+	# A closed door in the way: the bot presses "interact", as a player would (S-016).
+	var door := Door.closed_ahead(get_tree(), _player.global_position, to, DOOR_REACH)
+	if door != null:
+		door.hold(_player, delta)
+		door.release(_player)
 
 
 ## Walks the player from start to goal (plan coordinates) and tells if it got there.

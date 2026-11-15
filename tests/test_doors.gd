@@ -198,3 +198,16 @@ func test_the_monster_opens_it_by_hand() -> void:
 	assert_false(door.hold(avatar, 0.5), "prowling: the quiet way")
 	assert_true(door.hold(avatar, 0.6))
 	assert_eq(_noises[1].noise_range, 2.0)
+
+
+func test_closed_ahead_meets_a_wide_door_at_its_edge() -> void:
+	var door: Door = DOOR_SCENE.instantiate()
+	door.width = 2.0
+	add_child_autofree(door)
+	door.rotation.y = PI / 2.0  # Leaf across Z.
+	await wait_physics_frames(1)
+	var tree := get_tree()
+	var from := Vector3(0.8, 0, 0.9)  # Near the end of the leaf, 1.2 m from its middle.
+	assert_eq(Door.closed_ahead(tree, from, Vector3.LEFT, 1.0), door, "the edge is in reach")
+	assert_null(Door.closed_ahead(tree, from, Vector3.BACK, 1.0), "walking along it")
+	assert_almost_eq(door.closest_flat_point(from), Vector2(0, 0.9), Vector2(0.01, 0.01))

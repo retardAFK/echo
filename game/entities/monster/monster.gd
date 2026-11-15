@@ -325,6 +325,8 @@ func guard_exit(points: Array[Vector3]) -> void:
 func _on_noise_emitted(event: NoiseEvent) -> void:
 	if event.source == self or not is_inside_tree():
 		return  # Its own noise, or removed from the map (monster role).
+	if event.source is Door and (event.source as Door).last_user == self:
+		return  # A door it opened itself (S-016).
 	if scan_reveals(event):
 		brain.remember(event.position)
 		brain.hear(event.position)  # Even a faint one, like a breath (D-009).

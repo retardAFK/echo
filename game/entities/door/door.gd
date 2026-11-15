@@ -24,6 +24,9 @@ enum Kind { NORMAL, FIRE, EMERGENCY }
 const GROUP := &"doors"
 ## Physics layer 2, "walls": a closed door is a wall (see the project settings).
 const WALLS_LAYER := 1 << 1
+## Physics layers 3 and 4, the hunted and the monster: a fire door waits for
+## the doorway to be clear before it closes.
+const BODIES_LAYERS := (1 << 2) | (1 << 3)
 
 @export var settings: DoorSettings
 @export var kind := Kind.NORMAL
@@ -69,7 +72,7 @@ func _physics_process(delta: float) -> void:
 	if kind != Kind.FIRE or not is_open or NoiseBus.mirror:
 		return  # On an online client, the room closes it (S-010).
 	_open_for += delta
-	if _open_for >= settings.fire_close_delay:
+	if _open_for >= settings.fire_close_delay and not _doorway_busy():
 		last_user = null
 		_set_open(false, true)
 		NoiseBus.emit_noise(
@@ -101,8 +104,7 @@ static func closed_ahead(tree: SceneTree, from: Vector3, direction: Vector3, rea
 		var door := node as Door
 		if door.is_open or absf(door.global_position.y - from.y) > door.settings.reach_height:
 			continue
-		var gap := door.global_position - from
-		var flat := Vector2(gap.x, gap.z)
+		var flat := door.closest_flat_point(from) - Vector2(from.x, from.z)
 		var distance := flat.length()
 		if distance > best_distance:
 			continue
@@ -111,6 +113,16 @@ static func closed_ahead(tree: SceneTree, from: Vector3, direction: Vector3, rea
 		best = door
 		best_distance = distance
 	return best
+
+
+## The point of the leaf, closed, nearest to a position, on the ground plan
+## (x, z): a wide door or one leaf of a double door is met at its edge, not
+## only at its middle.
+func closest_flat_point(at: Vector3) -> Vector2:
+	var center := Vector2(global_position.x, global_position.z)
+	var axis := Vector2(global_basis.x.x, global_basis.x.z).normalized()
+	var along := clampf(axis.dot(Vector2(at.x, at.z) - center), -width / 2.0, width / 2.0)
+	return center + axis * along
 
 
 func get_prompt() -> String:
@@ -205,6 +217,19 @@ func smash(user: Node) -> void:
 func mirror(open: bool) -> void:
 	if open != is_open:
 		_set_open(open, true)
+
+
+## Whether someone stands in the doorway, where the leaf would close on them.
+func _doorway_busy() -> bool:
+	if not is_inside_tree():
+		return false
+	var box := BoxShape3D.new()
+	box.size = Vector3(width, height, 1.0)
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = box
+	query.transform = global_transform.translated_local(Vector3(0, height / 2.0, 0))
+	query.collision_mask = BODIES_LAYERS
+	return not get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty()
 
 
 func _swing_away_from(at: Vector3) -> void:

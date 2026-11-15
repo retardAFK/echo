@@ -124,3 +124,20 @@ func test_metal_floor_covers_its_box() -> void:
 	assert_true(MetalFloor.under(get_tree(), Vector3(10.5, 1, 1.5)))
 	assert_false(MetalFloor.under(get_tree(), Vector3(11.5, 1, 0)), "beside")
 	assert_false(MetalFloor.under(get_tree(), Vector3(10, 2, 0)), "above")
+
+
+func test_a_fire_door_waits_for_the_doorway_to_be_clear() -> void:
+	var door := _door(Door.Kind.FIRE)
+	var body := StaticBody3D.new()
+	body.collision_layer = 1 << 2  # A hunted.
+	var shape := CollisionShape3D.new()
+	shape.shape = CapsuleShape3D.new()
+	body.add_child(shape)
+	add_child_autofree(body)
+	body.global_position = Vector3(0, 1, 0)
+	door.open_by(null)
+	await wait_seconds(SETTINGS.fire_close_delay + 0.5)
+	assert_true(door.is_open, "someone in the doorway: it waits")
+	body.global_position = Vector3(0, 1, 3)
+	await wait_seconds(0.3)
+	assert_false(door.is_open, "clear: it shuts")
