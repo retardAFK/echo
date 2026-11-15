@@ -17,7 +17,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-234 — Coupe-feu, issues de secours, métal et échelles
   - Résultat vérifiable : portes `FIRE` et `EMERGENCY`, surface métal (marche 6 m, course 18 m), entité `Ladder` avec lien de navigation ; tests GUT
   - Dépend de : T-232
-- [ ] T-235 — Nouvelles familles de cachettes
+- [x] T-235 — Nouvelles familles de cachettes
   - Résultat vérifiable : `HidingSpot.family` (basse, de fortune, en métal), règle « vue à 2 m », proie et monstre IA ; tests GUT
   - Dépend de : T-231
 - [ ] T-236 — La tour
@@ -54,3 +54,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - T-232 (15/11/2026) : `Door` (`game/entities/door/`), `DoorSettings`, bruit `DOOR`. Le battant fermé est sur la couche des murs : il coupe la vue et compte comme un mur pour le bruit, sans code de plus ; ouvert, il n'a plus de collision (plan B du plan, retenu d'emblée pour que rien n'accroche). Debout 6 m d'un coup, accroupi ou en rôdant 1 s pour 2 m, le monstre qui court la défonce (12 m). La porte s'ouvre du côté opposé à celui qui l'ouvre. Pas de marque de surbrillance sur les portes. Les IA ouvrent déjà les portes sur leur chemin (`Door.closed_ahead`), testées en T-233. Pas de porte dans la greybox : les tests en posent une. 10 tests GUT.
 - T-233 (15/11/2026) : le monstre IA ouvre les portes sur son chemin (il les défonce en poursuite), la proie IA les ouvre et, en fuite, referme derrière elle la porte qu'elle vient de passer si le monstre ne la voit pas (`close_behind_distance` 2 m). `NetWorld` liste les portes et envoie leur état (`state()[5]`) ; le client les fait bouger avec leur son, sans bruit dans `NoiseBus`. Le maillage passe par les baies, porte ouverte ou fermée. 5 tests GUT dans la greybox.
 - T-234 (15/11/2026) : portes coupe-feu (se referment seules après 3 s, claquement 5 m), issues de secours (s'ouvrent de l'intérieur, barre anti-panique 10 m, restent ouvertes ; à mettre dans navigation_source quand on les pose), sols en métal (6 m en marchant, 18 m en courant). Les échelles sont remplacées par des escaliers métalliques raides : pas de nouveau mouvement à apprendre, et l'IA les emprunte avec le maillage de navigation.
+- T-235 (15/11/2026) : `HidingSpot.Family` : placard (inchangé), basse (sous un lit : 2 s pour entrer ou sortir, bruit 1 m, allongé), de fortune (rideau : 0,5 s, silencieuse, mais le monstre voit la personne cachée à moins de 2 m s'il regarde vers elle ; il va alors l'ouvrir), en métal (6 m, le monstre met 2 s à l'ouvrir). Scènes provisoires (boîtes) en attendant les modèles de T-240. La proie IA se montre quand elle est vue derrière son rideau ; en ligne, la salle envoie la cachette vue. 9 tests GUT.

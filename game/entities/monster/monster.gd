@@ -194,6 +194,8 @@ func _update_sight(delta: float) -> void:
 		go_open(player.get("hiding_in"))  # It saw the hunted get in (S-008, Q7).
 	_was_hidden = hidden
 	sees_player = _can_see(player)
+	if hidden and sees_player and open_target == null:
+		go_open(player.get("hiding_in"))  # Seen behind its curtain (S-016, Q6).
 	if sees_player or others.is_empty():
 		return
 	# Lost sight of it: the nearest other hunted in sight becomes the target.
@@ -214,6 +216,8 @@ func _update_sight(delta: float) -> void:
 func _can_see(hunted: Node3D) -> bool:
 	var eye := get_ear_position()
 	var target: Vector3 = hunted.get_eye_position()
+	if HidingSpot.is_revealed(hunted, eye, -global_basis.z):
+		return true  # Right beside a makeshift spot, facing it (S-016, Q6).
 	return (
 		not HidingSpot.is_hidden(hunted)  # Hidden: never seen (S-008, Q6).
 		and MonsterVision.in_view_cone(eye, -global_basis.z, target, settings)

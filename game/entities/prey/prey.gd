@@ -200,6 +200,7 @@ func _physics_process(delta: float) -> void:
 		_agent.target_position = brain.target
 		_stuck_left = settings.stuck_time
 	_pant(delta)
+	_show_if_revealed()
 	if _update_hiding(delta):
 		return  # Inside a hiding spot, or getting out of it: no move.
 	if _errand != null and _hold.holding:
@@ -646,6 +647,16 @@ func leave_hiding() -> void:
 
 func is_hidden() -> bool:
 	return hiding_in != null
+
+
+## Behind a curtain or boxes, the body shows to a monster close by that looks
+## at it (S-016, Q6): the playable monster sees it, and may open the spot.
+func _show_if_revealed() -> void:
+	if hiding_in == null or hiding_in.family != HidingSpot.Family.MAKESHIFT or monster == null:
+		return
+	$Body.visible = HidingSpot.is_revealed(
+		self, monster.get_ear_position(), -monster.global_basis.z
+	)
 
 
 func _count_ruse(kind: StringName) -> void:

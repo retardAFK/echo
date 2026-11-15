@@ -59,3 +59,16 @@ extends Resource
 @export_range(0.0, 89.0, 1.0, "suffix:°") var hidden_pitch_limit: float = 20.0
 ## Share of the screen height left visible through the slit (Q6).
 @export_range(0.05, 1.0, 0.05) var slit_share: float = 0.3
+
+@export_group("Hiding spot families")
+## Low spots, under a bed, a stage, a car (S-016, Q6): slow in and out, quiet.
+@export_range(0.1, 10.0, 0.1, "suffix:s") var low_hide_time: float = 2.0
+@export_range(0.0, 50.0, 0.5, "suffix:m") var low_noise_range: float = 1.0
+## Makeshift spots, behind a curtain or boxes (Q6): quick and silent, but a
+## monster this close looking at it sees the hunted.
+@export_range(0.1, 10.0, 0.1, "suffix:s") var makeshift_hide_time: float = 0.5
+@export_range(0.0, 50.0, 0.5, "suffix:m") var makeshift_noise_range: float = 0.0
+@export_range(0.5, 10.0, 0.1, "suffix:m") var makeshift_reveal_distance: float = 2.0
+## Metal spots, a dryer, a car boot, a lift (Q6): loud to get in, slow to open.
+@export_range(0.0, 50.0, 0.5, "suffix:m") var metal_noise_range: float = 6.0
+@export_range(0.1, 10.0, 0.1, "suffix:s") var metal_open_time: float = 2.0
