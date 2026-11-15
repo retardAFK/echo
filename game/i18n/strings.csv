@@ -50,7 +50,7 @@ CONTROLS_DECOY,Clic droit : poser un réveil
 CONTROLS_PROWL,{crouch} : rôder (silencieux)
 CONTROLS_SCAN,Maintenir clic droit en visant un bâtiment visitable proche : scanner
 CONTROLS_OPEN,Maintenir {interact} : ouvrir une cachette
-CONTROLS_PAUSE,Échap : pause
+CONTROLS_PAUSE,Échap : pause · F11 : plein écran
 GOAL_HUNTED,"Trouvez 3 fusibles, posez-les dans le transformateur, puis fuyez par le tunnel. Chaque bruit trahit votre position au monstre."
 GOAL_MONSTER,"Les bruits de la proie s'affichent en orange, avec leur distance. Attrapez-la avant qu'elle ne s'enfuie."
 PAUSE_TITLE,Pause
@@ -115,7 +115,7 @@ MENU_SUBTITLE,Cité des Tilleuls · 02 h 47
 MENU_PLATE,Bât. C · Esc. 2
 MENU_SOLO,Jouer seul
 MENU_SOLO_HINT,"Une partie contre l'IA, dans ton navigateur. Choisis ton rôle."
-MENU_HELP,Entrée : valider · Échap : retour
+MENU_HELP,Entrée : valider · Échap : retour · F11 : plein écran
 MENU_VERSION,version %s
 LOBBY_LEADER_TAG,chef
 LOBBY_INTERCOM,Interphone
@@ -138,6 +138,7 @@ OPTIONS_VOLUME_AMBIENCE,Ambiance
 OPTIONS_VOLUME_MUSIC,Musique
 OPTIONS_SENSITIVITY,Sensibilité de la souris
 OPTIONS_INVERT_Y,Inverser l'axe vertical
+OPTIONS_FULLSCREEN,Plein écran
 OPTIONS_BRIGHTNESS,Luminosité
 OPTIONS_FOV,Champ de vision
 OPTIONS_KEYBOARD,Clavier

@@ -29,6 +29,7 @@ const TABS := [
 	[
 		"OPTIONS_TAB_IMAGE",
 		[
+			["fullscreen", OptionRow.Kind.FLAG, "OPTIONS_FULLSCREEN"],
 			["brightness", OptionRow.Kind.NUMBER, "OPTIONS_BRIGHTNESS"],
 			["fov", OptionRow.Kind.NUMBER, "OPTIONS_FOV"],
 		],

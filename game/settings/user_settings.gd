@@ -20,8 +20,10 @@ const NUMBERS := {
 	"brightness": [1.0, 0.6, 1.6, 0.1],
 	"fov": [75.0, 60.0, 100.0, 5.0],
 }
-## On or off settings and their default.
-const FLAGS := {"invert_y": false}
+## On or off settings and their default. "fullscreen" is the state of the
+## window, never saved: a browser only allows it right after a key or a click.
+const FLAGS := {"invert_y": false, "fullscreen": false}
+const FULLSCREEN := "fullscreen"
 ## Settings picked in a list; the first one is the default.
 const CHOICES := {"keyboard": ["azerty", "qwerty"]}
 ## Audio bus of each volume. Buses other than Master are made at start.
@@ -90,9 +92,19 @@ func _ready() -> void:
 	_make_buses()
 	load_file()
 	get_tree().node_added.connect(route_audio)
+	# The browser leaves fullscreen on its own (Escape): the options follow.
+	get_tree().root.size_changed.connect(changed.emit.bind(FULLSCREEN))
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_fullscreen"):
+		step(FULLSCREEN, 1)
+		get_viewport().set_input_as_handled()
 
 
 func get_value(key: String) -> Variant:
+	if key == FULLSCREEN:
+		return is_fullscreen()
 	if not _values.has(key):
 		return default_of(key)
 	return _values[key]
@@ -126,6 +138,9 @@ static func sanitize(key: String, value: Variant) -> Variant:
 
 
 func set_value(key: String, value: Variant) -> void:
+	if key == FULLSCREEN:
+		set_fullscreen(sanitize(key, value))
+		return
 	_values[key] = sanitize(key, value)
 	_apply(key)
 	save_file()
@@ -142,6 +157,22 @@ func step(key: String, direction: int) -> void:
 		var choices: Array = CHOICES[key]
 		var index := choices.find(get_value(key))
 		set_value(key, choices[posmod(index + direction, choices.size())])
+
+
+func is_fullscreen() -> bool:
+	var mode := DisplayServer.window_get_mode()
+	return (
+		mode == DisplayServer.WINDOW_MODE_FULLSCREEN
+		or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+	)
+
+
+## Fills the screen, or goes back to a window (in a browser, the page).
+func set_fullscreen(on: bool) -> void:
+	DisplayServer.window_set_mode(
+		DisplayServer.WINDOW_MODE_FULLSCREEN if on else DisplayServer.WINDOW_MODE_WINDOWED
+	)
+	changed.emit(FULLSCREEN)
 
 
 ## Where a number sits between its lowest and highest value, 0 to 1.
@@ -164,7 +195,7 @@ func load_file() -> void:
 	var file := ConfigFile.new()
 	if file.load(path) == OK:
 		for key in NUMBERS.keys() + FLAGS.keys() + CHOICES.keys():
-			if file.has_section_key(SECTION, key):
+			if key != FULLSCREEN and file.has_section_key(SECTION, key):
 				_values[key] = sanitize(key, file.get_value(SECTION, key))
 		for action in REMAPPABLE:
 			var code: Variant = file.get_value(KEYS_SECTION, action, 0)

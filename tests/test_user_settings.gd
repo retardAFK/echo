@@ -146,3 +146,26 @@ func test_options_from_the_home_screen_and_back() -> void:
 	assert_false(menu.get_node("%Home").visible)
 	menu.get_node("%Options").close()
 	assert_true(menu.get_node("%Home").visible)
+
+
+func test_fullscreen_follows_the_window_and_is_never_saved() -> void:
+	assert_true(InputMap.has_action("toggle_fullscreen"))
+	watch_signals(Settings)
+	Settings.set_value("fullscreen", true)
+	assert_signal_emitted_with_parameters(Settings, "changed", ["fullscreen"])
+	assert_eq(Settings.get_value("fullscreen"), Settings.is_fullscreen())
+	var file := ConfigFile.new()
+	file.load(TEST_PATH)
+	assert_false(file.has_section_key(UserSettings.SECTION, "fullscreen"))
+	Settings.set_value("fullscreen", false)
+	assert_false(Settings.get_value("fullscreen"))
+
+
+func test_the_image_tab_offers_fullscreen() -> void:
+	var options: OptionsMenu = OPTIONS_SCENE.instantiate()
+	add_child_autofree(options)
+	options.show_tab(2)
+	var settings: Array[String] = []
+	for row in options.get_rows():
+		settings.append(row.setting)
+	assert_has(settings, "fullscreen")

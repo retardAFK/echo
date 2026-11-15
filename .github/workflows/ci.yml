@@ -111,16 +111,17 @@ jobs:
           grep -n "config/version" project.godot
 
       # T-108: the web build plays online on the server named by the variable
-      # ECHO_HOST (its domain). The settings go back as they were right after,
-      # for the network checks below, which run on this machine.
+      # ECHO_HOST (its domain), and its home screen offers "Jouer en ligne".
+      # The settings go back as they were right after, for the network checks
+      # below, which run on this machine.
       - name: Export web build
         env:
           ECHO_HOST: ${{ vars.ECHO_HOST }}
         run: |
           mkdir -p build/web
           if [ -n "$ECHO_HOST" ]; then
-            sed -i '/^script = /a server_address = "wss://'"$ECHO_HOST"'"' game/data/net_settings.tres
-            grep -n server_address game/data/net_settings.tres
+            sed -i '/^script = /a server_address = "wss://'"$ECHO_HOST"'"\nshow_online = true' game/data/net_settings.tres
+            grep -n -e server_address -e show_online game/data/net_settings.tres
           fi
           godot --headless --export-release "Web" build/web/index.html
           git checkout -- game/data/net_settings.tres
