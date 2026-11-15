@@ -7,13 +7,15 @@ const GAUGE_MAX := 10.0
 
 
 ## Range of a footstep for a gait, in meters.
-static func range_for_gait(settings: NoiseSettings, gait: PlayerMotion.Gait) -> float:
+static func range_for_gait(
+	settings: NoiseSettings, gait: PlayerMotion.Gait, on_metal := false
+) -> float:
 	match gait:
 		PlayerMotion.Gait.CROUCH:
 			return settings.crouch_range
 		PlayerMotion.Gait.SPRINT:
-			return settings.sprint_range
-	return settings.walk_range
+			return settings.metal_sprint_range if on_metal else settings.sprint_range
+	return settings.metal_walk_range if on_metal else settings.walk_range
 
 
 ## Distance between two footsteps for a gait, in meters.
