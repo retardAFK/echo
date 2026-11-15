@@ -132,6 +132,9 @@ func _on_game_started(lobby: LobbyState) -> void:
 	_map = load(MAP).instantiate()
 	add_child(_map)
 	_net = _map.get_node("NetGame")
+	if _map.pause_menu == null:
+		_fail("no pause menu online (S-013, T-164)")
+		return
 	_phase = "start"
 
 
