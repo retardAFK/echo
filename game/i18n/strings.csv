@@ -51,6 +51,7 @@ CONTROLS_CROUCH,{crouch} : s'accroupir (presque silencieux)
 CONTROLS_INTERACT,"{interact} : ramasser, interagir ; maintenir {interact} : fusible, cachette"
 CONTROLS_THROW,Clic gauche : lancer une bouteille
 CONTROLS_DECOY,Clic droit : poser un réveil
+CONTROLS_MAP,{map} : ouvrir ou fermer la carte
 CONTROLS_PROWL,{crouch} : rôder (silencieux)
 CONTROLS_SCAN,Maintenir clic droit en visant un bâtiment visitable proche : scanner
 CONTROLS_OPEN,Maintenir {interact} : ouvrir une cachette
@@ -71,6 +72,22 @@ BUILDING_SOCIAL_CENTRE,Centre social
 BUILDING_GALLERY,Galerie
 BUILDING_CAR_PARK,Parking
 BUILDING_GARAGES,Garages
+MAP_TITLE_TILLEULS,Cité des Tilleuls
+MAP_HERE,Vous êtes ici
+MAP_HINT,{map} : fermer la carte
+MAP_RAILWAY,Voie ferrée
+MAP_MOTORWAY,Autoroute
+MAP_BOULEVARD,Boulevard barré
+MAP_WASTELAND,Friche
+MAP_PLAYGROUND,Aire de jeux
+MAP_STADIUM,City stade
+MAP_BLOCK_A,Barre A
+MAP_BLOCK_B,Barre B
+MAP_BLOCK_C,Barre C
+MAP_BLOCK_D,Barre D
+MAP_BLOCK_E,Barre E
+MAP_BLOCK_F,Barre F
+MAP_BLOCK_G,Barre G
 HUD_SCAN_HINT,%s : maintenir clic droit pour scanner
 HUD_SCAN_RECHARGING,%s : jauge de scan en recharge
 HUD_SCAN_TOO_FAR,"%s : trop loin pour scanner (%s)"
@@ -155,6 +172,7 @@ OPTIONS_KEY_RIGHT,Aller à droite
 OPTIONS_KEY_SPRINT,Courir
 OPTIONS_KEY_CROUCH,S'accroupir ou rôder
 OPTIONS_KEY_INTERACT,Interagir
+OPTIONS_KEY_MAP,Carte
 OPTIONS_ON,Oui
 OPTIONS_OFF,Non
 OPTIONS_PRESS_KEY,Appuie sur une touche… (Échap : annuler)

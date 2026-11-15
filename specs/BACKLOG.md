@@ -25,6 +25,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 | 14 | S-014 | Deuxième map : l'hôpital | T-180 à T-209 | Phase 13 |
 | 15 | S-015 | Finition et publication | T-210 à T-229 | Phase 14 |
 | — | S-016 | Intérieurs des bâtiments de la cité (demande du 15/11/2026, hors ordre des phases) | T-230 à T-249 | S-006, S-008, S-010 |
+| — | S-017 | Carte des chassés (demande du 15/11/2026, hors ordre des phases) | T-250 à T-259 | S-006, S-010 |
 
 L'ordre suit D-013 (12/11/2026) : le multijoueur passe juste après le test à plusieurs, avant les personnages, l'audio et les menus. Tout ce qui est ajouté avant le réseau (animations, sons d'autres joueurs, menus) devrait sinon être repris pour être synchronisé.
 
@@ -402,6 +403,16 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-230
 - T-232 à T-244 : détaillées dans [`S-016-interieurs/tasks.md`](S-016-interieurs/tasks.md)
+
+---
+
+## Carte des chassés (S-017)
+
+**But** : une carte du quartier que les chassés ouvrent avec Tab, sans aucun indice sur les fusibles (demande de Maxime, 15/11/2026). Spec : [`S-017-carte/spec.md`](S-017-carte/spec.md).
+
+- [x] T-250 — Spec S-017
+- [x] T-251 — Plan de la cité
+- [x] T-252 — Écran carte, solo et en ligne
 
 ---
 

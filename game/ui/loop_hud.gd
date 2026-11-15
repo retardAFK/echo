@@ -1,7 +1,8 @@
 class_name LoopHud
 extends CanvasLayer
 ## The hunted's only hint about the goal (spec S-007, Q8): "Fusibles n/3" in
-## small at the top of the screen. No map, no arrow, no marker.
+## small at the top of the screen. No arrow, no marker; the map (S-017, D-018)
+## shows the place only.
 
 @export var game_loop: GameLoop
 

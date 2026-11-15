@@ -30,6 +30,7 @@ const HIDE_MASK_SCENE := preload("res://game/ui/hide_mask.tscn")
 const INTERACT_PROMPT_SCENE := preload("res://game/ui/interact_prompt.tscn")
 const PAUSE_MENU_SCENE := preload("res://game/ui/pause_menu.tscn")
 const HIGHLIGHTS_SCENE := preload("res://game/ui/interact_highlights.tscn")
+const MAP_SCREEN_SCENE := preload("res://game/ui/map_screen.tscn")
 ## Size of the F4 markers for the prey's wander points and hiding spots, in meters.
 const POINT_MARKER_SIZE := 0.3
 
@@ -44,6 +45,8 @@ var game_loop: GameLoop
 var end_screen: EndScreen
 ## Escape pauses the game (S-009, Q6).
 var pause_menu: PauseMenu
+## The hunted's map (S-017), null for the monster and on a map without a plan.
+var map_screen: MapScreen
 
 var _rng := RandomNumberGenerator.new()
 ## The online part of the game (S-010), null in solo.
@@ -99,6 +102,7 @@ func _ready() -> void:
 		var highlights: InteractHighlights = HIGHLIGHTS_SCENE.instantiate()
 		highlights.player = _player
 		add_child(highlights)
+		_add_map_screen()
 	for spot in get_hiding_spots():
 		spot.found.connect(_on_hidden_found)
 	_setup_game_loop()
@@ -145,6 +149,17 @@ func _setup_monster_role() -> void:
 		node.queue_free()
 	_player = null
 	_monster = null
+
+
+## The hunted's map (S-017, T-252), if the map has a plan.
+func _add_map_screen() -> void:
+	var plan := MapPlan.for_scene(scene_file_path)
+	if plan == null:
+		return
+	map_screen = MAP_SCREEN_SCENE.instantiate()
+	map_screen.plan = plan
+	map_screen.player = _player
+	add_child(map_screen)
 
 
 ## Online game (S-010, T-097). The room plays everyone: a Player for each
@@ -423,7 +438,10 @@ func _setup_online_client(net: NetGame) -> void:
 		var highlights: InteractHighlights = HIGHLIGHTS_SCENE.instantiate()
 		highlights.player = _player
 		add_child(highlights)
+		_add_map_screen()
 		_own_huds.assign([carry, mask, highlights, _gauge])
+		if map_screen != null:
+			_own_huds.append(map_screen)
 		_own_huds.append_array(_player.find_children("*", "CanvasLayer", true, false))
 		_overlay.monster = null
 		_free_node(_monster)  # The room runs the monster; here it is a puppet.

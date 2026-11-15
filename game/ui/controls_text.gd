@@ -11,6 +11,7 @@ const HUNTED_KEYS: Array[String] = [
 	"CONTROLS_INTERACT",
 	"CONTROLS_THROW",
 	"CONTROLS_DECOY",
+	"CONTROLS_MAP",
 	"CONTROLS_PAUSE",
 ]
 const MONSTER_KEYS: Array[String] = [
