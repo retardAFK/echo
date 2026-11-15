@@ -73,6 +73,8 @@ static func make_material(source: BaseMaterial3D, settings: VisualSettings) -> S
 		"world_triplanar", source.uv1_triplanar and source.uv1_world_triplanar
 	)
 	material.set_shader_parameter("uv_scale", source.uv1_scale)
+	material.set_shader_parameter("atlas_grid", source.get_meta(&"atlas_grid", Vector2.ZERO))
+	material.set_shader_parameter("vertex_tint", source.vertex_color_use_as_albedo)
 	var glow := Color.BLACK
 	if source.emission_enabled:
 		glow = source.emission * source.emission_energy_multiplier

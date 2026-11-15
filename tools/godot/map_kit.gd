@@ -24,6 +24,9 @@ const BAKE_CELL := 1.0
 ## against a real light, T-049).
 const BAKE_GAMMA := 0.4
 const BAKE_SCALE := 0.82
+## Cells of the lined interiors (S-019): their lights are small and many, so
+## coarser cells keep the triangle count down (constitution 2.2).
+const LINING_BAKE_CELL := 1.5
 ## Shadow rays start this far in front of the face.
 const BAKE_OFFSET := 0.05
 
@@ -33,6 +36,28 @@ class Block:
 	var size: Vector3
 	var material: Material
 	var kind: int
+
+
+## A room lined by the interior atlas (S-019): the faces of the source
+## blocks that look into its box take its wall, floor and ceiling tiles.
+class Zone:
+	var box: AABB
+	var wall: int
+	var floor: int
+	var ceiling: int
+
+
+## One face of a block, or the part of it inside one zone.
+class FacePart:
+	var corner: Vector3
+	var u_axis: Vector3
+	var v_axis: Vector3
+	var u_len: float
+	var v_len: float
+	var normal: Vector3
+	var material: Material
+	## Atlas tile, or -1 for the block's own material.
+	var tile := -1
 
 
 class Structure:
@@ -48,6 +73,12 @@ class Structure:
 
 var origin := Vector2(110, 110)
 var structures: Array[Structure] = []
+## Interior linings (S-019): the rooms, the atlas material their faces take,
+## and the block materials that get lined (the others, grilles or metal, keep
+## their own look).
+var zones: Array[Zone] = []
+var lining: Material
+var lined_materials: Array[Material] = []
 
 
 ## A new structure, built under the node at parent_path.
@@ -60,6 +91,18 @@ func structure(p_name: String, parent_path := "Structures") -> Structure:
 ## World position of a plan point at a height.
 func world(x: float, y: float, h := 0.0) -> Vector3:
 	return Vector3(x - origin.x, h, y - origin.y)
+
+
+## A lined room (S-019): a plan rectangle from height h0 to h1, measured
+## from the middle of its walls, and its atlas tiles (-1 leaves that side
+## alone). The first zone added wins where two overlap.
+func zone(rect: Rect2, h0: float, h1: float, wall: int, floor_tile: int, ceiling: int) -> void:
+	var z := Zone.new()
+	z.box = AABB(world(rect.position.x, rect.position.y, h0), Vector3(rect.size.x, h1 - h0, rect.size.y))
+	z.wall = wall
+	z.floor = floor_tile
+	z.ceiling = ceiling
+	zones.append(z)
 
 
 ## An axis-aligned box spanning a plan rectangle, from height h0 to h1.
@@ -205,17 +248,19 @@ func build(root: Node) -> void:
 
 
 func _build_meshes(s: Structure, node: Node3D, root: Node) -> void:
+	var lined := _is_lined(s)
 	var tools := {}
 	for block in s.blocks:
 		if block.material == null:
 			continue  # Collision only: a model dresses it (S-006, T-046).
-		if not tools.has(block.material):
-			var tool := SurfaceTool.new()
-			tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-			tools[block.material] = tool
-		var cube := BoxMesh.new()
-		cube.size = block.size
-		tools[block.material].append_from(cube, 0, block.transform)
+		if not lined:
+			_tool(tools, block.material, false)
+			var cube := BoxMesh.new()
+			cube.size = block.size
+			tools[block.material].append_from(cube, 0, block.transform)
+			continue
+		for part in _faces(block):
+			_emit_face(_tool(tools, part.material, false), part, [0.0, part.u_len], [0.0, part.v_len], [])
 	var mesh := ArrayMesh.new()
 	for material: Material in tools:
 		var tool: SurfaceTool = tools[material]
@@ -228,6 +273,126 @@ func _build_meshes(s: Structure, node: Node3D, root: Node) -> void:
 	instance.mesh = mesh
 	node.add_child(instance)
 	instance.owner = root
+
+
+func _tool(tools: Dictionary, material: Material, baked: bool) -> SurfaceTool:
+	if not tools.has(material):
+		var tool := SurfaceTool.new()
+		tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+		if baked:
+			tool.set_custom_format(0, SurfaceTool.CUSTOM_RGB_FLOAT)
+		tools[material] = tool
+	return tools[material]
+
+
+## Whether a face of the structure looks into a lined room.
+func _is_lined(s: Structure) -> bool:
+	if zones.is_empty() or lining == null:
+		return false
+	for block in s.blocks:
+		if block.material == null or not lined_materials.has(block.material):
+			continue
+		var bounds := block.transform * AABB(-block.size / 2.0, block.size)
+		for z in zones:
+			if z.box.grow(0.1).intersects(bounds):
+				return true
+	return false
+
+
+## The six faces of a block, each cut where lined rooms begin and end, and
+## the lining tile of each part.
+func _faces(block: Block) -> Array[FacePart]:
+	var parts: Array[FacePart] = []
+	var b := block.transform.basis
+	var lined := lined_materials.has(block.material) and lining != null
+	var straight := b.is_equal_approx(Basis.IDENTITY)
+	for axis in 3:
+		for side: float in [-1.0, 1.0]:
+			var face := FacePart.new()
+			face.normal = b[axis].normalized() * side
+			face.u_axis = b[(axis + 1) % 3].normalized()
+			face.v_axis = b[(axis + 2) % 3].normalized()
+			face.u_len = block.size[(axis + 1) % 3]
+			face.v_len = block.size[(axis + 2) % 3]
+			face.corner = (
+				block.transform.origin + face.normal * block.size[axis] / 2.0
+				- face.u_axis * face.u_len / 2.0 - face.v_axis * face.v_len / 2.0
+			)
+			face.material = block.material
+			if not lined:
+				parts.append(face)
+				continue
+			var us := PackedFloat32Array([0.0, face.u_len])
+			var vs := PackedFloat32Array([0.0, face.v_len])
+			if straight:
+				for z in zones:
+					var slab := AABB(face.corner, face.u_axis * face.u_len + face.v_axis * face.v_len)
+					slab = slab.abs().grow(0.1)
+					if not z.box.intersects(slab):
+						continue
+					for edge: Vector3 in [z.box.position, z.box.end]:
+						us = _cut(us, (edge - face.corner).dot(face.u_axis), face.u_len)
+						vs = _cut(vs, (edge - face.corner).dot(face.v_axis), face.v_len)
+			us.sort()
+			vs.sort()
+			for j in vs.size() - 1:
+				for i in us.size() - 1:
+					var part := FacePart.new()
+					part.normal = face.normal
+					part.u_axis = face.u_axis
+					part.v_axis = face.v_axis
+					part.u_len = us[i + 1] - us[i]
+					part.v_len = vs[j + 1] - vs[j]
+					part.corner = face.corner + face.u_axis * us[i] + face.v_axis * vs[j]
+					part.material = block.material
+					var probe := (
+						part.corner + part.u_axis * part.u_len / 2.0 + part.v_axis * part.v_len / 2.0
+						+ part.normal * 0.05
+					)
+					var tile := _tile_at(probe, part.normal)
+					if tile >= 0:
+						part.material = lining
+						part.tile = tile
+					parts.append(part)
+	return parts
+
+
+static func _cut(cuts: PackedFloat32Array, at: float, length: float) -> PackedFloat32Array:
+	if at > 0.001 and at < length - 0.001 and not _has_cut(cuts, at):
+		cuts.append(at)
+	return cuts
+
+
+## The lining tile a face with this normal takes at a point, or -1.
+func _tile_at(p: Vector3, normal: Vector3) -> int:
+	for z in zones:
+		if z.box.has_point(p):
+			if normal.y > 0.5:
+				return z.floor
+			if normal.y < -0.5:
+				return z.ceiling
+			return z.wall
+	return -1
+
+
+## Adds a face cut along us and vs; colors holds the baked light of each
+## corner (rows along vs), or is empty. The vertex color carries the tile.
+func _emit_face(tool: SurfaceTool, part: FacePart, us: Array, vs: Array, colors: Array) -> void:
+	# Godot draws clockwise faces: flip the quads whose u x v points inward.
+	var flip := part.u_axis.cross(part.v_axis).dot(part.normal) > 0.0
+	var tint := Color(maxf(part.tile, 0) / 15.0, 0, 0) if part.tile >= 0 else Color.WHITE
+	tool.set_normal(part.normal)
+	for j in vs.size() - 1:
+		for i in us.size() - 1:
+			var quad := [Vector2i(i, j), Vector2i(i + 1, j), Vector2i(i + 1, j + 1), Vector2i(i, j + 1)]
+			if flip:
+				quad.reverse()
+			for k: int in [0, 1, 2, 0, 2, 3]:
+				var c: Vector2i = quad[k]
+				tool.set_color(tint)
+				if not colors.is_empty():
+					tool.set_custom(0, colors[c.y][c.x])
+				tool.add_vertex(part.corner + part.u_axis * us[c.x] + part.v_axis * vs[c.y])
 
 
 func _build_bodies(s: Structure, node: Node3D, root: Node) -> void:
@@ -309,14 +474,8 @@ func bake_light(lights: Array[OmniLight3D], space: PhysicsDirectSpaceState3D, ma
 		for block in s.blocks:
 			if block.material == null:
 				continue
-			if not tools.has(block.material):
-				var tool := SurfaceTool.new()
-				tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-				tool.set_custom_format(0, SurfaceTool.CUSTOM_RGB_FLOAT)
-				tools[block.material] = tool
-			for axis in 3:
-				for side: float in [-1.0, 1.0]:
-					count += _bake_face(tools[block.material], block, axis, side, near, space, mask)
+			for part in _faces(block):
+				count += _bake_face(_tool(tools, part.material, true), part, near, space, mask)
 		var mesh := ArrayMesh.new()
 		for material: Material in tools:
 			var tool: SurfaceTool = tools[material]
@@ -326,24 +485,21 @@ func bake_light(lights: Array[OmniLight3D], space: PhysicsDirectSpaceState3D, ma
 	return count
 
 
-## One face of a block, cut along the cells of the lights in front of it.
+## One face part, cut along the cells of the lights in front of it.
 func _bake_face(
-	tool: SurfaceTool, block: Block, axis: int, side: float, lights: Array[OmniLight3D],
+	tool: SurfaceTool, part: FacePart, lights: Array[OmniLight3D],
 	space: PhysicsDirectSpaceState3D, mask: int
 ) -> int:
-	var b := block.transform.basis
-	var normal := b[axis].normalized() * side
-	var u_axis := b[(axis + 1) % 3].normalized()
-	var v_axis := b[(axis + 2) % 3].normalized()
-	var u_len: float = block.size[(axis + 1) % 3]
-	var v_len: float = block.size[(axis + 2) % 3]
-	var corner := (
-		block.transform.origin + normal * block.size[axis] / 2.0
-		- u_axis * u_len / 2.0 - v_axis * v_len / 2.0
-	)
+	var normal := part.normal
+	var u_axis := part.u_axis
+	var v_axis := part.v_axis
+	var u_len := part.u_len
+	var v_len := part.v_len
+	var corner := part.corner
 	var us := PackedFloat32Array([0.0, u_len])
 	var vs := PackedFloat32Array([0.0, v_len])
 	var lit: Array[OmniLight3D] = []
+	var cell := LINING_BAKE_CELL if part.tile >= 0 else BAKE_CELL
 	for light in lights:
 		var to_light := light.global_position - corner
 		var depth := to_light.dot(normal)
@@ -353,8 +509,8 @@ func _bake_face(
 		if depth <= 0.0 or depth >= r or lu < -r or lu > u_len + r or lv < -r or lv > v_len + r:
 			continue
 		lit.append(light)
-		us = _add_cuts(us, lu - r, lu + r, u_len)
-		vs = _add_cuts(vs, lv - r, lv + r, v_len)
+		us = _add_cuts(us, lu - r, lu + r, u_len, cell)
+		vs = _add_cuts(vs, lv - r, lv + r, v_len, cell)
 	us.sort()
 	vs.sort()
 	var colors := []
@@ -364,30 +520,19 @@ func _bake_face(
 			var p := corner + u_axis * u + v_axis * v
 			row.append(_light_at(p, normal, lit, space, mask))
 		colors.append(row)
-	# Godot draws clockwise faces: flip the quads whose u x v points inward.
-	var flip := u_axis.cross(v_axis).dot(normal) > 0.0
-	tool.set_normal(normal)
-	for j in vs.size() - 1:
-		for i in us.size() - 1:
-			var quad := [Vector2i(i, j), Vector2i(i + 1, j), Vector2i(i + 1, j + 1), Vector2i(i, j + 1)]
-			if flip:
-				quad.reverse()
-			for k: int in [0, 1, 2, 0, 2, 3]:
-				var c: Vector2i = quad[k]
-				tool.set_custom(0, colors[c.y][c.x])
-				tool.add_vertex(corner + u_axis * us[c.x] + v_axis * vs[c.y])
+	_emit_face(tool, part, Array(us), Array(vs), colors)
 	return us.size() * vs.size()
 
 
-## Adds the cell lines from a to b (one per BAKE_CELL) inside (0, length).
+## Adds the cell lines from a to b (one per cell) inside (0, length).
 static func _add_cuts(
-	cuts: PackedFloat32Array, a: float, b: float, length: float
+	cuts: PackedFloat32Array, a: float, b: float, length: float, cell := BAKE_CELL
 ) -> PackedFloat32Array:
 	var x := a
 	while x <= b + 0.0001:
 		if x > 0.0001 and x < length - 0.0001 and not _has_cut(cuts, x):
 			cuts.append(x)
-		x += BAKE_CELL
+		x += cell
 	return cuts
 
 
