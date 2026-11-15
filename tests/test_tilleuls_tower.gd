@@ -119,6 +119,6 @@ func test_the_tower_has_spots_of_every_family() -> void:
 		if tower.contains(spot.global_position + Vector3.UP * 0.5):
 			families[spot.family] = families.get(spot.family, 0) + 1
 	assert_eq(families.get(HidingSpot.Family.CLOSET, 0), 3)
-	assert_eq(families.get(HidingSpot.Family.LOW, 0), 3)
-	assert_eq(families.get(HidingSpot.Family.MAKESHIFT, 0), 3)
+	assert_eq(families.get(HidingSpot.Family.LOW, 0), 4)
+	assert_eq(families.get(HidingSpot.Family.MAKESHIFT, 0), 4)
 	assert_eq(families.get(HidingSpot.Family.METAL, 0), 1)

@@ -111,7 +111,7 @@ func test_spots_of_every_family_in_the_car_park() -> void:
 	assert_eq(families.get(HidingSpot.Family.CLOSET, 0), 3)
 	assert_eq(families.get(HidingSpot.Family.LOW, 0), 1, "under a wreck")
 	assert_eq(families.get(HidingSpot.Family.MAKESHIFT, 0), 1, "in a cellar cage")
-	assert_eq(families.get(HidingSpot.Family.METAL, 0), 1, "a wreck's boot")
+	assert_eq(families.get(HidingSpot.Family.METAL, 0), 2, "two wrecks' boots")
 
 
 func test_the_ai_monster_walks_the_cellar_corridor() -> void:

@@ -33,7 +33,7 @@ func test_a_client_map_and_loop_follow_the_room() -> void:
 	var client: GameMap = made[0]
 	var client_world: NetWorld = made[1]
 	client.game_loop.mirror = true
-	assert_eq(room_world.boxes.size(), 16)
+	assert_eq(room_world.boxes.size(), 24)
 	assert_eq(room_world.pickups.size(), client_world.pickups.size(), "same list on both sides")
 	# A fuse taken in the room, an alarm set off, a bottle picked up.
 	var box: FuseBox = room.game_loop.fused_boxes[0]

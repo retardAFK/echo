@@ -57,6 +57,7 @@ var gesture := BodyGesture.new()
 var _heard_monster := false
 var _vision_timer := 0.0
 var _stuck_left := 0.0
+var _jamb := JambUnstick.new()
 var _breath_timer := 0.0
 ## Game loop (S-007): the boxes in visiting order, and what it holds on.
 var _boxes: Array[FuseBox] = []
@@ -783,6 +784,8 @@ func _move(delta: float) -> void:
 			if door != null:
 				door.open_by(self)
 				_opened_door = door
+	if global_position.distance_to(_agent.target_position) > JambUnstick.GOAL_CLEARANCE:
+		horizontal = _jamb.update(self, horizontal, delta)  # Not at its goal: a jamb.
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	if is_on_floor():

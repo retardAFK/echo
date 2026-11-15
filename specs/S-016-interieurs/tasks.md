@@ -41,7 +41,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-242 — Sons des intérieurs
   - Résultat vérifiable : `tools/audio/interior_sounds.py`, sons montrés à Maxime puis intégrés
   - Dépend de : T-232
-- [ ] T-243 — Fusibles, ruses et équilibre
+- [x] T-243 — Fusibles, ruses et équilibre
   - Résultat vérifiable : 6 emplacements de fusible par bâtiment, cachettes et ruses replacées (environ 40 cachettes), 20 parties simulées sans blocage, durée non réduite
   - Dépend de : T-241
 - [ ] T-244 — Vérification finale de S-016
@@ -62,3 +62,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - T-242 : 11 sons synthétisés (tools/audio/interior_sounds.py), validés par Maxime : porte ouverte debout, accroupi, fermée, défoncée, coupe-feu qui claque, barre anti-panique, rideau métallique, clochette ; cachettes basse, de fortune et en métal.
 - T-240 : 19 modèles (tools/blender/interiors.py) validés par Maxime : lit, canapé, table, frigo, cartons, chaises empilées, rideau de scène, piano de cuisson, armoire froide, comptoir, rayonnages, portes d'ascenseur, devantures pharmacie/tabac/boulangerie, vantaux des portes (normale, coupe-feu, secours, rideau). Vantaux et devantures intégrés ici, le reste du mobilier placé en T-241.
 - T-241 (PR #130) : 71 meubles, dessinés à moins de 12 m, appels de dessin au niveau de main ; le monstre IA recule quand un chambranle le bloque.
+- T-243 (PR #137) : 6 fusibles par bâtiment, 40 cachettes ; palier plat en haut de l'escalier de la cave et recul commun (JambUnstick) contre les blocages de l'IA ; 20 parties simulées : 17 sorties, 3 prises, aucune bloquée, 6,2 min en moyenne.

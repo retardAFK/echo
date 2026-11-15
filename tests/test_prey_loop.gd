@@ -80,7 +80,7 @@ func test_boxes_are_visited_building_by_building() -> void:
 	var map: GameMap = MAP_SCENE.instantiate()
 	add_child_autofree(map)
 	var ordered := Prey.order_boxes(map.get_fuse_boxes(), Vector3.ZERO)
-	assert_eq(ordered.size(), 16)
+	assert_eq(ordered.size(), 24)
 	var changes := 0
 	for i in range(1, ordered.size()):
 		if ordered[i].building_name != ordered[i - 1].building_name:
