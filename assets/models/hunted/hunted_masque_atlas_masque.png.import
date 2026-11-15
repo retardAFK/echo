@@ -2,19 +2,15 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dcot155nfqnfy"
-path="res://.godot/imported/hunted_ambulancier_T_Eye_Brown.png-d8bfbb7107fefadd60066262accc2250.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://634b0cec0hpl"
+valid=false
 generator_parameters={
-"md5": "830da396e71092b8bf809e8c522e8638"
+"md5": "689ebaa1a77006c7fd73a399c1f92f62"
 }
 
 [deps]
 
-source_file="res://assets/models/hunted/hunted_ambulancier_T_Eye_Brown.png"
-dest_files=["res://.godot/imported/hunted_ambulancier_T_Eye_Brown.png-d8bfbb7107fefadd60066262accc2250.ctex"]
+source_file="res://assets/models/hunted/hunted_masque_atlas_masque.png"
 
 [params]
 

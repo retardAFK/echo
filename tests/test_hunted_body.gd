@@ -152,6 +152,20 @@ func test_prey_wears_a_hunted_body() -> void:
 	prey.free()
 
 
+func test_each_character_draws_in_three_calls_at_most() -> void:
+	# Final textures (T-124): one baked atlas, plus its lights.
+	var paths: Array = HuntedBody.MODELS.values() + [MonsterBody.MODEL]
+	for path: String in paths:
+		var model: Node = (load(path) as PackedScene).instantiate()
+		var meshes := model.find_children("*", "MeshInstance3D", true, false)
+		assert_eq(meshes.size(), 1, path)
+		var mesh: Mesh = (meshes[0] as MeshInstance3D).mesh
+		assert_lte(mesh.get_surface_count(), 3, path)
+		var atlas := (mesh.surface_get_material(0) as BaseMaterial3D).albedo_texture
+		assert_lte(atlas.get_width(), 512, "512 px at most (2.3)")
+		model.free()
+
+
 func test_every_character_faces_forward() -> void:
 	# Godot's forward is -Z (look_at): the toes are ahead of the ankles.
 	for role: HuntedBody.Role in HuntedBody.MODELS:

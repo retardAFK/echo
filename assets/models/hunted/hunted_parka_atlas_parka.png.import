@@ -2,19 +2,15 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dl78amxaysb15"
-path="res://.godot/imported/hunted_parka_tx_r2_strap.png-4264e8810dc6d28350ba1dd642ae374f.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://dmekct1743jam"
+valid=false
 generator_parameters={
-"md5": "d92a18e5ffc441c960b628d9bf471623"
+"md5": "bfbe85960455ec52af85ec027cf188e6"
 }
 
 [deps]
 
-source_file="res://assets/models/hunted/hunted_parka_tx_r2_strap.png"
-dest_files=["res://.godot/imported/hunted_parka_tx_r2_strap.png-4264e8810dc6d28350ba1dd642ae374f.ctex"]
+source_file="res://assets/models/hunted/hunted_parka_atlas_parka.png"
 
 [params]
 

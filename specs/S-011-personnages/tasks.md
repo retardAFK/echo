@@ -18,6 +18,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-124 — Modèles des chassés
   - Résultat vérifiable : `tools/blender/hunted.py`, trois `.glb` skinnés sous 2 500 triangles, crédit CC0
   - Fait le 14/11/2026 : 2 478, 2 377 et 2 399 triangles ; sources CC0 dans `art_src/quaternius_ubc/` ; `assets/models/hunted/`
+  - Textures définitives le 15/11/2026 : tous les matériaux d'un personnage (chassés et chasseur) cuits dans une seule texture de 512 px, avec la saleté peinte au passage (poussière qui monte des pieds, plis sombres, coutures, bords usés, taches) ; il reste à côté les seules lumières (LED, lampe, yeux rouges). De 10 à 16 matériaux par personnage, on passe à 2 ou 3, soit 10 appels de dessin pour les quatre
 - [x] T-125 — Animations des chassés
   - Résultat vérifiable : repos, marche, course, accroupi, à genoux dans les `.glb`
   - Dépend de : T-124

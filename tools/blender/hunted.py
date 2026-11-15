@@ -177,6 +177,7 @@ def skin_mat(name, path, tint):
     rgb = np.asarray(im, dtype=float) / 255.0 * np.array(tint)
     m = bpy.data.materials.new(name)
     m.use_nodes = True
+    m["skin"] = True
     textured(m, image("tx_" + name, rgb), 0.6)
     return m
 
@@ -414,7 +415,7 @@ class Char:
         h["keep_uv"] = True
         self.extras.append(h)
 
-    def merge(self):
+    def merge(self, name):
         """One skinned mesh: body, eyes and garments, cloth on cube UVs."""
         for o in self.extras:
             if not o.get("keep_uv"):
@@ -430,6 +431,13 @@ class Char:
         bpy.ops.object.join()
         body = self.body
         uv_cloth(body)
+        me = body.data  # Only what the materials use: one UV map, the grime.
+        for layer in [u for u in me.uv_layers if not u.active_render]:
+            me.uv_layers.remove(layer)
+        for attr in list(me.color_attributes):
+            me.color_attributes.remove(attr)
+        grime(body)
+        bake_atlas(body, name)
         body.parent = self.arm
         md = body.modifiers.new("skin", "ARMATURE")
         md.object = self.arm
@@ -448,6 +456,176 @@ def uv_cloth(o):
     bmesh.update_edit_mesh(o.data)
     bpy.ops.uv.cube_project(cube_size=1.0 / TILES_PER_METER, scale_to_bounds=False)
     bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def noise3(p, scale):
+    """Smooth value noise in 3D, from 0 to 1 (the grime's blotches)."""
+    q = np.asarray(p) * scale
+    i = np.floor(q).astype(int)
+    f = q - i
+    f = f * f * (3 - 2 * f)
+
+    def h(dx, dy, dz):
+        n = (i[:, 0] + dx) * 73856093 ^ (i[:, 1] + dy) * 19349663 ^ (i[:, 2] + dz) * 83492791
+        return (n % 1024) / 1023.0
+
+    out = 0.0
+    for dx in (0, 1):
+        for dy in (0, 1):
+            for dz in (0, 1):
+                w = (f[:, 0] if dx else 1 - f[:, 0]) * (f[:, 1] if dy else 1 - f[:, 1])
+                out = out + w * (f[:, 2] if dz else 1 - f[:, 2]) * h(dx, dy, dz)
+    return out
+
+
+# Final textures (S-011, T-128): every material of a character is baked into
+# one 512 px atlas, with grime painted on the way: dust rising from the feet,
+# dark creases where the mesh folds in, darker seams where two materials
+# meet, worn edges, blotches. One material (plus its lights) per character.
+ATLAS = 512
+DUST = (0.12, 0.1, 0.07, 1.0)  # Linear (about 0.38, 0.35, 0.29 on screen).
+GLOWING = ("led_", "lamp", "h_red", "h_eyecore")
+
+
+def glowing(m):
+    return m is not None and m.name.startswith(GLOWING)
+
+
+def grime(o, dust_height=0.3):
+    """Vertex colours: rgb = shade (multiplied), alpha = dust (mixed in)."""
+    me = o.data
+    n = len(me.vertices)
+    co = np.array([v.co[:] for v in me.vertices])
+    nor = np.array([v.normal[:] for v in me.vertices])
+    top = co[:, 2].max()
+    acc = np.zeros(n)
+    cnt = np.zeros(n)
+    for e in me.edges:  # Where the neighbours sit, along the normal.
+        a, b = e.vertices
+        d = co[b] - co[a]
+        length = max(np.linalg.norm(d), 1e-6)
+        acc[a] += np.dot(d, nor[a]) / length
+        acc[b] -= np.dot(d, nor[b]) / length
+        cnt[a] += 1
+        cnt[b] += 1
+    bend = acc / np.maximum(cnt, 1)  # > 0: a crease, < 0: an edge.
+    shade = 1 - 0.6 * np.clip(bend * 3, 0, 1)
+    shade *= 1 - 0.3 * np.clip(-nor[:, 2], 0, 1)  # Facing down: in shadow.
+    shade *= 0.85 + 0.25 * noise3(co + 7.0, 4.0)
+    mats = [set() for _ in range(n)]
+    for p in me.polygons:
+        for i in p.vertices:
+            mats[i].add(p.material_index)
+    seam = np.array([len(m) > 1 for m in mats])
+    shade[seam] *= 0.6
+    h = co[:, 2] / top
+    dust = np.clip((dust_height - h) / dust_height, 0, 1) ** 2 * 0.55
+    dust += 0.12 * np.clip(-bend * 3, 0, 1)  # Worn edges.
+    dust += 0.6 * np.clip(noise3(co, 9.0) - 0.7, 0, 1)  # Dusty blotches.
+    dust = np.clip(dust, 0, 0.6)
+    clean = {k for k, sl in enumerate(o.material_slots) if glowing(sl.material) or (sl.material and (sl.material.get("skin") or "Eye" in sl.material.name))}
+    only_clean = np.array([bool(m) and m <= clean for m in mats])
+    shade[only_clean] = 0.7 + 0.3 * shade[only_clean]
+    dust[only_clean] *= 0.2
+    attr = me.color_attributes.new("grime", "BYTE_COLOR", "POINT")
+    rgba = np.stack([shade, shade, shade, dust], axis=1)
+    attr.data.foreach_set("color", np.clip(rgba, 0, 1).ravel())
+
+
+def mix_node(nt, blend):
+    mix = nt.nodes.new("ShaderNodeMix")
+    mix.data_type = "RGBA"
+    mix.blend_type = blend
+    a, b = [i for i in mix.inputs if i.type == "RGBA"]  # Float sockets share the names.
+    return mix, a, b, [o for o in mix.outputs if o.type == "RGBA"][0]
+
+
+def bake_atlas(o, name):
+    """Bakes the colour of every material but the lights into one atlas."""
+    me = o.data
+    render_uv = me.uv_layers.active.name
+    atlas = me.uv_layers.new(name="atlas")
+    me.uv_layers.active = atlas
+    head = o.vertex_groups.find("Head")
+    big = set()  # The face and head get more pixels.
+    for p in me.polygons:
+        ws = [g.weight for i in p.vertices for g in me.vertices[i].groups if g.group == head]
+        if sum(ws) / len(p.vertices) > 0.5:
+            big.add(p.index)
+    select([o], o)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.smart_project(angle_limit=math.radians(72), island_margin=0.003)
+    bm = bmesh.from_edit_mesh(me)
+    uv = bm.loops.layers.uv["atlas"]
+    for f in bm.faces:
+        if f.index in big:
+            for lp in f.loops:
+                lp[uv].uv *= 1.6
+    bmesh.update_edit_mesh(me)
+    bpy.ops.uv.select_all(action="SELECT")
+    bpy.ops.uv.pack_islands(rotate=True, margin=0.004)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    img = bpy.data.images.new("atlas_" + name, ATLAS, ATLAS)
+    for slot in o.material_slots:
+        m = slot.material
+        if m is None or glowing(m):
+            continue
+        nt = m.node_tree
+        bsdf = nt.nodes["Principled BSDF"]
+        for node in [x for x in nt.nodes if x.type == "VERTEX_COLOR"]:
+            node.layer_name = "grime"  # The base's own colours (the eyes) are gone.
+        for node in [x for x in nt.nodes if x.type == "TEX_IMAGE"]:
+            uvn = nt.nodes.new("ShaderNodeUVMap")
+            uvn.uv_map = render_uv
+            nt.links.new(uvn.outputs["UV"], node.inputs["Vector"])
+        col = nt.nodes.new("ShaderNodeVertexColor")
+        col.layer_name = "grime"
+        shade, a1, b1, r1 = mix_node(nt, "MULTIPLY")
+        dust, a2, b2, r2 = mix_node(nt, "MIX")
+        shade.inputs["Factor"].default_value = 1.0
+        links = bsdf.inputs["Base Color"].links
+        if links:
+            nt.links.new(links[0].from_socket, a1)
+        else:
+            a1.default_value = bsdf.inputs["Base Color"].default_value
+        nt.links.new(col.outputs["Color"], b1)
+        nt.links.new(r1, a2)
+        b2.default_value = DUST
+        nt.links.new(col.outputs["Alpha"], dust.inputs["Factor"])
+        nt.links.new(r2, bsdf.inputs["Base Color"])
+        target = nt.nodes.new("ShaderNodeTexImage")
+        target.image = img
+        tuv = nt.nodes.new("ShaderNodeUVMap")
+        tuv.uv_map = "atlas"
+        nt.links.new(tuv.outputs["UV"], target.inputs["Vector"])
+        nt.nodes.active = target
+    sc = bpy.context.scene
+    sc.render.engine = "CYCLES"
+    sc.cycles.samples = 1
+    sc.cycles.device = "CPU"
+    select([o], o)
+    bpy.ops.object.bake(type="DIFFUSE", pass_filter={"COLOR"}, margin=3, use_clear=True)
+    img.pack()
+    # One material for all that was baked, the lights kept as they are.
+    baked = bpy.data.materials.new("atlas_" + name)
+    baked.use_nodes = True
+    textured(baked, img, 0.85)
+    old = [sl.material for sl in o.material_slots]
+    keep = [m for m in old if glowing(m)]
+    slot_of = [1 + keep.index(m) if glowing(m) else 0 for m in old]
+    faces = [slot_of[p.material_index] for p in me.polygons]
+    me.materials.clear()  # (This puts every face on slot 0.)
+    for m in [baked] + keep:
+        me.materials.append(m)
+    me.polygons.foreach_set("material_index", faces)
+    me.uv_layers.remove(me.uv_layers[render_uv])
+    atlas = me.uv_layers["atlas"]
+    atlas.name = "UVMap"
+    me.uv_layers.active = atlas
+    atlas.active_render = True
+    for attr in list(me.color_attributes):
+        me.color_attributes.remove(attr)
 
 
 def armband_on(c, m, s="l", r=0.068):
@@ -876,7 +1054,7 @@ def reset():
 def build(role):
     reset()
     c = ROLES[role]()
-    body = c.merge()
+    body = c.merge(role)
     rig = HuntedRig(c)
     for name in rig.cycles:
         rig.bake(name)

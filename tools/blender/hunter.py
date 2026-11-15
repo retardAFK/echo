@@ -255,7 +255,7 @@ class HunterRig(H.Rig):
 def build():
     H.reset()
     c = mk_hunter()
-    body = c.merge()
+    body = c.merge("hunter")
     rig = HunterRig(c)
     for name in rig.cycles:
         rig.bake(name)
