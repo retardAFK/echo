@@ -14,8 +14,4 @@ const GROUP := &"furniture"
 
 func _ready() -> void:
 	add_to_group(GROUP)
-	for node in find_children("*", "GeometryInstance3D", true, false):
-		var geometry := node as GeometryInstance3D
-		geometry.visibility_range_end = draw_distance
-		geometry.visibility_range_end_margin = 2.0
-		geometry.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+	DrawRange.limit(self, draw_distance)

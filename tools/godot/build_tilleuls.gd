@@ -770,6 +770,30 @@ func _door(at: Vector3, yaw: float, width: float, kind := Door.Kind.NORMAL, bell
 	_doors.append([at, yaw, width, kind, bell])
 
 
+## Whether a door stands between two rooms of a visited building: a meter
+## each side of it is inside one (T-244).
+func _is_inner_door(at: Vector3, yaw: float) -> bool:
+	var across := Vector2(0, 1) if is_zero_approx(fmod(yaw, 180.0)) else Vector2(1, 0)
+	for side: float in [-1.0, 1.0]:
+		var point := Vector2(at.x, at.z) + across * side
+		if not _in_building(point, at.y + 1.0):
+			return false
+	return true
+
+
+## Whether a plan point at this height is inside a visited building.
+func _in_building(point: Vector2, h: float) -> bool:
+	var data := _buildings()
+	var extras := _extra_boxes()
+	for building_name: String in data:
+		var entry: Array = data[building_name]
+		var boxes: Array = [[entry[0], entry[1], entry[2]]] + extras.get(building_name, [])
+		for box: Array in boxes:
+			if (box[0] as Rect2).has_point(point) and h > box[1] and h < box[2]:
+				return true
+	return false
+
+
 ## The doors and the metal floors. Doors are not navigation sources: the
 ## navigation mesh goes through their doorways, except for the emergency
 ## exits, which the AIs could not open from outside.
@@ -791,6 +815,7 @@ func _add_doors() -> void:
 		door.width = entry[2]
 		door.kind = entry[3]
 		door.bell = entry[4]
+		door.indoor = _is_inner_door(at, entry[1])
 		var parent := exits if door.kind == Door.Kind.EMERGENCY else doors
 		parent.add_child(door)
 		door.owner = _root
@@ -1103,8 +1128,8 @@ func _buildings() -> Dictionary:
 	return {
 		"Tower": [TOWER, 0.0, tower_top,
 			[[Vector3(104, 2.6, 92), 6.0], [Vector3(96, 8.6, 100), 6.0], [Vector3(112, 14.6, 100), 6.0]],
-			[Vector3(95.5, 0, 108), Vector3(113, 6, 93), Vector3(96, 9, 109), Vector3(113, 12, 108),
-				Vector3(113, 3, 110.5), Vector3(94, 6, 90.5)]],
+			[Vector3(113, 0, 89), Vector3(113, 6, 110.5), Vector3(96, 9, 109), Vector3(113, 12, 108),
+				Vector3(113, 3, 110.5), Vector3(94, 6, 102.5)]],
 		"SocialCentre": [SOCIAL_CENTRE, 0.0, SOCIAL_CENTRE_HEIGHT,
 			[[Vector3(151, 3.4, 72), 9.0], [Vector3(161.5, 3.4, 72), 5.0]],
 			[Vector3(142, 0, 62), Vector3(176, 0, 62), Vector3(176, 0, 74), Vector3(170, 0, 82),

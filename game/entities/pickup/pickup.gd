@@ -13,6 +13,7 @@ signal taken
 
 func _ready() -> void:
 	add_to_group(Interactable.GROUP)
+	DrawRange.limit(self, DrawRange.SMALL)
 
 
 func get_prompt() -> String:

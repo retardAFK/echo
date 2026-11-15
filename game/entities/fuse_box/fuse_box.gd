@@ -25,6 +25,7 @@ func _ready() -> void:
 	add_to_group(Interactable.GROUP)
 	progress = HoldProgress.new(settings.pickup_time)
 	_led.visible = has_fuse
+	DrawRange.limit(self, DrawRange.SMALL)
 
 
 ## Puts a fuse in the box, or takes it out (start of a game).

@@ -1,6 +1,6 @@
 # S-016 — Intérieurs des bâtiments de la cité
 
-**Statut** : validée (15/11/2026, Maxime : « Tout valider »)
+**Statut** : livrée (15/11/2026), sauf la mesure des 60 images/s, à refaire sur la machine de référence. Validée le 15/11/2026 (Maxime : « Tout valider »)
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : hors feuille de route, demandée par Maxime le 15/11/2026 (« les bâtiments font vide »)
 
@@ -37,15 +37,16 @@ Les 4 bâtiments visitables de la cité des Tilleuls (S-006) sont des boîtes pr
 - Q11 : Quand ? → Proposition : tout de suite, dans l'ordre : portes (le système), cachettes, puis un bâtiment à la fois (tour, centre social, galerie, parking), puis mobilier, sons et vérification. Les autres phases ne touchent pas la cité, donc rien ne bloque. → R : retenu (15/11/2026).
 
 ## Critères d'acceptation
-- [ ] Chaque bâtiment visitable a au moins 3 issues, et aucune pièce où se trouve un fusible n'est en cul-de-sac.
-- [ ] Ouvrir une porte debout fait un bruit de 6 m, accroupi de 2 m ; une porte fermée coupe la vue et atténue le bruit.
-- [ ] Le monstre (joueur et IA) ouvre les portes et les défonce en courant (bruit de 12 m).
-- [ ] Une porte coupe-feu se referme seule en claquant 3 s après le passage.
-- [ ] Le couloir des caves relie la tour et le parking, et les deux IA l'empruntent.
-- [ ] Les trois nouvelles familles de cachettes marchent selon Q6, pour le joueur et pour la proie IA.
-- [ ] Les portes, leurs états et les cachettes sont synchronisés en ligne (S-010).
-- [ ] 20 parties simulées sans blocage d'IA, et la durée moyenne ne baisse pas.
-- [ ] Budget tenu : 300 appels de dessin au pire endroit, 60 images/s mesurées.
+- [x] Chaque bâtiment visitable a au moins 3 issues, et aucune pièce où se trouve un fusible n'est en cul-de-sac.
+- [x] Ouvrir une porte debout fait un bruit de 6 m, accroupi de 2 m ; une porte fermée coupe la vue et atténue le bruit.
+- [x] Le monstre (joueur et IA) ouvre les portes et les défonce en courant (bruit de 12 m).
+- [x] Une porte coupe-feu se referme seule en claquant 3 s après le passage.
+- [x] Le couloir des caves relie la tour et le parking, et les deux IA l'empruntent.
+- [x] Les trois nouvelles familles de cachettes marchent selon Q6, pour le joueur et pour la proie IA.
+- [x] Les portes, leurs états et les cachettes sont synchronisés en ligne (S-010).
+- [x] 20 parties simulées sans blocage d'IA, et la durée moyenne ne baisse pas (T-244, carte finale : 16 sorties, 4 prises, aucune bloquée, 5,5 min contre 5,3 en S-007).
+- [x] Budget tenu : 300 appels de dessin au pire endroit (T-244 : 294 au palier du 2e étage de la tour, 290 au pire du balayage de la cité).
+- [ ] 60 images/s mesurées : pas mesurable dans l'environnement de Claude (pas de carte graphique) ; la dernière mesure sur la machine de référence (13/11, 59,8 images/s) précède S-016.
 
 ## Hors périmètre
 - Les verrous (Q8), les barricades avec des meubles, les fenêtres qu'on enjambe.
