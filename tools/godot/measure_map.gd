@@ -42,6 +42,12 @@ const VIEWS := [
 	["voiture", Vector3(40, 1.6, 51), Vector3(36, 0.6, 45)],
 	["lampadaire", Vector3(126, 1.6, 58), Vector3(130, 0, 48)],
 	["lampadaire_loin", Vector3(122, 1.6, 82), Vector3(130, 0, 48)],
+	# Furnished interiors (S-016, T-241).
+	["tour_appartement", Vector3(108, 7.6, 102), Vector3(115, 7, 108)],
+	["tour_appartement_nord", Vector3(109, 4.6, 98), Vector3(93, 4, 92)],
+	["galerie_boutiques", Vector3(64, 1.6, 141), Vector3(78, 1, 143)],
+	["centre_cuisine", Vector3(153, 1.6, 79), Vector3(159, 1, 83)],
+	["centre_scene", Vector3(152, 1.6, 70), Vector3(141, 1.5, 70)],
 ]
 
 ## Grid step of the sweep, in meters.

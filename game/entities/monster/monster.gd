@@ -14,6 +14,12 @@ signal hunted_caught(hunted: Node3D)
 const RETARGET_DISTANCE := 0.5
 const DOOR_SETTINGS := preload("res://game/data/door_settings.tres")
 const CONE_SEGMENTS := 16
+## Caught on a corner (a door jamb) this long, it steps back from it.
+const STUCK_TIME := 0.3
+## How hard it steps back, as a share of its pace.
+const UNSTICK_PUSH := 0.7
+## How long it steps back, in seconds.
+const BACK_TIME := 0.4
 ## Lift above the floor so the debug cone does not flicker against it.
 const CONE_GROUND_OFFSET := 0.05
 
@@ -52,6 +58,8 @@ var _was_hidden := false
 var _noise: MonsterNoise
 ## Time left standing still over a hunted it just caught (T-127).
 var _still_left := 0.0
+var _stuck_for := 0.0
+var _backing_for := 0.0  ## Time left stepping back from a jamb.
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 @onready var _body: MonsterBody = $Body
@@ -388,6 +396,7 @@ func _move(delta: float) -> void:
 			horizontal = direction * MonsterBrain.speed_for(brain.get_pace(), settings)
 			look_at(global_position + direction, Vector3.UP)
 			_open_door(direction)
+	horizontal = _unstick(horizontal, delta)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	if is_on_floor():
@@ -395,6 +404,25 @@ func _move(delta: float) -> void:
 	else:
 		velocity += get_gravity() * delta
 	move_and_slide()
+
+
+## Held back without moving, as on a door jamb the path grazes: it steps
+## back the way it came a moment, then walks on.
+func _unstick(horizontal: Vector3, delta: float) -> Vector3:
+	var wanted := Vector2(horizontal.x, horizontal.z).length()
+	if _backing_for > 0.0:
+		_backing_for -= delta
+		return -horizontal.normalized() * wanted * UNSTICK_PUSH
+	var moved := Vector2(get_real_velocity().x, get_real_velocity().z).length()
+	if wanted < 0.01 or moved > 0.2 * wanted:
+		_stuck_for = 0.0
+		return horizontal
+	_stuck_for += delta
+	if _stuck_for < STUCK_TIME:
+		return horizontal
+	_stuck_for = 0.0
+	_backing_for = BACK_TIME
+	return -horizontal.normalized() * wanted * UNSTICK_PUSH
 
 
 ## A closed door on its way: smashed on the run, opened otherwise (S-016, Q2).

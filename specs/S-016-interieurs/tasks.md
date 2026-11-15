@@ -35,7 +35,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-240 — Mobilier et portes en 3D
   - Résultat vérifiable : `tools/blender/interiors.py`, rendus montrés à Maxime puis intégrés
   - Dépend de : T-231
-- [ ] T-241 — Habillage, éclairage et performance
+- [x] T-241 — Habillage, éclairage et performance
   - Résultat vérifiable : intérieurs meublés, éclairage précalculé, 300 appels de dessin au pire endroit
   - Dépend de : T-237, T-238, T-239, T-240
 - [x] T-242 — Sons des intérieurs
@@ -61,3 +61,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - T-239 : escalier nord du parking (de la rue à -3 m) avec double porte coupe-feu, local technique, épaves déplacées ; cachettes métal (épave), basse (sous une épave) et de fortune (cages des caves).
 - T-242 : 11 sons synthétisés (tools/audio/interior_sounds.py), validés par Maxime : porte ouverte debout, accroupi, fermée, défoncée, coupe-feu qui claque, barre anti-panique, rideau métallique, clochette ; cachettes basse, de fortune et en métal.
 - T-240 : 19 modèles (tools/blender/interiors.py) validés par Maxime : lit, canapé, table, frigo, cartons, chaises empilées, rideau de scène, piano de cuisson, armoire froide, comptoir, rayonnages, portes d'ascenseur, devantures pharmacie/tabac/boulangerie, vantaux des portes (normale, coupe-feu, secours, rideau). Vantaux et devantures intégrés ici, le reste du mobilier placé en T-241.
+- T-241 (PR #130) : 71 meubles, dessinés à moins de 12 m, appels de dessin au niveau de main ; le monstre IA recule quand un chambranle le bloque.
