@@ -22,7 +22,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 | 11 | S-011 | Personnages et animations | T-120 à T-139 | Phase 10 |
 | 12 | S-012 | Audio complet | T-140 à T-159 | Phase 11 |
 | 13 | S-013 | Interface, menus et options | T-160 à T-179 | Phase 12 |
-| 14 | S-014 | Deuxième map : l'hôpital | T-180 à T-209 | Phase 13 |
+| 14 | S-014 | L'hôpital, intégré à la cité des Tilleuls (D-019) | T-180 à T-209 | Phase 13 |
 | 15 | S-015 | Finition et publication | T-210 à T-229 | Phase 14 |
 | — | S-016 | Intérieurs des bâtiments de la cité (demande du 15/11/2026, hors ordre des phases) | T-230 à T-249 | S-006, S-008, S-010 |
 | — | S-017 | Carte des chassés (demande du 15/11/2026, hors ordre des phases) | T-250 à T-259 | S-006, S-010 |
@@ -30,7 +30,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 L'ordre suit D-013 (12/11/2026) : le multijoueur passe juste après le test à plusieurs, avant les personnages, l'audio et les menus. Tout ce qui est ajouté avant le réseau (animations, sons d'autres joueurs, menus) devrait sinon être repris pour être synchronisé.
 
 ```
-S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Multijoueur ──► 11 Personnages ──► 12 Audio ──► 13 Menus ──► 14 Hôpital ──► 15 Sortie
+S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Multijoueur ──► 11 Personnages ──► 12 Audio ──► 13 Menus ──► 14 Hôpital (dans la cité) ──► 15 Sortie
 ```
 
 ---
@@ -292,16 +292,18 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 ---
 
-## Phase 14 — Deuxième map : l'hôpital (S-014)
+## Phase 14 — L'hôpital dans la cité (S-014)
 
-**But** : une deuxième map qui se joue autrement, en réutilisant toute la chaîne déjà construite. D'après D-010 et D-012 : plus petite que la cité, sur plusieurs niveaux, choisie au salon (une map par partie).
+**But** : un hôpital abandonné, **intégré à la cité des Tilleuls** (D-019, 15/11/2026), qui devient le bâtiment le plus effrayant de la map : un grand bâtiment visitable sur plusieurs niveaux, qui se joue autrement que les autres, en réutilisant toute la chaîne déjà construite (portes et cachettes de S-016).
 
-**Règles de zone** (section 6.4) : ventilation qui couvre les petits bruits, moniteurs qui bipent, brancards et fauteuils roulants bruyants, nombreuses cachettes (lits, placards). Les **portes mobiles**, sorties du périmètre de S-008 (Q10), arrivent ici, puis peuvent revenir dans la cité.
+**Règles de zone** (section 6.4) : ventilation qui couvre les petits bruits, moniteurs qui bipent, brancards et fauteuils roulants bruyants, nombreuses cachettes (lits, placards).
 
-**Terminé quand** : une partie complète se joue à l'hôpital en solo et en ligne, sous le budget de performance.
+**Ce qui doit le rendre effrayant** (à préciser dans la spec, rendus montrés à Maxime) : néons verts qui grésillent ou meurent, longs couloirs où la vue porte loin mais où l'on ne voit pas le bout, sous-sols (morgue, chambres d'isolement), traces d'évacuation précipitée, sons lointains qui ne viennent de nulle part, très peu de lumière.
+
+**Terminé quand** : une partie complète dans la cité avec l'hôpital se joue en solo et en ligne, sous le budget de performance.
 
 - [ ] T-180 — Spec S-014
-  - Résultat vérifiable : spec validée (taille, nombre d'étages, ailes visitables, ce que devient le scan d'un bâtiment dans un seul grand bâtiment)
+  - Résultat vérifiable : spec validée (emplacement dans la cité : à la place d'une barre en façade ou en agrandissant la map, taille, nombre d'étages, ailes visitables, ce que devient le scan dans un grand bâtiment, place des fusibles, si la prison de S-018 y déménage)
   - Dépend de : T-168
 - [ ] T-181 — Plan sur papier de l'hôpital
   - Résultat vérifiable : plan dessiné (comme `plan-map.svg` de S-006), validé par Maxime
@@ -310,7 +312,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-181
 - [ ] T-183 — Greybox sur plusieurs niveaux
-  - Résultat vérifiable : générateur de la map, escaliers, navigation des IA entre étages, limites fermées ; tests GUT
+  - Résultat vérifiable : l'hôpital ajouté au générateur de la cité (`build_tilleuls`), escaliers, navigation des IA entre étages et avec le reste de la cité ; tests GUT
   - Dépend de : T-182
 - [ ] T-184 — Scan par aile ou par étage
   - Résultat vérifiable : la règle retenue en T-180 marche pour le monstre joueur et le monstre IA ; tests GUT
@@ -324,8 +326,8 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-187 — Brancards et fauteuils roulants
   - Résultat vérifiable : objets qu'on pousse pour bloquer ou faire diversion, bruyants ; tests GUT
   - Dépend de : T-183
-- [ ] T-188 — Boucle de partie de l'hôpital
-  - Résultat vérifiable : fusibles, équivalent du transformateur (groupe électrogène), sortie, cachettes (lits, placards), ruses placées
+- [ ] T-188 — L'hôpital dans la boucle de partie
+  - Résultat vérifiable : emplacements de fusibles, cachettes (lits, placards) et ruses placés dans l'hôpital ; la boucle de la cité (transformateur, tunnel) reste la même
   - Dépend de : T-184, T-185, T-186, T-187
 - [ ] T-189 — Assets de l'hôpital
   - Résultat vérifiable : kit de couloirs, chambres, carrelage, néons verts, mobilier ; scripts dans `tools/blender/` ; rendus validés par Maxime
@@ -336,8 +338,8 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-191 — Ambiance sonore de l'hôpital
   - Résultat vérifiable : ventilation, bourdonnement des néons, bruits lointains ; montrée à Maxime
   - Dépend de : T-190
-- [ ] T-192 — IA à l'hôpital et choix de la map
-  - Résultat vérifiable : monstre IA et proie IA jouent la map sans blocage (simulation de 20 parties) ; la map se choisit au salon
+- [ ] T-192 — IA à l'hôpital
+  - Résultat vérifiable : monstre IA et proie IA jouent la cité avec l'hôpital sans blocage (simulation de 20 parties) ; la durée moyenne reste dans la cible
   - Dépend de : T-190
 - [ ] T-193 — Vérification finale de S-014
   - Résultat vérifiable : critères cochés, performance mesurée sur la machine de référence, spec livrée

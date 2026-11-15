@@ -384,8 +384,8 @@ Chaque phase a un objectif, des livrables et une **définition de « terminé »
 ### Phase 13 — Interface et menus
 - Spec S-013 : menu principal, choix du rôle, options (volume, sensibilité, qualité, touches), pause.
 
-### Phase 14 — Deuxième map : l'hôpital
-- Spec S-014 : hôpital sur plusieurs niveaux (D-010), portes mobiles, ventilation, brancards, en réutilisant toute la chaîne déjà construite.
+### Phase 14 — L'hôpital dans la cité
+- Spec S-014 : un hôpital abandonné intégré à la cité des Tilleuls (D-019), sur plusieurs niveaux, vraiment effrayant, avec ventilation, brancards et les portes de S-016, en réutilisant toute la chaîne déjà construite.
 
 ### Phase 15 — Finition et publication
 - Spec S-015 : corrections, optimisation, nom définitif, page itch.io, captures, bande-annonce courte.
@@ -517,13 +517,14 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-016 | 14/11/2026 | Hébergement du serveur (D-015) : **VPS XS d'IONOS** (x86_64, Ubuntu 24.04, `echo404.duckdns.org`) à la place de Hetzner ; nom de domaine gratuit (DuckDNS) pour les tests. Le serveur est aussi exporté pour arm64 (préréglage « Server ARM »), pour une machine ARM plus tard | Choix de Maxime : Hetzner demandait un dépôt de 25 € par PayPal ; l'offre gratuite d'Oracle Cloud et les VPS d'OVH étaient indisponibles ce jour-là. Le VPS XS (1 cœur, 1 Go) suffit pour les tests à 4 (une salle prend environ 110 Mo) ; à revoir avant la sortie (`tools/server/README.md`) |
 | D-017 | 14/11/2026 | Règle 2.7 : les polices sous licence SIL OFL sont acceptées en plus du CC0, pour les polices seulement (Barlow, Barlow Condensed et VT323 dans les menus, S-013) | L'OFL permet l'usage gratuit dans un jeu, même vendu, et n'interdit que la revente de la police seule ; presque aucune bonne police condensée n'est en CC0 (choix de Maxime) |
 | D-018 | 15/11/2026 | Les chassés ont une carte du quartier (Tab), sans indice : ni fusible, ni objectif, ni coéquipier, seulement « vous êtes ici ». Le monstre n'en a pas. Remplace le « ni carte » de S-007, Q8 (spec S-017) | Demande de Maxime : une map de 220 m de nuit est difficile à lire sans plan, et chercher les fusibles doit rester le travail du chassé |
+| D-019 | 15/11/2026 | L'hôpital n'est plus une map séparée : c'est un grand bâtiment visitable **intégré à la cité des Tilleuls**, sur plusieurs niveaux, qui doit avoir l'air **vraiment effrayant**. Remplace la phrase « l'hôpital sera une map séparée » de D-010 ; D-012 (une map par partie) reste vrai pour les maps futures (gare, piscine) | Choix de Maxime : une seule grande map plus riche plutôt que deux maps moyennes, et un lieu fort au cœur de la cité |
 
 ### 10.2 Questions ouvertes
 
 - [ ] **Q-001** : Nom définitif du jeu (« Écho » est provisoire).
 - [x] **Q-002** : Combien de chassés au final : 3 ou 4 ? → 3 chassés contre 1 monstre (S-010, Q1, 13/11/2026).
 - [x] **Q-003** : Le chassé attrapé est-il éliminé, ou peut-il être sauvé par un coéquipier ? → sauvable une fois par un coéquipier ; attrapé une deuxième fois, il est éliminé et devient spectateur (S-010, Q2, 13/11/2026).
-- [x] **Q-004** : Les maps sont-elles reliées entre elles ou séparées ? → séparées, une map par partie (D-012).
+- [x] **Q-004** : Les maps sont-elles reliées entre elles ou séparées ? → séparées, une map par partie (D-012) ; l'hôpital, lui, est intégré à la cité des Tilleuls (D-019).
 - [x] **Q-005** : Multijoueur entre amis seulement, ou matchmaking public ? → entre amis seulement, avec un code de partie ; le matchmaking public pourra revenir avec S-015 (S-010, Q3, 13/11/2026).
 - [ ] **Q-006** : Le PC de développement est fourni par l'employeur. Faut-il un PC personnel pour ce projet ?
 - [ ] **Q-007** : Projet gratuit ou payant à terme (itch.io, Steam) ? Lien avec la structure envisagée pour publier des applications.
