@@ -15,6 +15,10 @@ extends Resource
 @export_range(0.5, 50.0, 0.5, "suffix:m") var slam_range: float = 5.0
 ## An emergency exit's crash bar, in meters (Q3).
 @export_range(0.5, 50.0, 0.5, "suffix:m") var emergency_range: float = 10.0
+## A shop's metal shutter rolled up or down, in meters (S-016, the gallery).
+@export_range(0.5, 50.0, 0.5, "suffix:m") var shutter_range: float = 12.0
+## The bell over a shop door, rung by opening it, even slowly, in meters.
+@export_range(0.5, 50.0, 0.5, "suffix:m") var bell_range: float = 8.0
 
 @export_group("Timing")
 ## How long the slow, quiet way takes, in seconds (Q1).
@@ -41,3 +45,5 @@ extends Resource
 @export_range(0.01, 0.3, 0.01, "suffix:m") var leaf_thickness: float = 0.06
 ## How far the leaf swings open, in degrees.
 @export_range(10.0, 180.0, 1.0, "suffix:°") var open_angle: float = 95.0
+## How much of a rolled-up shutter still hangs under the lintel, in meters.
+@export_range(0.0, 1.0, 0.05, "suffix:m") var shutter_hang: float = 0.3

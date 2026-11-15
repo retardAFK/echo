@@ -88,7 +88,9 @@ func test_panels_have_no_collision() -> void:
 
 func test_gallery_has_its_shop_fronts_and_machines() -> void:
 	var gallery := _map.get_node("GalleryDressing")
-	assert_eq(gallery.find_children("Shop*", "", false, false).size(), 5)
+	# The laundrette and the grocer; the other three open now (S-016) and wait
+	# for new fronts.
+	assert_eq(gallery.find_children("Shop*", "", false, false).size(), 2)
 	assert_eq(gallery.find_children("Washers*", "", false, false).size(), 4)
 	assert_eq(gallery.find_children("*", "CollisionShape3D", true, false).size(), 0)
 
