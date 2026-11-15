@@ -200,10 +200,27 @@ jobs:
               tail -n 20 build/server/match/client*.log
             fi
           fi
+          if [ "$code" -eq 0 ]; then
+            # T-107: a hunted caught twice watches its teammates, a click
+            # moves to the next one (3 scripted players, an AI in seat 3).
+            mkdir -p build/server/spectate
+            for index in 0 1 2; do
+              timeout 300 godot --headless res://tools/godot/net_spectate.tscn -- --index $index \
+                --dir build/server/spectate > build/server/spectate/client$index.log 2>&1 &
+              pids[$index]=$!
+            done
+            for index in 0 1 2; do
+              wait ${pids[$index]} || code=1
+              grep ECHO_NET_SPECTATE build/server/spectate/client$index.log | tee -a build/server/smoke.log
+            done
+            if [ "$code" -ne 0 ]; then
+              tail -n 20 build/server/spectate/client*.log
+            fi
+          fi
           pkill -f echo_server.x86_64
           echo "--- lobby and rooms ---"
           cat build/server/lobby.log
-          grep -E "ECHO_NET_(SMOKE|WALK|REJOIN|MATCH)" build/server/smoke.log >> "$GITHUB_STEP_SUMMARY"
+          grep -E "ECHO_NET_(SMOKE|WALK|REJOIN|MATCH|SPECTATE)" build/server/smoke.log >> "$GITHUB_STEP_SUMMARY"
           grep "load" build/server/lobby.log | tail -n 1 >> "$GITHUB_STEP_SUMMARY"
           exit $code
 
@@ -217,6 +234,7 @@ jobs:
           path: |
             build/server/*.log
             build/server/match/
+            build/server/spectate/
           retention-days: 5
           if-no-files-found: ignore
 

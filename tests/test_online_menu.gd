@@ -79,19 +79,20 @@ func test_intercom_tags_and_lamps() -> void:
 	assert_false(intercom.is_lamp_lit(3), "an AI has no lamp")
 
 
-func test_intercom_lines_this_player_can_press() -> void:
+func test_intercom_hides_closed_seats_and_roles_until_drawn() -> void:
 	var intercom := Intercom.new()
 	add_child_autofree(intercom)
 	var state := _state()
 	intercom.show_state(state, 2)
-	assert_false(intercom.is_seat_pressable(1), "not one's own seat")
-	assert_false(intercom.is_seat_pressable(0), "only the leader swaps")
-	assert_true(intercom.is_seat_pressable(3), "a free seat")
-	intercom.show_state(state, 1)
-	assert_true(intercom.is_seat_pressable(2), "the leader swaps")
-	watch_signals(intercom)
-	intercom.seat_pressed.emit(3)
-	assert_signal_emitted_with_parameters(intercom, "seat_pressed", [3])
+	for seat in LobbyState.SEATS:
+		assert_true(intercom.is_seat_shown(seat))
+	assert_eq(intercom.get_role_text(1), "?", "roles drawn at launch")
+	state.game_size = 3
+	intercom.show_state(state, 2)
+	assert_false(intercom.is_seat_shown(3), "closed seat")
+	state.started = true
+	intercom.show_state(state, 2)
+	assert_eq(intercom.get_role_text(0), LobbyMenu.seat_name(0).to_upper())
 
 
 func test_lobby_menu_starts_on_create_or_join() -> void:

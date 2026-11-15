@@ -130,21 +130,15 @@ func get_seat() -> int:
 	return lobby.seat_of(get_place()) if lobby != null else -1
 
 
-## Client side, waiting room: sit in a free seat.
-func take_seat(seat: int) -> void:
-	if mode == Mode.CLIENT:
-		link.ask_seat(seat)
-
-
-## Client side, leader only: swap two seats.
-func swap_seats(first: int, second: int) -> void:
-	if mode == Mode.CLIENT:
-		link.ask_swap(first, second)
-
-
 func set_ready(is_ready: bool) -> void:
 	if mode == Mode.CLIENT:
 		link.ask_ready(is_ready)
+
+
+## Client side, leader only: how many play, monster included (2 to 4).
+func set_game_size(wanted: int) -> void:
+	if mode == Mode.CLIENT:
+		link.ask_game_size(wanted)
 
 
 ## Client side, leader only: launch the game once everyone is ready.

@@ -106,16 +106,15 @@ LOBBY_YOU,Toi
 LOBBY_PLAYER,Joueur %d
 LOBBY_LEADER,(chef)
 LOBBY_IS_READY,prêt
-LOBBY_TAKE,Prendre
-LOBBY_SWAP,Échanger
 LOBBY_READY,Je suis prêt
 LOBBY_NOT_READY,Pas prêt
 LOBBY_START,Lancer la partie
+LOBBY_GAME_SIZE,Joueurs : %d
 LOBBY_LEAVE,Quitter
 LOBBY_CONNECTING,Connexion…
 LOBBY_STARTING,La partie commence…
 LOBBY_WAIT_LEADER,Le chef lance la partie quand tout le monde est prêt.
-LOBBY_WAIT_READY,Lance la partie quand tout le monde est prêt. Les places vides sont jouées par des IA.
+LOBBY_WAIT_READY,"Lance quand tout le monde est prêt. Rôles au hasard, places vides jouées par des IA."
 LOBBY_ERROR_UNREACHABLE,Serveur injoignable. Réessaie plus tard.
 LOBBY_ERROR_UNKNOWN_CODE,Aucune partie avec ce code.
 LOBBY_ERROR_BUSY,Le serveur est plein. Réessaie plus tard.
@@ -140,8 +139,8 @@ MENU_HELP,Entrée : valider · Échap : retour · F11 : plein écran
 MENU_VERSION,version %s
 LOBBY_LEADER_TAG,chef
 LOBBY_INTERCOM,Interphone
-LOBBY_INTERCOM_HINT,Appuie pour prendre une place
-LOBBY_ONLINE_SUB,Un monstre contre trois chassés
+LOBBY_INTERCOM_HINT,Rôles tirés au hasard
+LOBBY_ONLINE_SUB,"Un monstre contre un, deux ou trois chassés"
 LOBBY_JOIN_HINT,"Tape le code que ton ami t'a envoyé, sur le digicode ou au clavier. Un code fait 4 lettres."
 LOBBY_CODE_CAPTION,Code à envoyer à tes amis
 LOBBY_ROOM,Salon

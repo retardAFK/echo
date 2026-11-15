@@ -27,28 +27,6 @@ func test_players_sit_hunted_first_then_monster() -> void:
 	assert_false(lobby.add_player(5), "four seats")
 
 
-func test_take_free_seat_resets_ready() -> void:
-	var lobby := LobbyState.new()
-	lobby.add_player(1)
-	lobby.add_player(2)
-	lobby.set_ready(1, true)
-	assert_true(lobby.take_seat(1, LobbyState.MONSTER_SEAT))
-	assert_eq(lobby.seat_of(1), LobbyState.MONSTER_SEAT)
-	assert_false(lobby.is_ready(1))
-	assert_false(lobby.take_seat(1, 2), "taken by player 2")
-
-
-func test_only_leader_swaps() -> void:
-	var lobby := LobbyState.new()
-	lobby.add_player(1)
-	lobby.add_player(2)
-	assert_false(lobby.swap(2, 1, 2))
-	assert_true(lobby.swap(1, 1, LobbyState.MONSTER_SEAT))
-	assert_eq(lobby.seat_of(1), LobbyState.MONSTER_SEAT)
-	assert_true(lobby.swap(1, LobbyState.MONSTER_SEAT, 2))
-	assert_eq(lobby.seat_of(2), LobbyState.MONSTER_SEAT)
-
-
 func test_start_needs_leader_and_everyone_ready() -> void:
 	var lobby := LobbyState.new()
 	lobby.add_player(1)
@@ -60,6 +38,56 @@ func test_start_needs_leader_and_everyone_ready() -> void:
 	assert_true(lobby.start(1))
 	assert_true(lobby.started)
 	assert_false(lobby.add_player(3), "no newcomer once started")
+
+
+func test_leader_sets_the_game_size() -> void:
+	var lobby := LobbyState.new()
+	lobby.add_player(1)
+	lobby.add_player(2)
+	lobby.add_player(3)
+	lobby.set_ready(2, true)
+	assert_false(lobby.set_game_size(2, 3), "only the leader")
+	assert_false(lobby.set_game_size(1, 2), "fewer than the players in")
+	assert_false(lobby.set_game_size(1, 1), "2 at least")
+	assert_false(lobby.set_game_size(1, 5), "4 at most")
+	assert_true(lobby.set_game_size(1, 3))
+	assert_eq(lobby.game_size, 3)
+	assert_eq(lobby.seats[3], 0, "the closed seat is empty")
+	assert_eq(lobby.players().size(), 3)
+	assert_false(lobby.is_ready(2), "everyone says again they are ready")
+	assert_false(lobby.add_player(4), "full at 3")
+
+
+func test_two_players_play_one_against_one() -> void:
+	var lobby := LobbyState.new()
+	lobby.add_player(1)
+	assert_true(lobby.set_game_size(1, 2))
+	assert_true(lobby.add_player(2))
+	assert_false(lobby.add_player(3))
+	lobby.set_ready(1, true)
+	lobby.set_ready(2, true)
+	assert_true(lobby.start(1))
+	assert_true(lobby.seat_of(1) < 2 and lobby.seat_of(2) < 2, "monster and hunted 1")
+	assert_eq(lobby.seats[2], 0)
+	assert_eq(lobby.seats[3], 0)
+
+
+func test_roles_are_drawn_at_random_with_a_player_as_monster() -> void:
+	var monsters := {}
+	for draw in 40:
+		var lobby := LobbyState.new()
+		lobby.rng.seed = draw
+		for player in [1, 2, 3]:
+			lobby.add_player(player)
+			lobby.set_ready(player, true)
+		assert_true(lobby.start(1))
+		assert_ne(lobby.seats[LobbyState.MONSTER_SEAT], 0, "a player is the monster")
+		assert_eq(lobby.seats[3], 0, "the hunted seat left: an AI")
+		var sorted := lobby.players()
+		sorted.sort()
+		assert_eq(sorted, [1, 2, 3] as Array[int])
+		monsters[lobby.seats[LobbyState.MONSTER_SEAT]] = true
+	assert_eq(monsters.size(), 3, "each player can be drawn the monster")
 
 
 func test_leader_passes_on_when_leaving() -> void:
@@ -85,6 +113,9 @@ func test_state_round_trip() -> void:
 	assert_eq(read.code, "KRBX")
 	assert_true(read.is_ready(2))
 	assert_false(read.is_ready(1))
+	lobby.set_game_size(1, 3)
+	read = LobbyState.from_dict(JSON.parse_string(JSON.stringify(lobby.to_dict())))
+	assert_eq(read.game_size, 3)
 
 
 func _room(port: int) -> RoomLink:
@@ -125,9 +156,10 @@ func test_waiting_room_over_the_network() -> void:
 	var seen := LobbyState.from_dict(first.lobby_state)
 	assert_eq(seen.code, "KRBX")
 	assert_eq(seen.leader, first.place)
-	second.ask_seat(LobbyState.MONSTER_SEAT)
-	await _wait_until(func() -> bool: return room.lobby.seat_of(second.place) == 0)
-	assert_eq(room.lobby.seat_of(second.place), LobbyState.MONSTER_SEAT)
+	second.ask_game_size(2)  # Not the leader: ignored.
+	first.ask_game_size(2)
+	await _wait_until(func() -> bool: return room.lobby.game_size == 2)
+	assert_eq(room.lobby.game_size, 2)
 	second.ask_start()  # Not the leader: ignored.
 	first.ask_ready(true)
 	second.ask_ready(true)
@@ -137,6 +169,11 @@ func test_waiting_room_over_the_network() -> void:
 	await wait_for_signal(second.game_started, 3.0)
 	assert_signal_emitted(second, "game_started")
 	assert_true(room.lobby.started)
+	var drawn := room.lobby.seats.duplicate()
+	assert_true(
+		drawn.slice(0, 2).has(first.place) and drawn.slice(0, 2).has(second.place),
+		"one monster, one hunted: %s" % [drawn]
+	)
 	var late := _client(PORT)
 	watch_signals(late)
 	await wait_for_signal(late.refused, 3.0)
@@ -149,7 +186,7 @@ func test_waiting_room_over_the_network() -> void:
 	var after := LobbyState.from_dict(first.lobby_state)
 	assert_false(after.started)
 	assert_false(after.is_ready(first.place))
-	assert_eq(after.seat_of(second.place), LobbyState.MONSTER_SEAT, "seats kept")
+	assert_eq(after.seats, drawn, "seats kept")
 
 
 func test_leaving_frees_the_seat_for_everyone() -> void:

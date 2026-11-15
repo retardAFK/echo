@@ -62,11 +62,12 @@ func test_a_player_who_left_comes_back_with_its_token() -> void:
 	first.ask_start()
 	await wait_for_signal(second.game_started, 3.0)
 	var token := first.resume_token
+	var seat := room.lobby.seat_of(1)  # Drawn at launch.
 	watch_signals(room)
 	first.get_parent().free()
 	await _wait_until(func() -> bool: return room.players.size() == 1)
 	assert_signal_emitted_with_parameters(room, "player_left", [1])
-	assert_eq(room.lobby.seat_of(1), 1, "its seat waits for it")
+	assert_eq(room.lobby.seat_of(1), seat, "its seat waits for it")
 	assert_eq(room.lobby.leader, 2, "the leader's role goes on")
 	var stranger := _client(PORT, "not-a-token")
 	watch_signals(stranger)

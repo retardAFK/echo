@@ -3,8 +3,9 @@ extends Control
 ## Online game menu (S-010, Q3 and Q6, T-096; style A of S-013, T-169):
 ## create a game or type its code on the digicode, then the waiting room: the
 ## code to send, the intercom with the four seats (monster, hunted 1 to 3),
-## who sits where and who is ready, and the leader's "Lancer". Empty seats are
-## played by AIs. Texts go through strings.csv.
+## who is in and who is ready, how many play (the leader chooses, 2 to 4) and
+## the leader's "Lancer". The roles are drawn at random at launch; hunted
+## seats nobody takes are played by AIs. Texts go through strings.csv.
 
 ## The leader launched the game; seat is this player's (0 = monster).
 signal launched(seat: int)
@@ -76,7 +77,6 @@ func _ready() -> void:
 	_entry_list.chosen.connect(_on_entry_chosen)
 	_room_list.chosen.connect(_on_room_chosen)
 	_digicode.submitted.connect(join_code)
-	_intercom.seat_pressed.connect(_on_seat_pressed)
 	NetSession.joined.connect(_on_joined)
 	NetSession.refused.connect(_show_error)
 	NetSession.unreachable.connect(_on_unreachable)
@@ -148,6 +148,9 @@ func show_lobby(state: LobbyState) -> void:
 	_room_list.item("LOBBY_READY").key = (
 		"LOBBY_NOT_READY" if state.is_ready(me) else "LOBBY_READY"
 	)
+	var size_item := _room_list.item("LOBBY_GAME_SIZE")
+	size_item.text = (tr("LOBBY_GAME_SIZE") % state.game_size).to_upper()
+	_room_list.set_item_visible("LOBBY_GAME_SIZE", me == state.leader)
 	_room_list.set_item_visible("LOBBY_START", me == state.leader)
 	_room_list.item("LOBBY_START").disabled = not state.can_start(me)
 	_hint.text = tr("LOBBY_WAIT_READY") if me == state.leader else tr("LOBBY_WAIT_LEADER")
@@ -171,13 +174,15 @@ func get_status() -> String:
 	return _status.text
 
 
-func _on_seat_pressed(seat: int) -> void:
-	if lobby == null:
-		return
-	if lobby.seats[seat] == 0:
-		NetSession.take_seat(seat)
-	else:
-		NetSession.swap_seats(lobby.seat_of(NetSession.get_place()), seat)
+## The game size the leader gets by choosing the entry again: one more,
+## back to the smallest after 4, skipping sizes too small for those in.
+static func next_game_size(state: LobbyState) -> int:
+	var wanted := state.game_size
+	for i in LobbyState.SEATS:
+		wanted = wanted + 1 if wanted < LobbyState.SEATS else LobbyState.MIN_GAME_SIZE
+		if wanted >= state.players().size():
+			return wanted
+	return state.game_size
 
 
 func _on_entry_chosen(key: String) -> void:
@@ -194,6 +199,9 @@ func _on_room_chosen(key: String) -> void:
 	match key:
 		"LOBBY_READY":
 			_on_ready_pressed()
+		"LOBBY_GAME_SIZE":
+			if lobby != null:
+				NetSession.set_game_size(next_game_size(lobby))
 		"LOBBY_START":
 			NetSession.start_game()
 		_:

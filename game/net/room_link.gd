@@ -258,7 +258,7 @@ func hello(client_version: String, token := "") -> void:
 		reason = "version"
 	elif lobby.started:
 		reason = "started"
-	elif free_place() == 0:
+	elif free_place() == 0 or lobby.players().size() >= lobby.game_size:
 		reason = "full"
 	if reason != "":
 		refuse.rpc_id(sender, reason)
@@ -349,21 +349,15 @@ func pong(sent_msec: int) -> void:
 	pinged.emit(ping_ms)
 
 
-## Client side: asks for a free seat of the waiting room.
-func ask_seat(seat: int) -> void:
-	if place > 0:
-		_request_seat.rpc_id(1, seat)
-
-
-## Client side: the leader asks to swap two seats.
-func ask_swap(first: int, second: int) -> void:
-	if place > 0:
-		_request_swap.rpc_id(1, first, second)
-
-
 func ask_ready(is_ready: bool) -> void:
 	if place > 0:
 		_request_ready.rpc_id(1, is_ready)
+
+
+## Client side: the leader sets how many play (2 to 4).
+func ask_game_size(wanted: int) -> void:
+	if place > 0:
+		_request_game_size.rpc_id(1, wanted)
 
 
 ## Client side: the leader asks to launch.
@@ -383,14 +377,8 @@ func _broadcast_lobby() -> void:
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _request_seat(seat: int) -> void:
-	if _sender_place() != 0 and lobby.take_seat(_sender_place(), seat):
-		_broadcast_lobby()
-
-
-@rpc("any_peer", "call_remote", "reliable")
-func _request_swap(first: int, second: int) -> void:
-	if _sender_place() != 0 and lobby.swap(_sender_place(), first, second):
+func _request_game_size(wanted: int) -> void:
+	if _sender_place() != 0 and lobby.set_game_size(_sender_place(), wanted):
 		_broadcast_lobby()
 
 
