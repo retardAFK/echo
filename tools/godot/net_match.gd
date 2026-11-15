@@ -3,8 +3,8 @@ extends Node
 ## the exported server: 4 processes of this scene play a whole game, each
 ## with 75 ms added to every message, steering their avatar with the same
 ## commands as a player (keys and where it looks).
-## - Index 0 creates the game, writes its code to <dir>/code, and takes the
-##   monster's seat; the others join with the code. Each plays its seat.
+## - Index 0 creates the game and writes its code to <dir>/code; the others
+##   join with the code. The roles are drawn at launch; each plays its seat.
 ## - Each hunted takes the fuse of one box (seat 1 the first fused box, and
 ##   so on). The monster then catches the hunted of seat 2 at its box and
 ##   walks away; a free teammate frees it once the monster is far (any
@@ -43,6 +43,8 @@ const ACTIONS: Array[String] = [
 	"move_forward", "move_back", "move_left", "move_right", "sprint", "interact"
 ]
 
+## Players the leader waits for before it launches.
+var players_wanted := PLAYERS
 var _settings := NetSettings.new()
 var _lobby := LobbyClient.new()
 var _index := 0
@@ -111,13 +113,9 @@ func _on_lobby_changed(lobby: LobbyState) -> void:
 	var me := NetSession.get_place()
 	if lobby.started or me == 0:
 		return
-	if _index == 0 and lobby.seat_of(me) != LobbyState.MONSTER_SEAT:
-		if lobby.seats[LobbyState.MONSTER_SEAT] == 0:
-			NetSession.take_seat(LobbyState.MONSTER_SEAT)
-		return
 	if not lobby.is_ready(me):
 		NetSession.set_ready(true)
-	elif lobby.players().size() == PLAYERS and lobby.can_start(me):
+	elif lobby.players().size() == players_wanted and lobby.can_start(me):
 		NetSession.start_game()
 
 

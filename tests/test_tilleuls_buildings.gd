@@ -71,6 +71,20 @@ func test_each_visitable_building_has_four_fuse_slots_inside() -> void:
 	assert_eq(get_tree().get_nodes_in_group("fuse_slot").size(), 16)
 
 
+func test_no_hiding_spot_stands_between_a_hunted_and_its_fuse_box() -> void:
+	# A spot nearer the approach point than the box takes the hunted's aim:
+	# it hides instead of taking the fuse (the gallery dryer, T-110).
+	for box: FuseBox in _map.get_node("FuseSlots").find_children("FuseBox", "", true, false):
+		var stand := box.get_approach_point()
+		var reach := stand.distance_to(box.global_position)
+		for spot: Node3D in _map.get_node("Hideouts").get_children():
+			assert_gt(
+				stand.distance_to(spot.global_position),
+				reach,
+				"%s at the box of %s" % [spot.name, box.get_parent().get_path()]
+			)
+
+
 func test_fuse_slots_stand_on_a_floor() -> void:
 	await wait_physics_frames(2)
 	var space := _map.get_world_3d().direct_space_state

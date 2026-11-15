@@ -14,11 +14,13 @@ func after_each() -> void:
 	GameSession.game_seed = 0
 
 
-## The cité played by the room, with these players in the seats (0: an AI).
-func _room(seats: Array[int]) -> GameMap:
+## The cité played by the room, with these players in the seats (0: an AI),
+## for a game of this size.
+func _room(seats: Array[int], game_size := LobbyState.SEATS) -> GameMap:
 	NetSession.mode = NetSession.Mode.ROOM
 	var lobby := LobbyState.new()
 	lobby.seats = seats
+	lobby.game_size = game_size
 	GameSession.online_lobby = lobby
 	GameSession.game_seed = 7
 	var map: GameMap = MAP_SCENE.instantiate()
@@ -44,6 +46,14 @@ func _open_point(body: Node3D, distance: float) -> Vector3:
 		if clear:
 			return body.global_position + direction * distance
 	return body.global_position + Vector3(distance, 0, 0)
+
+
+func test_closed_seats_have_nobody() -> void:
+	var map := _room([5, 11, 0, 0], 2)
+	var net: NetGame = map.get_node("NetGame")
+	assert_eq(net.ai_hunted.size(), 0, "one against one: no AI prey")
+	assert_null(net.ai_monster)
+	assert_eq(map.game_loop.team.size(), 1)
 
 
 func test_ai_preys_fill_the_empty_hunted_seats() -> void:

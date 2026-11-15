@@ -1,12 +1,9 @@
 class_name Intercom
 extends PanelContainer
 ## The intercom of the waiting room (spec S-013, T-169): one line per seat,
-## its role, a name tag and a lamp lit when that player is ready. A line is
-## a button when this player can take or swap that seat. It only shows a
-## LobbyState; LobbyMenu keeps the logic.
-
-## This player pressed the line of a seat.
-signal seat_pressed(seat: int)
+## a name tag and a lamp lit when that player is ready; seats past the game
+## size are hidden. The roles are drawn at launch, so the lines only show who
+## is in. It only shows a LobbyState; LobbyMenu keeps the logic.
 
 const LAMP_SIZE := 12.0
 
@@ -26,14 +23,6 @@ static func tag_text(state: LobbyState, seat: int, me: int) -> String:
 	if player == state.leader:
 		text += " · " + TranslationServer.translate("LOBBY_LEADER_TAG")
 	return text
-
-
-## Whether player me can press the line of a seat: take a free seat, or swap
-## when leader. Never one's own seat.
-static func can_press(state: LobbyState, seat: int, me: int) -> bool:
-	if seat == state.seat_of(me):
-		return false
-	return state.seats[seat] == 0 or me == state.leader
 
 
 func _ready() -> void:
@@ -60,10 +49,10 @@ func show_state(state: LobbyState, me: int) -> void:
 		)
 		var lamp: IntercomLamp = row["lamp"]
 		lamp.lit = player != 0 and state.is_ready(player)
-		var button: Button = row["button"]
-		button.disabled = not can_press(state, seat, me)
-		button.mouse_default_cursor_shape = (
-			Control.CURSOR_ARROW if button.disabled else Control.CURSOR_POINTING_HAND
+		(row["button"] as Button).visible = _shown_seat(seat, state.game_size)
+		# The roles are only known once drawn.
+		(row["role"] as Label).text = (
+			LobbyMenu.seat_name(seat).to_upper() if state.started else "?"
 		)
 
 
@@ -72,8 +61,17 @@ func is_lamp_lit(seat: int) -> bool:
 	return (_rows[seat]["lamp"] as IntercomLamp).lit
 
 
-func is_seat_pressable(seat: int) -> bool:
-	return not (_rows[seat]["button"] as Button).disabled
+func get_role_text(seat: int) -> String:
+	return (_rows[seat]["role"] as Label).text
+
+
+func is_seat_shown(seat: int) -> bool:
+	return (_rows[seat]["button"] as Button).visible
+
+
+## A seat past the game size is closed.
+static func _shown_seat(seat: int, game_size: int) -> bool:
+	return seat < game_size
 
 
 func _caption(key: String, left: bool) -> Label:
@@ -93,7 +91,6 @@ func _row(seat: int) -> Button:
 	button.theme_type_variation = &"IntercomRow"
 	button.focus_mode = Control.FOCUS_NONE
 	button.custom_minimum_size = Vector2(0, 20)
-	button.pressed.connect(func() -> void: seat_pressed.emit(seat))
 	var line := HBoxContainer.new()
 	line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	line.add_theme_constant_override("separation", 6)
@@ -120,5 +117,5 @@ func _row(seat: int) -> Button:
 	lamp.custom_minimum_size = Vector2(LAMP_SIZE + 6, LAMP_SIZE)
 	lamp.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	line.add_child(lamp)
-	_rows.append({"button": button, "name": name_label, "tag": tag, "lamp": lamp})
+	_rows.append({"button": button, "name": name_label, "tag": tag, "lamp": lamp, "role": role})
 	return button

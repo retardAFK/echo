@@ -161,6 +161,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : serveur (VPS XS d'IONOS, choix de Maxime du 14/11/2026 à la place de Hetzner, D-016) et nom de domaine créés par Maxime, secrets de déploiement dans GitHub ; `setup.sh` passé, job `deploy` sur `main`, le jeu web est servi par le serveur sur `https://<domaine>/` (demande de Maxime du 14/11/2026 : plus besoin d'itch.io pour jouer en ligne) et `wss://<domaine>/lobby` y répond
   - Dépend de : T-094
   - Fait le 14/11/2026 : VPS XS d'IONOS (x86_64, Ubuntu 24.04) et domaine DuckDNS `echo404.duckdns.org` créés par Maxime, `setup.sh` passé, secret `ECHO_DEPLOY_KEY` et variable `ECHO_HOST` dans GitHub. Chaque fusion sur `main` déploie le serveur et le jeu web (envoi par ssh, sans sftp) ; Caddy sert le jeu sur `https://echo404.duckdns.org/` et ses routes sont rechargées à chaque déploiement par son API locale. Maxime a créé une partie depuis ce site et vu le code. Connexion SSH par clé seulement. PRs #97 à #102
+- [x] T-110 — Nombre de joueurs et rôles au hasard
+  - Résultat vérifiable : dans le salon, le chef choisit combien jouent (2 à 4 : le monstre et 1 à 3 chassés) ; au lancement les rôles sont tirés au hasard, un joueur est toujours le monstre (demande de Maxime du 15/11/2026)
+  - Dépend de : T-096, T-107
+  - Fait le 15/11/2026 : entrée « Joueurs : N » pour le chef (2, 3, 4, jamais moins que les joueurs présents), places au-delà fermées et cachées, partie pleine au-delà ; `LobbyState.deal()` tire le monstre et l'ordre des chassés, les places de chassé restantes sont jouées par des IA. Le choix manuel des places (Prendre, Échanger) disparaît. La CI joue aussi `net_spectate` (3 clients) : un chassé attrapé deux fois regarde un coéquipier, un clic passe au suivant. Tests GUT : taille de partie, partie à 2, tirage, places fermées sur la carte
 - [ ] T-104 — Partie à 4 navigateurs **(Maxime)**
   - Résultat vérifiable : Maxime et 3 personnes jouent une partie complète ; retours notés dans la spec
   - Dépend de : T-103, T-108

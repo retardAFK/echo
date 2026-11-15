@@ -330,7 +330,7 @@ const FAMILY_SPOTS := [
 	["Low", Vector3(143, 0, 73.5), Vector2.RIGHT],  # Social centre: under the stage,
 	["Makeshift", Vector3(140.85, 0, 65)], ["Makeshift", Vector3(158.2, 0, 63)],  # the wings, the chairs,
 	["Metal", Vector3(153.5, 0, 83)],  # the kitchen's cold cabinet.
-	["Low", Vector3(48.5, 0, 144.5)], ["Metal", Vector3(54, 0, 143.5)],  # Gallery: pharmacy, dryer,
+	["Low", Vector3(48.5, 0, 144.5)], ["Metal", Vector3(54, 0, 145.5)],  # Gallery: pharmacy, dryer,
 	["Makeshift", Vector3(68.4, 0, 145.5)], ["Metal", Vector3(85.5, 0, 145.3)],  # boxes, oven.
 	["Metal", Vector3(154, -3, 101.05), Vector2.DOWN],  # Car park: a wreck's boot,
 	["Low", Vector3(160, -3, 113.5), Vector2.LEFT],  # under a wreck,
