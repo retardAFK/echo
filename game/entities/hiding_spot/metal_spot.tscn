@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://game/entities/hiding_spot/hiding_spot.gd" id="1_spot"]
 [ext_resource type="Resource" path="res://game/data/ruse_settings.tres" id="2_settings"]
-[ext_resource type="AudioStream" path="res://assets/audio/ruses/bin_lid.wav" id="3_creak"]
+[ext_resource type="AudioStream" path="res://assets/audio/interiors/metal_cabinet.wav" id="3_creak"]
 [ext_resource type="Material" path="res://game/fx/materials/concrete_obstacle.tres" id="4_material"]
 
 [sub_resource type="BoxMesh" id="Mesh_model"]
