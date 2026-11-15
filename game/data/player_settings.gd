@@ -20,6 +20,8 @@ extends Resource
 @export_range(0.01, 1.0, 0.01, "suffix:°/px") var mouse_sensitivity: float = 0.15
 ## Maximum up and down look angle, in degrees.
 @export_range(1.0, 89.9, 0.1, "suffix:°") var pitch_limit: float = 89.0
+## Caught (S-011, T-127): how fast the head turns to the monster, per second.
+@export_range(1.0, 60.0, 0.5, "suffix:/s") var caught_turn_speed: float = 14.0
 
 @export_group("Body")
 ## Capsule height when standing, in meters.

@@ -1,12 +1,18 @@
 class_name HuntedBody
 extends Node3D
 ## The body of a hunted (spec S-011, T-126): one of the three characters made
-## by tools/blender/hunted.py, animated from what the game already knows of
-## the hunted (gait, horizontal speed, captured). Nothing new goes over the
-## network (Q6). Without a display (server, tests) no model is loaded.
+## by tools/blender/hunted.py, animated from what the game knows of the
+## hunted (gait, horizontal speed, captured) and the gesture it makes (T-125:
+## throwing, picking something up or putting it down, working at something).
+## Online, the room sends the gesture with the rest of its state. Without a
+## display (server, tests) no model is loaded.
 
 ## The three hunted, by role (Q1); online, the seat decides (Q5).
 enum Role { AMBULANCIER, PARKA, MASQUE }
+## What its hands do (BodyGesture): throw a bottle, pick something up or put
+## an alarm clock down, work at something it holds "interact" on (a fuse box,
+## a hiding spot, a teammate to free).
+enum Gesture { NONE, THROW, PICK, WORK }
 
 const MODELS := {
 	Role.AMBULANCIER: "res://assets/models/hunted/hunted_ambulancier.glb",
@@ -19,6 +25,11 @@ const RUN := &"run"
 const CROUCH := &"crouch"
 const CROUCH_IDLE := &"crouch_idle"
 const KNEEL := &"kneel"
+const THROW := &"throw"
+const PICK := &"pick"
+const WORK := &"work"
+## Played once, not looped.
+const ONE_SHOTS: Array[StringName] = [THROW, PICK]
 
 @export var role := Role.AMBULANCIER:
 	set(value):
@@ -43,13 +54,24 @@ static func role_for_seat(seat: int) -> Role:
 	return clampi(seat - 1, 0, Role.size() - 1) as Role
 
 
-## The animation for a state: captured kneels, crouched creeps or crouches,
-## otherwise idle, walk or run by gait and speed.
+## The animation for a state: captured kneels; a gesture comes next; then
+## crouched creeps or crouches, otherwise idle, walk or run by gait and speed.
 static func pick(
-	gait: PlayerMotion.Gait, speed: float, down: bool, values: HuntedBodySettings
+	gait: PlayerMotion.Gait,
+	speed: float,
+	down: bool,
+	values: HuntedBodySettings,
+	gesture := Gesture.NONE
 ) -> StringName:
 	if down:
 		return KNEEL
+	match gesture:
+		Gesture.THROW:
+			return THROW
+		Gesture.PICK:
+			return PICK
+		Gesture.WORK:
+			return WORK
 	var still := speed < values.still_speed
 	match gait:
 		PlayerMotion.Gait.CROUCH:
@@ -74,11 +96,11 @@ static func playback_scale(anim: StringName, speed: float, values: HuntedBodySet
 	return clampf(speed / made_for, values.min_scale, values.max_scale)
 
 
-## Plays what fits the hunted's state.
-func show_state(gait: PlayerMotion.Gait, speed: float, down: bool) -> void:
-	var next := pick(gait, speed, down, settings)
+## Plays what fits the hunted's state. A gesture plays once from its start.
+func show_state(gait: PlayerMotion.Gait, speed: float, down: bool, gesture := Gesture.NONE) -> void:
+	var next := pick(gait, speed, down, settings, gesture)
 	if _player != null:
-		if next != animation or not _player.is_playing():
+		if next != animation:
 			_player.play(next, settings.blend_time)
 		_player.speed_scale = playback_scale(next, speed, settings)
 	animation = next
@@ -99,5 +121,8 @@ func _load_model() -> void:
 		return
 	_player = players[0]
 	for anim_name in _player.get_animation_list():
-		_player.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
+		var once := anim_name in ONE_SHOTS
+		_player.get_animation(anim_name).loop_mode = (
+			Animation.LOOP_NONE if once else Animation.LOOP_LINEAR
+		)
 	_player.play(animation)

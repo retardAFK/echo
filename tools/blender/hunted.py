@@ -713,6 +713,7 @@ class Rig:
 
     cycles = CYCLES
     scaled = ()  # Bones whose scale is keyed too.
+    breathing = ("idle", "crouch_idle", "kneel")  # Still cycles: the chest breathes.
 
     def __init__(self, c):
         self.arm = c.arm
@@ -735,9 +736,13 @@ class Rig:
     def leg_height(self, a, b):
         return self.thigh * math.cos(math.radians(a)) + self.shin * math.cos(math.radians(a - b)) + self.ankle
 
+    def params(self, name, t):
+        """Parameters of a cycle at time t; a gesture may change them over time."""
+        return self.cycles[name]
+
     def pose(self, name, t):
         """Pose of a cycle at time t (seconds)."""
-        sec, swing, k0, k1, arm_sw, fore, lean, ca, cb = self.cycles[name]
+        sec, swing, k0, k1, arm_sw, fore, lean, ca, cb = self.params(name, t)
         p = 2 * math.pi * t / sec
         for pb in self.arm.pose.bones:
             pb.matrix_basis = Matrix.Identity(4)
@@ -752,7 +757,7 @@ class Rig:
             dz = self.thigh * math.cos(math.radians(ca)) + 0.06 - rest
         else:
             dz = max(self.leg_height(*legs["l"]), self.leg_height(*legs["r"])) - rest
-        breath = math.sin(p) if name in ("idle", "crouch_idle", "kneel") else 0.0
+        breath = math.sin(p) if name in self.breathing else 0.0
         self.move("pelvis", dz + (0.012 * abs(math.sin(p)) if name == "run" else 0.0))
         if name in ("walk", "run", "crouch"):
             self.rot("pelvis", "Z", 4 * math.sin(p))
@@ -799,6 +804,65 @@ class Rig:
         return act
 
 
+def track(u, keys):
+    """Value at u (0 to 1) of keys [(u, value), ...], eased between keys."""
+    if u <= keys[0][0]:
+        return keys[0][1]
+    for (u0, v0), (u1, v1) in zip(keys, keys[1:]):
+        if u <= u1:
+            k = (u - u0) / (u1 - u0) if u1 > u0 else 1.0
+            k = k * k * (3 - 2 * k)
+            return v0 + (v1 - v0) * k
+    return keys[-1][1]
+
+
+# One-shot gestures and the work loop (S-011, T-125), on a still base:
+# name: (seconds, base cycle). throw: a bottle, overarm, right hand; pick: down
+# to the ground and back (take a pickup, put an alarm clock down); work: both
+# hands busy at chest height (a fuse box, a hiding spot, freeing a teammate).
+GESTURES = {
+    "throw": (0.7, "idle"),
+    "pick": (0.9, "idle"),
+    "work": (1.0, "idle"),
+}
+
+
+class HuntedRig(Rig):
+    cycles = {**CYCLES, **{k: (sec,) + CYCLES[base][1:] for k, (sec, base) in GESTURES.items()}}
+
+    def params(self, name, t):
+        values = self.cycles[name]
+        if name != "pick":
+            return values
+        # Down into a squat and back up: thigh, knee and lean follow one curve.
+        k = track(t / values[0], [(0, 0), (0.4, 1), (0.6, 1), (1, 0)])
+        squat = CYCLES["crouch_idle"]
+        return values[:6] + tuple(values[i] + (squat[i] - values[i]) * k for i in (6, 7, 8))
+
+    def finish(self, name, p):
+        u = p / (2 * math.pi)
+        if name == "throw":
+            self.rot("spine_02", "Z", track(u, [(0, 0), (0.3, 24), (0.55, -18), (1, 0)]))
+            self.rot("spine_01", "X", track(u, [(0, 0), (0.3, 6), (0.55, -10), (1, 0)]))
+            self.rot("upperarm_r", "X", track(u, [(0, 0), (0.3, 160), (0.42, 160), (0.58, 70), (1, 0)]))
+            self.rot("lowerarm_r", "X", track(u, [(0, 0), (0.3, 100), (0.42, 110), (0.58, 0), (1, 0)]))
+            self.rot("upperarm_l", "X", track(u, [(0, 0), (0.3, 55), (0.58, 20), (1, 0)]))
+        elif name == "pick":
+            k = track(u, [(0, 0), (0.4, 1), (0.6, 1), (1, 0)])
+            self.rot("spine_02", "X", -18 * k)
+            self.rot("neck_01", "X", -14 * k)
+            self.rot("upperarm_r", "X", 40 * k)
+            self.rot("lowerarm_r", "X", 10 * k)
+            for f in ("index", "middle", "ring", "pinky"):
+                self.rot(f"{f}_01_r", "Y", 30 * k * track(u, [(0, 0), (0.45, 0), (0.55, 1), (1, 1)]))
+        elif name == "work":
+            self.rot("spine_01", "X", -6)
+            self.rot("neck_01", "X", -12)
+            for s, ph in (("l", p), ("r", p + math.pi)):
+                self.rot(f"upperarm_{s}", "X", 32 + 6 * math.sin(2 * ph))
+                self.rot(f"lowerarm_{s}", "X", 50 + 10 * math.sin(2 * ph + 1))
+
+
 # ------------------------------------------------------------ build
 
 
@@ -813,7 +877,7 @@ def build(role):
     reset()
     c = ROLES[role]()
     body = c.merge()
-    rig = Rig(c)
+    rig = HuntedRig(c)
     for name in rig.cycles:
         rig.bake(name)
     for pb in c.arm.pose.bones:

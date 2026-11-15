@@ -91,6 +91,8 @@ func test_catch_resets_player_and_monster() -> void:
 	await _see_for(0.1)
 	assert_signal_emitted(_monster, "player_caught")
 	assert_eq(_monster.catch_count, 1)
+	assert_true(_player.is_watching_catcher(), "first it seizes the player (T-127)")
+	await wait_seconds(_monster.settings.catch_show_time + 0.1)
 	assert_true(_map.get_node("CaughtScreen").visible, "caught screen shown")
 	assert_lt(_player.global_position.distance_to(spawn), 0.5, "player back at spawn")
 	assert_gt(_monster.global_position.distance_to(spawn), 10.0, "monster far away")

@@ -3,8 +3,9 @@ extends Node3D
 ## Another player of an online game as this client sees it (S-010, T-097),
 ## moved between the snapshots the room sends. A hunted has its character
 ## (S-011, T-126: the seat decides which), animated from its gait and the
-## speed seen between snapshots; the monster has the hunter's body (T-123),
-## animated from that speed.
+## speed seen between snapshots, and the gesture the room sends (T-125); the
+## monster has the hunter's body (T-123), animated from that speed and what
+## the room says it does (scanning, opening, catching, crushing, T-127).
 ## Hidden while the room does not send it (out of sight).
 ## A captured hunted (T-107) is down on its knees: a free hunted next to it
 ## sees the prompt to free it, and the room does the freeing.
@@ -31,6 +32,9 @@ var gait := PlayerMotion.Gait.WALK
 var buffer := SnapshotBuffer.new()
 ## Captured, on its knees (T-107).
 var down := false
+## What its body shows, from the snapshots: a HuntedBody.Gesture, or the
+## monster's MonsterBody.Action.
+var gesture := 0
 
 var _character: HuntedBody
 var _monster_body: MonsterBody
@@ -64,9 +68,9 @@ func show_at(time: float, max_extrapolation: float) -> void:
 	global_position = position_now
 	rotation.y = pose[1]
 	if _character != null:
-		_character.show_state(gait, _speed, down)
+		_character.show_state(gait, _speed, down, gesture as HuntedBody.Gesture)
 	if _monster_body != null:
-		_monster_body.show_state(_speed)
+		_monster_body.show_state(_speed, gesture as MonsterBody.Action)
 
 
 ## Back in sight: no speed from where it was lost.
@@ -90,6 +94,11 @@ func set_down(value: bool) -> void:
 func set_seen_from_inside(inside: bool) -> void:
 	if _character != null:
 		_character.visible = not inside
+
+
+## Where its eyes are, in the world.
+func get_eye_position() -> Vector3:
+	return global_position + Vector3.UP * get_eye_height()
 
 
 ## Height of its eyes above its feet.

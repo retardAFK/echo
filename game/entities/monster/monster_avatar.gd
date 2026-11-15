@@ -20,6 +20,8 @@ enum ScanMiss { NOTHING, TOO_FAR, GAUGE_LOW }
 ## A wall this close to a building's box (its facade may stand a little
 ## outside the box) belongs to it, for aim_far_building().
 const FAR_AIM_WALL_MARGIN := 4.0
+## Length of the gestures the hunted see (S-011, T-127).
+const BODY_SETTINGS := preload("res://game/data/monster_body_settings.tres")
 
 @export var settings: MonsterSettings
 ## Mouse sensitivity, look limit and acceleration are shared with the hunted.
@@ -45,6 +47,8 @@ var local_controls := true
 ## progress the room says.
 var mirror_world := false
 var remote_hold_ratio := 0.0
+## Its last one-shot gesture, as the hunted see it: catching, crushing (T-127).
+var gesture := BodyGesture.new()
 
 var _pace := MonsterBrain.Pace.WALK
 var _prowling := false
@@ -87,6 +91,7 @@ func _physics_process(delta: float) -> void:
 		_controls.fill()
 	else:
 		set_look(commands.yaw, commands.pitch)  # Played from another machine (T-097).
+	gesture.update(delta)
 	apply_actions()
 	update_aim()
 	update_scan(delta, commands.scan)
@@ -146,8 +151,20 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 	move_and_slide()
 	var moved := Vector2(global_position.x - before.x, global_position.z - before.z).length()
 	_noise.update(delta, moved, _pace, global_position, get_ear_position(), self)
-	if not mirror_world:
-		Decoy.crush_near(get_tree(), global_position, settings.catch_distance)  # S-008, Q4.
+	if not mirror_world and Decoy.crush_near(get_tree(), global_position, settings.catch_distance):
+		gesture.play(MonsterBody.Action.CRUSH, BODY_SETTINGS.crush_time)  # S-008, Q4.
+
+
+## What the hunted see it do (S-011, T-127): a gesture, else scanning, else
+## opening a hiding spot (holding "interact" on it).
+func get_action() -> MonsterBody.Action:
+	if gesture.kind != MonsterBody.Action.NONE:
+		return gesture.kind as MonsterBody.Action
+	if scan.active:
+		return MonsterBody.Action.SCAN
+	if _hold.holding:
+		return MonsterBody.Action.OPEN
+	return MonsterBody.Action.NONE
 
 
 ## Field of view from the options (S-013, T-163).

@@ -11,3 +11,5 @@ run_speed = 4.0
 crouch_speed = 1.2
 min_scale = 0.6
 max_scale = 1.6
+throw_time = 0.7
+pick_time = 0.9

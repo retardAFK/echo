@@ -24,11 +24,17 @@ func test_titles_and_duration() -> void:
 	assert_eq(EndScreen.format_duration(545.7), "9 min 05 s")
 
 
-func test_a_caught_hunted_loses_at_once() -> void:
+func test_a_caught_hunted_loses_after_the_catch() -> void:
 	var map := _make_map()
 	var player: Player = map.get_node("Player")
 	var before := player.global_position
-	map.get_node("Monster").player_caught.emit()
+	var monster: Monster = map.get_node("Monster")
+	monster.player_caught.emit()
+	assert_false(map.game_loop.is_over, "first the monster seizes it (T-127)")
+	assert_true(player.is_watching_catcher())
+	assert_eq(monster.get_action(), MonsterBody.Action.CATCH)
+	# A timer that runs on while the end screen pauses the game (GUT's waits stop).
+	await get_tree().create_timer(monster.settings.catch_show_time + 0.2, true).timeout
 	assert_true(map.game_loop.is_over)
 	assert_false(map.game_loop.hunted_won)
 	assert_eq(player.global_position, before, "no respawn in solo (Q5)")

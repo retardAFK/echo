@@ -460,6 +460,7 @@ func _on_capture_changed(state: CaptureState.State, player: Node3D) -> void:
 				game_loop.set_captured(player, true)
 			if _monster != null:
 				_monster.forget(player)
+				_monster.hold_still(_monster.settings.catch_show_time)  # T-127.
 				_monster.walk_away(player.global_position)
 		CaptureState.State.FREE:
 			if game_loop != null:
@@ -472,6 +473,7 @@ func _on_capture_changed(state: CaptureState.State, player: Node3D) -> void:
 				game_loop.hunted_out(player)
 			if _monster != null:
 				_monster.forget(player)
+				_monster.hold_still(_monster.settings.catch_show_time)  # T-127.
 				_monster.walk_away(player.global_position)
 			_net.spectate(player)
 			player.process_mode = Node.PROCESS_MODE_DISABLED
@@ -525,6 +527,16 @@ func _on_caught_reported(seat: int, state: CaptureState.State) -> void:
 			CaptureState.State.FREE: "HUD_RESCUED",
 			CaptureState.State.OUT: "HUD_ELIMINATED",
 		}
+		var catcher: NetPuppet = _net.puppets.get(LobbyState.MONSTER_SEAT)
+		if (
+			state != CaptureState.State.FREE
+			and catcher != null
+			and catcher.visible
+			and _player != null
+		):
+			# Seized (S-011, T-127): the head turns to the monster first.
+			_player.watch_catcher(catcher.get_eye_position(), settings.catch_show_time)
+			await get_tree().create_timer(settings.catch_show_time, false).timeout
 		_caught_screen.show_for(settings.caught_screen_time, keys[state])
 
 
@@ -709,7 +721,22 @@ func _pick_spawn() -> void:
 	_spawn_yaw = marker.global_rotation.y
 
 
+## Solo, hunted role: the monster caught the player. First the catch
+## (S-011, T-127): the monster seizes it, the player's head turns to its red
+## eyes, for catch_show_time (2 s at most, 2.3); then the end of the game, or
+## the "caught" screen and a respawn outside the game loop.
 func _on_player_caught() -> void:
+	if _player.is_watching_catcher():
+		return  # Already in its claws.
+	var show := _monster.settings.catch_show_time
+	_monster.gesture.play(MonsterBody.Action.CATCH, _monster.get_body_settings().catch_time)
+	_monster.hold_still(show)
+	_player.watch_catcher(_monster.get_eye_position(), show)
+	await get_tree().create_timer(show, false).timeout
+	_end_catch()
+
+
+func _end_catch() -> void:
 	if game_loop != null:
 		game_loop.finish(false)  # No respawn in solo (S-007, Q5).
 		return

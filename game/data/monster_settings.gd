@@ -71,6 +71,9 @@ extends Resource
 @export_range(0.0, 600.0, 5.0, "suffix:s") var guard_break: float = 45.0
 ## Time the "caught" screen stays up, in seconds.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var caught_screen_time: float = 2.0
+## Caught (S-011, T-127): the hunted sees the monster seize it for this long,
+## before the screen. At most 2 s: the monster never shows longer (2.3).
+@export_range(0.1, 2.0, 0.1, "suffix:s") var catch_show_time: float = 1.2
 
 @export_group("Body")
 ## Height of the ears and eyes above the feet, in meters.

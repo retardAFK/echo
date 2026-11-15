@@ -10,6 +10,7 @@ crouch_speed = 1.5
 acceleration = 30.0
 deceleration = 40.0
 mouse_sensitivity = 0.15
+caught_turn_speed = 14.0
 pitch_limit = 89.0
 standing_height = 1.75
 crouch_height = 1.0
