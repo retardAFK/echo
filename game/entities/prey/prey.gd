@@ -19,6 +19,8 @@ const RETARGET_DISTANCE := 0.5
 const DOOR_SETTINGS := preload("res://game/data/door_settings.tres")
 const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
+## Length of the gestures its body shows (S-011, T-125).
+const BODY_SETTINGS := preload("res://game/data/hunted_body_settings.tres")
 
 @export var settings: PreySettings
 ## Speeds of the hunted (S-001).
@@ -49,6 +51,8 @@ var capture: CaptureState
 ## Captured, on its knees (T-107): it neither moves nor acts.
 var held := false:
 	set = set_held
+## What its hands do, as its body and the players see it (S-011, T-125).
+var gesture := BodyGesture.new()
 
 var _heard_monster := false
 var _vision_timer := 0.0
@@ -178,10 +182,19 @@ func get_eye_position() -> Vector3:
 
 func _process(_delta: float) -> void:
 	var down := held or (capture != null and capture.state == CaptureState.State.CAPTURED)
-	_body.show_state(get_gait(), Vector2(velocity.x, velocity.z).length(), down)
+	_body.show_state(get_gait(), Vector2(velocity.x, velocity.z).length(), down, get_gesture())
+
+
+## What its hands do: working while it holds "interact" on something (a fuse
+## box, a hiding spot, a teammate), else its last gesture, for its length.
+func get_gesture() -> HuntedBody.Gesture:
+	if _hold.holding or _hide_hold.holding:
+		return HuntedBody.Gesture.WORK
+	return gesture.kind as HuntedBody.Gesture
 
 
 func _physics_process(delta: float) -> void:
+	gesture.update(delta)
 	if held:
 		_stay_down(delta)
 		return
@@ -388,6 +401,7 @@ func throw_bottle_to(point: Vector3) -> ThrownBottle:
 	bottle.global_position = get_eye_position() + direction * ruse_settings.throw_hand_offset
 	bottle.linear_velocity = launch * speed
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	gesture.play(HuntedBody.Gesture.THROW, BODY_SETTINGS.throw_time)
 	_count_ruse(&"bottle")
 	return bottle
 
@@ -400,6 +414,7 @@ func place_decoy() -> Decoy:
 	get_parent().add_child(decoy)
 	decoy.global_position = global_position
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	gesture.play(HuntedBody.Gesture.PICK, BODY_SETTINGS.pick_time)
 	_count_ruse(&"decoy")
 	_decoy = decoy
 	return decoy
@@ -462,6 +477,7 @@ func _update_detour(delta: float) -> void:
 		):
 			_end_detour()
 		elif _detour.can_interact(global_position):
+			gesture.play(HuntedBody.Gesture.PICK, BODY_SETTINGS.pick_time)
 			_detour.interact(self)
 			_end_detour()
 		return

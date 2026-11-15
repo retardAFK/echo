@@ -41,10 +41,17 @@ var open_target: HidingSpot
 var scan: ScanGauge
 ## Building it is scanning, or null.
 var scan_target: Building
+## Its last one-shot gesture: catching, crushing (S-011, T-127).
+var gesture := BodyGesture.new()
+## What its body shows: a gesture, else what its brain is doing.
+var body_action: MonsterBody.Action:
+	get = _get_action
 
 var _vision_timer := 0.0
 var _was_hidden := false
 var _noise: MonsterNoise
+## Time left standing still over a hunted it just caught (T-127).
+var _still_left := 0.0
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 @onready var _body: MonsterBody = $Body
@@ -103,10 +110,32 @@ func reset_to_patrol(away_from: Vector3) -> void:
 
 func _process(_delta: float) -> void:
 	var speed := Vector2(velocity.x, velocity.z).length()
-	_body.show_state(speed, MonsterBody.action_for(brain.state))
+	_body.show_state(speed, body_action)
+
+
+func _get_action() -> MonsterBody.Action:
+	if gesture.kind != MonsterBody.Action.NONE:
+		return gesture.kind as MonsterBody.Action
+	return MonsterBody.action_for(brain.state)
+
+
+## Values of its body: the length of its gestures.
+func get_body_settings() -> MonsterBodySettings:
+	return _body.settings
+
+
+## Stays where it is for a time (seconds), the hunted it caught in its claws:
+## no move, no catch (T-127).
+func hold_still(duration: float) -> void:
+	_still_left = duration
+	velocity = Vector3.ZERO
 
 
 func _physics_process(delta: float) -> void:
+	gesture.update(delta)
+	if _still_left > 0.0:
+		_still_left -= delta
+		return
 	var arrived := _agent.is_navigation_finished()
 	var player_position := Vector3.ZERO
 	var distance := 0.0
@@ -128,13 +157,15 @@ func _physics_process(delta: float) -> void:
 	var before := global_position
 	_move(delta)
 	_make_noise(delta, before)
-	Decoy.crush_near(get_tree(), global_position, settings.catch_distance)  # S-008, Q4.
+	if Decoy.crush_near(get_tree(), global_position, settings.catch_distance) > 0:  # S-008, Q4.
+		gesture.play(MonsterBody.Action.CRUSH, _body.settings.crush_time)
 	for hunted in get_targets():
 		if (
 			not HidingSpot.is_hidden(hunted)
 			and brain.is_catch(hunted.global_position - global_position)
 		):
 			catch_count += 1
+			gesture.play(MonsterBody.Action.CATCH, _body.settings.catch_time)
 			hunted_caught.emit(hunted)
 			player_caught.emit()
 			break

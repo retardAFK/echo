@@ -13,3 +13,5 @@ walk_speed = 3.5
 run_speed = 6.0
 min_scale = 0.6
 max_scale = 1.6
+catch_time = 0.9
+crush_time = 0.8

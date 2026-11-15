@@ -2,11 +2,14 @@ class_name MonsterBody
 extends Node3D
 ## The hunter's body (spec S-011, T-122, T-123): the model made by
 ## tools/blender/hunter.py, animated from its speed and what it is doing
-## (scanning a building, opening a hiding spot). Used by the AI monster and,
-## online, by the hunted's view of the monster (NetPuppet), which only knows
-## its speed. Without a display (server, tests) no model is loaded.
+## (scanning a building, opening a hiding spot) or the gesture it makes
+## (T-127: catching a hunted, crushing an alarm clock). Used by the AI monster
+## and, online, by the hunted's view of the monster (NetPuppet), from its speed
+## and the action the room sends. Without a display (server, tests) no model
+## is loaded.
 
-enum Action { NONE, SCAN, OPEN }
+## What it is doing; CATCH and CRUSH are one-shot gestures (BodyGesture).
+enum Action { NONE, SCAN, OPEN, CATCH, CRUSH }
 
 const MODEL := "res://assets/models/hunter/hunter.glb"
 const IDLE := &"idle"
@@ -15,6 +18,10 @@ const WALK := &"walk"
 const RUN := &"run"
 const SCAN := &"scan"
 const REACH := &"reach"
+const CATCH := &"catch"
+const CRUSH := &"crush"
+## Played once, not looped.
+const ONE_SHOTS: Array[StringName] = [CATCH, CRUSH]
 
 @export var settings: MonsterBodySettings
 
@@ -34,7 +41,10 @@ func _ready() -> void:
 		return
 	_player = players[0]
 	for anim_name in _player.get_animation_list():
-		_player.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
+		var once := anim_name in ONE_SHOTS
+		_player.get_animation(anim_name).loop_mode = (
+			Animation.LOOP_NONE if once else Animation.LOOP_LINEAR
+		)
 	_player.play(animation)
 
 
@@ -46,6 +56,10 @@ static func pick(speed: float, action: Action, values: MonsterBodySettings) -> S
 			return SCAN
 		Action.OPEN:
 			return REACH
+		Action.CATCH:
+			return CATCH
+		Action.CRUSH:
+			return CRUSH
 	if speed < values.still_speed:
 		return IDLE
 	if speed < values.walk_from:
@@ -80,11 +94,11 @@ static func playback_scale(anim: StringName, speed: float, values: MonsterBodySe
 	return clampf(speed / made_for, values.min_scale, values.max_scale)
 
 
-## Plays what fits the hunter's state.
+## Plays what fits the hunter's state. A gesture plays once from its start.
 func show_state(speed: float, action := Action.NONE) -> void:
 	var next := pick(speed, action, settings)
 	if _player != null:
-		if next != animation or not _player.is_playing():
+		if next != animation:
 			_player.play(next, settings.blend_time)
 		_player.speed_scale = playback_scale(next, speed, settings)
 	animation = next

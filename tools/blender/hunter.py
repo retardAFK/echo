@@ -209,11 +209,23 @@ CYCLES = {
     "run": (0.62, 42, 15, 85, 30, 50, 32, 0, 0),
     "scan": (2.0, 0, 10, 0, 0, 20, 14, 4, 6),
     "reach": (1.2, 0, 12, 0, 0, 10, 34, 10, 14),
+    # One-shots (T-127): catch, a lunge that grabs with both hands; crush, a
+    # stomp of the right foot on a ringing alarm clock.
+    "catch": (0.9, 0, 10, 0, 0, 10, 24, 6, 6),
+    "crush": (0.8, 0, 10, 0, 0, 10, 24, 6, 6),
 }
 
 
 class HunterRig(H.Rig):
     cycles = CYCLES
+
+    def params(self, name, t):
+        values = self.cycles[name]
+        if name != "catch":
+            return values
+        # The lunge: it drops low and leans in, then straightens with its prey.
+        k = H.track(t / values[0], [(0, 0), (0.3, 1), (0.6, 1), (1, 0.3)])
+        return values[:6] + (values[6] + 26 * k, values[7] + 24 * k, values[8] + 30 * k)
 
     def finish(self, name, p):
         self.rot("Head", "X", 18)  # The face juts forward, the eyes on the prey.
@@ -224,6 +236,20 @@ class HunterRig(H.Rig):
             for s in ("l", "r"):
                 self.rot(f"upperarm_{s}", "X", 70 + 6 * math.sin(p))
                 self.rot(f"lowerarm_{s}", "X", 10 + 10 * math.sin(p))
+        u = p / (2 * math.pi)
+        if name == "catch":  # Arms shoot out, then the claws close on the prey.
+            for s in ("l", "r"):
+                self.rot(f"upperarm_{s}", "X", H.track(u, [(0, 0), (0.3, 70), (0.55, 45), (1, 25)]))
+                self.rot(f"lowerarm_{s}", "X", H.track(u, [(0, 0), (0.3, 0), (0.55, 35), (1, 25)]))
+                for f in ("index", "middle", "ring", "pinky"):
+                    self.rot(f"{f}_01_{s}", "Y", H.track(u, [(0, 0), (0.4, 0), (0.55, 1), (1, 1)]) * 40 * (-1 if s == "l" else 1))
+        if name == "crush":  # The right foot rises, then slams down.
+            lift = H.track(u, [(0, 0), (0.35, 1), (0.48, 0), (1, 0)])
+            self.rot("thigh_r", "X", 75 * lift)
+            self.rot("calf_r", "X", -95 * lift)
+            self.rot("Head", "X", H.track(u, [(0, 0), (0.35, 12), (0.5, 22), (1, 0)]))
+            for s, sign in (("l", 1), ("r", -1)):
+                self.rot(f"upperarm_{s}", "Y", 25 * sign * H.track(u, [(0, 0), (0.35, 1), (0.6, 1), (1, 0)]))
 
 
 def build():

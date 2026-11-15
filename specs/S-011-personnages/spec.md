@@ -21,7 +21,7 @@ Léa joue la jeune femme à la parka. Au coin du bâtiment C, elle voit une silh
 - Q3 : Voit-on ses bras en vue subjective ? → Proposition : **non** pour cette spec. La vue reste sans corps, comme aujourd'hui ; les bras demandent un second modèle et des animations à part. → R : proposition de Claude.
 - Q4 : D'où viennent les animations ? → Proposition : animations **faites par script Blender** sur le squelette de la base CC0 (marcher, courir, accroupi, repos, à genoux), courtes et en boucle, exportées dans le modèle. La bibliothèque d'animations Quaternius n'est pas joignable depuis l'environnement de travail ; on pourra la brancher plus tard, le squelette est le même. → R : proposition de Claude.
 - Q5 : Qui joue quel chassé ? → Proposition : la **place** dans le salon décide : place 1 l'ambulancier (bleu), place 2 la parka (vert), place 3 le monteur de lignes (blanc). Une IA dans une place prend le personnage de cette place. En solo, la proie IA est l'ambulancier. → R : proposition de Claude.
-- Q6 : Les animations sont-elles envoyées par le réseau ? → Proposition : **non**. Chaque client choisit l'animation à partir de ce qu'il reçoit déjà (allure, vitesse, à genoux) ; rien de nouveau n'est envoyé. → R : proposition de Claude.
+- Q6 : Les animations sont-elles envoyées par le réseau ? → Proposition : **non**. Chaque client choisit l'animation à partir de ce qu'il reçoit déjà (allure, vitesse, à genoux) ; rien de nouveau n'est envoyé. → R : proposition de Claude. Revue le 15/11/2026 (T-125, T-127) : les gestes (lancer, ramasser, travailler, attraper, écraser) ne se devinent pas à la vitesse ; l'instantané envoie donc un entier de plus par joueur vu, le geste en cours.
 
 ## Hors périmètre
 - Les bras en vue subjective (Q3).
