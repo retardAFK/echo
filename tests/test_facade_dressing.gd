@@ -59,8 +59,9 @@ func test_blocks_of_flats_have_entrance_doors() -> void:
 
 
 func test_visited_storeys_of_the_tower_have_open_windows() -> void:
-	# 4 storeys above the hall, 8 modules on each of the 4 sides.
-	assert_eq(_dressing.count_of(OPEN), 128)
+	# 4 storeys above the hall, 8 modules on each of the 4 sides, but the two
+	# around the door onto the fire escape (S-016).
+	assert_eq(_dressing.count_of(OPEN), 120)
 	for i in _dressing.panels.size():
 		if _dressing.variants[i] != OPEN:
 			continue

@@ -166,6 +166,25 @@ const STAIR_FLIGHT_LENGTH := 4.0
 const STAIR_MID_LANDING := 1.5
 ## Corridor across each storey, between the north and south flats.
 const CORRIDOR := Vector2(98.5, 101.5)
+## Double doors of the hall, north and south (S-016).
+const TOWER_NORTH_DOORS := Vector2(106, 110)
+const TOWER_SOUTH_DOORS := Vector2(103, 107)
+## Door of each corridor onto the fire escape, in the east wall (Q4).
+const FIRE_ESCAPE_DOOR := Vector2(99.4, 100.6)
+## Fire door from the hall to the cellar stairs, in the wall at x = 99.
+const CELLAR_DOOR := Vector2(93, 94.2)
+## Hole in the partition between the south flats, to crawl through.
+const TOWER_CRAWL_HOLE := Vector2(104.6, 105.8)
+const TOWER_CRAWL_HEIGHT := 1.0
+## The stuck lift, west of the stairs.
+const LIFT_SHAFT := Rect2(99.15, 88.3, 1.7, 2.7)
+## Cellars (Q5): stairs down from the tower, a corridor to the car park, the
+## cages along it in alcoves to the north.
+const CELLAR_STAIRS := Rect2(92.6, 96.0, 6.0, 2.4)
+const CELLAR_CORRIDOR := Rect2(92.6, 96.0, 47.4, 2.4)
+const CELLAR_FIRE_DOORS := [116.5, 139.0]
+const CELLAR_CAGES := Vector2(118, 136)
+const CELLAR_CAGE_DEPTH := 1.8
 
 const SOCIAL_CENTRE := Rect2(140, 60, 38, 24)
 const SOCIAL_CENTRE_HEIGHT := 4.0
@@ -192,7 +211,7 @@ const GARAGES_OPEN := [1, 4]
 ## Where the hunted may start, far from the monster (Q2).
 const PLAYER_SPAWNS := [
 	Vector2(45, 44), Vector2(95, 44), Vector2(32, 150), Vector2(72, 112),
-	Vector2(124, 96), Vector2(170, 44),
+	Vector2(127, 96), Vector2(170, 44),  # Clear of the tower's fire escape (S-016).
 ]
 const MONSTER_SPAWN := Vector2(190, 190)
 
@@ -238,6 +257,10 @@ const TREES := [
 ## against the nearest wall, its door toward the room; each pickup on what is
 ## below its point (ground, low wall, workbench).
 const CLOSET := preload("res://game/entities/hiding_spot/closet.tscn")
+const LOW_SPOT := preload("res://game/entities/hiding_spot/low_spot.tscn")
+const MAKESHIFT_SPOT := preload("res://game/entities/hiding_spot/makeshift_spot.tscn")
+const METAL_SPOT := preload("res://game/entities/hiding_spot/metal_spot.tscn")
+const DOOR := preload("res://game/entities/door/door.tscn")
 const DUMPSTER := preload("res://game/entities/hiding_spot/dumpster.tscn")
 const BOTTLE := preload("res://game/entities/pickup/bottle_pickup.tscn")
 const DECOY := preload("res://game/entities/pickup/decoy_pickup.tscn")
@@ -251,6 +274,14 @@ const CLOSETS := [
 	Vector3(164.2, 0, 61.5), Vector3(148, 0, 61), Vector3(176.8, 0, 82.5),  # Social centre.
 	Vector3(54.2, 0, 141), Vector3(77.8, 0, 141), Vector3(45.8, 0, 148),  # Gallery.
 	Vector3(141, -3, 112), Vector3(179, -3, 106), Vector3(152, -3, 95.8),  # Car park.
+]
+## The other families (S-016, Q6): low (under a bed), makeshift (behind a
+## curtain), metal (the stuck lift).
+const FAMILY_SPOTS := [
+	["Metal", Vector3(100, 0, 91.6)],  # Tower: the lift cabin.
+	["Low", Vector3(113, 3, 90)], ["Low", Vector3(101, 6, 110.5)], ["Low", Vector3(113, 9, 104.5)],
+	["Makeshift", Vector3(92.6, 3, 103)], ["Makeshift", Vector3(115.6, 6, 104)],
+	["Makeshift", Vector3(110, 12, 88.6)],
 ]
 ## 6 dumpsters outside, against the blocks of flats (Q5).
 const DUMPSTERS := [
@@ -280,6 +311,10 @@ const DECOYS := [
 var kit := MapKit.new()
 var _root: Node3D
 var _materials := {}
+## Doors to place once the structures are built: plan position (x, h, y),
+## yaw in degrees, width, kind (S-016).
+var _doors: Array = []
+var _metal_floors: Array[MetalFloor] = []
 
 
 func _ready() -> void:
@@ -294,8 +329,10 @@ func _ready() -> void:
 	_build_social_centre()
 	_build_gallery()
 	_build_car_park()
+	_build_cellars()
 	_build_garages()
 	kit.build(_root)
+	_add_doors()
 	_add_buildings()
 	_add_props()
 	_add_navigation()
@@ -336,7 +373,7 @@ func _ready() -> void:
 
 
 func _build_ground() -> void:
-	var holes: Array[Rect2] = [CAR_PARK_RAMP, CAR_PARK_STAIRS]
+	var holes: Array[Rect2] = [CAR_PARK_RAMP, CAR_PARK_STAIRS, CELLAR_STAIRS]
 	kit.slab_tiles(
 		"Tile", Rect2(0, 0, MAP_SIZE, MAP_SIZE), holes, -GROUND_THICKNESS, 0.0, MAT_DIRT,
 		GROUND_TILE
@@ -420,29 +457,47 @@ func _build_tower() -> void:
 	for level in TOWER_VISITED_STOREYS:
 		var h := level * STOREY
 		var windows: Array = [] if level == 0 else _windows(r.position.x, r.end.x, h)
-		# Outer walls: entrances north and south on the ground floor.
-		var north_gaps: Array = [[106.0, 110.0, DOOR_TOP]] if level == 0 else windows
-		var south_gaps: Array = [[102.0, 108.0, DOOR_TOP]] if level == 0 else windows
+		# Outer walls: double doors north and south on the ground floor (S-016).
+		var north_gaps: Array = [[TOWER_NORTH_DOORS.x, TOWER_NORTH_DOORS.y, DOOR_TOP]] if level == 0 else windows
+		var south_gaps: Array = [[TOWER_SOUTH_DOORS.x, TOWER_SOUTH_DOORS.y, DOOR_TOP]] if level == 0 else windows
 		kit.wall_x(s, r.position.x, r.end.x, r.position.y + WALL / 2, h, h + STOREY, WALL, MAT_CONCRETE, north_gaps)
 		kit.wall_x(s, r.position.x, r.end.x, r.end.y - WALL / 2, h, h + STOREY, WALL, MAT_CONCRETE, south_gaps)
 		var side: Array = [] if level == 0 else _windows(r.position.y, r.end.y, h)
 		kit.wall_y(s, r.position.y, r.end.y, r.position.x + WALL / 2, h, h + STOREY, WALL, MAT_CONCRETE, side)
-		kit.wall_y(s, r.position.y, r.end.y, r.end.x - WALL / 2, h, h + STOREY, WALL, MAT_CONCRETE, side)
+		# East: the fire escape door at the end of each corridor (S-016, Q4).
+		var east_gaps := side.duplicate()
+		if level > 0:
+			east_gaps.append([FIRE_ESCAPE_DOOR.x, FIRE_ESCAPE_DOOR.y, h + DOOR_TOP])
+		kit.wall_y(s, r.position.y, r.end.y, r.end.x - WALL / 2, h, h + STOREY, WALL, MAT_CONCRETE, east_gaps)
 		# Floor: the ground floor stands on the ground, the others have a hole for the stairs.
 		if level > 0:
 			for piece in MapKit.subtract(inner, hole):
 				kit.box(s, piece.position.x, piece.position.y, piece.end.x, piece.end.y, h - SLAB, h, MAT_OBSTACLE, MapKit.Kind.FLOOR)
 		else:
-			kit.box(s, inner.position.x, inner.position.y, inner.end.x, inner.end.y, 0, 0.03, MAT_OBSTACLE, MapKit.Kind.GHOST)
+			for piece in MapKit.subtract(inner, CELLAR_STAIRS):
+				kit.box(s, piece.position.x, piece.position.y, piece.end.x, piece.end.y, 0, 0.03, MAT_OBSTACLE, MapKit.Kind.GHOST)
 		_tower_stairs(s, h, level == TOWER_VISITED_STOREYS - 1)
+		# On each storey, a double fire door across the corridor on either side
+		# of the stair landing (Q3), a lintel above it.
+		if level > 0:
+			for x: float in [STAIR_X - WALL / 2, east + WALL / 2]:
+				var leaf := (CORRIDOR.y - CORRIDOR.x) / 2.0
+				kit.box(s, x - WALL / 2, CORRIDOR.x, x + WALL / 2, CORRIDOR.y, h + DOOR_TOP, h + STOREY, MAT_CONCRETE)
+				_door(Vector3(x, h, CORRIDOR.x + leaf / 2.0), 90.0, leaf, Door.Kind.FIRE)
+				_door(Vector3(x, h, CORRIDOR.y - leaf / 2.0), 90.0, leaf, Door.Kind.FIRE)
 		if level == 0:
 			_tower_ground_floor(s)
 		else:
-			_tower_flats(s, h, level)
+			_tower_flats(s, h)
+			_door(Vector3(r.end.x - WALL / 2, h, (FIRE_ESCAPE_DOOR.x + FIRE_ESCAPE_DOOR.y) / 2.0), 90.0, FIRE_ESCAPE_DOOR.y - FIRE_ESCAPE_DOOR.x, Door.Kind.FIRE)
 	# Stairwell walls, west, east and north, from the ground to the top.
 	kit.wall_y(s, stair_north - WALL, STAIR_LANDING_Y, STAIR_X - WALL / 2, 0, top, WALL, MAT_CONCRETE)
 	kit.wall_y(s, stair_north - WALL, STAIR_LANDING_Y, east + WALL / 2, 0, top, WALL, MAT_CONCRETE)
 	kit.wall_x(s, STAIR_X - WALL, east + WALL, stair_north - WALL / 2, 0, top, WALL, MAT_CONCRETE)
+	# The lift shaft, beside the stairs, from the ground to the top: its cabin
+	# is stuck on the ground floor (a hiding spot, S-016).
+	kit.box(s, LIFT_SHAFT.position.x, LIFT_SHAFT.position.y, LIFT_SHAFT.end.x, LIFT_SHAFT.end.y, 0, top, MAT_CONCRETE)
+	_tower_fire_escape(s)
 	var beacon := _material("beacon")
 	var c := r.get_center()
 	kit.box(s, c.x - 0.3, c.y - 0.3, c.x + 0.3, c.y + 0.3, TOWER_STOREYS * STOREY, TOWER_STOREYS * STOREY + 0.6, beacon, MapKit.Kind.GHOST)
@@ -451,63 +506,188 @@ func _build_tower() -> void:
 ## One storey of stairs: flight up to the north, mid landing, flight back south.
 ## On the last visitable storey a grille closes the way up (Q4).
 func _tower_stairs(s: MapKit.Structure, h: float, last: bool) -> void:
-	var half := STOREY / 2.0
-	var west_end := STAIR_X + STAIR_FLIGHT_WIDTH
-	var east_start := west_end + STAIR_DIVIDER
-	var east := east_start + STAIR_FLIGHT_WIDTH
-	var north := STAIR_LANDING_Y - STAIR_FLIGHT_LENGTH
-	kit.ramp(s, STAIR_X, STAIR_LANDING_Y, west_end, north, h, h + half, false, MAT_OBSTACLE)
-	kit.box(s, STAIR_X, north - STAIR_MID_LANDING, east, north, h + half - SLAB, h + half, MAT_OBSTACLE, MapKit.Kind.FLOOR)
-	kit.ramp(s, east_start, north, east, STAIR_LANDING_Y, h + half, h + STOREY, false, MAT_OBSTACLE)
-	kit.box(s, west_end, north, east_start, STAIR_LANDING_Y, h, h + STOREY, MAT_CONCRETE)
+	_switchback(s, STAIR_X, h, MAT_OBSTACLE, MAT_CONCRETE)
 	if last:
+		var west_end := STAIR_X + STAIR_FLIGHT_WIDTH
 		kit.box(s, STAIR_X, STAIR_LANDING_Y - 0.15, west_end, STAIR_LANDING_Y, h, h + STOREY, _material("grille"))
 
 
-## Ground floor: a hall through the tower, the bin room (open) and a locked
-## technical room.
+## Two flights side by side from x0, the landing to the south on STAIR_LANDING_Y:
+## up to the north on the west one, a mid landing, back south on the east one.
+func _switchback(s: MapKit.Structure, x0: float, h: float, steps: Material, divider: Material) -> void:
+	var half := STOREY / 2.0
+	var west_end := x0 + STAIR_FLIGHT_WIDTH
+	var east_start := west_end + STAIR_DIVIDER
+	var east := east_start + STAIR_FLIGHT_WIDTH
+	var north := STAIR_LANDING_Y - STAIR_FLIGHT_LENGTH
+	kit.ramp(s, x0, STAIR_LANDING_Y, west_end, north, h, h + half, false, steps)
+	kit.box(s, x0, north - STAIR_MID_LANDING, east, north, h + half - SLAB, h + half, steps, MapKit.Kind.FLOOR)
+	kit.ramp(s, east_start, north, east, STAIR_LANDING_Y, h + half, h + STOREY, false, steps)
+	kit.box(s, west_end, north, east_start, STAIR_LANDING_Y, h, h + STOREY, divider)
+
+
+## Ground floor (S-016): a hall through the tower, the stairs down to the
+## cellars where the technical room was, the bin room, the stuck lift.
 func _tower_ground_floor(s: MapKit.Structure) -> void:
 	var r := TOWER
-	# Technical room, north-west, locked.
-	kit.wall_y(s, r.position.y, STAIR_LANDING_Y, 99.0, 0, STOREY, WALL, MAT_CONCRETE)
+	# Double doors north and south.
+	for doors: Vector2 in [TOWER_NORTH_DOORS, TOWER_SOUTH_DOORS]:
+		var y := r.position.y + WALL / 2 if doors == TOWER_NORTH_DOORS else r.end.y - WALL / 2
+		var leaf := (doors.y - doors.x) / 2.0
+		_door(Vector3(doors.x + leaf / 2.0, 0, y), 0.0, leaf)
+		_door(Vector3(doors.y - leaf / 2.0, 0, y), 0.0, leaf)
+	# Cellar stairs room, north-west: a fire door from the hall.
+	var door := CELLAR_DOOR
+	kit.wall_y(s, r.position.y, STAIR_LANDING_Y, 99.0, 0, STOREY, WALL, MAT_CONCRETE, [[door.x, door.y, DOOR_TOP]])
 	kit.wall_x(s, r.position.x, 99.0, STAIR_LANDING_Y, 0, STOREY, WALL, MAT_CONCRETE)
-	# Bin room, south-west, open.
-	kit.wall_x(s, r.position.x, 99.0, 104.0, 0, STOREY, WALL, MAT_CONCRETE, [[95.0, 96.4, DOOR_TOP]])
+	_door(Vector3(99.0, 0, (door.x + door.y) / 2.0), 90.0, door.y - door.x, Door.Kind.FIRE)
+	# A railing along the open side of the stairs, but at their top.
+	var c := CELLAR_STAIRS
+	kit.wall_x(s, c.position.x + 1.4, c.end.x, c.position.y - 0.1, 0, PARAPET, 0.2, MAT_CONCRETE)
+	kit.wall_y(s, c.position.y - 0.2, c.end.y, c.end.x + 0.1, 0, PARAPET, 0.2, MAT_CONCRETE)
+	# Bin room, south-west, with its door.
+	kit.wall_x(s, r.position.x, 99.0, 104.0, 0, STOREY, WALL, MAT_CONCRETE, [[95.0, 96.2, DOOR_TOP]])
+	_door(Vector3(95.6, 0, 104.0), 0.0, 1.2)
 	kit.wall_y(s, 104.0, r.end.y, 99.0, 0, STOREY, WALL, MAT_CONCRETE)
 	# Letter boxes along the east wall of the hall.
 	kit.box(s, 114.6, 92.0, 115.7, 97.0, 0.8, 1.8, MAT_OBSTACLE, MapKit.Kind.FLOOR)
 
 
-## Flats around the corridor: two open per landing, the others locked (Q4).
-func _tower_flats(s: MapKit.Structure, h: float, level: int) -> void:
+## Flats around the corridor (S-016): all four open on every storey, each
+## behind its door, with two or three rooms; a hole in the partition joins
+## the two south flats, low enough to crawl through.
+func _tower_flats(s: MapKit.Structure, h: float) -> void:
 	var r := TOWER
 	var top := h + STOREY
 	var north := CORRIDOR.x
 	var south := CORRIDOR.y
 	var stair_east := STAIR_X + 2 * STAIR_FLIGHT_WIDTH + STAIR_DIVIDER
-	var open: Array = [[0, 3], [1, 2], [0, 2], [1, 3]][level - 1]
-	# Flats: 0 north-west, 1 north-east, 2 south-west, 3 south-east.
-	var door := func(flat: int, at: float) -> Array:
-		return [[at, at + DOOR_WIDTH, h + DOOR_TOP]] if open.has(flat) else []
-	kit.wall_x(s, r.position.x, STAIR_X - WALL, north, h, top, WALL, MAT_CONCRETE, door.call(0, 97.0))
-	kit.wall_x(s, stair_east + WALL, r.end.x, north, h, top, WALL, MAT_CONCRETE, door.call(1, 108.0))
-	kit.wall_x(s, r.position.x, 104.0, south, h, top, WALL, MAT_CONCRETE, door.call(2, 100.0))
-	kit.wall_x(s, 104.0, r.end.x, south, h, top, WALL, MAT_CONCRETE, door.call(3, 106.0))
-	kit.wall_y(s, south, r.end.y, 104.0, h, top, WALL, MAT_CONCRETE)
-	# North flats end at the stairwell; a closet fills the gap north of it.
+	var gap := func(at: float) -> Array:
+		return [[at, at + DOOR_WIDTH, h + DOOR_TOP]]
+	# Front doors: 0 north-west, 1 north-east, 2 south-west, 3 south-east.
+	var fronts := [[97.0, north], [108.0, north], [98.5, south], [106.0, south]]
+	kit.wall_x(s, r.position.x, STAIR_X - WALL, north, h, top, WALL, MAT_CONCRETE, gap.call(97.0))
+	kit.wall_x(s, stair_east + WALL, r.end.x, north, h, top, WALL, MAT_CONCRETE, gap.call(108.0))
+	kit.wall_x(s, r.position.x, 104.0, south, h, top, WALL, MAT_CONCRETE, gap.call(98.5))
+	kit.wall_x(s, 104.0, r.end.x, south, h, top, WALL, MAT_CONCRETE, gap.call(106.0))
+	for front: Array in fronts:
+		_door(Vector3(front[0] + DOOR_WIDTH / 2.0, h, front[1]), 0.0, DOOR_WIDTH)
+	# Between the south flats, a hole to crawl through (Q4).
+	var crawl := TOWER_CRAWL_HOLE
+	kit.wall_y(s, south, r.end.y, 104.0, h, top, WALL, MAT_CONCRETE, [[crawl.x, crawl.y, h + TOWER_CRAWL_HEIGHT]])
+	# North flats end at the stairwell.
 	kit.wall_y(s, r.position.y, north, STAIR_X - WALL / 2, h, top, WALL, MAT_CONCRETE)
 	kit.wall_y(s, r.position.y, north, stair_east + WALL / 2, h, top, WALL, MAT_CONCRETE)
-	# Inside each open flat, a partition with a doorway between two rooms.
-	for flat: int in open:
-		match flat:
-			0:
-				kit.wall_y(s, r.position.y, north, 96.0, h, top, WALL, MAT_CONCRETE, [[93.0, 94.2, h + DOOR_TOP]])
-			1:
-				kit.wall_y(s, r.position.y, north, 111.0, h, top, WALL, MAT_CONCRETE, [[93.0, 94.2, h + DOOR_TOP]])
-			2:
-				kit.wall_x(s, r.position.x, 104.0, 107.0, h, top, WALL, MAT_CONCRETE, [[97.0, 98.2, h + DOOR_TOP]])
-			3:
-				kit.wall_x(s, 104.0, r.end.x, 107.0, h, top, WALL, MAT_CONCRETE, [[110.0, 111.2, h + DOOR_TOP]])
+	# Inside each flat, a partition with a doorway between two rooms, and a
+	# bathroom wall in the south flats.
+	kit.wall_y(s, r.position.y, north, 96.0, h, top, WALL, MAT_CONCRETE, [[93.0, 94.2, h + DOOR_TOP]])
+	kit.wall_y(s, r.position.y, north, 111.0, h, top, WALL, MAT_CONCRETE, [[93.0, 94.2, h + DOOR_TOP]])
+	kit.wall_x(s, r.position.x, 104.0, 107.0, h, top, WALL, MAT_CONCRETE, [[100.0, 101.2, h + DOOR_TOP]])
+	kit.wall_x(s, 104.0, r.end.x, 107.0, h, top, WALL, MAT_CONCRETE, [[107.0, 108.2, h + DOOR_TOP]])
+	kit.wall_y(s, 107.0, r.end.y, 98.0, h, top, WALL, MAT_CONCRETE, [[108.0, 109.2, h + DOOR_TOP]])
+	kit.wall_y(s, 107.0, r.end.y, 110.0, h, top, WALL, MAT_CONCRETE, [[108.0, 109.2, h + DOOR_TOP]])
+
+
+## Metal stairs outside the east wall, from the ground to the 4th storey
+## (S-016, Q4 and Q9), with a landing at each corridor door.
+func _tower_fire_escape(s: MapKit.Structure) -> void:
+	var metal := _material("metal")
+	var x0 := TOWER.end.x + 0.3
+	var east := x0 + 2 * STAIR_FLIGHT_WIDTH + STAIR_DIVIDER
+	var landing_south := CORRIDOR.y
+	var north := STAIR_LANDING_Y - STAIR_FLIGHT_LENGTH - STAIR_MID_LANDING
+	for level in TOWER_VISITED_STOREYS:
+		var h := level * STOREY
+		if level > 0:
+			kit.box(s, TOWER.end.x, STAIR_LANDING_Y, east, landing_south, h - SLAB, h, metal, MapKit.Kind.FLOOR)
+			kit.wall_x(s, x0, east, landing_south + 0.05, h, h + PARAPET, 0.1, metal)
+		if level < TOWER_VISITED_STOREYS - 1:
+			_switchback(s, x0, h, metal, metal)
+		# Railings on the outer sides of the flights.
+		kit.wall_y(s, north, landing_south, east + 0.05, h, h + STOREY if level < TOWER_VISITED_STOREYS - 1 else h + PARAPET, 0.1, metal)
+		kit.wall_x(s, x0, east, north - 0.05, h, h + PARAPET + STOREY / 2.0, 0.1, metal)
+	var floor_box := MetalFloor.new()
+	floor_box.name = "FireEscapeMetal"
+	floor_box.size = Vector3(east - TOWER.end.x, TOWER_VISITED_STOREYS * STOREY + 2.0, landing_south - north)
+	floor_box.position = kit.world((TOWER.end.x + east) / 2.0, (north + landing_south) / 2.0, floor_box.size.y / 2.0 - 1.0)
+	_metal_floors.append(floor_box)
+
+
+## The cellars (S-016, Q5): stairs down from the tower's ground floor, then a
+## corridor under the street to the car park, a fire door at each end, the
+## cellar cages along it.
+func _build_cellars() -> void:
+	var s := kit.structure("Cellars")
+	var c := CELLAR_STAIRS
+	var corridor := CELLAR_CORRIDOR
+	var floor_h := -CAR_PARK_DEPTH
+	var ceiling := -GROUND_THICKNESS
+	# Stairs down from the west (top) to the east (bottom), in their shaft.
+	kit.ramp(s, c.position.x, c.position.y, c.end.x, c.end.y, 0, floor_h, true, MAT_OBSTACLE)
+	kit.wall_x(s, c.position.x, c.end.x, c.position.y - WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE)
+	kit.wall_y(s, c.position.y - WALL, corridor.end.y + WALL, c.position.x - WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE)
+	# The corridor, from the foot of the stairs to the car park.
+	kit.box(s, c.end.x, corridor.position.y, corridor.end.x, corridor.end.y, floor_h - SLAB, floor_h, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+	kit.wall_x(s, c.end.x, corridor.end.x, corridor.position.y - WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE, [[CELLAR_CAGES.x, CELLAR_CAGES.y, ceiling]])
+	kit.wall_x(s, c.position.x - WALL, corridor.end.x, corridor.end.y + WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE)
+	var mid := (corridor.position.y + corridor.end.y) / 2.0
+	for x: float in CELLAR_FIRE_DOORS:
+		kit.wall_y(s, corridor.position.y - WALL, corridor.end.y + WALL, x, -CAR_PARK_DEPTH + DOOR_TOP, ceiling, WALL, MAT_CONCRETE)
+		var leaf := corridor.size.y / 2.0
+		_door(Vector3(x, floor_h, mid - leaf / 2.0), 90.0, leaf, Door.Kind.FIRE)
+		_door(Vector3(x, floor_h, mid + leaf / 2.0), 90.0, leaf, Door.Kind.FIRE)
+	# Cellar cages in an alcove north of the corridor: grilles, boxes inside,
+	# the middle one left open.
+	var cages := CELLAR_CAGES
+	var back := corridor.position.y - CELLAR_CAGE_DEPTH
+	var grille := _material("grille")
+	kit.box(s, cages.x, back, cages.y, corridor.position.y, floor_h - SLAB, floor_h, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+	kit.wall_x(s, cages.x, cages.y, back - WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE)
+	var cage := 3.0
+	var count := roundi((cages.y - cages.x) / cage)
+	for i in count + 1:
+		var x := cages.x + i * cage
+		kit.box(s, x - 0.03, back, x + 0.03, corridor.position.y, floor_h, ceiling, grille)
+	for i in count:
+		var x := cages.x + i * cage
+		kit.box(s, x + 0.4, back + 0.1, x + 1.4, back + 0.7, floor_h, floor_h + 0.8, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+		if i != count / 2:
+			kit.box(s, x, corridor.position.y - 0.05, x + cage, corridor.position.y, floor_h, ceiling, grille, MapKit.Kind.FLOOR)
+
+
+## Records a door to place once the structures are built (S-016): at a plan
+## point (x, height, y), its leaf turned by yaw degrees (0: across X).
+func _door(at: Vector3, yaw: float, width: float, kind := Door.Kind.NORMAL) -> void:
+	_doors.append([at, yaw, width, kind])
+
+
+## The doors and the metal floors. Doors are not navigation sources: the
+## navigation mesh goes through their doorways, except for the emergency
+## exits, which the AIs could not open from outside.
+func _add_doors() -> void:
+	var doors := _group("Doors")
+	var exits := Node3D.new()
+	exits.name = "EmergencyExits"
+	exits.add_to_group("navigation_source", true)
+	doors.add_child(exits)
+	exits.owner = _root
+	var count := 0
+	for entry: Array in _doors:
+		var door: Door = DOOR.instantiate()
+		count += 1
+		door.name = "Door%d" % count
+		var at: Vector3 = entry[0]
+		door.position = kit.world(at.x, at.z, at.y)
+		door.rotation_degrees.y = entry[1]
+		door.width = entry[2]
+		door.kind = entry[3]
+		var parent := exits if door.kind == Door.Kind.EMERGENCY else doors
+		parent.add_child(door)
+		door.owner = _root
+	var metal := _group("MetalFloors")
+	for floor_box in _metal_floors:
+		metal.add_child(floor_box)
+		floor_box.owner = _root
 
 
 ## Window openings of a storey at height h, one every WINDOW_STEP meters.
@@ -591,7 +771,7 @@ func _build_car_park() -> void:
 	var ceiling := -GROUND_THICKNESS
 	kit.wall_x(s, r.position.x, r.end.x, r.position.y + WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE)
 	kit.wall_x(s, r.position.x, r.end.x, r.end.y - WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE)
-	kit.wall_y(s, r.position.y, r.end.y, r.position.x + WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE, [[ramp.position.y, ramp.end.y, ceiling]])
+	kit.wall_y(s, r.position.y, r.end.y, r.position.x + WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE, [[CELLAR_CORRIDOR.position.y, CELLAR_CORRIDOR.end.y, ceiling], [ramp.position.y, ramp.end.y, ceiling]])
 	kit.wall_y(s, r.position.y, r.end.y, r.end.x - WALL / 2, floor_h, ceiling, WALL, MAT_CONCRETE)
 	# Pillars every 8 m.
 	var px := r.position.x + CAR_PARK_PILLAR_STEP
@@ -707,6 +887,21 @@ func _buildings() -> Dictionary:
 	}
 
 
+## Parts of a building outside its main box (S-016, Q5): plan rectangle,
+## floor and top heights. The cellar stairs belong to the tower; the cellar
+## corridor, past them, to the car park, up to its ceiling: not the street
+## above it.
+func _extra_boxes() -> Dictionary:
+	var c := CELLAR_STAIRS
+	var corridor := CELLAR_CORRIDOR
+	var cages := Rect2(CELLAR_CAGES.x, corridor.position.y - CELLAR_CAGE_DEPTH, CELLAR_CAGES.y - CELLAR_CAGES.x, CELLAR_CAGE_DEPTH)
+	var under := Rect2(c.end.x, corridor.position.y, corridor.end.x - c.end.x, corridor.size.y)
+	return {
+		"Tower": [[c, -CAR_PARK_DEPTH, 0.0]],
+		"CarPark": [[under, -CAR_PARK_DEPTH, -GROUND_THICKNESS], [cages, -CAR_PARK_DEPTH, -GROUND_THICKNESS]],
+	}
+
+
 func _add_buildings() -> void:
 	var parent := Node3D.new()
 	parent.name = "Buildings"
@@ -726,6 +921,12 @@ func _add_buildings() -> void:
 		building.position = kit.world(center.x, center.y, (bottom + top) / 2.0)
 		building.set("size", Vector3(rect.size.x, top - bottom, rect.size.y))
 		building.set("display_key", "BUILDING_" + building_name.to_snake_case().to_upper())
+		var extras: Array[AABB] = []
+		for extra: Array in _extra_boxes().get(building_name, []):
+			var r2: Rect2 = extra[0]
+			var lo := kit.world(r2.position.x, r2.position.y, extra[1]) - building.position
+			extras.append(AABB(lo, Vector3(r2.size.x, extra[2] - extra[1], r2.size.y)))
+		building.set("extra_boxes", extras)
 		parent.add_child(building)
 		building.owner = _root
 		for i in entry[3].size():
@@ -833,6 +1034,11 @@ func _place_ruses() -> void:
 		_place_spot(spots, CLOSET, "Closet%d" % (i + 1), CLOSETS[i])
 	for i in DUMPSTERS.size():
 		_place_spot(spots, DUMPSTER, "Dumpster%d" % (i + 1), DUMPSTERS[i])
+	var families := {"Low": LOW_SPOT, "Makeshift": MAKESHIFT_SPOT, "Metal": METAL_SPOT}
+	var counts := {}
+	for entry: Array in FAMILY_SPOTS:
+		counts[entry[0]] = counts.get(entry[0], 0) + 1
+		_place_spot(spots, families[entry[0]], "%s%d" % [entry[0], counts[entry[0]]], entry[1])
 	var pickups := _group("Pickups")
 	for kind: Array in [["Bottles", BOTTLE, "Bottle", BOTTLES], ["Decoys", DECOY, "Decoy", DECOYS]]:
 		var parent := Node3D.new()
@@ -860,7 +1066,8 @@ func _place_spot(parent: Node3D, scene: PackedScene, node_name: String, at: Vect
 		var query := PhysicsRayQueryParameters3D.create(
 			from, from + direction * SPOT_WALL_SEARCH, MapKit.WALLS_LAYER
 		)
-		query.exclude = [spot.get_node("Body").get_rid()]
+		if spot.has_node("Body"):
+			query.exclude = [spot.get_node("Body").get_rid()]
 		var hit := space.intersect_ray(query)
 		if hit and from.distance_to(hit.position) < best_distance:
 			best_distance = from.distance_to(hit.position)
@@ -869,8 +1076,11 @@ func _place_spot(parent: Node3D, scene: PackedScene, node_name: String, at: Vect
 	if best_distance >= SPOT_WALL_SEARCH:
 		push_warning("No wall near %s" % node_name)
 		return
-	var shape: BoxShape3D = spot.get_node("Body/CollisionShape3D").shape
-	var center := wall + front * (shape.size.z / 2.0 + 0.02)
+	var depth := 0.0
+	if spot.has_node("Body"):
+		var shape: BoxShape3D = spot.get_node("Body/CollisionShape3D").shape
+		depth = shape.size.z
+	var center := wall + front * (depth / 2.0 + 0.02)
 	spot.position = Vector3(center.x, at.y, center.z)
 	spot.rotation.y = atan2(front.x, front.z)
 
@@ -1144,11 +1354,15 @@ func _dress_wall(
 		var under_porch: bool = porch != null and mid.x > porch.x and mid.x < porch.y and absf(normal.y) > 0.5
 		var balconies := rng.randf() < BALCONY_SHARE
 		# The hall entrances of the tower stay open (north and south, ground floor).
-		var entrance: bool = tower and absf(normal.y) > 0.5 and (mid.x > 103.0 and mid.x < 111.0 if normal.y < 0 else mid.x > 101.0 and mid.x < 109.0)
+		var entrance: bool = tower and absf(normal.y) > 0.5 and (mid.x > TOWER_NORTH_DOORS.x - 3.0 and mid.x < TOWER_NORTH_DOORS.y + 1.0 if normal.y < 0 else mid.x > TOWER_SOUTH_DOORS.x - 2.0 and mid.x < TOWER_SOUTH_DOORS.y + 2.0)
+		var fire_escape: bool = tower and normal.x > 0.5 and absf(mid.y - (FIRE_ESCAPE_DOOR.x + FIRE_ESCAPE_DOOR.y) / 2.0) < width
 		for storey in storeys:
 			if under_porch and storey * STOREY < PORCH_HEIGHT:
 				continue
 			if entrance and storey == 0:
+				continue
+			# The doors onto the fire escape stay clear (S-016).
+			if fire_escape and storey > 0 and storey < TOWER_VISITED_STOREYS:
 				continue
 			var module: int
 			if tower and storey > 0 and storey < TOWER_VISITED_STOREYS:
