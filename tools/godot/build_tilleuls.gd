@@ -9,6 +9,7 @@ extends Node
 ## Coordinates are plan coordinates (see map_kit.gd): x east, y south, meters.
 
 const MapKit := preload("res://tools/godot/map_kit.gd")
+const InteriorLining := preload("res://tools/godot/interior_lining.gd")
 
 const SCENE_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
 const NAVMESH_PATH := "res://game/maps/tilleuls/tilleuls_navmesh.tres"
@@ -426,6 +427,8 @@ func _ready() -> void:
 	_build_cellars()
 	_build_garages()
 	_build_furniture()
+	var lining := InteriorLining.new(self)
+	lining.add_zones(kit)
 	kit.build(_root)
 	_add_doors()
 	_add_buildings()
@@ -437,6 +440,7 @@ func _ready() -> void:
 	_add_car_park_dressing()
 	_add_outdoor_dressing()
 	_add_furniture()
+	lining.dress(_root)
 	_add_ambience()
 	get_tree().root.add_child.call_deferred(_root)
 	await get_tree().physics_frame

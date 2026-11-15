@@ -9,6 +9,13 @@ uniform vec3 emission_color : source_color = vec3(0.0);
 uniform float roughness = 1.0;
 uniform bool world_triplanar = false;
 uniform vec3 uv_scale = vec3(1.0);
+// Texture atlas of the interior linings (S-019): columns and rows of tiles,
+// the tile of each face given by its vertex color (red = index / 15). Zero
+// for a plain texture.
+uniform vec2 atlas_grid = vec2(0.0);
+// Interior decor (S-019): boxes colored by their vertex color; a vertex alpha
+// of 0 makes them glow (lamps, TV screens) in the same draw call.
+uniform bool vertex_tint = false;
 // Screen grid the vertices snap to; 0 turns the wobble off.
 uniform vec2 snap_grid = vec2(0.0);
 // Unshaded sources (the sign) glow with their color instead of being lit.
@@ -35,11 +42,17 @@ varying vec3 world_normal;
 // Light baked in the vertices by the map generator (S-006, T-049); zero on
 // meshes without it.
 varying vec3 baked_light;
+varying flat float atlas_tile;
+varying vec3 tint;
+varying float glow;
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	baked_light = CUSTOM0.rgb;
+	atlas_tile = round(COLOR.r * 15.0);
+	tint = vertex_tint ? COLOR.rgb : vec3(1.0);
+	glow = vertex_tint ? 1.0 - COLOR.a : 0.0;
 	vec4 clip = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
 	if (snap_grid.x > 0.0 && clip.w > 0.0) {
 		// Clip space spans 2 units across the screen, hence the half grid.
@@ -69,8 +82,14 @@ vec3 desaturate(vec3 color, float amount) {
 
 void fragment() {
 	vec2 uv = world_triplanar ? triplanar_uv(world_pos * uv_scale, world_normal) : UV * uv_scale.xy;
-	vec3 albedo = texture(albedo_texture, uv).rgb * albedo_color.rgb;
+	if (atlas_grid.x > 0.0) {
+		vec2 cell = vec2(mod(atlas_tile, atlas_grid.x), floor(atlas_tile / atlas_grid.x));
+		uv = (fract(uv) + cell) / atlas_grid;
+	}
+	vec3 albedo = texture(albedo_texture, uv).rgb * albedo_color.rgb * tint;
 	vec3 emission = texture(emission_texture, UV).rgb * emission_color;
+	emission += albedo * glow;
+	albedo *= 1.0 - glow;
 	if (unshaded) {
 		emission = albedo;
 		albedo = vec3(0.0);
