@@ -19,8 +19,8 @@ const VIEWS := [
 	["palier_3_est", Vector3(115, 7.6, 100), Vector3(93, 7.2, 100)],
 	["salon_tele", Vector3(113, 4.6, 106), Vector3(109.6, 3.8, 104)],
 	["salon_nord", Vector3(110, 7.6, 97), Vector3(106, 7.6, 88.5)],
-	["chambre_sud", Vector3(96, 10.6, 108), Vector3(93, 10, 111.5)],
-	["cuisine_sud", Vector3(103, 4.6, 108), Vector3(99, 4.1, 110.5)],
+	["cuisine_sud", Vector3(96, 10.6, 108), Vector3(93, 10, 111.5)],
+	["chambre_sud", Vector3(103, 4.6, 108), Vector3(99, 4.1, 110.5)],
 	["caves", Vector3(100, -1.4, 97.2), Vector3(130, -1.8, 97.2)],
 ]
 
