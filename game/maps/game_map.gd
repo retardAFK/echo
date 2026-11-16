@@ -78,6 +78,7 @@ var _prison: Prison
 
 
 func _ready() -> void:
+	add_child(LevelVisibility.new())  # Draw calls: interiors near the camera only (T-195).
 	if GameSession.game_seed != 0:
 		_rng.seed = GameSession.game_seed
 	else:

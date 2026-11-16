@@ -322,7 +322,7 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [x] T-194 — Map enregistrée en binaire compressé
   - Résultat vérifiable : le générateur écrit la map en `.scn` compressé (14 Mo de texte, 1,1 Mo compressé) ; build web sous 50 Mo ; tests GUT et test en ligne inchangés
   - Dépend de : T-182
-- [ ] T-195 — Visibilité par niveau
+- [x] T-195 — Visibilité par niveau
   - Résultat vérifiable : les intérieurs d'un niveau (revêtement, mobilier, portes, lumières) ne sont dessinés que si la caméra est à ce niveau, à côté, ou dehors à moins de 25 m ; pire point de la map actuelle mesuré avant et après ; tests GUT
   - Dépend de : T-194
 - [ ] T-183 — Greybox sur plusieurs niveaux
