@@ -214,3 +214,19 @@ OPTIONS_OFF,Non
 OPTIONS_PRESS_KEY,Appuie sur une touche… (Échap : annuler)
 OPTIONS_RESET,Rétablir les réglages
 OPTIONS_HELP,‹ › : régler · Entrée : changer une touche · Échap : retour (tout est enregistré)
+HUD_INTERACT_RELAY,{interact} : abaisser le levier du relais
+HUD_INTERACT_DISK,Maintenir {interact} : prendre la disquette
+HUD_INTERACT_TRANSFORMER_DISK,Maintenir {interact} : insérer la disquette
+HUD_TRANSFORMER_WAITS_OTHER,Le transformateur attend d'autres réparations
+HUD_OBJECTIVES,Objectifs %d/%d
+HUD_TERMINAL_KEY,Touche %d
+HUD_TERMINAL_DOWNLOAD,Lancer le téléchargement
+HUD_KEYPAD_TITLE,CLAVIER DU TRANSFORMATEUR
+HUD_KEYPAD_IDLE,Aucun code attendu.
+HUD_KEYPAD_TYPED,Code : %s
+MAP_OBJECTIVE_FUSES,Fusibles posés : %d/%d
+MAP_OBJECTIVE_CODE,Taper le code sur le clavier du transformateur
+MAP_OBJECTIVE_DOWNLOAD,Télécharger la disquette et l'insérer au transformateur
+MAP_OBJECTIVE_RELAY,Abaisser deux leviers de relais en même temps
+MAP_OBJECTIVE_DONE,(fait)
+NET_TERM_KEYPAD,clavier du transformateur

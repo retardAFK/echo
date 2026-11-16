@@ -2,8 +2,9 @@ class_name TerminalMenu
 extends CanvasLayer
 ## The menu of a terminal (spec S-018, Q10), while the hunted sits at one: on
 ## the right of the screen, the lines the network offers there
-## (CityNetwork.entries_for), numbered. Keys 1 to 9 pick a line; the mouse
-## wheel moves the highlight and a click picks it. A pick goes out as a PICK
+## (CityNetwork.entries_for), numbered. Keys 1 to 9 pick a line, 0 the tenth
+## (the transformer's keypad, T-266); the mouse wheel moves the highlight and
+## a click picks it. A pick goes out as a PICK
 ## action of the player's commands, so online the room carries it out. The
 ## line of the camera watched is marked. "interact" or moving gets up.
 
@@ -42,7 +43,6 @@ func _ready() -> void:
 	column.add_theme_constant_override(&"separation", 4)
 	_panel.add_child(column)
 	_title = _label(GREEN)
-	_title.text = "HUD_TERMINAL_TITLE"
 	column.add_child(_title)
 	_lines = VBoxContainer.new()
 	_lines.add_theme_constant_override(&"separation", 1)
@@ -64,6 +64,14 @@ func _process(_delta: float) -> void:
 	_selected = clampi(_selected, 0, maxi(_entries.size() - 1, 0))
 	_show_lines(network)
 	_help.text = Settings.fill(tr("HUD_TERMINAL_HELP"))
+	_title.text = tr("HUD_TERMINAL_TITLE")
+	if terminal.kind == Terminal.Kind.CODE:
+		_title.text = tr("HUD_KEYPAD_TITLE")
+		var quests := Quests.of(player)
+		if quests == null or not quests.wants_code():
+			_help.text = tr("HUD_KEYPAD_IDLE")
+		else:
+			_help.text = tr("HUD_KEYPAD_TYPED") % quests.typed_on(terminal).rpad(4, "_")
 
 
 func _input(event: InputEvent) -> void:
@@ -71,7 +79,9 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var digit: int = event.physical_keycode - KEY_1
-		if digit >= 0 and digit < mini(9, _entries.size()):
+		if event.physical_keycode == KEY_0:
+			digit = 9  # The keypad's 0 comes after its 9.
+		if digit >= 0 and digit < mini(10, _entries.size()):
 			pick(digit)
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.pressed:

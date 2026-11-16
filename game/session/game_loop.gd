@@ -45,6 +45,13 @@ var hunted_won := false
 var mirror := false
 ## Fuses dropped on the ground by captured hunted (T-107), still there.
 var drops: Array[FuseBox] = []
+## The objectives other than fuses this game may draw (S-018, Q13), among
+## those the map offers. Empty: fuses only (settings.fuse_count of them).
+var allowed: Array = []
+## The objectives of the game, imposed (ECHO_OBJECTIVES, tests); else drawn.
+var forced: Array = []
+## The objectives other than fuses (S-018), null on a client.
+var quests: Quests
 
 var _elapsed := 0.0
 ## Frames drawn and their time during the game, for the average frames per
@@ -62,6 +69,7 @@ var _boxes: Array = []
 ## Hunted captured and waiting for a teammate (S-010, T-107).
 var _captured: Array[Node] = []
 var _map: Node
+var _exit_opened := false
 
 
 func _ready() -> void:
@@ -132,6 +140,8 @@ func hunted_out(node: Node) -> void:
 		box.set_fuse(true)
 		rules.carried -= 1
 		_carried[node] -= 1
+	if quests != null:
+		quests.drop_disk(node)
 	fuses_changed.emit(rules.found(), rules.placed)
 
 
@@ -174,6 +184,8 @@ func is_captured(node: Node) -> bool:
 ## The fuses a hunted carries fall at its feet (T-107): any hunted picks them
 ## up again, like from a fuse box.
 func drop_fuses(node: Node) -> void:
+	if quests != null:
+		quests.drop_disk(node)
 	var count := carried_by(node)
 	if count <= 0 or _map == null:
 		return
@@ -249,7 +261,8 @@ func setup(map: Node, rng_seed := 0) -> void:
 		if not by_building.has(box.building_name):
 			by_building[box.building_name] = []
 		by_building[box.building_name].append(box)
-	fused_boxes = LoopRules.draw_fuses(by_building, settings.fuse_count, _rng)
+	_draw_objectives(map)
+	fused_boxes = LoopRules.draw_fuses(by_building, rules.fuse_count, _rng)
 	for box: FuseBox in fused_boxes:
 		box.set_fuse(true)
 	_draw_decoys(map)
@@ -261,6 +274,43 @@ func setup(map: Node, rng_seed := 0) -> void:
 		exit_zone = zones[0]
 		exit_zone.reached.connect(_on_exit_reached)
 	fuses_changed.emit(rules.found(), rules.placed)
+
+
+## The objectives of the game (S-018, Q13): imposed, or drawn among those
+## allowed; only those the map offers; fuses only when none is.
+func _draw_objectives(map: Node) -> void:
+	var offered := Quests.offered_by(map, settings) + [LoopRules.Objective.FUSE]
+	var kinds: Array = forced.filter(func(kind: int) -> bool: return kind in offered)
+	if kinds.is_empty():
+		var drawable := allowed.filter(func(kind: int) -> bool: return kind in offered)
+		if drawable.is_empty():
+			return  # settings.fuse_count fuses, as before S-018.
+		kinds = LoopRules.draw_objectives(drawable, settings.objectives_per_game, _rng)
+	rules.set_objectives(kinds)
+	quests = Quests.new()
+	quests.name = "Quests"
+	quests.settings = settings
+	add_child(quests)
+	quests.setup(map, rules, _rng)
+	quests.changed.connect(_on_quests_changed)
+
+
+func _on_quests_changed() -> void:
+	fuses_changed.emit(rules.found(), rules.placed)
+	if transformer != null:
+		transformer.update_label()
+	if rules.is_repaired():
+		_open_exit()
+
+
+## Parses an imposed list of objectives, such as "fuse,code,download,relay".
+static func parse_objectives(text: String) -> Array:
+	var kinds := []
+	for word in text.to_lower().split(",", false):
+		var kind: int = LoopRules.Objective.keys().find(word.strip_edges().to_upper())
+		if kind >= 0:
+			kinds.append(kind)
+	return kinds
 
 
 ## The transformer and the gate of the map.
@@ -369,6 +419,9 @@ func _physics_process(delta: float) -> void:
 
 
 func _open_exit() -> void:
+	if _exit_opened:
+		return
+	_exit_opened = true
 	if transformer != null:
 		siren_left = settings.siren_time
 		_siren_noise_left = 0.0
