@@ -1,5 +1,6 @@
 extends GutTest
-## Interiors of the tower and the cellars with the mood of the hospital (S-019):
+## Interiors of the tower, the cellars, the social centre, the gallery and the
+## car park with the mood of the hospital (S-019):
 ## lined rooms in one material, the decor of each storey in one draw call drawn
 ## near it only, a few live lamps baked like the street lights.
 
@@ -28,13 +29,16 @@ func _lining_surfaces(node_path: String) -> int:
 func test_the_tower_and_the_cellars_are_lined_in_one_draw_call_each() -> void:
 	assert_eq(_lining_surfaces("Structures/Tower/Mesh"), 1)
 	assert_eq(_lining_surfaces("Structures/Cellars/Mesh"), 1)
+	assert_eq(_lining_surfaces("Structures/SocialCentre/Mesh"), 1)
+	assert_eq(_lining_surfaces("Structures/Gallery/Mesh"), 1)
+	assert_eq(_lining_surfaces("Structures/CarPark/Mesh"), 1)
 	# The blocks of flats seen from outside keep their concrete.
 	assert_eq(_lining_surfaces("Structures/BarreA/Mesh"), 0)
 
 
-func test_each_storey_has_its_decor_in_one_draw_call_drawn_near_it() -> void:
+func test_each_storey_and_building_has_its_decor_in_one_draw_call_drawn_near_it() -> void:
 	var decor := _map.get_node("InteriorDecor")
-	assert_eq(decor.get_child_count(), 6, "5 storeys and the cellars")
+	assert_eq(decor.get_child_count(), 11, "5 storeys, the cellars, 2 in each public building")
 	for node: MeshInstance3D in decor.get_children():
 		assert_eq(node.mesh.get_surface_count(), 1, node.name)
 		assert_gt(node.visibility_range_end, 0.0, node.name)
@@ -43,7 +47,7 @@ func test_each_storey_has_its_decor_in_one_draw_call_drawn_near_it() -> void:
 
 func test_live_lamps_are_few_baked_and_never_orange() -> void:
 	var lamps := _map.get_node("Props/InteriorLights").get_children()
-	assert_between(lamps.size(), 5, 20)
+	assert_between(lamps.size(), 5, 25)
 	for light: OmniLight3D in lamps:
 		assert_eq(light.light_cull_mask & MapKit.BAKED_LAYER, 0, light.name)
 		assert_true(light.distance_fade_enabled, light.name)
