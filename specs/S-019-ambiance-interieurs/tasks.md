@@ -14,7 +14,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-293 — Centre social, galerie et parking
   - Résultat vérifiable : même palette et mêmes lampes, captures et mesure des appels de dessin
   - Dépend de : T-292, fin de S-016 (T-244)
-- [ ] T-294 — Vérification finale de S-019
+- [x] T-294 — Vérification finale de S-019
   - Résultat vérifiable : critères cochés, export web vérifié
   - Dépend de : T-293
 
@@ -23,3 +23,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - T-291 : chaque face d'un bloc de béton qui regarde dans une pièce prend la tuile de cette pièce (couleur de sommet = numéro de tuile, lue par `retro_surface`), découpée aux limites des pièces. Un seul matériau par structure, cellules de lumière précalculée de 1,5 m dans les pièces.
 - T-292 : décor fait de boîtes colorées par sommet (alpha 0 = lumineux) dans un seul maillage par étage, affiché à moins de 14 m ; 17 lampes vivantes sous `Props/InteriorLights`.
 - T-293 (16/11/2026) : centre social (salle des fêtes en parquet avec guirlandes et banderole, cuisine en faïence, couloir et trois bureaux), galerie (pharmacie et sa croix verte, laverie et ses hublots, tabac, épicerie, boulangerie, couloir de livraison) et parking (murs tagués des caves, tubes, places peintes, numéros de piliers). Les pièces au niveau de la rue reçoivent un sol mince sans collision, comme le rez-de-chaussée de la tour ; au-dessus de 3 m, les murs des pièces hautes prennent le plâtre du plafond. 4 lampes vivantes de plus (21 en tout), décor en 2 maillages par bâtiment affichés à moins de 18 m. Mesure (`measure_map`) : +1 à +6 appels de dessin par vue ; pire vue toujours le palier du 2e étage de la tour (297 pour 295 avant, limite 300).
+- T-294 (16/11/2026) : critères cochés. Navmesh inchangé et tests S-016 verts en CI ; une lampe vivante par couloir de la tour, aucune orange (test) ; +1 à +9 appels de dessin par vue, 297 au pire (palier du 2e étage, limite 300), triangles sous 95 000 ; export web vérifié par la CI (« Import, tests and web export ») sur #136 et #139.

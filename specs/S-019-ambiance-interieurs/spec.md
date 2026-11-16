@@ -1,6 +1,6 @@
 # S-019 — Ambiance des intérieurs de la cité
 
-**Statut** : validée (15/11/2026, Maxime : « magnifique » sur la planche d'ambiance).
+**Statut** : livrée (16/11/2026, PRs #136 et #139) ; validée le 15/11/2026 (Maxime : « magnifique » sur la planche d'ambiance).
 **Piliers servis** : P3 (l'inquiétante familiarité), P4 (le rétro qui dérange)
 **Phase** : hors feuille de route, demandée par Maxime le 15/11/2026 (« la cité des Tilleuls doit avoir la même ambiance que l'hôpital, les intérieurs ressemblent à des parkings à étages, ça fait très peu HLM »).
 
@@ -20,8 +20,8 @@ J'entre dans le hall de la tour : granito sale, faïence beige taguée, boîtes 
 - **Ordre** : la tour et les caves d'abord, puis le centre social, la galerie et le parking avec la même palette (lieux publics : carrelage, néons).
 
 ## Critères d'acceptation
-- [ ] Le hall, l'escalier, les couloirs et les appartements de la tour ont chacun leur revêtement ; les captures en jeu rappellent la planche.
-- [ ] Les murs, portes, cachettes et le maillage de navigation sont inchangés (tests S-016 verts).
-- [ ] Une lampe vivante au plus par couloir, aucune lumière orange, lumière précalculée.
-- [ ] Au plus 10 appels de dessin de plus dans les vues de la tour, triangles sous 150 000.
-- [ ] Le centre social, la galerie et le parking reçoivent la même palette.
+- [x] Le hall, l'escalier, les couloirs et les appartements de la tour ont chacun leur revêtement ; les captures en jeu rappellent la planche.
+- [x] Les murs, portes, cachettes et le maillage de navigation sont inchangés (tests S-016 verts).
+- [x] Une lampe vivante au plus par couloir, aucune lumière orange, lumière précalculée.
+- [x] Au plus 10 appels de dessin de plus dans les vues de la tour, triangles sous 150 000.
+- [x] Le centre social, la galerie et le parking reçoivent la même palette.
