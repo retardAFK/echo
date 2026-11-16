@@ -109,7 +109,11 @@ func _ready() -> void:
 func _visible_lights(camera: Camera3D, eye: Vector3, lights: Array) -> int:
 	var near := 0
 	var space := get_viewport().get_world_3d().direct_space_state
-	for light: Light3D in lights:
+	for node: Variant in lights:
+		# The bodies of the characters free some of their lights at start.
+		if not is_instance_valid(node):
+			continue
+		var light := node as Light3D
 		if not (light is OmniLight3D and light.is_visible_in_tree()):
 			continue
 		var at := light.global_position

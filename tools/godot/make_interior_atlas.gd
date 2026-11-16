@@ -1,6 +1,7 @@
 extends SceneTree
 ## Generates the atlas of the HLM interior linings (S-019, validated mood board
-## tools/blender/hlm_interior_mood.py): one tile per kind of wall, floor and
+## tools/blender/hlm_interior_mood.py) and of the hospital (S-014, mood board
+## tools/blender/hospital_mood.py): one tile per kind of wall, floor and
 ## ceiling, 4 m wide and one storey (3 m) high at 64 px per meter.
 ## Run: godot --headless -s tools/godot/make_interior_atlas.gd
 ## Same seed, same pixels: the PNG can be regenerated at any time.
@@ -11,7 +12,7 @@ extends SceneTree
 
 const OUT := "res://assets/textures/interior_atlas.png"
 const TILE := Vector2i(256, 192)
-const GRID := Vector2i(4, 3)
+const GRID := Vector2i(4, 4)
 const PPM := 64.0
 const SEED := 19
 
@@ -19,6 +20,7 @@ const SEED := 19
 enum Tile {
 	HALL, STAIRS, CORRIDOR, LIVING, BEDROOM, KITCHEN, CELLAR, CEILING,
 	TERRAZZO, LINO, PARQUET, CONCRETE,
+	WARD_CORRIDOR, FAIENCE, WARD, WARD_LINO,
 }
 
 var _rng := RandomNumberGenerator.new()
@@ -284,3 +286,85 @@ func _parquet() -> void:
 func _concrete() -> void:
 	_fill(0, TILE.y, Color(0.3, 0.3, 0.29), 0.05)
 	_stains(12, 0.5, Color(0.12, 0.12, 0.12), false)
+
+
+# --- Hospital (S-014) ----------------------------------------------------------
+
+
+## Scuffs in a band of heights: the gurneys and the trolleys rubbing the wall.
+func _scuffs(count: int, y0: int, y1: int) -> void:
+	for i in count:
+		var x := _rng.randi_range(0, TILE.x - 1)
+		var y := _rng.randi_range(y0, y1)
+		for dx in _rng.randi_range(8, 30):
+			_put_wrap(x + dx, y, _pick(x + dx, y).darkened(0.35))
+
+
+## Paint flaking off in patches, the plaster or older paint showing.
+func _flakes(count: int, under: Color) -> void:
+	for i in count:
+		var cx := _rng.randi_range(0, TILE.x - 1)
+		var cy := _rng.randi_range(20, TILE.y - 1)
+		var r := _rng.randf_range(3, 10)
+		for y in range(int(cy - r), int(cy + r)):
+			for x in range(int(cx - r * 1.5), int(cx + r * 1.5)):
+				var d := Vector2((x - cx) / 1.5, y - cy).length()
+				if d < r - _rng.randf_range(0, 2):
+					_put_wrap(x, y, _noise(under, 0.02))
+				elif d < r + 1:
+					_put_wrap(x, y, _pick(x, y).darkened(0.3))
+
+
+## Hospital corridor: sea-green gloss to 1.4 m under a grey bumper rail,
+## dirty cream above, scuffed by the gurneys.
+func _ward_corridor() -> void:
+	var split := int(1.4 * PPM)
+	_fill(0, split, Color(0.3, 0.42, 0.37), 0.02)
+	_line(split, split + 2, Color(0.1, 0.1, 0.1))
+	_fill(split + 2, TILE.y, Color(0.5, 0.5, 0.43), 0.025)
+	_line(int(0.9 * PPM), int(0.9 * PPM) + 6, Color(0.3, 0.31, 0.3))  # The bumper rail.
+	_line(int(0.9 * PPM) + 6, int(0.9 * PPM) + 7, Color(0.12, 0.12, 0.12))
+	_scuffs(40, 6, int(0.9 * PPM))
+	_flakes(5, Color(0.42, 0.42, 0.38))
+	_stains(10, 0.4, Color(0.2, 0.18, 0.12), false)
+	_grime(16, 14)
+
+
+## Morgue, theatres, care rooms: dirty white faience to the ceiling, tiles
+## missing, rust-brown runs.
+func _faience() -> void:
+	_tiles(0, TILE.y, 16, Color(0.6, 0.61, 0.57), Color(0.33, 0.34, 0.31), 0.025)
+	_stains(8, 0.45, Color(0.3, 0.2, 0.12), true)
+	_stains(5, 0.3, Color(0.22, 0.24, 0.2), false)
+	for i in 6:  # Runs down from a crack.
+		var x := _rng.randi_range(0, TILE.x - 1)
+		var top := _rng.randi_range(60, TILE.y - 1)
+		for dy in _rng.randi_range(20, 60):
+			_put(x, top - dy, _pick(x, top - dy).lerp(Color(0.3, 0.19, 0.11), 0.5))
+	_grime(8, 10)
+
+
+## Wards and offices: sea-green paint to the ceiling, peeling, damp.
+func _ward() -> void:
+	_fill(0, TILE.y, Color(0.4, 0.48, 0.43), 0.025)
+	_line(0, 5, Color(0.2, 0.22, 0.2))  # The skirting.
+	_flakes(9, Color(0.5, 0.49, 0.43))
+	_stains(9, 0.4, Color(0.22, 0.2, 0.13), false)
+	_grime(20, 16)
+
+
+## Sheet linoleum, pale grey-green, welded seams, wheel tracks, stains.
+func _ward_lino() -> void:
+	for y in TILE.y:
+		for x in TILE.x:
+			var c := Color(0.36, 0.4, 0.37)
+			if x % 128 == 0:
+				c = Color(0.2, 0.22, 0.2)  # A seam.
+			elif _rng.randf() < 0.05:
+				c = c.lightened(0.08)
+			_put(x, y, _noise(c, 0.02))
+	for track: int in [70, 100, 156, 186]:  # The wheels' tracks, along the corridor.
+		for y in TILE.y:
+			for dx in 3:
+				_put(track + dx, y, _pick(track + dx, y).darkened(0.18))
+	_stains(14, 0.4, Color(0.18, 0.16, 0.12), false)

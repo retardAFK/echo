@@ -56,6 +56,9 @@ const GAUGE := preload("res://game/ui/noise_gauge.tscn")
 const CAUGHT := preload("res://game/ui/caught_screen.tscn")
 const INTERACT_PROMPT := preload("res://game/ui/interact_prompt.tscn")
 const CAR_ALARM := preload("res://game/entities/car_alarm/car_alarm.tscn")
+## The car alarm under the hospital's canopy is the abandoned ambulance (S-014).
+const AMBULANCE_ALARM := preload("res://game/entities/car_alarm/ambulance_alarm.tscn")
+const AMBULANCE_CAR := 4
 const RETRO_POST := preload("res://game/fx/retro_post.tscn")
 const LAMPPOST := preload("res://game/entities/props/lamppost.tscn")
 const BENCH_DIRTY := preload("res://game/entities/props/bench_dirty.tscn")
@@ -85,9 +88,15 @@ const FURNITURE_MODELS := {
 	"counter": preload("res://assets/models/counter.glb"),
 	"shelves": preload("res://assets/models/shelves.glb"),
 	"lift_doors": preload("res://assets/models/lift_doors.glb"),
+	# The hospital (S-014, T-189, tools/blender/hospital_kit.py).
+	"hospital_bed": preload("res://assets/models/hospital/hospital_bed.glb"),
+	"morgue_drawers": preload("res://assets/models/hospital/morgue_drawers.glb"),
+	"curtain": preload("res://assets/models/hospital/curtain.glb"),
+	"iv_pole": preload("res://assets/models/hospital/iv_pole.glb"),
 }
-## What only shows, and stops nobody: the curtain, the lift doors on its shaft.
-const FURNITURE_GHOSTS := ["stage_curtain", "lift_doors"]
+## What only shows, and stops nobody: the curtains, the lift doors on its
+## shaft, the drip stands.
+const FURNITURE_GHOSTS := ["stage_curtain", "lift_doors", "curtain", "iv_pole"]
 const CENTRE_WINDOW := preload("res://assets/models/centre_window.glb")
 const CENTRE_ENTRANCE := preload("res://assets/models/centre_entrance.glb")
 const FOLDING_TABLE := preload("res://assets/models/folding_table.glb")
@@ -1629,7 +1638,8 @@ func _add_props() -> void:
 	_add(cars)
 	cars.add_to_group("navigation_source", true)
 	for i in CAR_ALARMS.size():
-		_place(cars, CAR_ALARM, "Car%d" % (i + 1), CAR_ALARMS[i][0], CAR_ALARMS[i][1])
+		var scene := AMBULANCE_ALARM if i == AMBULANCE_CAR else CAR_ALARM
+		_place(cars, scene, "Car%d" % (i + 1), CAR_ALARMS[i][0], CAR_ALARMS[i][1])
 	_add_light(props, "TowerBeacon", Vector2(104, 100), TOWER_STOREYS * STOREY + 1.0, Color(1, 0.15, 0.1), 2.0, 6.0, false)
 	_add_light(props, "SocialCentreLamp", Vector2(161.5, 58.5), 3.0, Color(1, 0.9, 0.7), 1.0, 5.0)
 	_add_light(props, "LaundretteSign", Vector2(57.6, 137.5), 2.6, Color(0.7, 0.85, 1.0), 0.9, 5.0)
@@ -1714,7 +1724,7 @@ func _furniture_pieces() -> Array:
 		for piece: Array in FLAT_FURNITURE:
 			var at: Vector2 = piece[1]
 			pieces.append([piece[0], Vector3(at.x, level * STOREY, at.y), piece[2], 1.0])
-	for piece: Array in FURNITURE:
+	for piece: Array in FURNITURE + Hospital.FURNITURE:
 		pieces.append([piece[0], piece[1], piece[2], piece[3] if piece.size() > 3 else 1.0])
 	var keep_clear: Array = CLOSETS + BOTTLES + DECOYS + HIDING_SPOTS + PREY_ROUTE + PATROL_ROUTE
 	for spot: Array in FAMILY_SPOTS + Hospital.SPOTS:

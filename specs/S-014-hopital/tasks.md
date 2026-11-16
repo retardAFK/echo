@@ -32,10 +32,10 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-188 — L'hôpital dans la boucle de partie
   - Résultat vérifiable : 6 emplacements de fusible, 15 cachettes, terminal, caméra, haut-parleur, relais, code, ambulance ; tests GUT
   - Dépend de : T-184, T-186, T-187
-- [ ] T-189 — Assets de l'hôpital
+- [x] T-189 — Assets de l'hôpital
   - Résultat vérifiable : `tools/blender/hospital_kit.py`, rendus validés par Maxime
   - Dépend de : T-182
-- [ ] T-190 — Habillage et éclairage précalculé
+- [x] T-190 — Habillage et éclairage précalculé
   - Résultat vérifiable : tuiles de l'hôpital dans l'atlas, mobilier, néons qui grésillent, brouillard du couloir ; budget tenu
   - Dépend de : T-188, T-189
 - [ ] T-191 — Ambiance sonore de l'hôpital

@@ -344,10 +344,10 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [x] T-188 — L'hôpital dans la boucle de partie
   - Résultat vérifiable : 6 emplacements de fusibles, 15 cachettes, terminal, caméra, haut-parleur, relais et code placés dans l'hôpital (Q8, Q9) ; l'ambulance à alarme ; la boucle de la cité (transformateur, tunnel) reste la même
   - Dépend de : T-184, T-186, T-187
-- [ ] T-189 — Assets de l'hôpital
+- [x] T-189 — Assets de l'hôpital
   - Résultat vérifiable : kit de couloirs, chambres, carrelage, néons verts, lits, brancards, fauteuils, moniteurs, tiroirs de morgue, ambulance ; scripts dans `tools/blender/` ; rendus validés par Maxime
   - Dépend de : T-182
-- [ ] T-190 — Habillage et éclairage précalculé
+- [x] T-190 — Habillage et éclairage précalculé
   - Résultat vérifiable : hôpital habillé, néons qui grésillent, traces d'évacuation, brouillard intérieur ; budget de lumières et d'appels de dessin tenu
   - Dépend de : T-188, T-189
 - [ ] T-191 — Ambiance sonore de l'hôpital

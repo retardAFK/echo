@@ -124,6 +124,81 @@ const EAST_ROOMS := {
 		[124.0, 132.0, 128.0]
 	],
 }
+## Lining of the rooms (InteriorLining.Tile names, wall then floor), in the
+## order of WEST_ROOMS then EAST_ROOMS, from the paper plan's room names.
+const ROOM_TILES := {
+	-3.0:
+	[
+		[  # Morgue, autopsy, quay, boiler room.
+			["FAIENCE", "CONCRETE"],
+			["FAIENCE", "CONCRETE"],
+			["CELLAR", "CONCRETE"],
+			["CELLAR", "CONCRETE"],
+		],
+		[  # Four padded cells, linen room, archives, technical room.
+			["WARD", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["CELLAR", "CONCRETE"],
+			["CELLAR", "CONCRETE"],
+			["CELLAR", "CONCRETE"],
+		],
+	],
+	0.0:
+	[
+		[  # X-ray 1 and 2, pharmacy, waiting room, emergency boxes.
+			["FAIENCE", "WARD_LINO"],
+			["FAIENCE", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["WARD_CORRIDOR", "TERRAZZO"],
+			["WARD", "WARD_LINO"],
+		],
+		[  # Admissions, reception, hall, airlock, care room, storeroom.
+			["WARD", "WARD_LINO"],
+			["WARD_CORRIDOR", "TERRAZZO"],
+			["WARD_CORRIDOR", "TERRAZZO"],
+			["FAIENCE", "WARD_LINO"],
+			["FAIENCE", "WARD_LINO"],
+			["CELLAR", "CONCRETE"],
+		],
+	],
+	3.0:
+	[
+		[  # Rooms 101, 103, 105, washrooms, rooms 107, 109.
+			["WARD", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["FAIENCE", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+		],
+		[  # Rooms 102, 104, nurses' station, rooms 106, 108, linen.
+			["WARD", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["WARD_CORRIDOR", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["CELLAR", "CONCRETE"],
+		],
+	],
+	6.0:
+	[
+		[  # Sterilisation, theatres 1 and 2, intensive care.
+			["FAIENCE", "WARD_LINO"],
+			["FAIENCE", "WARD_LINO"],
+			["FAIENCE", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+		],
+		[  # Theatre airlock, rest room, lift side, glazed boxes, store.
+			["FAIENCE", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["WARD", "WARD_LINO"],
+			["CELLAR", "CONCRETE"],
+		],
+	],
+}
 ## Doors in the walls between two rooms: level, side (-1 west, 1 east), the
 ## wall's y, the middle of the door along x.
 const LINKS := [
@@ -201,6 +276,55 @@ const SPOTS := [
 	["Low", Vector3(11.0, 6.0, 111.0)],  # Reanimation beds.
 	["Low", Vector3(31.0, 6.0, 108.0)],
 ]
+## Furniture (build_tilleuls.gd's FURNITURE format): model, plan point (x,
+## height, y), front toward that plan direction. Beds head to the outer wall,
+## the morgue's drawers on its west wall, curtains between the emergency
+## boxes, drip stands by the beds. Pieces on a hiding spot or a slot drop out.
+const FURNITURE := [
+	["morgue_drawers", Vector3(10.15, -3.0, 70.0), Vector2.RIGHT],
+	# Emergency boxes, ground floor west.
+	["hospital_bed", Vector3(11.2, 0.0, 106.0), Vector2.RIGHT],
+	["curtain", Vector3(11.4, 0.0, 109.6), Vector2.DOWN],
+	["hospital_bed", Vector3(11.2, 0.0, 113.0), Vector2.RIGHT],
+	["curtain", Vector3(11.4, 0.0, 116.6), Vector2.DOWN],
+	["hospital_bed", Vector3(11.2, 0.0, 120.0), Vector2.RIGHT],
+	["iv_pole", Vector3(12.6, 0.0, 121.3), Vector2.RIGHT],
+	["hospital_bed", Vector3(30.8, 0.0, 115.5), Vector2.LEFT],  # Care room.
+	# 1st floor rooms.
+	["hospital_bed", Vector3(11.2, 3.0, 64.5), Vector2.RIGHT],
+	["hospital_bed", Vector3(11.2, 3.0, 71.5), Vector2.RIGHT],
+	["iv_pole", Vector3(12.6, 3.0, 73.0), Vector2.RIGHT],
+	["hospital_bed", Vector3(11.2, 3.0, 76.5), Vector2.RIGHT],
+	["hospital_bed", Vector3(11.2, 3.0, 84.0), Vector2.RIGHT],
+	["hospital_bed", Vector3(11.2, 3.0, 88.5), Vector2.RIGHT],
+	["hospital_bed", Vector3(11.2, 3.0, 107.5), Vector2.RIGHT],
+	["hospital_bed", Vector3(11.2, 3.0, 118.0), Vector2.RIGHT],
+	["iv_pole", Vector3(12.6, 3.0, 119.5), Vector2.RIGHT],
+	["hospital_bed", Vector3(11.2, 3.0, 123.0), Vector2.RIGHT],
+	["hospital_bed", Vector3(30.8, 3.0, 65.0), Vector2.LEFT],
+	["hospital_bed", Vector3(30.8, 3.0, 71.0), Vector2.LEFT],
+	["hospital_bed", Vector3(30.8, 3.0, 84.0), Vector2.LEFT],
+	["iv_pole", Vector3(29.4, 3.0, 85.5), Vector2.LEFT],
+	["hospital_bed", Vector3(30.8, 3.0, 100.0), Vector2.LEFT],
+	["hospital_bed", Vector3(30.8, 3.0, 106.0), Vector2.LEFT],
+	["hospital_bed", Vector3(30.8, 3.0, 119.0), Vector2.LEFT],
+	# Intensive care, 2nd floor.
+	["hospital_bed", Vector3(11.2, 6.0, 104.0), Vector2.RIGHT],
+	["iv_pole", Vector3(12.6, 6.0, 105.5), Vector2.RIGHT],
+	["hospital_bed", Vector3(11.2, 6.0, 117.0), Vector2.RIGHT],
+	["hospital_bed", Vector3(11.2, 6.0, 122.5), Vector2.RIGHT],
+	["iv_pole", Vector3(12.6, 6.0, 124.0), Vector2.RIGHT],
+	["hospital_bed", Vector3(30.8, 6.0, 101.0), Vector2.LEFT],
+	["hospital_bed", Vector3(30.8, 6.0, 114.0), Vector2.LEFT],
+	["iv_pole", Vector3(29.4, 6.0, 115.5), Vector2.LEFT],
+	["hospital_bed", Vector3(30.8, 6.0, 120.0), Vector2.LEFT],
+]
+## The tubes that stutter (NeonTube): plan x, level floor, plan y; along the
+## corridor, at the far south of the ground floor, the north of the 1st, and
+## in the morgue.
+const NEONS := [Vector3(21.0, 0.0, 129.0), Vector3(21.0, 3.0, 59.0), Vector3(14.75, -3.0, 65.0)]
+const NEON := preload("res://game/entities/neon/neon_tube.tscn")
+
 ## The network of the cité in the hospital (S-018 formats).
 const TERMINALS := [
 	[Vector3(27.5, 3.0, 96.7), 0.0, Terminal.Kind.NORMAL, "NET_TERM_HOSPITAL"],
@@ -324,6 +448,28 @@ func add_gameplay() -> void:
 		thing.position = kit.world(at.x, at.z, at.y)
 		rolling.add_child(thing)
 		thing.owner = rolling.owner
+	var neons := Node3D.new()
+	neons.name = "Neons"
+	_builder._add(neons)
+	for i in NEONS.size():
+		var at: Vector3 = NEONS[i]
+		var neon: Node3D = NEON.instantiate()
+		neon.name = "Neon%d" % (i + 1)
+		neon.position = kit.world(at.x, at.z, at.y + STOREY - _slab)
+		neon.rotation.y = PI / 2.0  # Along the corridor.
+		neons.add_child(neon)
+		neon.owner = neons.owner
+	var fogs := Node3D.new()
+	fogs.name = "IndoorFog"
+	_builder._add(fogs)
+	var corridor := Rect2(CORRIDOR.x, RECT.position.y, CORRIDOR.y - CORRIDOR.x, RECT.size.y)
+	for h: float in LEVELS:
+		var fog := IndoorFog.new()
+		fog.name = "Corridor%d" % (LEVELS.find(h))
+		fog.size = Vector3(corridor.size.x, STOREY, corridor.size.y)
+		fog.position = kit.world(corridor.get_center().x, corridor.get_center().y, h + STOREY / 2.0)
+		fogs.add_child(fog)
+		fog.owner = fogs.owner
 	var zones := Node3D.new()
 	zones.name = "Ventilation"
 	_builder._add(zones)

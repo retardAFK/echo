@@ -32,22 +32,29 @@ func test_the_tower_and_the_cellars_are_lined_in_one_draw_call_each() -> void:
 	assert_eq(_lining_surfaces("Structures/SocialCentre/Mesh"), 1)
 	assert_eq(_lining_surfaces("Structures/Gallery/Mesh"), 1)
 	assert_eq(_lining_surfaces("Structures/CarPark/Mesh"), 1)
+	assert_eq(_lining_surfaces("Structures/Hospital/Mesh"), 1, "S-014")
 	# The blocks of flats seen from outside keep their concrete.
 	assert_eq(_lining_surfaces("Structures/BarreA/Mesh"), 0)
 
 
 func test_each_storey_and_building_has_its_decor_in_one_draw_call_drawn_near_it() -> void:
 	var decor := _map.get_node("InteriorDecor")
-	assert_eq(decor.get_child_count(), 11, "5 storeys, the cellars, 2 in each public building")
+	assert_eq(
+		decor.get_child_count(),
+		23,
+		"5 storeys, the cellars, 2 in each public building, 3 stretches of each hospital level"
+	)
 	for node: MeshInstance3D in decor.get_children():
 		assert_eq(node.mesh.get_surface_count(), 1, node.name)
 		assert_gt(node.visibility_range_end, 0.0, node.name)
-		assert_lte(node.visibility_range_end, 20.0, node.name)
+		# The hospital's long corridors are seen farther, into their fog.
+		var reach := 32.0 if node.name.begins_with("Hospital") else 20.0
+		assert_lte(node.visibility_range_end, reach, node.name)
 
 
 func test_live_lamps_are_few_baked_and_never_orange() -> void:
 	var lamps := _map.get_node("Props/InteriorLights").get_children()
-	assert_between(lamps.size(), 5, 25)
+	assert_between(lamps.size(), 5, 70)
 	for light: OmniLight3D in lamps:
 		assert_eq(light.light_cull_mask & MapKit.BAKED_LAYER, 0, light.name)
 		assert_true(light.distance_fade_enabled, light.name)

@@ -23,6 +23,15 @@ extends Resource
 ## Energy of the moonlight, very faint.
 @export_range(0.0, 2.0, 0.01) var moon_energy: float = 0.08
 
+@export_group("Indoor fog (S-014)")
+## Fog of the hospital's corridors: the depth fog thickens to this density
+## while the camera is in an IndoorFog zone, so the neons fade into it.
+@export_range(0.0, 0.3, 0.001) var indoor_fog_density: float = 0.09
+## Color of that fog, a dirty sea green under the neons.
+@export var indoor_fog_color := Color(0.13, 0.17, 0.15)
+## Time for the fog to thicken or thin out when the camera crosses a zone.
+@export_range(0.1, 5.0, 0.1, "suffix:s") var indoor_fog_time: float = 1.5
+
 @export_group("Screen filter")
 ## Color levels per channel, fewer means a more retro image.
 @export_range(2, 256) var color_levels: int = 24

@@ -4,8 +4,9 @@ extends GutTest
 ## or a pickup, and drawn only near the camera.
 
 const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
-## Pieces that only show: the stage curtain, the lift doors on their shaft.
-const GHOSTS := ["StageCurtain", "LiftDoors"]
+## Pieces that only show: the stage curtain, the lift doors on their shaft,
+## the hospital's curtains and drip stands.
+const GHOSTS := ["StageCurtain", "LiftDoors", "Curtain", "IvPole"]
 
 var _map: GameMap
 

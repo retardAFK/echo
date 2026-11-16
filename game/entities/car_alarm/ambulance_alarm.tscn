@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/car_alarm/car_alarm.gd" id="1_alarm"]
+[ext_resource type="Resource" path="res://game/data/car_alarm_settings.tres" id="2_settings"]
+[ext_resource type="PackedScene" path="res://assets/models/hospital/ambulance.glb" id="3_model"]
+
+[sub_resource type="BoxShape3D" id="Shape_body"]
+size = Vector3(2.1, 2.7, 6.0)
+
+[node name="AmbulanceAlarm" type="Node3D"]
+script = ExtResource("1_alarm")
+settings = ExtResource("2_settings")
+
+[node name="Model" parent="." instance=ExtResource("3_model")]
+
+[node name="HazardLeft" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 2.9, 0.88)
+light_color = Color(0.55, 0.65, 1, 1)
+omni_range = 5.0
+
+[node name="HazardRight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 2.9, 0.88)
+light_color = Color(0.55, 0.65, 1, 1)
+omni_range = 5.0
+
+[node name="Body" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
+shape = SubResource("Shape_body")
