@@ -4,8 +4,8 @@ extends GutTest
 const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const ORIGIN := Vector3(110, 0, 110)
 const VISITABLE := ["Tower", "SocialCentre", "Gallery", "CarPark"]
-const SCANNABLE := ["Tower", "SocialCentre", "Gallery", "CarPark", "Garages"]
-const FACADES := ["BarreA", "BarreB", "BarreC", "BarreD", "BarreE", "BarreF", "BarreG"]
+const SCANNABLE := ["Tower", "SocialCentre", "Gallery", "CarPark", "Garages", "Hospital"]
+const FACADES := ["BarreA", "BarreB", "BarreD", "BarreE", "BarreF", "BarreG"]
 ## A fuse slot must be reachable by the AI monster: the end of the path is this close.
 const REACH := 1.0
 

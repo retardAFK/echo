@@ -23,7 +23,6 @@ const TRANSFORMER := Rect2(96, 150, 9, 7)
 const BLOCK_KEYS := {
 	"BarreA": "MAP_BLOCK_A",
 	"BarreB": "MAP_BLOCK_B",
-	"BarreC": "MAP_BLOCK_C",
 	"BarreD": "MAP_BLOCK_D",
 	"BarreE": "MAP_BLOCK_E",
 	"BarreF": "MAP_BLOCK_F",
@@ -67,4 +66,5 @@ static func make_plan() -> MapPlan:
 	plan.add(Tilleuls.GALLERY, MapPlan.Kind.BUILDING, "BUILDING_GALLERY")
 	plan.add(Tilleuls.CAR_PARK, MapPlan.Kind.BUILDING, "BUILDING_CAR_PARK")
 	plan.add(Tilleuls.GARAGES, MapPlan.Kind.BUILDING, "BUILDING_GARAGES")
+	plan.add(Tilleuls.Hospital.RECT, MapPlan.Kind.BUILDING, "BUILDING_HOSPITAL")
 	return plan

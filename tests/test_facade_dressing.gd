@@ -42,11 +42,11 @@ func test_panels_use_the_retro_surface() -> void:
 
 
 func test_every_block_of_flats_is_dressed_on_its_four_sides() -> void:
-	# 7 blocks and the tower, four walls each.
+	# 6 blocks (block C made way for the hospital, S-014) and the tower, four walls each.
 	var walls := {}
 	for wall in _dressing.walls:
 		walls[wall] = true
-	assert_eq(walls.size(), 32)
+	assert_eq(walls.size(), 28)
 
 
 func test_blocks_of_flats_have_entrance_doors() -> void:
