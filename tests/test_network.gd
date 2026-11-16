@@ -304,7 +304,7 @@ func test_online_a_hunted_sees_what_its_camera_sees() -> void:
 	# The world state says the LED is lit and the terminal used, not by whom.
 	var state: Array = net.world.state()
 	assert_eq(state.size(), 8)
-	assert_eq(state[7][0][0], [false, true])
+	assert_eq(state[7][0][0], [false, true, 0])
 	assert_eq(state[7][1][0], [true, false])
 
 

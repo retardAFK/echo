@@ -1,20 +1,22 @@
 class_name CityNetwork
 extends Node
 ## The network of the cité (spec S-018, part B): its terminals and its
-## security cameras (loudspeakers, shutters, the guard terminal and the
-## objectives join it with T-264 to T-266). It lists them in a fixed order,
-## the same on the room and on every client, says what a terminal's menu
-## offers, carries out what a hunted picks there (a PICK action), and keeps
-## who watches which camera.
+## security cameras, and the guard's terminal that opens the prison (Q4)
+## (loudspeakers, shutters and the objectives join it with T-265 and T-266).
+## It lists them in a fixed order, the same on the room and on every client,
+## says what a terminal's menu offers, carries out what a hunted picks there
+## (a PICK action), and keeps who watches which camera.
 ## Online, the room sends state() in NetWorld; a client shows it with apply().
 
 ## What a line of a terminal's menu does.
-enum Entry { CAMERA }
+enum Entry { CAMERA, OPEN_CAGES }
 
 const GROUP := &"city_network"
 
 var terminals: Array[Terminal] = []
 var cameras: Array[SecurityCamera] = []
+## The prison the guard's terminal opens, or null.
+var prison: Prison
 ## Online client: the room decides.
 var mirror := false:
 	set(value):
@@ -24,6 +26,8 @@ var mirror := false:
 
 ## Who watches which camera: watcher -> SecurityCamera.
 var _watching := {}
+## Guard terminals opening the cages: Terminal -> seconds done.
+var _opening := {}
 
 
 static func of(node: Node) -> CityNetwork:
@@ -41,13 +45,18 @@ func _ready() -> void:
 			(node as Terminal).left.connect(_on_left)
 		elif node is SecurityCamera:
 			cameras.append(node)
+		elif node is Prison:
+			prison = node
 
 
-## The lines of a terminal's menu, in order: [Entry, index, label key].
-func entries_for(_terminal: Terminal) -> Array:
+## The lines of a terminal's menu, in order: [Entry, index, label key]. The
+## guard's terminal ends with "open the cages", when there is a prison.
+func entries_for(terminal: Terminal) -> Array:
 	var entries := []
 	for i in cameras.size():
 		entries.append([Entry.CAMERA, i, cameras[i].label_key])
+	if terminal != null and terminal.kind == Terminal.Kind.GUARD and prison != null:
+		entries.append([Entry.OPEN_CAGES, 0, "HUD_TERMINAL_OPEN_CAGES"])
 	return entries
 
 
@@ -64,6 +73,33 @@ func pick(user: Node3D, n: int) -> void:
 		Entry.CAMERA:
 			var camera := cameras[entry[1]]
 			watch(user, null if watched_by(user) == camera else camera)
+		Entry.OPEN_CAGES:
+			if has_prisoners() and not _opening.has(terminal):
+				_opening[terminal] = 0.0
+
+
+## Someone waits in a cage of the prison.
+func has_prisoners() -> bool:
+	return prison != null and prison.cages.any(func(cage: Cage) -> bool: return cage.is_occupied())
+
+
+## The guard's terminal (Q4): seated there for guard_time, every cage opens
+## with the bell. Getting up, or the monster switching it off, starts over.
+func _open_cages(delta: float) -> void:
+	for terminal: Terminal in _opening.keys():
+		if terminal.user == null or not terminal.is_on():
+			_opening.erase(terminal)
+			terminal.progress = 0.0
+			continue
+		_opening[terminal] += delta
+		terminal.progress = minf(_opening[terminal] / prison.settings.guard_time, 1.0)
+		if terminal.progress >= 1.0:
+			_opening.erase(terminal)
+			terminal.progress = 0.0
+			for hunted in prison.open_all():
+				var capture: CaptureState = hunted.get("capture")
+				if capture != null:
+					capture.set_free()
 
 
 ## A captured hunted in its cage (Q8) goes to the next working camera, and
@@ -110,9 +146,10 @@ func terminal_index(terminal: Terminal) -> int:
 	return terminals.find(terminal) if terminal != null else -1
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if mirror:
 		return
+	_open_cages(delta)
 	for user: Variant in _watching.keys():
 		var camera: SecurityCamera = _watching[user]
 		if not is_instance_valid(user):
@@ -150,11 +187,12 @@ func _count(camera: SecurityCamera) -> void:
 	camera.set_watchers(count)
 
 
-## Room side: [[off, in use] per terminal, [watched, broken] per camera].
+## Room side: [[off, in use, progress in percent] per terminal, [watched,
+## broken] per camera].
 func state() -> Array:
 	var used := []
 	for terminal in terminals:
-		used.append([not terminal.is_on(), terminal.is_in_use()])
+		used.append([not terminal.is_on(), terminal.is_in_use(), roundi(terminal.progress * 100.0)])
 	var seen := []
 	for camera in cameras:
 		seen.append([camera.is_watched(), camera.broken])
@@ -168,6 +206,8 @@ func apply(values: Array) -> void:
 	var used: Array = values[0]
 	for i in mini(used.size(), terminals.size()):
 		terminals[i].mirror_state(used[i][0], used[i][1])
+		if used[i].size() >= 3:
+			terminals[i].progress = used[i][2] / 100.0
 	var seen: Array = values[1]
 	for i in mini(seen.size(), cameras.size()):
 		cameras[i].mirror_state(seen[i][0], seen[i][1])
