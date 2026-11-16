@@ -310,10 +310,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-hopital.svg`](S-014-hopital/plan-hopital.svg) (16/11/2026). Les tâches T-194 et T-195 (budget) passent avant la greybox, car le build web (59,5 Mo sur 60) et les appels de dessin (294 sur 300) n'ont presque plus de marge.
 
-- [ ] T-180 — Spec S-014
+- [x] T-180 — Spec S-014
   - Résultat vérifiable : spec validée (emplacement dans la cité, taille, nombre d'étages, ailes visitables, ce que devient le scan dans un grand bâtiment, place des fusibles, si la prison de S-018 y déménage)
   - Dépend de : T-168
-- [ ] T-181 — Plan sur papier de l'hôpital
+- [x] T-181 — Plan sur papier de l'hôpital
   - Résultat vérifiable : plan dessiné (`plan-hopital.svg`, comme `plan-map.svg` de S-006), validé par Maxime avec la spec
   - Dépend de : T-180
 - [ ] T-182 — Plan et tâches de S-014

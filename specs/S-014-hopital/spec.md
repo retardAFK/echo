@@ -1,6 +1,6 @@
 # S-014 — L'hôpital dans la cité
 
-**Statut** : brouillon (16/11/2026), propositions de Claude à valider par Maxime
+**Statut** : validée (16/11/2026) : emplacement choisi par Maxime (Q1) ; les autres réponses sont les propositions de Claude, retenues sans objection et ajustables à la construction
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : 14 — L'hôpital dans la cité (D-019 : intégré à la cité des Tilleuls, vraiment effrayant)
 
@@ -34,7 +34,7 @@ Voir [`plan-hopital.svg`](plan-hopital.svg), généré par `tools/plans/make_hos
 | 2e étage | bloc opératoire (sas, 2 salles, portes battantes), réanimation (moniteurs, box vitrés), stérilisation, salle de repos, réserve | 2 escaliers, escalier de secours en métal |
 
 ## Clarifications
-- Q1 : Où va l'hôpital ? → Proposition : **à la place de la barre C**, à l'ouest. C'est le seul côté de la map sans bâtiment visitable, donc l'hôpital rééquilibre la cité au lieu de l'encombrer ; la taille de la map ne change pas (220 × 220 m, D-010) et les allées restent les mêmes. Alternatives : à la place de la barre D (à l'est, déjà dense avec le centre social et le parking), ou agrandir la map vers l'ouest (traversée plus longue que 45 s, tout le plan de S-006 à reprendre).
+- Q1 : Où va l'hôpital ? → Proposition : **à la place de la barre C**, à l'ouest. C'est le seul côté de la map sans bâtiment visitable, donc l'hôpital rééquilibre la cité au lieu de l'encombrer ; la taille de la map ne change pas (220 × 220 m, D-010) et les allées restent les mêmes. Alternatives : à la place de la barre D (à l'est, déjà dense avec le centre social et le parking), ou agrandir la map vers l'ouest (traversée plus longue que 45 s, tout le plan de S-006 à reprendre). → R : à la place de la barre C (Maxime, 16/11/2026).
 - Q2 : Quelle taille et combien de niveaux ? → Proposition : **22 × 76 m, 4 niveaux visitables** (sous-sol, RDC, 1er, 2e), 6 niveaux de haut vus de dehors. C'est le plus grand bâtiment de la cité (environ 6 700 m² visitables, la tour en a 2 900), mais il garde un seul couloir par niveau, donc on s'y repère vite.
 - Q3 : Comment le rendre effrayant ? → Proposition, d'après la planche validée :
   - **Lumière** : néons verts, un sur trois mort, quelques-uns qui grésillent et clignotent, presque rien au sous-sol ; croix verte de pharmacie qui clignote dehors. Jamais d'orange (réservé au bruit, section 2).
