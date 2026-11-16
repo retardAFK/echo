@@ -1290,7 +1290,7 @@ func _build_city_stadium() -> void:
 ## Each entry: plan rectangle, floor and top heights, lights, fuse slots.
 func _buildings() -> Dictionary:
 	var tower_top := TOWER_VISITED_STOREYS * STOREY
-	return {
+	var data := {
 		"Tower": [TOWER, 0.0, tower_top,
 			[[Vector3(104, 2.6, 92), 6.0], [Vector3(96, 8.6, 100), 6.0], [Vector3(112, 14.6, 100), 6.0]],
 			[Vector3(113, 0, 89), Vector3(113, 6, 110.5), Vector3(96, 9, 109), Vector3(113, 12, 108),
@@ -1308,9 +1308,11 @@ func _buildings() -> Dictionary:
 			[Vector3(142, -3, 97), Vector3(178, -3, 97), Vector3(142, -3, 115), Vector3(166, -3, 115),
 				Vector3(178.5, -3, 111), Vector3(110, -3, 97.2)]],
 		"Garages": [GARAGES, 0.0, GARAGE_HEIGHT, [], []],
-		# Spec S-014: no fuse slot before T-188.
-		"Hospital": Hospital.scan_box() + [Hospital.LIGHTS, []],
 	}
+	# Spec S-014: one volume per level of the hospital; no fuse slot before T-188.
+	for level: Array in Hospital.scan_levels():
+		data[level[0]] = level[2]
+	return data
 
 
 ## Parts of a building outside its main box (S-016, Q5): plan rectangle,
@@ -1322,11 +1324,12 @@ func _extra_boxes() -> Dictionary:
 	var corridor := CELLAR_CORRIDOR
 	var cages := Rect2(CELLAR_CAGES.x, corridor.position.y - CELLAR_CAGE_DEPTH, CELLAR_CAGES.y - CELLAR_CAGES.x, CELLAR_CAGE_DEPTH)
 	var under := Rect2(c.end.x, corridor.position.y, corridor.end.x - c.end.x, corridor.size.y)
-	return {
+	var boxes := {
 		"Tower": [[c, -CAR_PARK_DEPTH, 0.0]],
 		"CarPark": [[under, -CAR_PARK_DEPTH, -GROUND_THICKNESS], [cages, -CAR_PARK_DEPTH, -GROUND_THICKNESS]],
-		"Hospital": Hospital.extra_boxes(),
 	}
+	boxes.merge(Hospital.extra_boxes())
+	return boxes
 
 
 func _add_buildings() -> void:
@@ -1348,6 +1351,10 @@ func _add_buildings() -> void:
 		building.position = kit.world(center.x, center.y, (bottom + top) / 2.0)
 		building.set("size", Vector3(rect.size.x, top - bottom, rect.size.y))
 		building.set("display_key", "BUILDING_" + building_name.to_snake_case().to_upper())
+		var level := Hospital.LEVEL_NAMES.find(building_name)
+		if level >= 0:
+			building.set("display_key", Hospital.LEVEL_KEYS[level])
+			building.set("complex", Hospital.COMPLEX)
 		var extras: Array[AABB] = []
 		for extra: Array in _extra_boxes().get(building_name, []):
 			var r2: Rect2 = extra[0]

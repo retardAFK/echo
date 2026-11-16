@@ -40,9 +40,11 @@ const EYE := 0.5
 ## Seconds between two looks at the camera.
 const PERIOD := 0.1
 
-## Models by key "building index:level": Array of [GeometryInstance3D, layers].
+## Models by key "complex index:level": Array of [GeometryInstance3D, layers].
 var _cells := {}
 var _buildings: Array[Building] = []
+## Index of the complex of each building: the levels of the hospital are one.
+var _complex_of: Array[int] = []
 var _key := ""
 var _wait := 0.0
 
@@ -58,9 +60,14 @@ func _sort() -> void:
 	if buildings == null:  # A map without buildings (tests, greybox).
 		set_process(false)
 		return
+	var complexes: Array[String] = []
 	for node in buildings.get_children():
 		if node is Building:
+			var complex := (node as Building).get_complex()
+			if not complexes.has(complex):
+				complexes.append(complex)
 			_buildings.append(node)
+			_complex_of.append(complexes.find(complex))
 	for group: String in GROUPS:
 		var root := map.get_node_or_null(group)
 		if root == null:
@@ -132,5 +139,5 @@ func hidden_count() -> int:
 func _building_at(point: Vector3) -> int:
 	for i in _buildings.size():
 		if _buildings[i].contains(point):
-			return i
+			return _complex_of[i]
 	return -1

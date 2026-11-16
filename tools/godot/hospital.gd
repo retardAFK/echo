@@ -15,6 +15,16 @@ const RECT := Rect2(10, 56, 22, 76)
 ## The levels: their floor height, the basement first.
 const LEVELS := [-3.0, 0.0, 3.0, 6.0]
 const STOREY := 3.0
+## The scan volumes of the levels, and the reticle's names for them.
+const LEVEL_NAMES := ["HospitalBasement", "HospitalGround", "HospitalFirst", "HospitalSecond"]
+const LEVEL_KEYS := [
+	"BUILDING_HOSPITAL_BASEMENT",
+	"BUILDING_HOSPITAL_GROUND",
+	"BUILDING_HOSPITAL_FIRST",
+	"BUILDING_HOSPITAL_SECOND",
+]
+## The building the levels belong to (Building.complex).
+const COMPLEX := "Hospital"
 ## Seen from outside: three storeys more, closed.
 const STOREYS := 7
 ## The middle of the corridor's walls.
@@ -162,14 +172,24 @@ static func ground_holes() -> Array[Rect2]:
 	return [NORTH_STAIRS, SOUTH_STAIRS, QUAY_RAMP.merge(QUAY_APRON)]
 
 
-## The volume of the building for the scan, and its extra boxes (the quay's
-## pit), as build_tilleuls.gd's _buildings() and _extra_boxes() want them.
-static func scan_box() -> Array:
-	return [RECT, LEVELS[0], LEVELS[-1] + STOREY]
+## One scan volume per level (spec S-014, Q4): name, string key of the
+## reticle, then the entry build_tilleuls.gd's _buildings() wants (plan
+## rectangle, floor and top heights, lights, fuse slots).
+static func scan_levels() -> Array:
+	var levels := []
+	for i in LEVELS.size():
+		var bottom: float = LEVELS[i]
+		var lights := []
+		for light: Array in LIGHTS:
+			if light[0].y >= bottom and light[0].y < bottom + STOREY:
+				lights.append(light)
+		levels.append([LEVEL_NAMES[i], LEVEL_KEYS[i], [RECT, bottom, bottom + STOREY, lights, []]])
+	return levels
 
 
-static func extra_boxes() -> Array:
-	return [[QUAY_RAMP.merge(QUAY_APRON), LEVELS[0], 0.0]]
+## Extra boxes of the scan volumes: the quay's pit belongs to the basement.
+static func extra_boxes() -> Dictionary:
+	return {LEVEL_NAMES[0]: [[QUAY_RAMP.merge(QUAY_APRON), LEVELS[0], 0.0]]}
 
 
 func build() -> void:

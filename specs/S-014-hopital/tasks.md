@@ -20,7 +20,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-183 — Greybox sur plusieurs niveaux
   - Résultat vérifiable : `tools/godot/hospital.gd`, l'hôpital à la place de la barre C, 4 niveaux, 2 escaliers, escalier de secours, rampe du quai, auvent ; IA qui montent et ressortent ; carte des chassés régénérée ; traversée en courant sous 45 s ; appels de dessin sous 300 ; tests GUT
   - Dépend de : T-195
-- [ ] T-184 — Scan par niveau
+- [x] T-184 — Scan par niveau
   - Résultat vérifiable : 4 volumes `Building` d'un même complexe, viseur qui nomme le niveau, monstre IA ; tests GUT
   - Dépend de : T-183
 - [ ] T-186 — Ventilation et moniteurs
