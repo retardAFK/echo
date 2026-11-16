@@ -283,7 +283,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [x] T-164 — Pause et menus en partie
   - Résultat vérifiable : en solo la partie s'arrête, en ligne elle continue ; quitter proprement
   - Dépend de : T-162
-- [ ] T-165 — HUD final
+- [x] T-165 — HUD final
   - Résultat vérifiable : HUD des deux rôles repris sur la base 640 × 360 (D-011), lisible à toutes les tailles d'écran
   - Dépend de : T-161
 - [ ] T-166 — Écran de chargement et premiers pas

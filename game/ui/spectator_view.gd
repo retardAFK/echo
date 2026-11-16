@@ -21,7 +21,8 @@ func _ready() -> void:
 	add_child(layer)
 	_hint.text = "HUD_SPECTATOR"
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint.add_theme_font_size_override("font_size", 18)
+	_hint.theme = load(MenuStyle.THEME_PATH)
+	_hint.theme_type_variation = &"HudLabel"
 	_hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	_hint.offset_top = -60.0
 	_hint.offset_bottom = -30.0

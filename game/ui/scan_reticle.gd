@@ -24,7 +24,7 @@ const LABEL_OFFSET := 4.0
 const METER_GAP := 6.0
 const METER_STEP := 3.0
 const METER_HEIGHT := 7.0
-const FONT_SIZE := 10
+const FONT_SIZE := MenuStyle.SIZE_HUD_PROMPT
 ## Opacity of the secondary lines, and of the gauge while too low to scan.
 const DIM_ALPHA := 0.45
 ## Sound meter: bars, how often it moves, how fast a loud noise fades.
@@ -50,6 +50,8 @@ var _miss_text := ""
 var _miss_time := 0.0
 var _meter_time := 0.0
 var _rng := RandomNumberGenerator.new()
+## The HUD font of style A (S-013, T-165).
+var _font: Font = load(MenuStyle.FONT_DISPLAY)
 
 @onready var _canvas: Control = $Canvas
 
@@ -178,13 +180,7 @@ func _draw_reticle() -> void:
 	if not hint.is_empty():
 		var at := Vector2(0.0, center.y + IDLE_GAUGE_OFFSET + HINT_OFFSET)
 		_canvas.draw_string(
-			ThemeDB.fallback_font,
-			at,
-			hint,
-			HORIZONTAL_ALIGNMENT_CENTER,
-			_canvas.size.x,
-			FONT_SIZE,
-			pale
+			_font, at, hint, HORIZONTAL_ALIGNMENT_CENTER, _canvas.size.x, FONT_SIZE, pale
 		)
 
 
@@ -213,7 +209,7 @@ func _draw_frame(frame: Rect2, pale: Color, dim: Color) -> void:
 	_draw_corners(frame, BRACKET, pale, 2.0)
 	_draw_corners(frame.grow(OUTER_GAP), OUTER_BRACKET, dim, 1.0)
 	# "Listening" and the sound meter above the frame.
-	var font := ThemeDB.fallback_font
+	var font := _font
 	var label := TranslationServer.translate("HUD_SCAN_LISTENING")
 	var base := frame.position - Vector2(0, LABEL_OFFSET)
 	_canvas.draw_string(font, base, label, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, pale)

@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/ui/noise_marker.gd" id="1_marker"]
+[ext_resource type="Theme" path="res://game/ui/theme/echo_theme.tres" id="2_theme"]
 
 [node name="NoiseMarker" type="Control"]
 layout_mode = 3
@@ -14,7 +15,7 @@ offset_left = 8.0
 offset_top = -7.0
 offset_right = 48.0
 offset_bottom = 7.0
-theme_override_constants/outline_size = 2
+theme = ExtResource("2_theme")
+theme_type_variation = &"HudLabel"
 theme_override_font_sizes/font_size = 10
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 text = "0 m"

@@ -1,12 +1,15 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/ui/noise_gauge.gd" id="1_gauge"]
+[ext_resource type="Theme" path="res://game/ui/theme/echo_theme.tres" id="9_theme"]
 
 [node name="NoiseGauge" type="CanvasLayer"]
 layer = 10
 script = ExtResource("1_gauge")
 
 [node name="Label" type="Label" parent="."]
+theme = ExtResource("9_theme")
+theme_type_variation = &"HudLabel"
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -15,9 +18,6 @@ offset_top = -22.0
 offset_right = 48.0
 offset_bottom = -8.0
 grow_vertical = 0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
 text = "HUD_NOISE"
 
 [node name="Bar" type="ColorRect" parent="."]

@@ -22,10 +22,8 @@ func _ready() -> void:
 	_label.offset_bottom = 36.0
 	_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_label.add_theme_color_override(&"font_color", Color(0.9, 0.85, 0.6))
-	_label.add_theme_color_override(&"font_outline_color", Color.BLACK)
-	_label.add_theme_constant_override(&"outline_size", 2)
-	_label.add_theme_font_size_override(&"font_size", 10)
+	_label.theme = load(MenuStyle.THEME_PATH)
+	_label.theme_type_variation = &"HudValue"
 	add_child(_label)
 	_label.visible = false
 
