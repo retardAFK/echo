@@ -1,6 +1,6 @@
 # S-018 — Prison et réseau de la cité
 
-**Statut** : validée dans ses grandes lignes (15/11/2026, Maxime : libération « sur place ou à distance », mécanismes « outils + quêtes tirées au sort »). Les chiffres restent des propositions de Claude, ajustables à la construction.
+**Statut** : livrée (16/11/2026), sauf la mesure des 60 images/s, à faire sur la machine de référence avec celle de T-128. Validée dans ses grandes lignes (15/11/2026, Maxime : libération « sur place ou à distance », mécanismes « outils + quêtes tirées au sort »). Les chiffres restent des propositions de Claude, ajustables à la construction.
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : hors feuille de route, demandée par Maxime le 15/11/2026 (« une prison où il peut être libéré » et « des mécanismes à distance, un peu informatiques, qui font varier les quêtes »)
 
@@ -60,15 +60,15 @@ Cette spec ajoute deux choses qui se renforcent :
 - Q15 : Dans quel ordre ? → Proposition : après la fin de S-016 (les deux touchent la cité), dans l'ordre : prison sur place (A), terminaux et caméras, terminal du gardien, haut-parleurs et rideaux, quêtes tirées au sort (C), IA (le monstre IA éteint les terminaux et passe voir la prison, la proie IA libère et utilise les leurres), modèles et sons montrés à Maxime, vérification. Bloc de tâches **T-260 à T-289**.
 
 ## Critères d'acceptation
-- [ ] Un chassé attrapé en ligne se réveille dans une cage de la prison ; ses fusibles restent sur place.
-- [ ] Libérer sur place prend 4 s et ouvre une cage ; le terminal du gardien ouvre toutes les cages en 10 s, avec les bruits de Q3 et Q4.
-- [ ] Les durées de séjour (120 s puis 60 s), l'élimination à la troisième prise et l'arrêt du chrono quand le monstre est à moins de 15 m marchent.
-- [ ] Le monstre gagne quand tous les chassés sont en prison ou éliminés ; le solo est inchangé.
-- [ ] Les terminaux montrent les caméras, déclenchent les haut-parleurs et baissent les rideaux selon Q11 ; le monstre casse les caméras et éteint les terminaux.
-- [ ] Chaque partie tire 3 objectifs selon Q13, et chaque type d'objectif peut se terminer, en solo et en ligne.
-- [ ] Tout est synchronisé en ligne ; un chassé ne reçoit jamais la position d'un autre par le réseau, sauf ce qu'il voit lui-même sur une caméra.
-- [ ] 20 parties simulées sans blocage d'IA ; la durée moyenne ne baisse pas.
-- [ ] Budget tenu : 300 appels de dessin au pire endroit, 60 images/s mesurées.
+- [x] Un chassé attrapé en ligne se réveille dans une cage de la prison ; ses fusibles restent sur place.
+- [x] Libérer sur place prend 4 s et ouvre une cage ; le terminal du gardien ouvre toutes les cages en 10 s, avec les bruits de Q3 et Q4.
+- [x] Les durées de séjour (120 s puis 60 s), l'élimination à la troisième prise et l'arrêt du chrono quand le monstre est à moins de 15 m marchent.
+- [x] Le monstre gagne quand tous les chassés sont en prison ou éliminés ; le solo est inchangé.
+- [x] Les terminaux montrent les caméras, déclenchent les haut-parleurs et baissent les rideaux selon Q11 ; le monstre casse les caméras et éteint les terminaux.
+- [x] Chaque partie tire 3 objectifs selon Q13, et chaque type d'objectif peut se terminer, en solo et en ligne.
+- [x] Tout est synchronisé en ligne ; un chassé ne reçoit jamais la position d'un autre par le réseau, sauf ce qu'il voit lui-même sur une caméra.
+- [x] 20 parties simulées sans blocage d'IA ; la durée moyenne ne baisse pas.
+- [ ] Budget tenu : 300 appels de dessin au pire endroit, 60 images/s mesurées. (Appels de dessin tenus : 297 au pire point, 268 au pire du balayage ; 60 images/s à mesurer sur la machine de référence.)
 
 ## Hors périmètre
 - Transport du chassé par le monstre, crochets ou exécutions.

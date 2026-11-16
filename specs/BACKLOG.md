@@ -472,6 +472,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [ ] T-270 — Vérification finale de S-018
   - Résultat vérifiable : critères cochés, budget de 300 appels de dessin et 60 images/s tenus
   - Dépend de : T-267, T-268, T-269
+  - En cours le 16/11/2026 : critères vérifiés et 297 appels de dessin au pire point ; reste la mesure des 60 images/s sur la machine de référence, avec T-128
 
 ---
 

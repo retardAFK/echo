@@ -10,11 +10,20 @@ const CROSSING_TIME := 45.0
 const REACH := 1.0
 
 var _map: GameMap
+var _objectives := ""
 
 
 func before_each() -> void:
+	# Fuses only: the other objectives are drawn at random (S-018), and their
+	# props must not change the walks of these tests from one run to the next.
+	_objectives = OS.get_environment("ECHO_OBJECTIVES")
+	OS.set_environment("ECHO_OBJECTIVES", "fuse")
 	_map = MAP_SCENE.instantiate()
 	add_child_autofree(_map)
+
+
+func after_each() -> void:
+	OS.set_environment("ECHO_OBJECTIVES", _objectives)
 
 
 func _world(plan: Vector3) -> Vector3:
@@ -109,6 +118,7 @@ func test_ai_monster_walks_into_the_buildings() -> void:
 	monster.player = null
 	var settings: MonsterSettings = monster.settings.duplicate()
 	settings.prowl_speed = 6.0
+	settings.sabotage_range = 0.0  # A lit camera in sight would draw it away (S-018).
 	monster.settings = settings
 	monster.brain.settings = settings
 	await _nav_map()
@@ -125,4 +135,11 @@ func test_ai_monster_walks_into_the_buildings() -> void:
 		var points: Array[Vector3] = [goal]
 		monster.brain.set_patrol(points, 0)
 		await wait_until(func() -> bool: return monster.global_position.distance_to(goal) < 1.5, 20)
-		assert_lt(monster.global_position.distance_to(goal), 1.5, "walked to %s" % [leg[1]])
+		assert_lt(
+			monster.global_position.distance_to(goal),
+			1.5,
+			(
+				"walked to %s, stopped at %s in state %s"
+				% [leg[1], monster.global_position + ORIGIN, monster.brain.state]
+			)
+		)
