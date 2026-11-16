@@ -9,7 +9,7 @@ extends Node
 ## Online, the room sends state() in NetWorld; a client shows it with apply().
 
 ## What a line of a terminal's menu does.
-enum Entry { CAMERA, SPEAKER, SHUTTER, OPEN_CAGES }
+enum Entry { CAMERA, SPEAKER, SHUTTER, OPEN_CAGES, DIGIT, DOWNLOAD }
 
 const GROUP := &"city_network"
 
@@ -60,9 +60,17 @@ func _ready() -> void:
 
 
 ## The lines of a terminal's menu, in order: [Entry, index, label key]. The
-## guard's terminal ends with "open the cages", when there is a prison.
+## guard's terminal ends with "open the cages", when there is a prison; the
+## terminal of a download with it (T-266). The transformer's keypad only has
+## its keys 1 to 9 and 0, while a code is awaited.
 func entries_for(terminal: Terminal) -> Array:
 	var entries := []
+	var quests := Quests.of(self)
+	if terminal != null and terminal.kind == Terminal.Kind.CODE:
+		if quests != null and quests.wants_code():
+			for digit in [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]:
+				entries.append([Entry.DIGIT, digit, "HUD_TERMINAL_KEY"])
+		return entries
 	for i in cameras.size():
 		entries.append([Entry.CAMERA, i, cameras[i].label_key])
 	for i in speakers.size():
@@ -71,6 +79,8 @@ func entries_for(terminal: Terminal) -> Array:
 		entries.append([Entry.SHUTTER, i, shutters[i].label_key])
 	if terminal != null and terminal.kind == Terminal.Kind.GUARD and prison != null:
 		entries.append([Entry.OPEN_CAGES, 0, "HUD_TERMINAL_OPEN_CAGES"])
+	if quests != null and terminal != null and terminal == quests.download_terminal:
+		entries.append([Entry.DOWNLOAD, 0, "HUD_TERMINAL_DOWNLOAD"])
 	return entries
 
 
@@ -94,6 +104,10 @@ func pick(user: Node3D, n: int) -> void:
 		Entry.OPEN_CAGES:
 			if has_prisoners() and not _opening.has(terminal):
 				_opening[terminal] = 0.0
+		Entry.DIGIT:
+			Quests.of(self).type_digit(terminal, entry[1])
+		Entry.DOWNLOAD:
+			Quests.of(self).start_download(terminal)
 
 
 ## Someone waits in a cage of the prison.

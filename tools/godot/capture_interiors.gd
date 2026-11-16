@@ -44,7 +44,16 @@ const VIEWS := [
 	["cam_sud_tour", Vector3(110.0, 3.3, 112.4), Vector3(105.0, 0.0, 128.0)],
 	["rideau_rampe", Vector3(146.0, -1.4, 102.0), Vector3(140.0, -1.6, 102.0)],
 	["rideau_galerie", Vector3(80.0, 1.6, 148.0), Vector3(86.0, 1.4, 148.0)],
+	["relais_tour", Vector3(95.0, -1.5, 98.5), Vector3(95.0, -1.8, 96.0)],
+	["relais_centre", Vector3(156.0, 1.5, 81.0), Vector3(156.0, 1.2, 83.7)],
+	["relais_galerie", Vector3(57.0, 1.5, 147.6), Vector3(60.0, 1.0, 148.8)],
+	["relais_parking", Vector3(177.6, -1.5, 99.8), Vector3(177.6, -1.8, 101.8)],
+	["postit_tour", Vector3(113.6, 1.5, 106.6), Vector3(115.7, 1.4, 106.4)],
+	["postit_parking", Vector3(176.7, -1.5, 104.4), Vector3(176.9, -1.6, 102.2)],
+	["clavier_transfo", Vector3(108.8, 1.7, 155.0), Vector3(106.5, 0.9, 153.5)],
 ]
+## Views whose name starts with this show a code on every post-it (T-266).
+const CODE_PREFIX := "postit_"
 ## Views whose name starts with this show the metal shutters down (S-018).
 const SHUTTER_PREFIX := "rideau_"
 ## Views whose name starts with this are shown as a security camera shows
@@ -88,6 +97,8 @@ func _ready() -> void:
 			for shutter in get_tree().get_nodes_in_group(RemoteShutter.GROUP):
 				if not shutter.is_down():
 					shutter.lower()
+		for spot: CodeSpot in get_tree().get_nodes_in_group(CodeSpot.GROUP):
+			spot.show_code("4719" if String(view[0]).begins_with(CODE_PREFIX) else "")
 		for i in SETTLE_FRAMES:
 			await get_tree().process_frame
 		var draws := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)

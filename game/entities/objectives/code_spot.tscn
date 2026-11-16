@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/objectives/code_spot.gd" id="1_spot"]
+
+[sub_resource type="QuadMesh" id="PaperMesh"]
+size = Vector2(0.22, 0.22)
+
+[sub_resource type="StandardMaterial3D" id="Yellow"]
+albedo_color = Color(0.85, 0.78, 0.35, 1)
+
+[node name="CodeSpot" type="Node3D"]
+script = ExtResource("1_spot")
+
+[node name="Paper" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.005)
+mesh = SubResource("PaperMesh")
+surface_material_override/0 = SubResource("Yellow")
+
+[node name="Digits" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.01)
+pixel_size = 0.0016
+modulate = Color(0.1, 0.1, 0.25, 1)
+outline_size = 0
+font_size = 48

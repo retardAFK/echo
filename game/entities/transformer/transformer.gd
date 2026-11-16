@@ -4,7 +4,9 @@ extends Node3D
 ## The hunted places each fuse they carry by holding "interact" next to it:
 ## repair_time per fuse, with a repair noise at the start and then regularly.
 ## Letting go keeps half of the fuse in progress; a placed fuse stays placed.
-## Up close, a text says how many fuses it still waits for.
+## Up close, a text says how many fuses it still waits for. Since S-018 it
+## also takes the floppy disk of a download, placed the same way, and says
+## when only other objectives remain.
 
 ## Emitted when a fuse is placed.
 signal fuse_placed
@@ -44,11 +46,16 @@ func update_label() -> void:
 		return
 	_label.visible = true
 	var missing := game_loop.rules.missing()
+	if missing == 0:
+		_label.text = tr("HUD_TRANSFORMER_WAITS_OTHER")
+		return
 	var key := "HUD_TRANSFORMER_WAITS_ONE" if missing == 1 else "HUD_TRANSFORMER_WAITS"
 	_label.text = tr(key) % missing
 
 
 func get_prompt() -> String:
+	if _carries_disk():
+		return "HUD_INTERACT_TRANSFORMER_DISK"
 	return "HUD_INTERACT_TRANSFORMER" if _has_fuse_to_place() else ""
 
 
@@ -69,9 +76,14 @@ func interact(_user: Node) -> void:
 	pass
 
 
-## Only a hunted with a fuse in its pockets can repair (S-010, T-100).
+## Only a hunted with a fuse (or the floppy disk) in its pockets can repair
+## (S-010, T-100).
 func wanted_by(user: Node) -> bool:
-	return game_loop != null and game_loop.carried_by(user) > 0
+	if game_loop == null:
+		return false
+	if game_loop.quests != null and game_loop.quests.carries_disk(user):
+		return true
+	return game_loop.carried_by(user) > 0
 
 
 func hold(user: Node, delta: float) -> void:
@@ -86,7 +98,10 @@ func hold(user: Node, delta: float) -> void:
 		)
 	if progress.advance(delta):
 		_noise_left = 0.0
-		game_loop.place_fuse(user)
+		if game_loop.quests != null and game_loop.quests.carries_disk(user):
+			game_loop.quests.place_disk(user)
+		else:
+			game_loop.place_fuse(user)
 		update_label()
 		fuse_placed.emit()
 		if is_repaired():
@@ -118,4 +133,11 @@ func voice() -> void:
 
 
 func _has_fuse_to_place() -> bool:
-	return game_loop != null and game_loop.rules.carried > 0 and not is_repaired()
+	if game_loop == null or is_repaired():
+		return false
+	return game_loop.rules.carried > 0 or _carries_disk()
+
+
+## Someone carries the floppy disk of the download (S-018).
+func _carries_disk() -> bool:
+	return game_loop != null and game_loop.quests != null and game_loop.quests.disk_carrier != null

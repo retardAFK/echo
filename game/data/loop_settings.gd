@@ -32,3 +32,20 @@ extends Resource
 @export_range(0.1, 20.0, 0.1, "suffix:s") var gate_open_time: float = 3.0
 ## Least distance between the start points of two hunted (S-010, T-100).
 @export_range(0.0, 200.0, 1.0, "suffix:m") var spawn_spacing: float = 40.0
+
+@export_group("Objectives (S-018)")
+## Objectives of a game, at least one fuse (Q13).
+@export_range(1, 4) var objectives_per_game: int = 3
+## Seconds a download runs on its terminal (Q13).
+@export_range(1.0, 300.0, 1.0, "suffix:s") var download_time: float = 45.0
+## The hard disk scratching while it downloads, in meters, and how often.
+@export_range(0.0, 30.0, 0.5, "suffix:m") var disk_noise_range: float = 5.0
+@export_range(0.5, 20.0, 0.5, "suffix:s") var disk_noise_interval: float = 3.0
+## The wrong code's beep on the transformer's keypad, in meters.
+@export_range(0.0, 20.0, 0.5, "suffix:m") var beep_range: float = 3.0
+## Both relay switches must be thrown within this many seconds (Q13).
+@export_range(1.0, 120.0, 1.0, "suffix:s") var relay_window: float = 15.0
+## The noise of a relay switch, in meters.
+@export_range(0.0, 30.0, 0.5, "suffix:m") var relay_range: float = 6.0
+## The two relay switches drawn are at most this far apart, in meters.
+@export_range(10.0, 300.0, 5.0, "suffix:m") var relay_max_distance: float = 70.0

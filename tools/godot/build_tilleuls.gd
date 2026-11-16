@@ -226,7 +226,20 @@ const TERMINALS := [
 	[Vector3(80.0, 0.0, 146.4), 180.0, Terminal.Kind.NORMAL, "NET_TERM_BAKERY"],
 	[Vector3(176.5, -3.0, 102.4), 0.0, Terminal.Kind.NORMAL, "NET_TERM_CAR_PARK"],
 	[Vector3(51.5, 0.0, 146.4), 180.0, Terminal.Kind.GUARD, "NET_TERM_GUARD"],
+	[Vector3(106.5, 0.0, 153.5), 90.0, Terminal.Kind.CODE, "NET_TERM_KEYPAD"],
 ]
+## The relay switches (S-018, Q13), snapped to the nearest wall like the fuse
+## boxes: Vector3(x, h, y) on the plan, the building. Pairs at most
+## relay_max_distance apart: tower and gallery, tower and centre, centre and
+## car park.
+const RELAYS := [
+	[Vector3(95.0, -3.0, 96.1), "tower"],
+	[Vector3(156.0, 0.0, 81.0), "centre"],
+	[Vector3(60.0, 0.0, 148.0), "gallery"],
+	[Vector3(177.6, -3.0, 101.85), "car_park"],
+]
+const RELAY_SWITCH := preload("res://game/entities/objectives/relay_switch.tscn")
+const CODE_SPOT := preload("res://game/entities/objectives/code_spot.tscn")
 ## Cameras: where it hangs, what it looks at, its name.
 const CAMERAS := [
 	[Vector3(137.5, -0.6, 96.3), Vector3(121.0, -2.5, 95.5), "NET_CAM_CELLARS"],
@@ -367,7 +380,7 @@ const SPOT_RAY_HEIGHT := 0.5
 const CLOSETS := [
 	Vector3(93, 0, 109), Vector3(93.5, 3, 90), Vector3(103, 9, 109.5),  # Tower: bin room, flats.
 	Vector3(164.2, 0, 61.5), Vector3(148, 0, 61), Vector3(176.8, 0, 82.5),  # Social centre.
-	Vector3(54.2, 0, 141), Vector3(70.9, 0, 141.5), Vector3(45.8, 0, 141),  # Gallery.
+	Vector3(54.2, 0, 141), Vector3(77.9, 0, 145.8), Vector3(45.8, 0, 141),  # Gallery.
 	Vector3(141, -3, 112), Vector3(179, -3, 106), Vector3(152, -3, 95.8),  # Car park.
 ]
 ## The other families (S-016, Q6): low (under a bed), makeshift (behind a
@@ -503,6 +516,7 @@ func _ready() -> void:
 	await get_tree().physics_frame
 	_bake_light()
 	_place_fuse_boxes()
+	_place_objectives()
 	_place_ruses()
 	var region: NavigationRegion3D = _root.get_node("NavigationRegion3D")
 	var started := Time.get_ticks_msec()
@@ -1431,6 +1445,67 @@ func _place_fuse_boxes() -> void:
 		else:
 			push_warning("No wall near %s" % marker.get_path())
 		box.global_rotation.y = atan2(facing.x, facing.z)
+
+
+## The relay switches and the post-its of the code (S-018, T-266): each
+## switch on the nearest wall of its place, a post-it on the wall behind
+## each terminal's desk (not the keypad's).
+func _place_objectives() -> void:
+	var relays := _group("Relays")
+	for i in RELAYS.size():
+		var entry: Array = RELAYS[i]
+		var at: Vector3 = entry[0]
+		var marker := kit.world(at.x, at.z, at.y)
+		var switch: Node3D = RELAY_SWITCH.instantiate()
+		switch.name = "Relay%d" % (i + 1)
+		switch.set("building_name", entry[1])
+		relays.add_child(switch)
+		switch.owner = _root
+		_snap_to_wall(switch, marker)
+	var spots := _group("CodeSpots")
+	var count := 0
+	for terminal: Terminal in _root.get_node("Network/Terminals").get_children():
+		if terminal.kind == Terminal.Kind.CODE:
+			continue
+		count += 1
+		var spot: Node3D = CODE_SPOT.instantiate()
+		spot.name = "CodeSpot%d" % count
+		spots.add_child(spot)
+		spot.owner = _root
+		var from := terminal.to_global(Vector3(0.4, 1.4, 0.0))
+		var back := -terminal.global_basis.z
+		var hit := _root.get_world_3d().direct_space_state.intersect_ray(
+			PhysicsRayQueryParameters3D.create(from, from + back * 2.0, MapKit.WALLS_LAYER)
+		)
+		if hit:
+			spot.global_position = hit.position - back * 0.01
+		else:
+			push_warning("No wall behind %s" % terminal.name)
+			spot.global_position = from + back * 0.58
+		spot.global_rotation.y = terminal.global_rotation.y
+
+
+## Puts a wall object (origin on the floor, front toward +Z) on the nearest
+## wall around a point, facing away from it.
+func _snap_to_wall(node: Node3D, at: Vector3) -> void:
+	var space := _root.get_world_3d().direct_space_state
+	var from := at + Vector3.UP * 1.3
+	var best := at
+	var best_distance := FUSE_BOX_WALL_SEARCH
+	var facing := Vector3.BACK
+	for direction: Vector3 in [Vector3.FORWARD, Vector3.BACK, Vector3.LEFT, Vector3.RIGHT]:
+		var query := PhysicsRayQueryParameters3D.create(
+			from, from + direction * FUSE_BOX_WALL_SEARCH, MapKit.WALLS_LAYER
+		)
+		var hit := space.intersect_ray(query)
+		if hit and from.distance_to(hit.position) < best_distance:
+			best_distance = from.distance_to(hit.position)
+			best = hit.position
+			facing = -direction
+	if best_distance >= FUSE_BOX_WALL_SEARCH:
+		push_warning("No wall near %s" % node.name)
+	node.global_position = Vector3(best.x, at.y, best.z) + facing * 0.01
+	node.global_rotation.y = atan2(facing.x, facing.z)
 
 
 ## The hiding spots, obstacles for the navigation mesh, and the pickups (S-008).

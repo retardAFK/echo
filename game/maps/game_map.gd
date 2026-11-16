@@ -663,6 +663,13 @@ func _setup_game_loop() -> void:
 	elif NetSession.mode == NetSession.Mode.CLIENT:
 		game_loop.mirror = true  # The room's loop decides (T-099).
 		game_loop.hunted = null
+	# Objectives besides fuses (S-018, Q13): in solo for the hunted player
+	# until the AI prey and the online game know them (T-267, T-268).
+	if NetSession.mode == NetSession.Mode.SOLO and avatar == null:
+		game_loop.allowed = [
+			LoopRules.Objective.CODE, LoopRules.Objective.DOWNLOAD, LoopRules.Objective.RELAY
+		]
+	game_loop.forced = GameLoop.parse_objectives(OS.get_environment("ECHO_OBJECTIVES"))
 	add_child(game_loop)
 	game_loop.setup(self, GameSession.game_seed)
 	game_loop.exit_opened.connect(_on_exit_opened)

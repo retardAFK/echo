@@ -226,7 +226,7 @@ func test_the_cite_has_its_network() -> void:
 	add_child_autofree(map)
 	var network := CityNetwork.of(map)
 	assert_not_null(network)
-	assert_eq(network.terminals.size(), 6)
+	assert_eq(network.terminals.size(), 7, "the keypad of the transformer too")
 	assert_eq(network.cameras.size(), 8)
 	var guards := network.terminals.filter(
 		func(terminal: Terminal) -> bool: return terminal.kind == Terminal.Kind.GUARD
