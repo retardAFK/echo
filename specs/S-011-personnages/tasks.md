@@ -31,4 +31,5 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
   - 15/11/2026 : `BodyGesture` (un geste à la fois, pour sa durée) dans `Player`, `Prey`, `Monster` et `MonsterAvatar` ; l'instantané envoie un entier de plus par joueur vu (le geste d'un chassé, l'action du monstre : scan, ouverture, attrape, écrasement). Q6 revue : c'est le seul ajout au réseau
 - [x] T-127 — Capture
   - Fait le 15/11/2026 : attrapé, le chassé ne commande plus rien et sa tête se tourne vers les yeux rouges pendant que le monstre joue `catch`, 1,2 s (`catch_show_time`, borné à 2 s par la règle 2.3), puis l'écran « attrapé » ou la fin de partie. En ligne, même chose côté client si le monstre est en vue ; le monstre IA reste sur place pendant ce temps avant de repartir
-- [ ] T-128 — Vérification finale de S-011
+- [x] T-128 — Vérification finale de S-011
+  - Fait le 16/11/2026 : critères cochés ; Maxime confirme les 60 images/s sur sa machine avec les personnages animés ; spec livrée
