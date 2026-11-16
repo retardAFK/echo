@@ -19,6 +19,10 @@ const SCAN_LAYER := 1 << 4
 ## More boxes that belong to the building, in its own space: the cellar
 ## stairs of the tower, the corridor of the car park (S-016, Q5).
 @export var extra_boxes: Array[AABB] = []
+## Name of the building this volume is one level of, or empty for a building
+## of one volume: the hospital has one volume per level, and the scan hears
+## only the level aimed at (spec S-014, Q4).
+@export var complex := ""
 
 var scanned := false:
 	set(value):
@@ -67,12 +71,17 @@ func get_base_energy(index: int) -> float:
 	return _energies[index]
 
 
-## World transform of the box volume (its center and orientation).
 ## The building's name, as the scan reticle shows it.
 func get_display_name() -> String:
 	return tr(display_key)
 
 
+## The building this volume belongs to: its complex, or its own name.
+func get_complex() -> String:
+	return complex if complex != "" else String(name)
+
+
+## World transform of the box volume (its center and orientation).
 func get_box_transform() -> Transform3D:
 	return _shape.global_transform
 

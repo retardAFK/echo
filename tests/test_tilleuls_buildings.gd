@@ -4,7 +4,17 @@ extends GutTest
 const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const ORIGIN := Vector3(110, 0, 110)
 const VISITABLE := ["Tower", "SocialCentre", "Gallery", "CarPark"]
-const SCANNABLE := ["Tower", "SocialCentre", "Gallery", "CarPark", "Garages", "Hospital"]
+const SCANNABLE := [
+	"Tower",
+	"SocialCentre",
+	"Gallery",
+	"CarPark",
+	"Garages",
+	"HospitalBasement",
+	"HospitalGround",
+	"HospitalFirst",
+	"HospitalSecond",
+]
 const FACADES := ["BarreA", "BarreB", "BarreD", "BarreE", "BarreF", "BarreG"]
 ## A fuse slot must be reachable by the AI monster: the end of the path is this close.
 const REACH := 1.0
@@ -48,7 +58,9 @@ func test_only_the_planned_targets_can_be_scanned() -> void:
 	var expected: Array[String] = []
 	expected.assign(SCANNABLE)
 	expected.sort()
-	assert_eq(names, expected, "Q6: the 4 visitable buildings and the garages")
+	assert_eq(
+		names, expected, "Q6: the visitable buildings, the garages, the levels of the hospital"
+	)
 
 
 func test_facades_are_not_scannable() -> void:

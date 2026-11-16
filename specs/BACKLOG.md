@@ -328,7 +328,7 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [x] T-183 — Greybox sur plusieurs niveaux
   - Résultat vérifiable : l'hôpital remplace la barre C dans le générateur de la cité (`build_tilleuls`), 4 niveaux, escaliers, escalier de secours, rampe du quai, navigation des IA entre niveaux et avec le reste de la cité, carte des chassés régénérée ; traversée en courant sous 45 s ; tests GUT
   - Dépend de : T-195
-- [ ] T-184 — Scan par niveau
+- [x] T-184 — Scan par niveau
   - Résultat vérifiable : le scan n'entend que le niveau visé (Q4), pour le monstre joueur et le monstre IA, et le viseur nomme le niveau ; tests GUT
   - Dépend de : T-183
 - [x] T-185 — Portes mobiles (faites en S-016, T-232 à T-234 : l'hôpital les réutilise)

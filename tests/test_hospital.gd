@@ -83,12 +83,29 @@ func test_quay_and_fire_escape_can_be_reached() -> void:
 	_assert_reachable(nav_map, Vector3(mid.get_center().x, 3, mid.get_center().y), "escape middle")
 
 
-func test_the_hospital_can_be_scanned_on_every_level() -> void:
-	var hospital: Building = _map.get_node("Buildings/Hospital")
-	for level: float in Hospital.LEVELS:
-		assert_true(hospital.contains(_world(Vector3(21, level + 1, 94))), "level %d" % level)
-	assert_true(hospital.contains(_world(Vector3(8, -2, 92))), "the quay")
-	assert_false(hospital.contains(_world(Vector3(40, 1, 94))), "the forecourt")
+func test_each_level_is_scanned_on_its_own() -> void:
+	# Q4: the scan hears one level, the one aimed at.
+	for i in Hospital.LEVELS.size():
+		var level: Building = _map.get_node("Buildings/%s" % Hospital.LEVEL_NAMES[i])
+		assert_eq(level.complex, "Hospital")
+		assert_eq(level.display_key, Hospital.LEVEL_KEYS[i])
+		assert_ne(tr(level.display_key), level.display_key, "translated")
+		for j in Hospital.LEVELS.size():
+			var inside := _world(Vector3(21, Hospital.LEVELS[j] + 1.5, 94))
+			assert_eq(level.contains(inside), i == j, "%s holds level %d" % [level.name, j])
+	var basement: Building = _map.get_node("Buildings/HospitalBasement")
+	assert_true(basement.contains(_world(Vector3(8, -2, 92))), "the quay")
+	for name: String in Hospital.LEVEL_NAMES:
+		var level: Building = _map.get_node("Buildings/%s" % name)
+		assert_false(level.contains(_world(Vector3(40, 1, 94))), "the forecourt")
+
+
+func test_the_levels_are_one_building_for_the_drawing() -> void:
+	# LevelVisibility draws the floors above and below the camera's level.
+	var ground: Building = _map.get_node("Buildings/HospitalGround")
+	var tower: Building = _map.get_node("Buildings/Tower")
+	assert_eq(ground.get_complex(), "Hospital")
+	assert_eq(tower.get_complex(), "Tower")
 
 
 func test_its_walls_hide_and_muffle() -> void:

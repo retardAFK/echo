@@ -73,6 +73,10 @@ BUILDING_GALLERY,Galerie
 BUILDING_CAR_PARK,Parking
 BUILDING_GARAGES,Garages
 BUILDING_HOSPITAL,Hôpital
+BUILDING_HOSPITAL_BASEMENT,"Hôpital, sous-sol"
+BUILDING_HOSPITAL_GROUND,"Hôpital, rez-de-chaussée"
+BUILDING_HOSPITAL_FIRST,"Hôpital, 1er étage"
+BUILDING_HOSPITAL_SECOND,"Hôpital, 2e étage"
 MAP_TITLE_TILLEULS,Cité des Tilleuls
 MAP_HERE,Vous êtes ici
 MAP_HINT,{map} : fermer la carte

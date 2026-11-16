@@ -269,14 +269,33 @@ func aim_far_building() -> Building:
 
 
 ## The building in the middle of the view, within scan range, or null.
+## Inside a building of several levels, the level the monster stands in
+## (spec S-014, Q4): the ceiling does not lead to the storey above.
 func aim_building() -> Building:
 	var from := _camera.global_position
+	var inside := _level_around(from)
+	if inside != null:
+		return inside
 	var to := from - _camera.global_basis.z * settings.scan_max_distance
 	var query := PhysicsRayQueryParameters3D.create(from, to, Building.SCAN_LAYER)
 	query.collide_with_areas = true
 	query.collide_with_bodies = false
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	return hit.get("collider") as Building
+
+
+## The level of a building of several levels that holds a point, or null.
+func _level_around(point: Vector3) -> Building:
+	var query := PhysicsPointQueryParameters3D.new()
+	query.position = point
+	query.collision_mask = Building.SCAN_LAYER
+	query.collide_with_areas = true
+	query.collide_with_bodies = false
+	for hit in get_world_3d().direct_space_state.intersect_point(query):
+		var building := hit.get("collider") as Building
+		if building != null and building.complex != "":
+			return building
+	return null
 
 
 ## True if the scan reveals this noise: listening, and it comes from inside the building.
