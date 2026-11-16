@@ -208,6 +208,13 @@ const CELLAR_CORRIDOR := Rect2(92.6, 96.0, 47.4, 2.4)
 const CELLAR_FIRE_DOORS := [116.5, 139.0]
 const CELLAR_CAGES := Vector2(118, 136)
 const CELLAR_CAGE_DEPTH := 1.8
+## The prison (S-018, Q1): the three westmost cellar cages, by index, each
+## with a gate in the east end of its grille.
+const PRISON_CAGES := [0, 1, 2]
+const PRISON_GATE_WIDTH := 1.4
+const CAGE := preload("res://game/entities/prison/cage.tscn")
+const PRISON_SCRIPT := preload("res://game/entities/prison/prison.gd")
+const PRISON_SETTINGS := preload("res://game/data/prison_settings.tres")
 
 const SOCIAL_CENTRE := Rect2(140, 60, 38, 24)
 const SOCIAL_CENTRE_HEIGHT := 4.0
@@ -415,6 +422,9 @@ var _materials := {}
 ## yaw in degrees, width, kind (S-016).
 var _doors: Array = []
 var _metal_floors: Array[MetalFloor] = []
+## Cages of the prison to place once the structures are built: the plan
+## point (x, height, y) of the middle of each one's gate (S-018).
+var _cages: Array[Vector3] = []
 
 
 func _ready() -> void:
@@ -759,8 +769,14 @@ func _build_cellars() -> void:
 		kit.box(s, x - 0.03, back, x + 0.03, corridor.position.y, floor_h, ceiling, grille)
 	for i in count:
 		var x := cages.x + i * cage
-		kit.box(s, x + 0.4, back + 0.1, x + 1.4, back + 0.7, floor_h, floor_h + 0.8, MAT_OBSTACLE, MapKit.Kind.FLOOR)
-		if i != count / 2:
+		# Boxes at the back; in a prison cage, pushed west, out of the way.
+		var junk := 0.2 if i in PRISON_CAGES else 0.4
+		kit.box(s, x + junk, back + 0.1, x + junk + 0.8 + (0.2 if junk > 0.3 else 0.0), back + 0.7, floor_h, floor_h + 0.8, MAT_OBSTACLE, MapKit.Kind.FLOOR)
+		if i in PRISON_CAGES:
+			# A prison cage (S-018): its gate is the Cage entity.
+			kit.box(s, x, corridor.position.y - 0.05, x + cage - PRISON_GATE_WIDTH, corridor.position.y, floor_h, ceiling, grille, MapKit.Kind.FLOOR)
+			_cages.append(Vector3(x + cage - PRISON_GATE_WIDTH / 2.0, floor_h, corridor.position.y - 0.025))
+		elif i != count / 2:
 			kit.box(s, x, corridor.position.y - 0.05, x + cage, corridor.position.y, floor_h, ceiling, grille, MapKit.Kind.FLOOR)
 
 
@@ -819,10 +835,28 @@ func _add_doors() -> void:
 		var parent := exits if door.kind == Door.Kind.EMERGENCY else doors
 		parent.add_child(door)
 		door.owner = _root
+	_add_prison()
 	var metal := _group("MetalFloors")
 	for floor_box in _metal_floors:
 		metal.add_child(floor_box)
 		floor_box.owner = _root
+
+
+## The prison (S-018, Q1): a Cage in each prison cage's grille. Not a
+## navigation source: the mesh goes into the cages through their gates.
+func _add_prison() -> void:
+	var prison := Node3D.new()
+	prison.name = "Prison"
+	prison.set_script(PRISON_SCRIPT)
+	prison.set("settings", PRISON_SETTINGS)
+	_add(prison)
+	for i in _cages.size():
+		var cage: Node3D = CAGE.instantiate()
+		cage.name = "Cage%d" % (i + 1)
+		var at := _cages[i]
+		cage.position = kit.world(at.x, at.z, at.y)
+		prison.add_child(cage)
+		cage.owner = _root
 
 
 ## Window openings of a storey at height h, one every WINDOW_STEP meters.

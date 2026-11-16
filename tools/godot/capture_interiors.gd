@@ -3,7 +3,7 @@ extends Node
 ## compare with the mood board (tools/blender/hlm_interior_mood.py). Prints the
 ## draw calls and primitives of each view, like measure_map.gd.
 ##   xvfb-run -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 \
-##     tools/godot/capture_interiors.tscn -- [out_dir]
+##     tools/godot/capture_interiors.tscn -- [out_dir] [view,view...]
 
 const MAP_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
 const SETTLE_FRAMES := 8
@@ -29,6 +29,7 @@ const VIEWS := [
 	["laverie_dedans", Vector3(60.5, 1.6, 140.5), Vector3(55, 0.8, 146)],
 	["boulangerie", Vector3(85.5, 1.6, 140.5), Vector3(80, 1.2, 146.5)],
 	["parking_tubes", Vector3(145, -1.4, 106), Vector3(165, -2.0, 99)],
+	["prison", Vector3(130, -1.4, 97.8), Vector3(119, -2.0, 95.0)],
 ]
 
 
@@ -46,7 +47,10 @@ func _ready() -> void:
 	camera.far = VISUAL_SETTINGS.view_distance
 	camera.near = VISUAL_SETTINGS.near_clip
 	camera.make_current()
+	var only: PackedStringArray = args[1].split(",") if args.size() > 1 else PackedStringArray()
 	for view: Array in VIEWS:
+		if not only.is_empty() and not only.has(view[0]):
+			continue
 		var eye: Vector3 = view[1] - ORIGIN
 		var target: Vector3 = view[2] - ORIGIN
 		eye.y = view[1].y

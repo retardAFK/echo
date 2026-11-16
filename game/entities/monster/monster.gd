@@ -59,6 +59,7 @@ var _jamb := JambUnstick.new()
 
 
 func _ready() -> void:
+	add_to_group(Prison.MONSTERS_GROUP)  # The prison's clock stops near it (S-018).
 	brain = MonsterBrain.new(settings)
 	_noise = MonsterNoise.new(settings)
 	brain.state_changed.connect(state_changed.emit)

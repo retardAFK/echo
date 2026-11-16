@@ -179,7 +179,10 @@ func test_an_ai_plays_for_a_hunted_who_left_then_gives_its_place_back() -> void:
 	assert_eq(again.capture.catches, 1)
 	assert_true(map.game_loop.is_hunted(again))
 	assert_has(monster.get_targets(), again)
-	# Caught again: out, as it would have been.
+	# Caught again: its second stay in prison, then out the third time (S-018).
+	map._online_catch(again)
+	assert_eq(again.capture.state, CaptureState.State.CAPTURED)
+	again.capture.set_free()
 	map._online_catch(again)
 	assert_eq(again.capture.state, CaptureState.State.OUT)
 

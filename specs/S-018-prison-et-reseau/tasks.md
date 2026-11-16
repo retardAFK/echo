@@ -8,7 +8,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-261 — Plan et tâches de S-018
   - Résultat vérifiable : `plan.md` et `tasks.md`, emplacements des cages, des terminaux, des caméras, des haut-parleurs et des rideaux sur le plan de la cité
   - Dépend de : T-260, fin de S-016
-- [ ] T-262 — La prison
+- [x] T-262 — La prison
   - Résultat vérifiable : `Prison`, `Cage`, `PrisonRules`, `PrisonSettings` ; capture → écran noir → cage ; libération sur place (E 4 s, une cage, 8 m) ; séjours de 120 s puis 60 s, élimination à la 3e prise, chrono arrêté quand le monstre est à moins de 15 m ; lampe qui clignote ; victoire du monstre quand tous sont en prison ou éliminés ; solo inchangé ; état en ligne ; tests GUT
   - Dépend de : T-261
 - [ ] T-263 — Terminaux et caméras
@@ -39,3 +39,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 ## Compte rendu
 - T-260 (15/11/2026) : spec validée par Maxime, PR #134 (D-020).
 - T-261 (16/11/2026) : plan et tâches. Terminal du gardien déplacé du centre social à la galerie pour tenir les 80 m de Q4.
+- T-262 (16/11/2026) : `Prison`, `Cage`, `PrisonRules`, `PrisonSettings`, `PrisonHud`. Trois caves du couloir des caves deviennent les cages (portillon d'un mètre dans la grille, lampe au-dessus). En ligne, 2 s après la prise, le chassé est posé dans une cage libre ; ses fusibles restent où il a été pris. Libération à la grille (E 4 s, bruit `CAGE` de 8 m), séjours de 120 s puis 60 s, chrono arrêté à moins de 15 m du monstre, éliminé à la 3e prise ou à la fin du séjour. Plus de cri d'appel en prison. `Prison.open_all()` (sonnerie `BELL` de 15 m) est prêt pour le terminal du gardien. L'état des cages passe dans `NetWorld.state()[6]`. Solo inchangé. 10 tests GUT, tests de capture, de départ et d'IA de remplacement mis à la nouvelle règle.

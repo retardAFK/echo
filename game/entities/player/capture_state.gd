@@ -7,6 +7,10 @@ extends Node3D
 ## teammate frees it by holding "interact" next to it for rescue_time, with a
 ## RESCUE noise at the start and at the end. Caught a second time, it is OUT:
 ## eliminated, it watches a teammate.
+## With a prison on the map (S-018, part A), the rule changes: caught once or
+## twice, the hunted is CAPTURED and waits in a cage, silent; caught a third
+## time, or left in its cage until its stay is over, it is OUT. A teammate
+## frees it at the cage's grille (prison_settings: 4 s, a CAGE noise of 8 m).
 ## Solo never uses it: a catch there ends the game.
 
 ## The state changed: captured, freed or out.
@@ -18,6 +22,13 @@ var state := State.FREE
 ## Times the monster caught it.
 var catches := 0
 var progress: HoldProgress
+## The prison of the map (S-018), or null: then the hunted waits where it was
+## caught. The map sets it before the first catch.
+var prison: Prison:
+	set(value):
+		prison = value
+		if prison != null and progress != null:
+			progress.duration = prison.settings.free_time
 
 var _call_left := 0.0
 var _settings: PlayerSettings
@@ -30,17 +41,38 @@ func _ready() -> void:
 	_settings = _hunted.get("motion") if _hunted is Prey else _hunted.get("settings")
 	if _settings == null:
 		_settings = PlayerSettings.new()
-	progress = HoldProgress.new(_settings.rescue_time)
+	progress = HoldProgress.new(
+		prison.settings.free_time if prison != null else _settings.rescue_time
+	)
 
 
-## The monster caught it: captured the first time, out the second. Returns
-## the new state; a hunted not free cannot be caught.
+## The monster caught it: captured the first time, out the second (with a
+## prison: out the third). Returns the new state; a hunted not free cannot be
+## caught.
 func catch() -> State:
 	if state != State.FREE:
 		return state
 	catches += 1
-	_set_state(State.CAPTURED if catches == 1 else State.OUT)
+	var out := PrisonRules.is_out(catches, prison.settings) if prison != null else catches >= 2
+	_set_state(State.OUT if out else State.CAPTURED)
 	return state
+
+
+## Its stay in the prison is over (S-018, Q5): out of the game.
+func time_out() -> void:
+	if state == State.CAPTURED:
+		_set_state(State.OUT)
+
+
+## The cage it waits in, or null (not in prison, or not yet: black screen).
+func get_cage() -> Cage:
+	return prison.cage_of(_hunted) if prison != null else null
+
+
+## Freed all at once by the guard's terminal (S-018, Q4).
+func set_free() -> void:
+	if state == State.CAPTURED:
+		_set_state(State.FREE)
 
 
 ## Takes the place of another (an AI replacing a hunted who left, T-102):
@@ -68,8 +100,8 @@ func _set_state(value: State) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if state != State.CAPTURED:
-		return
+	if state != State.CAPTURED or prison != null:
+		return  # In prison it makes no noise (S-018, Q7).
 	_call_left -= delta
 	if _call_left <= 0.0:
 		_call_left += _noise.call_interval
@@ -79,14 +111,30 @@ func _physics_process(delta: float) -> void:
 
 
 func get_prompt() -> String:
-	return "HUD_INTERACT_RESCUE" if state == State.CAPTURED else ""
+	if state != State.CAPTURED:
+		return ""
+	return "HUD_INTERACT_FREE_CAGE" if prison != null else "HUD_INTERACT_RESCUE"
+
+
+## Where a teammate stands to free it: beside it, or before its cage's grille.
+func rescue_point() -> Vector3:
+	var cage := get_cage()
+	return cage.outside_point() if cage != null else global_position
 
 
 func can_interact(from: Vector3) -> bool:
 	if state != State.CAPTURED:
 		return false
-	var gap := from - global_position
-	return Vector2(gap.x, gap.z).length() <= _settings.rescue_reach and absf(gap.y) < 2.0
+	var reach := _settings.rescue_reach
+	var at := global_position
+	if prison != null:
+		var cage := get_cage()
+		if cage == null:
+			return false  # Not in its cage yet.
+		at = cage.outside_point()
+		reach = prison.settings.free_reach
+	var gap := from - at
+	return Vector2(gap.x, gap.z).length() <= reach and absf(gap.y) < 2.0
 
 
 ## Only a free teammate frees it.
@@ -127,6 +175,15 @@ func get_hold_ratio() -> float:
 
 
 func _rescue_noise(user: Node) -> void:
+	var cage := get_cage()
+	if cage != null:
+		NoiseBus.emit_noise(
+			NoiseEvent.Type.CAGE,
+			cage.global_position + Vector3.UP,
+			prison.settings.free_range,
+			user
+		)
+		return
 	NoiseBus.emit_noise(
 		NoiseEvent.Type.RESCUE, global_position + Vector3.UP, _noise.rescue_range, user
 	)

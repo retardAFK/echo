@@ -2,7 +2,8 @@ extends "res://tools/godot/net_match.gd"
 ## Scripted online game with 3 clients for the spectator (S-010, T-107):
 ## index 0 is the monster, the two others the hunted of seats 1 and 2; seat 3
 ## is an AI. The hunted of seat 2 stands still; the monster catches it, walks
-## away, its teammate frees it, the monster catches it again: it is out. Its
+## away, its teammate frees it from its cage (S-018), it walks back to where
+## it started, and so on until the third catch: it is out. Its
 ## client must then watch a teammate: the spectator camera is the one in use,
 ## at that teammate's eyes, and a click moves it to the other teammate.
 ## Prints ECHO_NET_SPECTATE and quits with 0 when all of this held.
@@ -15,6 +16,8 @@ const EYE_REACH := 0.5
 
 var _out_left := SETTLE_TIME
 var _first_watched := -1
+## Seat 2: where it waits for the monster, away from the prison.
+var _home := Vector3.ZERO
 
 
 func _ready() -> void:
@@ -37,14 +40,19 @@ func _play_hunted(delta: float) -> void:
 		return
 	if player.held:
 		_phase = "captured"
-	elif _phase in ["start", "captured"]:
+	elif _phase == "start":
+		_home = _own_position()
 		_phase = "wait_monster"
+	elif _phase in ["captured", "back"]:
+		_phase = "back"  # Out of its cage: back where it waits.
+		if _go_to(_home, delta, 1.0):
+			_phase = "wait_monster"
 
 
 func _play_monster(delta: float) -> void:
 	var prey := _read(2)
 	if prey.get("phase") == "done":
-		_succeed("caught the hunted of seat 2 twice")
+		_succeed("caught the hunted of seat 2 three times")
 		return
 	if _keep_clear(delta):
 		return
@@ -57,13 +65,14 @@ func _play_monster(delta: float) -> void:
 			if "2:OUT" in _seen:
 				_phase = "done"
 			elif prey.get("phase") == "captured":
-				_away_point = _far_point(_unvec(prey.get("at", [])))
+				_caught_at = _own_position()  # The caught one soon wakes up in a cage.
+				_away_point = _far_point(_caught_at)
 				_phase = "leave"
 			else:
 				_go_to(_unvec(prey.get("at", [])), delta, 0.0)
 		"leave":
 			var there := _go_to(_away_point, delta, 1.0)
-			var gone := _own_position().distance_to(_unvec(prey.get("at", [])))
+			var gone := _own_position().distance_to(_caught_at)
 			if there or gone >= AWAY_DISTANCE + 10.0:
 				_phase = "away"
 

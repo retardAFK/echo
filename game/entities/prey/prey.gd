@@ -545,7 +545,9 @@ func _update_errand(delta: float) -> void:
 	if best == null:
 		return
 	var spot := best.global_position
-	if best is CaptureState:  # Beside it, not into its body.
+	if best is CaptureState and (best as CaptureState).get_cage() != null:
+		spot = (best as CaptureState).rescue_point()  # Before its cage's grille (S-018).
+	elif best is CaptureState:  # Beside it, not into its body.
 		var side := global_position - spot
 		side.y = 0.0
 		spot += side.normalized() * 0.8 if side.length_squared() > 0.01 else Vector3.ZERO
@@ -562,6 +564,8 @@ func _errand_wanted(node: Node3D) -> bool:
 		var captured := node as CaptureState
 		if captured.state != CaptureState.State.CAPTURED or not captured.wanted_by(self):
 			return false
+		if captured.prison != null and captured.get_cage() == null:
+			return false  # On its way to a cage (S-018): nothing to open yet.
 	elif not (node as FuseBox).has_fuse:
 		return false
 	return (

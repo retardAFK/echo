@@ -437,9 +437,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : `plan.md` et `tasks.md`, emplacements des cages, des terminaux, des caméras, des haut-parleurs et des rideaux sur le plan de la cité
   - Dépend de : T-260, fin de S-016
   - Fait le 16/11/2026 : [`plan.md`](S-018-prison-et-reseau/plan.md) et [`tasks.md`](S-018-prison-et-reseau/tasks.md) ; le terminal du gardien va dans la galerie (90 m des cages) pour tenir les 80 m de Q4
-- [ ] T-262 — La prison
+- [x] T-262 — La prison
   - Résultat vérifiable : capture → écran noir → cage ; libération sur place (E 4 s, une cage) ; séjours de 120 s puis 60 s, élimination à la 3e prise, chrono arrêté quand le monstre est à moins de 15 m ; victoire du monstre quand tous sont en prison ou éliminés ; solo inchangé ; tests GUT
   - Dépend de : T-261
+  - Fait le 16/11/2026 : trois cages dans le couloir des caves, chrono et lampe, libération à la grille ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
 - [ ] T-263 — Terminaux et caméras
   - Résultat vérifiable : s'installer à un terminal (E 1 s, bruit de clavier, écran qui éclaire), voir une caméra ; lumière rouge visible du monstre, caméra cassée par le monstre ; vue des caméras pour le prisonnier ; tests GUT
   - Dépend de : T-262

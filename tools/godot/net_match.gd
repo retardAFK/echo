@@ -7,10 +7,11 @@ extends Node
 ##   join with the code. The roles are drawn at launch; each plays its seat.
 ## - Each hunted takes the fuse of one box (seat 1 the first fused box, and
 ##   so on). The monster then catches the hunted of seat 2 at its box and
-##   walks away; a free teammate frees it once the monster is far (any
-##   hunted caught on the way is freed the same way); the freed one takes
-##   back the fuse it dropped. All three place their fuses, and run for the
-##   exit once it opens.
+##   walks away; the caught one wakes up in a cage of the prison (S-018); a
+##   free teammate frees it at the grille once the monster is far (any
+##   hunted caught on the way is freed the same way); the freed one goes back
+##   for the fuse it dropped where it was caught. All three place their
+##   fuses, and run for the exit once it opens.
 ## The processes tell each other their phase and position through files in
 ## <dir> (seat<N>.json). Each prints ECHO_NET_MATCH and quits with 0 when
 ## the hunted won as planned, 1 otherwise.
@@ -31,8 +32,6 @@ const STUCK_TIME := 1.5
 const AWAY_DISTANCE := 30.0
 ## A teammate goes to free a captured hunted once the monster is that far.
 const SAFE_DISTANCE := 20.0
-## A fuse dropped closer than this is the one a freed hunted lost.
-const DROP_REACH := 4.0
 ## A hunted waits while the monster it is not prey to is this close; the
 ## monster steps back only within half of it, so it can walk past (and
 ## from further when it stands away, so the waiting hunted can go on).
@@ -64,6 +63,8 @@ var _path_target := Vector3.INF
 var _path_index := 0
 var _repath_left := 0.0
 var _stuck_left := STUCK_TIME
+## Monster: where it caught the hunted of seat 2.
+var _caught_at := Vector3.ZERO
 var _last_position := Vector3.ZERO
 var _sidestep_left := 0.0
 var _box: FuseBox
@@ -250,10 +251,11 @@ func _play_hunted(delta: float) -> void:
 		"captured":
 			if not player.held:
 				_phase = "freed"
-		"freed":  # Takes back the fuse it dropped at its feet.
-			var drop := _drop_near()
+		"freed":  # Takes back the fuse it dropped where it was caught.
+			var drop := _nearest_drop()
 			if drop != null:
-				_hold_on(drop.global_position)
+				if _go_to(drop.global_position, delta, 1.0):
+					_hold_on(drop.global_position)
 			else:
 				_phase = "fuse" if loop.carried_by(player) > 0 else "to_box"
 		"fuse":
@@ -268,30 +270,39 @@ func _play_hunted(delta: float) -> void:
 			_hold_on(_map.game_loop.transformer.global_position)
 
 
-## A fuse dropped within reach, or null.
-func _drop_near() -> Node3D:
+## The nearest fuse lying on the ground.
+func _nearest_drop() -> Node3D:
+	var best: Node3D = null
 	for drop: Node3D in _map.game_loop.drops:
-		if drop.global_position.distance_to(_own_position()) < DROP_REACH:
-			return drop
-	return null
+		if best == null or _closer(drop.global_position, best.global_position):
+			best = drop
+	return best
 
 
-## Frees a captured teammate once the monster is far from it. Returns true
-## while busy with it.
+func _closer(a: Vector3, b: Vector3) -> bool:
+	return _own_position().distance_to(a) < _own_position().distance_to(b)
+
+
+## Frees a captured teammate once the monster is far from it: at the grille
+## of its cage (S-018), once it is in one. Returns true while busy with it.
 func _rescue(delta: float) -> bool:
 	var monster := _unvec(_read(LobbyState.MONSTER_SEAT).get("at", []))
+	var prison := Prison.of(_map)
 	for seat in [1, 2, 3]:
 		var mate := _read(seat)
 		if seat == _seat or mate.get("phase") != "captured":
 			continue
-		var at := _unvec(mate.get("at", []))
+		var cage := prison.cage_of_seat(seat) if prison != null else null
+		if prison != null and cage == null:
+			continue  # Not in its cage yet.
+		var at := cage.outside_point() if cage != null else _unvec(mate.get("at", []))
 		if at.distance_to(monster) < SAFE_DISTANCE:
 			continue
 		var flat := Vector2(at.x - _own_position().x, at.z - _own_position().z)
-		if flat.length() > 1.1:
-			_go_to(at, delta, 1.1)
+		if flat.length() > 0.5:
+			_go_to(at, delta, 0.4)
 		else:
-			_hold_on(at)
+			_hold_on(cage.inside_point() if cage != null else at)
 		return true
 	return false
 
@@ -306,13 +317,15 @@ func _play_monster(delta: float) -> void:
 				_phase = "hunt"
 		"hunt":
 			if prey.get("phase") == "captured" or "2:CAPTURED" in _seen:
-				_away_point = _far_point(_unvec(prey.get("at", [])))
+				# Where it caught it: the caught one soon wakes up in a cage (S-018).
+				_caught_at = _own_position()
+				_away_point = _far_point(_caught_at)
 				_phase = "leave"
 			else:
 				_go_to(_unvec(prey.get("at", [])), delta, 0.0)
 		"leave":
 			var there := _go_to(_away_point, delta, 1.0)
-			var gone := _own_position().distance_to(_unvec(prey.get("at", [])))
+			var gone := _own_position().distance_to(_caught_at)
 			if there or gone >= AWAY_DISTANCE + 10.0:
 				_phase = "away"
 		"away":
@@ -357,6 +370,9 @@ func _far_point(from: Vector3) -> Vector3:
 	var best := from
 	var best_score := -1.0
 	var avoid: Array[Vector3] = [from, _map.game_loop.transformer.global_position, loop_exit()]
+	var prison := Prison.of(_map)
+	if prison != null:
+		avoid.append(prison.bell_position())  # Its clock stops near it (S-018).
 	for point in Prey.markers_of(_map.get_node("PatrolRoute")):
 		var score := INF
 		for other in avoid:

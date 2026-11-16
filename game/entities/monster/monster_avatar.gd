@@ -77,6 +77,7 @@ static func resolve_pace(prowling: bool, sprinting: bool, moving: bool) -> Monst
 
 
 func _ready() -> void:
+	add_to_group(Prison.MONSTERS_GROUP)  # The prison's clock stops near it (S-018).
 	_noise = MonsterNoise.new(settings)
 	scan = ScanGauge.new(settings)
 	_head.position.y = settings.ear_height

@@ -128,6 +128,8 @@ HUD_INTERACT_RESCUE,Maintenir {interact} : libérer
 HUD_CAPTURED,"Capturé : un coéquipier peut te libérer"
 HUD_RESCUED,Libéré
 HUD_ELIMINATED,Éliminé
+HUD_INTERACT_FREE_CAGE,Maintenir {interact} : ouvrir la cage
+HUD_PRISON_TIME,Prison : %d:%02d
 HUD_SPECTATOR,"Tu regardes un coéquipier, clic pour changer"
 HUD_RECONNECTING,"Connexion perdue, reconnexion…"
 MENU_TITLE,Écho
