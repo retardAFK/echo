@@ -8,6 +8,8 @@ extends RefCounted
 ## hunted at a terminal; CAMERA: the monster smashing a camera; SPEAKER: a
 ## loudspeaker set off from a terminal; SHUTTER: a metal shutter; DISK: a
 ## download's hard disk; BEEP: a wrong code; SWITCH: a relay switch (S-018).
+## MONITOR: a hospital monitor beeping; ROLL: a gurney or a wheelchair
+## rolling, or a gurney shoved over (S-014).
 enum Type {
 	FOOTSTEP,
 	BREATH,
@@ -31,6 +33,8 @@ enum Type {
 	DISK,
 	BEEP,
 	SWITCH,
+	MONITOR,
+	ROLL,
 }
 
 var type: Type
@@ -40,6 +44,9 @@ var position: Vector3
 var noise_range: float
 ## The node that made the noise, so listeners can ignore their own noises.
 var source: Node
+## Lost in the roar of a ventilation zone (S-014, Q5): the monster and its
+## scan do not hear it; the hunted still do.
+var masked := false
 ## Engine time of the emission, in milliseconds.
 var time_msec: int
 

@@ -21,6 +21,7 @@ enum ScanMiss { NOTHING, TOO_FAR, GAUGE_LOW }
 ## outside the box) belongs to it, for aim_far_building().
 const FAR_AIM_WALL_MARGIN := 4.0
 const DOOR_SETTINGS := preload("res://game/data/door_settings.tres")
+const HOSPITAL_SETTINGS := preload("res://game/data/hospital_settings.tres")
 ## Length of the gestures the hunted see (S-011, T-127).
 const BODY_SETTINGS := preload("res://game/data/monster_body_settings.tres")
 
@@ -161,6 +162,9 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 	velocity.z = horizontal.z
 	if _pace == MonsterBrain.Pace.RUN and not mirror_world:
 		_smash_door(horizontal)
+		var gurney := Gurney.ahead(get_tree(), global_position, horizontal, _gurney_reach())
+		if gurney != null:
+			gurney.shove(self)  # Running, it shoves the gurney over (S-014, Q7).
 	var before := global_position
 	move_and_slide()
 	var moved := Vector2(global_position.x - before.x, global_position.z - before.z).length()
@@ -177,6 +181,10 @@ func _get_action() -> MonsterBody.Action:
 	if _hold.holding:
 		return MonsterBody.Action.OPEN
 	return MonsterBody.Action.NONE
+
+
+func _gurney_reach() -> float:
+	return HOSPITAL_SETTINGS.gurney_run_reach
 
 
 ## Running, a closed door just ahead bursts open (S-016, Q2).
@@ -304,6 +312,7 @@ func scan_reveals(event: NoiseEvent) -> bool:
 		scan.is_listening()
 		and scan_target != null
 		and event.source != self
+		and not event.masked  # Lost in a ventilation zone (S-014, Q5).
 		and scan_target.contains(event.position)
 	)
 

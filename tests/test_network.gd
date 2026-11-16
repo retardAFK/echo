@@ -303,7 +303,7 @@ func test_online_a_hunted_sees_what_its_camera_sees() -> void:
 	assert_false(1 in net.snapshot_for(12)["others"].map(func(e: Array) -> int: return e[0]))
 	# The world state says the LED is lit and the terminal used, not by whom.
 	var state: Array = net.world.state()
-	assert_eq(state.size(), 9)
+	assert_eq(state.size(), 12)  # The hospital's things came last (S-014).
 	assert_eq(state[7][0][0], [false, true, 0])
 	assert_eq(state[7][1][0], [true, false])
 

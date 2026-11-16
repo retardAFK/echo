@@ -262,6 +262,8 @@ func seat_of(node: Node3D) -> int:
 static func noise_message(event: NoiseEvent, viewer: Node3D, viewer_is_monster: bool) -> Array:
 	if event.source == viewer or event.noise_range <= 0.0:
 		return []
+	if viewer_is_monster and event.masked:
+		return []  # Lost in a ventilation zone (S-014, Q5).
 	if not viewer_is_monster and not NoiseBus.can_hear(event, viewer.get_eye_position()):
 		return []
 	return [Event.NOISE, event.type, event.position, event.noise_range]

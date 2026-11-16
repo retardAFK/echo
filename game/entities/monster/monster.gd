@@ -13,6 +13,7 @@ signal hunted_caught(hunted: Node3D)
 ## Distance the chase target must move before the path is recomputed, in meters.
 const RETARGET_DISTANCE := 0.5
 const DOOR_SETTINGS := preload("res://game/data/door_settings.tres")
+const HOSPITAL_SETTINGS := preload("res://game/data/hospital_settings.tres")
 const CONE_SEGMENTS := 16
 ## Lift above the floor so the debug cone does not flicker against it.
 const CONE_GROUND_OFFSET := 0.05
@@ -56,6 +57,8 @@ var _still_left := 0.0
 var _sabotage_left := 0.0
 var _prison_left := 0.0
 var _jamb := JambUnstick.new()
+## Seconds it has stood against a gurney, shoving it (S-014, Q7).
+var _shoving := 0.0
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 @onready var _body: MonsterBody = $Body
@@ -416,7 +419,12 @@ func nearest_building(at: Vector3, radius: float) -> Building:
 ## True if the scan reveals this noise: listening, and it comes from inside the
 ## scanned building, however faint (same rule as the playable monster).
 func scan_reveals(event: NoiseEvent) -> bool:
-	return scan_target != null and scan.is_listening() and scan_target.contains(event.position)
+	return (
+		scan_target != null
+		and scan.is_listening()
+		and not event.masked
+		and scan_target.contains(event.position)
+	)
 
 
 func _end_scan() -> void:
@@ -438,6 +446,8 @@ func guard_exit(points: Array[Vector3]) -> void:
 func _on_noise_emitted(event: NoiseEvent) -> void:
 	if event.source == self or not is_inside_tree():
 		return  # Its own noise, or removed from the map (monster role).
+	if event.masked:
+		return  # Lost in the roar of a ventilation zone (S-014, Q5).
 	if event.source is Door and (event.source as Door).last_user == self:
 		return  # A door it opened itself (S-016).
 	if scan_reveals(event):
@@ -470,6 +480,8 @@ func _move(delta: float) -> void:
 			horizontal = direction * MonsterBrain.speed_for(brain.get_pace(), settings)
 			look_at(global_position + direction, Vector3.UP)
 			_open_door(direction)
+			if _clear_gurney(direction, delta):
+				horizontal = Vector3.ZERO  # Shoving a gurney aside.
 	if global_position.distance_to(_agent.target_position) > JambUnstick.GOAL_CLEARANCE:
 		horizontal = _jamb.update(self, horizontal, delta)  # Not at its goal: a jamb.
 		if _jamb.take_replan():
@@ -492,6 +504,25 @@ func _open_door(direction: Vector3) -> void:
 		door.smash(self)
 	else:
 		door.open_by(self)
+
+
+## A gurney across its way (S-014, Q7): shoved over on the run, or after
+## gurney_shove_hold standing against it. True while it is shoving.
+func _clear_gurney(direction: Vector3, delta: float) -> bool:
+	var reach: float = HOSPITAL_SETTINGS.gurney_run_reach
+	var gurney := Gurney.ahead(get_tree(), global_position, direction, reach)
+	if gurney == null:
+		_shoving = 0.0
+		return false
+	if brain.get_pace() == MonsterBrain.Pace.RUN:
+		gurney.shove(self)
+		return false
+	_shoving += delta
+	if _shoving >= HOSPITAL_SETTINGS.gurney_shove_hold:
+		_shoving = 0.0
+		gurney.shove(self)
+		return false
+	return true
 
 
 ## Outline of the field of view on the ground, shown with F4 (noise debug).

@@ -44,6 +44,8 @@ var capture: CaptureState
 ## Captured, on its knees (T-107): it neither moves nor acts. On the room it
 ## follows capture; on a client, what the room says.
 var held := false
+## The gurney it pushes in front of it (S-014, Q7), or null.
+var pushing: Gurney
 ## What its hands do, as the others see it (S-011, T-125).
 var gesture := BodyGesture.new()
 ## Caught (T-127): the head turns to the monster that seized it, the
@@ -120,6 +122,8 @@ func _physics_process(delta: float) -> void:
 	apply_actions()
 	_update_breath(delta)
 	if held:
+		if pushing != null:
+			pushing.drop()  # Caught: its hands let go.
 		_stay_down(delta)
 		return
 	if terminal != null:
@@ -154,6 +158,8 @@ func _physics_process(delta: float) -> void:
 	if step > 0.0:
 		global_position.y += step
 	move_and_slide()
+	if pushing != null and not mirror_world:
+		pushing.follow(delta)
 	_update_height(delta)
 	_update_head_bob(horizontal.length(), target_speed, delta)
 	if not mirror_world:
@@ -287,8 +293,8 @@ func set_look(yaw: float, pitch: float) -> void:
 ## The nearest thing in reach, in front of the crosshair, that the player can
 ## use (a car alarm, S-006), or null. A pickup it has no room for is skipped.
 func get_interactable() -> Node:
-	if held or terminal != null:
-		return null
+	if held or terminal != null or pushing != null:
+		return null  # Pushing a gurney: "interact" lets go of it.
 	if hiding_in != null:
 		return hiding_in  # Hidden: the only thing in reach is the way out.
 	var best: Node = null
@@ -313,6 +319,9 @@ func get_interactable() -> Node:
 
 ## Uses the nearest thing in reach in front of the crosshair, if any.
 func interact() -> void:
+	if pushing != null:
+		pushing.drop()
+		return
 	var target := get_interactable()
 	if target == null:
 		return

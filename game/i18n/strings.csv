@@ -7,6 +7,9 @@ HUD_DISTANCE,%d m
 HUD_PREY_CAUGHT,Attrapée
 HUD_SCAN_LISTENING,ÉCOUTE
 HUD_INTERACT_CAR_ALARM,{interact} : déclencher l'alarme
+HUD_INTERACT_MONITOR,{interact} : allumer le moniteur
+HUD_INTERACT_GURNEY,{interact} : pousser le brancard
+HUD_INTERACT_WHEELCHAIR,{interact} : lancer le fauteuil
 HUD_FUSES,Fusibles %d/%d
 HUD_INTERACT_FUSE_BOX,Maintenir {interact} : prendre le fusible
 HUD_INTERACT_TRANSFORMER,Maintenir {interact} : poser un fusible
@@ -139,6 +142,8 @@ HUD_PRISON_CAMERAS,{interact} : caméra suivante
 HUD_INTERACT_TERMINAL,Maintenir {interact} : s'installer au terminal
 HUD_MONSTER_SWITCH_OFF,Maintenir {interact} : éteindre le terminal
 HUD_MONSTER_SMASH_CAMERA,Maintenir {interact} : casser la caméra
+HUD_MONSTER_MONITOR_OFF,Maintenir {interact} : éteindre le moniteur
+HUD_MONSTER_SHOVE_GURNEY,Maintenir {interact} : renverser le brancard
 HUD_TERMINAL_TITLE,RÉSEAU DE LA CITÉ
 HUD_TERMINAL_HELP,"1 à 9, ou molette et clic : choisir. {interact} ou bouger : partir."
 HUD_TERMINAL_CAMERA,Caméra : %s

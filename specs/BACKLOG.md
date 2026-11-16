@@ -335,10 +335,10 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [x] T-185 — Portes mobiles (faites en S-016, T-232 à T-234 : l'hôpital les réutilise)
   - Résultat vérifiable : ouvrir et fermer une porte fait un bruit de 6 m (section 6.2) et coupe la vue ; le monstre les ouvre ; tests GUT
   - Dépend de : T-183
-- [ ] T-186 — Ventilation et moniteurs
+- [x] T-186 — Ventilation et moniteurs
   - Résultat vérifiable : zones où les bruits de 4 m ou moins sont couverts (Q5), moniteurs qu'on fait biper (Q6), synchronisés en ligne ; tests GUT
   - Dépend de : T-183
-- [ ] T-187 — Brancards et fauteuils roulants
+- [x] T-187 — Brancards et fauteuils roulants
   - Résultat vérifiable : brancards qu'on pousse et qui bloquent, fauteuils qu'on lance (Q7), bruyants, synchronisés en ligne ; tests GUT
   - Dépend de : T-183
 - [ ] T-188 — L'hôpital dans la boucle de partie

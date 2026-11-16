@@ -29,6 +29,11 @@ extends Resource
 ## Walls beyond this count are ignored (keeps raycasts cheap).
 @export_range(0, 10) var max_walls_counted: int = 4
 
+@export_group("Ventilation (S-014, Q5)")
+## In a ventilation zone, a noise of this range or less is lost in the roar:
+## neither the monster nor its scan hears it, in meters.
+@export_range(0.0, 20.0, 0.5, "suffix:m") var ventilation_mask: float = 4.0
+
 @export_group("Capture (S-010, T-107)")
 ## Range of the call for help of a captured hunted, in meters.
 @export_range(0.0, 50.0, 0.5, "suffix:m") var call_range: float = 8.0
