@@ -30,9 +30,10 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import, export web, ca
   - Résultat vérifiable : HUD des deux rôles repris sur la base 640 × 360 (D-011), lisible à toutes les tailles d'écran
   - Dépend de : T-161
   - Fait le 16/11/2026 : variations de thème `HudLabel`, `HudValue` (sodium), `HudPrompt`, `HudBig` (Barlow avec contour encre de 3 px) et `ScreenLabel` / `ScreenPanel` (VT323 vert des écrans) générées dans `echo_theme.tres` ; plus aucune police ni taille forcée dans les scènes du HUD : objectifs, jauge de bruit, invite, objet porté, capture, fin de partie (titre en grand, boutons du menu), temps de prison, vue des caméras, spectateur, menu des terminaux (panneau à droite, lignes coupées au mot, tout tient dans 360 px), marqueurs de bruit et réticule du monstre en Barlow Condensed ; `tools/godot/capture_hud.tscn` capture le terminal, la rue, la fin et le monstre ; 701 tests GUT
-- [ ] T-166 — Écran de chargement et premiers pas
+- [x] T-166 — Écran de chargement et premiers pas
   - Résultat vérifiable : chargement sous 10 s affiché avec une progression ; conseils de premier lancement pour chaque rôle
   - Dépend de : T-162
+  - Fait le 16/11/2026 : `LoadingScreen` (`game/ui/loading_screen.tscn`) entre le menu (solo ou salon en ligne) et la cité. Le build web n'a pas de threads : la map se charge par étapes, une par image (ses 121 dépendances dans un budget de 40 ms par image, puis la scène, puis son instance), et la barre ocre avance entre elles. La première fois qu'un rôle est joué, ses trois « premiers pas » s'affichent et le jeu attend Entrée ou un clic (jamais en ligne, où les autres attendent) ; ensuite un conseil du rôle tiré au hasard (5 pour le chassé, 4 pour le monstre) et la partie démarre dès que tout est chargé. Lu une fois, enregistré dans les réglages (`first_steps_hunted`, `first_steps_monster`). En ligne, la salle attend déjà que la map du joueur soit prête (`say_ready`) : rien ne change pour elle. Chargement mesuré à 3,4 s jusqu'à la barre pleine et 4,9 s jusqu'à la partie (rendu logiciel, sans carte graphique) ; 5 tests GUT
 - [ ] T-167 — Crédits en jeu
   - Résultat vérifiable : contenu de `CREDITS.md` affiché dans le jeu
   - Dépend de : T-162

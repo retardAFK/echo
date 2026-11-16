@@ -22,7 +22,13 @@ const NUMBERS := {
 }
 ## On or off settings and their default. "fullscreen" is the state of the
 ## window, never saved: a browser only allows it right after a key or a click.
-const FLAGS := {"invert_y": false, "fullscreen": false}
+## "first_steps_*": the first steps of a role were read (S-013, T-166).
+const FLAGS := {
+	"invert_y": false,
+	"fullscreen": false,
+	"first_steps_hunted": false,
+	"first_steps_monster": false,
+}
 const FULLSCREEN := "fullscreen"
 ## Settings picked in a list; the first one is the default.
 const CHOICES := {"keyboard": ["azerty", "qwerty"]}

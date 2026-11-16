@@ -97,7 +97,7 @@ func choose(role: GameSession.Role) -> void:
 
 func play() -> void:
 	if change_scene:
-		get_tree().change_scene_to_file(MAP_SCENE)
+		LoadingScreen.open(get_tree(), MAP_SCENE)  # T-166.
 
 
 ## The online game menu (S-010, T-096): create or join with a code.
