@@ -52,7 +52,7 @@ func _on_lobby_changed(lobby: LobbyState) -> void:
 
 func _on_game_started(lobby: LobbyState) -> void:
 	GameSession.online_seat = lobby.seat_of(NetSession.get_place())
-	_map = load("res://game/maps/tilleuls/tilleuls.tscn").instantiate()
+	_map = load("res://game/maps/tilleuls/tilleuls.scn").instantiate()
 	add_child(_map)
 
 

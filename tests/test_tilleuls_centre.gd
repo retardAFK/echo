@@ -3,7 +3,7 @@ extends GutTest
 ## kitchen and its hatch, offices that open onto each other, the stage and
 ## its wings.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const ORIGIN := Vector3(110, 0, 110)
 const REACH := 1.0
 ## Plan points (x, height, y) the AIs reach from outside.

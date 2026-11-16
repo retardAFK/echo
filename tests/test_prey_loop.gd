@@ -2,7 +2,7 @@ extends GutTest
 ## The AI prey plays the game loop when the player is the monster (spec S-007,
 ## T-058).
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const THREAT := Vector3(30, 0, 0)
 
 var _brain: PreyBrain

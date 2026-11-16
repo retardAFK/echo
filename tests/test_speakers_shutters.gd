@@ -4,7 +4,7 @@ extends GutTest
 ## a shutter goes down for 20 s, blocking bodies, sight and noise, and can go
 ## down again a minute after.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const SETTINGS := preload("res://game/data/network_settings.tres")
 const ORIGIN := Vector3(110, 0, 110)
 

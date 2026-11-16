@@ -1,7 +1,7 @@
 extends GutTest
 ## Sounds of the game loop (spec S-007, T-059).
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const BOX_SCENE := preload("res://game/entities/fuse_box/fuse_box.tscn")
 
 

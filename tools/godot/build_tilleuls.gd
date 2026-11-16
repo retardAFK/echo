@@ -11,8 +11,9 @@ extends Node
 const MapKit := preload("res://tools/godot/map_kit.gd")
 const InteriorLining := preload("res://tools/godot/interior_lining.gd")
 
-const SCENE_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
-const NAVMESH_PATH := "res://game/maps/tilleuls/tilleuls_navmesh.tres"
+## Binary and compressed (T-194): 1 MB instead of 11 MB in the web build.
+const SCENE_PATH := "res://game/maps/tilleuls/tilleuls.scn"
+const NAVMESH_PATH := "res://game/maps/tilleuls/tilleuls_navmesh.res"
 
 const MAP_SIZE := 220.0
 ## Ground tiles: a light only touches the few tiles around it.
@@ -522,7 +523,7 @@ func _ready() -> void:
 	var started := Time.get_ticks_msec()
 	region.bake_navigation_mesh(false)
 	var mesh := region.navigation_mesh
-	var error := ResourceSaver.save(mesh, NAVMESH_PATH)
+	var error := ResourceSaver.save(mesh, NAVMESH_PATH, ResourceSaver.FLAG_COMPRESS)
 	mesh.take_over_path(NAVMESH_PATH)
 	print(
 		"Baked %d polygons in %d ms, save error %d"
@@ -533,7 +534,7 @@ func _ready() -> void:
 	var packed := PackedScene.new()
 	error = packed.pack(_root)
 	if error == OK:
-		error = ResourceSaver.save(packed, SCENE_PATH)
+		error = ResourceSaver.save(packed, SCENE_PATH, ResourceSaver.FLAG_COMPRESS)
 	print("Saved %s, error %d" % [SCENE_PATH, error])
 	_root.free()
 	get_tree().quit(error)

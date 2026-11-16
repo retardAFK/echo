@@ -8,7 +8,7 @@ extends Node
 ## "-- --bench" on the command line. The console line starts with
 ## "ECHO_BENCH " followed by JSON; on the web, window.echoBench holds the same.
 
-const MAP_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
+const MAP_PATH := "res://game/maps/tilleuls/tilleuls.scn"
 const SETTINGS := preload("res://game/data/bench_settings.tres")
 const VISUAL_SETTINGS := preload("res://game/data/visual_settings.tres")
 ## Plan coordinates of the map origin (as in tools/godot/measure_map.gd).

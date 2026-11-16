@@ -3,7 +3,7 @@ extends GutTest
 ## every landing, four flats behind their doors on every storey, the fire
 ## escape outside, the cellars down to the car park.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const ORIGIN := Vector3(110, 0, 110)
 const REACH := 1.0
 ## Plan points (x, height, y) the AIs must reach from outside the tower.

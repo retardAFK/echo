@@ -5,7 +5,7 @@ extends Node
 ## xvfb-run godot --rendering-driver opengl3 --resolution 1280x720 \
 ##   res://tools/godot/capture_menu_backgrounds.tscn
 
-const MAP_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
+const MAP_PATH := "res://game/maps/tilleuls/tilleuls.scn"
 const OUT_DIR := "res://assets/textures/ui/"
 const ORIGIN := Vector3(110, 0, 110)
 ## Name, eye and look-at point in plan coordinates (like the bench views).

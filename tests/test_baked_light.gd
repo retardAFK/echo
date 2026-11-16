@@ -2,7 +2,7 @@ extends GutTest
 ## Light of the street lamps and landmarks baked in the vertices (spec S-006,
 ## T-049, plan B): the meshes carry it, the real lights skip them and fade out.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const MapKit := preload("res://tools/godot/map_kit.gd")
 
 var _map: Node3D

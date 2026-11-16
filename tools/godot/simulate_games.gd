@@ -8,7 +8,7 @@ extends Node
 ## three AI preys play together (S-010, T-100): out as soon as one gets out,
 ## caught once none is free.
 
-const MAP_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
+const MAP_PATH := "res://game/maps/tilleuls/tilleuls.scn"
 ## Longest game, in game seconds, before it counts as stuck.
 const TIME_LIMIT := 1800.0
 

@@ -1,7 +1,7 @@
 extends GutTest
 ## Facade modules on the blocks of flats and the tower (spec S-006, T-045).
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const ORIGIN := Vector3(110, 0, 110)
 ## Module order of FacadeDressing.models (build_tilleuls.gd).
 const DOOR := 4

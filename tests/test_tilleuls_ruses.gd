@@ -2,7 +2,7 @@ extends GutTest
 ## Ruses in the cité des Tilleuls (spec S-008, T-067): bottles, alarm clocks
 ## and hiding spots placed by build_tilleuls, within reach of the navigation.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const VISITABLE := ["Tower", "SocialCentre", "Gallery", "CarPark"]
 ## A hiding spot this close to a door, in meters, would catch the aim of whoever
 ## opens it (T-167).

@@ -5,7 +5,7 @@ extends GutTest
 ## on, the room stopped once nobody is in it.
 
 const PORT := 19041
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 
 var _settings: NetSettings
 

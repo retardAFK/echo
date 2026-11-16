@@ -1,7 +1,7 @@
 extends GutTest
 ## End of a game and end screen (spec S-007, T-056).
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 
 
 func after_each() -> void:

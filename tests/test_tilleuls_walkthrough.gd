@@ -3,7 +3,7 @@ extends GutTest
 ## controller and physics (spec S-006, T-044): into the tower up to the 4th
 ## floor, down the car park stairs, and crouching under the half-lowered shutter.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const ORIGIN := Vector3(110, 0, 110)
 ## A waypoint closer than this (horizontally) is passed, the bot aims at the next.
 const WAYPOINT_REACH := 0.6

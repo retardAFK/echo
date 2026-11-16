@@ -4,7 +4,7 @@ extends GutTest
 ## the monster away, throws its relay switch; the monster switches off a
 ## terminal in use it sees and smashes a lit camera.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 
 var _before := ""
 

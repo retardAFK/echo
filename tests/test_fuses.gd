@@ -4,7 +4,7 @@ extends GutTest
 const BOX_SCENE := preload("res://game/entities/fuse_box/fuse_box.tscn")
 const PLAYER_SCENE := preload("res://game/entities/player/player.tscn")
 const PROMPT_SCENE := preload("res://game/ui/interact_prompt.tscn")
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 
 var _fuse_noises: Array[NoiseEvent] = []
 

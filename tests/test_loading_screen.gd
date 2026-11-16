@@ -4,7 +4,7 @@ extends GutTest
 ## for Enter the first time only.
 
 const SCENE := preload("res://game/ui/loading_screen.tscn")
-const MAP_SCENE_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
+const MAP_SCENE_PATH := "res://game/maps/tilleuls/tilleuls.scn"
 const SMALL_PATH := "res://game/ui/end_screen.tscn"
 
 var _flags := {}

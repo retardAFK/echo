@@ -8,7 +8,7 @@ extends Node
 const START := "res://game/ui/start_menu.tscn"
 const LOBBY := "res://game/ui/lobby_menu.tscn"
 const LOADING := "res://game/ui/loading_screen.tscn"
-const MAP := "res://game/maps/tilleuls/tilleuls.tscn"
+const MAP := "res://game/maps/tilleuls/tilleuls.scn"
 const SETTLE_FRAMES := 8
 
 var _out := ""

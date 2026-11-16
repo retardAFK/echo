@@ -2,7 +2,7 @@ extends GutTest
 ## The AI monster in the game loop: drawn back to noisy buildings, guarding the
 ## tunnel once the exit is open, for a while at a time (spec S-007, T-057, T-060).
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const LURE := Vector3(50, 0, 50)
 const PLAYER_POS := Vector3(-3, 0, 2)
 

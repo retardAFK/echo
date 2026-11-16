@@ -319,7 +319,7 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [ ] T-182 — Plan et tâches de S-014
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-181
-- [ ] T-194 — Map enregistrée en binaire compressé
+- [x] T-194 — Map enregistrée en binaire compressé
   - Résultat vérifiable : le générateur écrit la map en `.scn` compressé (14 Mo de texte, 1,1 Mo compressé) ; build web sous 50 Mo ; tests GUT et test en ligne inchangés
   - Dépend de : T-182
 - [ ] T-195 — Visibilité par niveau

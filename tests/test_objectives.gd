@@ -4,7 +4,7 @@ extends GutTest
 ## the transformer on a floppy disk, two relay switches thrown together. The
 ## exit opens once all are done.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const LOOP_SETTINGS := preload("res://game/data/loop_settings.tres")
 const ALL := [
 	LoopRules.Objective.FUSE,

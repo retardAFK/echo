@@ -11,7 +11,7 @@ extends Control
 signal launched(seat: int)
 
 const START_MENU_SCENE := "res://game/ui/start_menu.tscn"
-const MAP_SCENE := "res://game/maps/tilleuls/tilleuls.tscn"
+const MAP_SCENE := "res://game/maps/tilleuls/tilleuls.scn"
 const ERROR_KEYS := {
 	"unreachable": "LOBBY_ERROR_UNREACHABLE",
 	"unknown_code": "LOBBY_ERROR_UNKNOWN_CODE",

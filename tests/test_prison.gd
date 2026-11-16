@@ -3,7 +3,7 @@ extends GutTest
 ## waits in a cage, freed at the grille by a teammate; its stay runs out
 ## unless the monster is near; out the third time. Solo is unchanged.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const PLAYER_SCENE := preload("res://game/entities/player/player.tscn")
 const SETTINGS := preload("res://game/data/prison_settings.tres")
 
