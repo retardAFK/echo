@@ -95,7 +95,7 @@ func test_the_cite_offers_every_kind_and_solo_draws_them() -> void:
 	var fused := map.get_fuse_boxes().filter(func(box: FuseBox) -> bool: return box.has_fuse)
 	assert_eq(fused.size(), rules.fuse_count, "as many fuses as FUSE objectives")
 	var spots := get_tree().get_nodes_in_group(CodeSpot.GROUP)
-	assert_eq(spots.size(), 6, "a post-it behind each terminal but the keypad")
+	assert_eq(spots.size(), 7, "a post-it behind each terminal but the keypad")
 	var written := spots.filter(func(spot: CodeSpot) -> bool: return spot.get_code() != "")
 	var has_code := LoopRules.Objective.CODE in rules.objectives
 	assert_eq(written.size(), 1 if has_code else 0)
@@ -196,7 +196,7 @@ func test_relay_switches_hang_on_a_wall() -> void:
 	await wait_physics_frames(2)
 	var space := map.get_world_3d().direct_space_state
 	var switches := get_tree().get_nodes_in_group(RelaySwitch.GROUP)
-	assert_eq(switches.size(), 4)
+	assert_eq(switches.size(), 5, "and the hospital's (S-014)")
 	for switch: RelaySwitch in switches:
 		assert_false(switch.armed, "not drawn this game")
 		var at := switch.global_position + Vector3.UP * 1.3 + switch.global_basis.z * 0.3
@@ -227,7 +227,7 @@ func test_a_client_shows_the_room_s_objectives() -> void:
 	var rules := client.game_loop.rules
 	assert_eq(Array(rules.objectives), Array(room.game_loop.rules.objectives))
 	assert_eq(rules.fuse_count, 1)
-	assert_eq(mirror.code_spot.get_parent().get_child_count(), 6)
+	assert_eq(mirror.code_spot.get_parent().get_child_count(), 7)  # With the hospital (S-014).
 	assert_eq(mirror.code, quests.code)
 	assert_eq(mirror.code_spot.get_index(), quests.code_spot.get_index(), "the same post-it")
 	assert_eq(mirror.typed_on(client.get_node("Network").terminals[-1]), quests.code[0])

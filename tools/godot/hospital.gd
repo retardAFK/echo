@@ -172,6 +172,48 @@ const WHEELCHAIRS := [
 	Vector3(22.0, 3.0, 93.0),
 	Vector3(14.0, 6.0, 112.0),
 ]
+## The hospital in the game loop (Q8, Q9): fuse slots (plan points x, height,
+## y), on the nearest wall like the other buildings' ones.
+const FUSE_SLOTS := [
+	Vector3(11.0, -3.0, 62.0),
+	Vector3(31.0, -3.0, 112.0),
+	Vector3(11.0, 0.0, 86.0),
+	Vector3(30.0, 0.0, 123.6),
+	Vector3(30.0, 3.0, 109.6),
+	Vector3(11.0, 6.0, 77.0),
+]
+## Hiding spots (Q8), as build_tilleuls.gd's FAMILY_SPOTS: morgue drawers
+## (metal), beds (low), curtains (makeshift).
+const SPOTS := [
+	["Metal", Vector3(11.0, -3.0, 58.0)],  # Morgue drawers.
+	["Metal", Vector3(11.0, -3.0, 66.0)],
+	["Makeshift", Vector3(31.0, -3.0, 70.5)],  # Padded cell.
+	["Makeshift", Vector3(31.0, -3.0, 104.0)],  # Archives.
+	["Makeshift", Vector3(11.0, 0.0, 108.0)],  # Emergency boxes' curtains.
+	["Makeshift", Vector3(11.0, 0.0, 115.0)],
+	["Low", Vector3(31.0, 0.0, 66.0)],
+	["Low", Vector3(11.0, 3.0, 60.0)],  # Room beds.
+	["Low", Vector3(11.0, 3.0, 111.0)],
+	["Low", Vector3(31.0, 3.0, 80.0)],
+	["Makeshift", Vector3(11.0, 3.0, 96.0)],  # Shower curtain.
+	["Low", Vector3(31.0, 3.0, 114.0)],
+	["Metal", Vector3(31.0, 6.0, 128.0)],  # Storeroom cabinet.
+	["Low", Vector3(11.0, 6.0, 111.0)],  # Reanimation beds.
+	["Low", Vector3(31.0, 6.0, 108.0)],
+]
+## The network of the cité in the hospital (S-018 formats).
+const TERMINALS := [
+	[Vector3(27.5, 3.0, 96.7), 0.0, Terminal.Kind.NORMAL, "NET_TERM_HOSPITAL"],
+]
+const CAMERAS := [
+	[Vector3(21.0, 2.6, 57.6), Vector3(21.0, 0.5, 90.0), "NET_CAM_HOSPITAL"],
+]
+const SPEAKERS := [
+	[Vector3(31.6, 2.4, 81.0), 90.0, "NET_SPEAKER_HOSPITAL"],
+]
+const RELAYS := [
+	[Vector3(31.6, -3.0, 128.0), "hospital"],
+]
 const GURNEY := preload("res://game/entities/gurney/gurney.tscn")
 const WHEELCHAIR := preload("res://game/entities/wheelchair/wheelchair.tscn")
 
@@ -213,7 +255,12 @@ static func scan_levels() -> Array:
 		for light: Array in LIGHTS:
 			if light[0].y >= bottom and light[0].y < bottom + STOREY:
 				lights.append(light)
-		levels.append([LEVEL_NAMES[i], LEVEL_KEYS[i], [RECT, bottom, bottom + STOREY, lights, []]])
+		# The fuse slots of every level go with the ground floor's entry: one
+		# building for the draw of the fuses (S-007, Q1).
+		var slots: Array = FUSE_SLOTS if i == 1 else []
+		levels.append(
+			[LEVEL_NAMES[i], LEVEL_KEYS[i], [RECT, bottom, bottom + STOREY, lights, slots]]
+		)
 	return levels
 
 

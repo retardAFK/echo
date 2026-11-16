@@ -158,6 +158,7 @@ HUD_TERMINAL_RECHARGE,(prêt dans %d s)
 NET_SPEAKER_STAGE,sono de la scène du centre social
 NET_SPEAKER_TOWER,alarme incendie du hall de la tour
 NET_SPEAKER_ARCADE,interphone de l'arcade de la galerie
+NET_SPEAKER_HOSPITAL,accueil de l'hôpital
 NET_SHUTTER_RAMP,entrée du parking par la rampe
 NET_SHUTTER_GALLERY,couloir de livraison de la galerie
 HUD_CAMERA_CAPTION,CAM %d · %s
@@ -169,7 +170,9 @@ NET_CAM_CENTRE_HALL,grande salle du centre social
 NET_CAM_ARCADE,arcade de la galerie
 NET_CAM_TRANSFORMER,transformateur
 NET_CAM_TOWER_SOUTH,carrefour au sud de la tour
+NET_CAM_HOSPITAL,couloir de l'hôpital
 NET_TERM_TOWER,loge de la tour
+NET_TERM_HOSPITAL,poste de soins de l'hôpital
 NET_TERM_CENTRE_OFFICE,bureau du centre social
 NET_TERM_CENTRE_HALL,accueil du centre social
 NET_TERM_BAKERY,arrière-boutique de la boulangerie

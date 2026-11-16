@@ -80,12 +80,12 @@ func test_boxes_are_visited_building_by_building() -> void:
 	var map: GameMap = MAP_SCENE.instantiate()
 	add_child_autofree(map)
 	var ordered := Prey.order_boxes(map.get_fuse_boxes(), Vector3.ZERO)
-	assert_eq(ordered.size(), 24)
+	assert_eq(ordered.size(), 30)
 	var changes := 0
 	for i in range(1, ordered.size()):
 		if ordered[i].building_name != ordered[i - 1].building_name:
 			changes += 1
-	assert_eq(changes, 3, "four buildings, each visited once")
+	assert_eq(changes, 4, "five buildings, each visited once")
 
 
 func test_it_does_not_give_up_its_first_box_on_its_first_frames() -> void:

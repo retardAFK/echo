@@ -84,6 +84,7 @@ func test_grain_changes_about_twelve_times_per_second() -> void:
 	var post: RetroPost = _map.get_node("RetroPost")
 	var material: ShaderMaterial = post.get_node("Filter").material
 	var before: Variant = material.get_shader_parameter("grain_seed")
+	post._grain_time = 0.0  # Whatever the frames of the map's loading added.
 	post._process(0.5 / SETTINGS.grain_rate)
 	assert_eq(material.get_shader_parameter("grain_seed"), before, "not every frame")
 	post._process(0.6 / SETTINGS.grain_rate)

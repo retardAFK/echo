@@ -29,7 +29,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-187 — Brancards et fauteuils roulants
   - Résultat vérifiable : entités `Gurney` et `Wheelchair`, bruits `ROLL`, monstre qui dégage, synchronisés en ligne ; tests GUT
   - Dépend de : T-183
-- [ ] T-188 — L'hôpital dans la boucle de partie
+- [x] T-188 — L'hôpital dans la boucle de partie
   - Résultat vérifiable : 6 emplacements de fusible, 15 cachettes, terminal, caméra, haut-parleur, relais, code, ambulance ; tests GUT
   - Dépend de : T-184, T-186, T-187
 - [ ] T-189 — Assets de l'hôpital
