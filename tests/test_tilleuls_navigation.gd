@@ -135,11 +135,29 @@ func test_ai_monster_walks_into_the_buildings() -> void:
 		var points: Array[Vector3] = [goal]
 		monster.brain.set_patrol(points, 0)
 		await wait_until(func() -> bool: return monster.global_position.distance_to(goal) < 1.5, 20)
-		assert_lt(
-			monster.global_position.distance_to(goal),
-			1.5,
-			(
-				"walked to %s, stopped at %s in state %s"
-				% [leg[1], monster.global_position + ORIGIN, monster.brain.state]
-			)
+		assert_lt(monster.global_position.distance_to(goal), 1.5, _walk_report(monster, leg[1]))
+
+
+## Where and why the monster stopped short of its goal.
+func _walk_report(monster: Monster, goal: Vector3) -> String:
+	var agent: NavigationAgent3D = monster.get_node("NavigationAgent3D")
+	var doors: Array[String] = []
+	for door: Door in get_tree().get_nodes_in_group(Door.GROUP):
+		if door.global_position.distance_to(monster.global_position) < 3.0:
+			doors.append("%s open %s" % [door.name, door.is_open])
+	return (
+		(
+			"walked to %s, stopped at %s in state %s, lingering %s, velocity %s, next %s,"
+			+ " finished %s, doors %s"
 		)
+		% [
+			goal,
+			monster.global_position + ORIGIN,
+			monster.brain.state,
+			monster.brain.lingering,
+			monster.velocity,
+			agent.get_next_path_position() + ORIGIN,
+			agent.is_navigation_finished(),
+			doors,
+		]
+	)
