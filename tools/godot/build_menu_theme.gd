@@ -22,6 +22,7 @@ static func build() -> Theme:
 	_labels(theme)
 	_panels(theme)
 	_digicode_and_intercom(theme)
+	_hud(theme)
 	return theme
 
 
@@ -166,3 +167,29 @@ static func _digicode_and_intercom(theme: Theme) -> void:
 	theme.set_font("font", "TagLabel", _font(STYLE.FONT_DISPLAY, 0))
 	theme.set_font_size("font_size", "TagLabel", STYLE.SIZE_BODY + 2)
 	theme.set_color("font_color", "TagLabel", STYLE.INK)
+
+
+## The HUD in game (T-165): labels outlined in warm black, and the green text
+## of the terminals' screens.
+static func _hud(theme: Theme) -> void:
+	var labels := {
+		"HudLabel": [STYLE.FONT_DISPLAY, STYLE.SPACING_ITEM, STYLE.SIZE_HUD, STYLE.TEXT],
+		"HudValue": [STYLE.FONT_DISPLAY, STYLE.SPACING_ITEM, STYLE.SIZE_HUD, STYLE.SODIUM],
+		"HudPrompt": [STYLE.FONT_BODY_BOLD, 0, STYLE.SIZE_HUD_PROMPT, STYLE.CREAM],
+		"HudBig": [STYLE.FONT_DISPLAY_BOLD, STYLE.SPACING_HEADING, STYLE.SIZE_HUD_BIG, STYLE.CREAM],
+		"ScreenLabel": [STYLE.FONT_DISPLAY_LCD, 0, STYLE.SIZE_SCREEN, STYLE.SCREEN],
+	}
+	for type: String in labels:
+		var spec: Array = labels[type]
+		theme.set_type_variation(type, "Label")
+		theme.set_font("font", type, _font(spec[0], spec[1]))
+		theme.set_font_size("font_size", type, spec[2])
+		theme.set_color("font_color", type, spec[3])
+		if type != "ScreenLabel":
+			theme.set_color("font_outline_color", type, STYLE.INK)
+			theme.set_constant("outline_size", type, STYLE.OUTLINE_HUD)
+	var screen := _flat(Color(0.0, 0.05, 0.02, 0.85), Vector4(8, 6, 8, 6))
+	screen.border_color = STYLE.SCREEN_DIM
+	screen.set_border_width_all(1)
+	theme.set_type_variation("ScreenPanel", "PanelContainer")
+	theme.set_stylebox("panel", "ScreenPanel", screen)

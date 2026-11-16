@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/ui/end_screen.gd" id="1_end"]
+[ext_resource type="Theme" path="res://game/ui/theme/echo_theme.tres" id="9_theme"]
 
 [node name="EndScreen" type="CanvasLayer"]
 layer = 30
@@ -15,6 +16,7 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.78)
 
 [node name="Box" type="VBoxContainer" parent="."]
+theme = ExtResource("9_theme")
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -30,19 +32,18 @@ alignment = 1
 theme_override_constants/separation = 10
 
 [node name="Title" type="Label" parent="Box"]
+theme_type_variation = &"HudBig"
 unique_name_in_owner = true
-theme_override_font_sizes/font_size = 22
 horizontal_alignment = 1
 
 [node name="Stats" type="Label" parent="Box"]
+theme_type_variation = &"BodyLabel"
 unique_name_in_owner = true
-theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 
 [node name="CopyButton" type="Button" parent="Box"]
+theme_type_variation = &"SmallMenuItem"
 unique_name_in_owner = true
-theme_override_font_sizes/font_size = 10
 text = "END_COPY"
 
 [node name="Buttons" type="HBoxContainer" parent="Box"]
@@ -50,13 +51,13 @@ alignment = 1
 theme_override_constants/separation = 12
 
 [node name="ReplayButton" type="Button" parent="Box/Buttons"]
+theme_type_variation = &"MenuItem"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(80, 0)
-theme_override_font_sizes/font_size = 12
 text = "END_REPLAY"
 
 [node name="MenuButton" type="Button" parent="Box/Buttons"]
+theme_type_variation = &"MenuItem"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(80, 0)
-theme_override_font_sizes/font_size = 12
 text = "END_MENU"

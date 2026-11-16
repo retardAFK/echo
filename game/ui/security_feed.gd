@@ -6,7 +6,6 @@ extends CanvasLayer
 ## a hint says that "interact" goes through the cameras (Q8).
 
 const SHADER := preload("res://game/fx/security_feed.gdshader")
-const CAPTION_COLOR := Color(0.55, 1.0, 0.6)
 
 var player: Player
 ## Where the captured wait (online), and its seat (GameSession.online_seat
@@ -72,10 +71,8 @@ func _label(preset: Control.LayoutPreset, top: float) -> Label:
 	label.offset_top = top
 	label.offset_bottom = top + 14.0
 	label.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	label.add_theme_color_override(&"font_color", CAPTION_COLOR)
-	label.add_theme_color_override(&"font_outline_color", Color.BLACK)
-	label.add_theme_constant_override(&"outline_size", 2)
-	label.add_theme_font_size_override(&"font_size", 10)
+	label.theme = load(MenuStyle.THEME_PATH)
+	label.theme_type_variation = &"ScreenLabel"
 	add_child(label)
 	return label
 

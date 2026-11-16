@@ -8,10 +8,9 @@ extends CanvasLayer
 ## action of the player's commands, so online the room carries it out. The
 ## line of the camera watched is marked. "interact" or moving gets up.
 
-const GREEN := Color(0.55, 1.0, 0.6)
-const DIM := Color(0.3, 0.6, 0.35)
-const PANEL := Color(0.0, 0.05, 0.02, 0.8)
-const WIDTH := 200.0
+const GREEN := MenuStyle.SCREEN
+const DIM := MenuStyle.SCREEN_DIM
+const WIDTH := 250.0
 
 var player: Player
 
@@ -29,26 +28,21 @@ func _ready() -> void:
 	_panel.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
 	_panel.offset_left = -WIDTH - 12.0
 	_panel.offset_right = -12.0
-	_panel.offset_top = 40.0
-	_panel.offset_bottom = -60.0
-	var box := StyleBoxFlat.new()
-	box.bg_color = PANEL
-	box.border_color = DIM
-	box.set_border_width_all(1)
-	box.set_content_margin_all(6.0)
-	_panel.add_theme_stylebox_override(&"panel", box)
+	_panel.offset_top = 24.0
+	_panel.offset_bottom = -40.0
+	_panel.theme = load(MenuStyle.THEME_PATH)
+	_panel.theme_type_variation = &"ScreenPanel"
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_panel)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override(&"separation", 4)
+	column.add_theme_constant_override(&"separation", 6)
 	_panel.add_child(column)
 	_title = _label(GREEN)
 	column.add_child(_title)
 	_lines = VBoxContainer.new()
-	_lines.add_theme_constant_override(&"separation", 1)
+	_lines.add_theme_constant_override(&"separation", 0)
 	column.add_child(_lines)
 	_help = _label(DIM)
-	_help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_help)
 	_panel.visible = false
 
@@ -157,7 +151,8 @@ func _line_text(network: CityNetwork, i: int) -> String:
 
 func _label(color: Color) -> Label:
 	var label := Label.new()
+	label.theme_type_variation = &"ScreenLabel"
 	label.add_theme_color_override(&"font_color", color)
-	label.add_theme_font_size_override(&"font_size", 10)
-	label.custom_minimum_size.x = WIDTH - 12.0
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size.x = WIDTH - 18.0
 	return label

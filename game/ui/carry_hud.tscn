@@ -1,12 +1,15 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/ui/carry_hud.gd" id="1_hud"]
+[ext_resource type="Theme" path="res://game/ui/theme/echo_theme.tres" id="9_theme"]
 
 [node name="CarryHud" type="CanvasLayer"]
 layer = 10
 script = ExtResource("1_hud")
 
 [node name="Label" type="Label" parent="."]
+theme = ExtResource("9_theme")
+theme_type_variation = &"HudValue"
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -18,9 +21,5 @@ offset_right = -8.0
 offset_bottom = -8.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_colors/font_color = Color(1, 1, 1, 0.75)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
 horizontal_alignment = 2
 vertical_alignment = 2

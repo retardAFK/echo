@@ -50,6 +50,17 @@ const SIZE_FOOT := 7
 const SIZE_CODE := 46
 const SIZE_LCD := 26
 
+## The HUD in game (T-165), on the same base: small condensed capitals with
+## a dark outline, readable over any scene.
+const SIZE_HUD := 11
+const SIZE_HUD_PROMPT := 10
+const SIZE_HUD_BIG := 30
+const OUTLINE_HUD := 3
+## The old terminals' screens and the camera feed: green VT323 text.
+const SIZE_SCREEN := 12
+const SCREEN := Color(0.55, 1.0, 0.6)
+const SCREEN_DIM := Color(0.3, 0.6, 0.35)
+
 ## Extra space between letters, in pixels of the 640 x 360 base.
 const SPACING_TITLE := 9
 const SPACING_HEADING := 3
