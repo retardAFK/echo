@@ -19,14 +19,6 @@ const CALL_LOW_HZ := 360.0
 const CALL_VOLUME := 0.35
 const RESCUE_LENGTH := 0.5
 const RESCUE_CUTOFF := 0.15
-const KEYS_LENGTH := 0.6
-const KEYS_COUNT := 5
-const KEY_LENGTH := 0.025
-const BEEP_LENGTH := 0.3
-const BEEP_HZ := 1040.0
-const BEEP_VOLUME := 0.35
-const DISK_LENGTH := 0.5
-const DISK_CUTOFF := 0.6
 
 
 ## A dull thump: low-passed noise with a fast decay.
@@ -70,40 +62,6 @@ static func call_for_help() -> AudioStreamWAV:
 ## A rescue: the rustle of a struggle.
 static func rescue() -> AudioStreamWAV:
 	return _noise_burst(RESCUE_LENGTH, RESCUE_CUTOFF, true, 37)
-
-
-## Keys clacking on an old keyboard (S-018): a few short bright clicks.
-static func keys() -> AudioStreamWAV:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 53
-	var count := int(KEYS_LENGTH * MIX_RATE)
-	var data := PackedByteArray()
-	data.resize(count * 2)
-	var click := int(KEY_LENGTH * MIX_RATE)
-	for k in KEYS_COUNT:
-		var start := int(rng.randf_range(0.0, KEYS_LENGTH - KEY_LENGTH) * MIX_RATE)
-		for i in click:
-			var t := float(i) / click
-			var sample := rng.randf_range(-1.0, 1.0) * pow(1.0 - t, 4.0) * PEAK * 0.6
-			data.encode_s16((start + i) * 2, int(sample * 32767.0))
-	return _stream(data)
-
-
-## A wrong code (S-018, T-266): a short square beep.
-static func beep() -> AudioStreamWAV:
-	var count := int(BEEP_LENGTH * MIX_RATE)
-	var data := PackedByteArray()
-	data.resize(count * 2)
-	for i in count:
-		var phase := fmod(float(i) * BEEP_HZ / MIX_RATE, 1.0)
-		var sample := BEEP_VOLUME * (1.0 if phase < 0.5 else -1.0)
-		data.encode_s16(i * 2, int(sample * 32767.0))
-	return _stream(data)
-
-
-## A hard disk scratching while it downloads (S-018, T-266): bright noise.
-static func disk() -> AudioStreamWAV:
-	return _noise_burst(DISK_LENGTH, DISK_CUTOFF, true, 71)
 
 
 static func _noise_burst(

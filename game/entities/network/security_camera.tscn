@@ -2,12 +2,7 @@
 
 [ext_resource type="Script" path="res://game/entities/network/security_camera.gd" id="1_camera"]
 [ext_resource type="Resource" path="res://game/data/network_settings.tres" id="2_settings"]
-
-[sub_resource type="BoxMesh" id="BodyMesh"]
-size = Vector3(0.16, 0.14, 0.32)
-
-[sub_resource type="StandardMaterial3D" id="Grey"]
-albedo_color = Color(0.55, 0.55, 0.52, 1)
+[ext_resource type="PackedScene" path="res://assets/models/network/security_camera.glb" id="3_model"]
 
 [sub_resource type="SphereMesh" id="LedMesh"]
 radius = 0.018
@@ -24,9 +19,7 @@ emission_energy_multiplier = 4.0
 script = ExtResource("1_camera")
 settings = ExtResource("2_settings")
 
-[node name="Body" type="MeshInstance3D" parent="."]
-mesh = SubResource("BodyMesh")
-surface_material_override/0 = SubResource("Grey")
+[node name="Body" parent="." instance=ExtResource("3_model")]
 
 [node name="Led" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.085, -0.13)

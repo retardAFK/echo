@@ -20,6 +20,7 @@ signal switched_off
 enum Kind { NORMAL, GUARD, CODE }
 
 const GROUP := &"terminals"
+const SOUND_KEYS := preload("res://assets/audio/network/keyboard.wav")
 ## What the monster may use with "interact" besides doors and hiding spots.
 const MONSTER_GROUP := &"monster_usable"
 ## Where the one at the keyboard stands, in front of the desk (local).
@@ -27,14 +28,6 @@ const SEAT := Vector3(0.0, 0.0, 0.75)
 const SCREEN_IDLE := Color(0.1, 0.45, 0.2)
 const SCREEN_LIT := Color(0.35, 1.0, 0.5)
 const SCREEN_OFF := Color(0.02, 0.03, 0.02)
-const WOOD := Color(0.32, 0.27, 0.2)
-const BEIGE := Color(0.62, 0.58, 0.47)
-## Its boxes, merged in one mesh (one draw call): [size, center, color].
-const BOXES := [
-	[Vector3(1.2, 0.75, 0.6), Vector3(0.0, 0.375, -0.3), WOOD],
-	[Vector3(0.46, 0.4, 0.42), Vector3(0.0, 0.95, -0.38), BEIGE],
-	[Vector3(0.44, 0.04, 0.16), Vector3(0.0, 0.77, -0.1), BEIGE],
-]
 
 @export var settings: NetworkSettings
 @export var kind := Kind.NORMAL
@@ -58,7 +51,6 @@ var _switch: HoldProgress
 var _keyboard_left := 0.0
 var _screen_material: StandardMaterial3D
 
-@onready var _body: MeshInstance3D = $Body
 @onready var _screen: MeshInstance3D = $Screen
 @onready var _light: OmniLight3D = $ScreenLight
 @onready var _keys: AudioStreamPlayer3D = $Keys
@@ -68,13 +60,12 @@ func _ready() -> void:
 	add_to_group(Interactable.GROUP)
 	add_to_group(GROUP)
 	add_to_group(MONSTER_GROUP)
-	_body.mesh = _build_body()
 	_sit = HoldProgress.new(settings.sit_time)
 	_switch = HoldProgress.new(settings.monster_hold)
 	_screen_material = _screen.get_surface_override_material(0).duplicate()
 	_screen.set_surface_override_material(0, _screen_material)
 	_light.omni_range = settings.screen_light_range
-	_keys.stream = PlaceholderSounds.keys()
+	_keys.stream = SOUND_KEYS
 	DrawRange.limit(self, DrawRange.INDOOR)
 	_show()
 
@@ -218,24 +209,3 @@ func _show() -> void:
 	_screen_material.albedo_color = color
 	_screen_material.emission = color
 	_light.visible = is_on() and is_in_use()
-
-
-## The desk, the case and the keyboard as one mesh, colored per vertex.
-static func _build_body() -> ArrayMesh:
-	var tool := SurfaceTool.new()
-	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for box: Array in BOXES:
-		var cube := BoxMesh.new()
-		cube.size = box[0]
-		var arrays := cube.get_mesh_arrays()
-		var colors := PackedColorArray()
-		colors.resize((arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size())
-		colors.fill(box[2])
-		arrays[Mesh.ARRAY_COLOR] = colors
-		var part := ArrayMesh.new()
-		part.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-		tool.append_from(part, 0, Transform3D(Basis.IDENTITY, box[1]))
-	var material := StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo = true
-	tool.set_material(material)
-	return tool.commit()

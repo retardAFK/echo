@@ -6,7 +6,7 @@ extends Node3D
 ## noise: a decoy far from the one at the terminal.
 
 const GROUP := &"loudspeakers"
-const BODY_COLOR := Color(0.18, 0.18, 0.17)
+const SOUND := preload("res://assets/audio/network/loudspeaker.wav")
 
 @export var settings: NetworkSettings
 ## Its name in the terminals' menus, a translation key.
@@ -26,7 +26,7 @@ var _next_noise := 0.0
 
 func _ready() -> void:
 	add_to_group(GROUP)
-	_sound.stream = PlaceholderSounds.alarm()
+	_sound.stream = SOUND
 	DrawRange.limit(self, DrawRange.INDOOR)
 
 

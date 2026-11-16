@@ -10,7 +10,6 @@ const GROUP := &"code_spots"
 const READ_DISTANCE := 15.0
 
 @onready var _label: Label3D = $Digits
-@onready var _paper: MeshInstance3D = $Paper
 
 
 func _ready() -> void:
