@@ -380,7 +380,7 @@ const SPOT_RAY_HEIGHT := 0.5
 const CLOSETS := [
 	Vector3(93, 0, 109), Vector3(93.5, 3, 90), Vector3(103, 9, 109.5),  # Tower: bin room, flats.
 	Vector3(164.2, 0, 61.5), Vector3(148, 0, 61), Vector3(176.8, 0, 82.5),  # Social centre.
-	Vector3(54.2, 0, 141), Vector3(77.9, 0, 145.8), Vector3(45.8, 0, 141),  # Gallery.
+	Vector3(54.2, 0, 141), Vector3(81.5, 0, 146.5), Vector3(45.8, 0, 141),  # Gallery.
 	Vector3(141, -3, 112), Vector3(179, -3, 106), Vector3(152, -3, 95.8),  # Car park.
 ]
 ## The other families (S-016, Q6): low (under a bed), makeshift (behind a
@@ -397,7 +397,7 @@ const FAMILY_SPOTS := [
 	["Makeshift", Vector3(140.85, 0, 65)], ["Makeshift", Vector3(158.2, 0, 63)],  # the wings, the chairs,
 	["Metal", Vector3(153.5, 0, 83)],  # the kitchen's cold cabinet.
 	["Low", Vector3(48.5, 0, 144.5)], ["Metal", Vector3(54, 0, 145.5)],  # Gallery: pharmacy, dryer,
-	["Makeshift", Vector3(68.4, 0, 145.5)], ["Metal", Vector3(85.5, 0, 145.3)],  # boxes, oven.
+	["Makeshift", Vector3(64.5, 0, 146.4)], ["Metal", Vector3(85.5, 0, 145.3)],  # boxes, oven.
 	["Metal", Vector3(154, -3, 101.05), Vector2.DOWN],  # Car park: a wreck's boot,
 	["Low", Vector3(160, -3, 113.5), Vector2.LEFT],  # under a wreck,
 	["Metal", Vector3(166, -3, 103.55), Vector2.DOWN],  # another boot,

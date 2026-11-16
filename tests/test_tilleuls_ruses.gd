@@ -4,6 +4,9 @@ extends GutTest
 
 const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
 const VISITABLE := ["Tower", "SocialCentre", "Gallery", "CarPark"]
+## A hiding spot this close to a door, in meters, would catch the aim of whoever
+## opens it (T-167).
+const DOORWAY_CLEARANCE := 1.0
 
 var _map: GameMap
 
@@ -145,3 +148,25 @@ func test_no_hiding_spot_stands_where_a_fuse_box_is_used() -> void:
 			var gap := Vector2(spot.global_position.x - at.x, spot.global_position.z - at.z)
 			var near := gap.length() < 1.5 and absf(spot.global_position.y - at.y) < 2.0
 			assert_false(near, "%s near %s" % [spot.name, box.get_path()])
+
+
+func test_no_hiding_spot_stands_in_a_doorway() -> void:
+	# The boxes of the tobacconist once stood by its back door: they caught
+	# the aim of whoever opened the door, who hid in them instead, and the
+	# AI monster stayed caught on them (the online test of 4 players got
+	# stuck there, T-167).
+	var map: GameMap = MAP_SCENE.instantiate()
+	add_child_autofree(map)
+	var spots := map.find_children("*", "", true, false).filter(
+		func(node: Node) -> bool: return node is HidingSpot
+	)
+	for node in map.get_tree().get_nodes_in_group(Door.GROUP):
+		var door := node as Door
+		for spot: Node3D in spots:
+			var flat := door.closest_flat_point(spot.global_position)
+			var gap := flat.distance_to(Vector2(spot.global_position.x, spot.global_position.z))
+			var near := (
+				gap < DOORWAY_CLEARANCE
+				and absf(spot.global_position.y - door.global_position.y) < 2.0
+			)
+			assert_false(near, "%s near %s (%.2f m)" % [spot.name, door.name, gap])
