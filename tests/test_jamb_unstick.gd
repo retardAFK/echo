@@ -56,3 +56,18 @@ func test_it_steps_back_aslant_one_side_then_the_other() -> void:
 			sides.append(signf(way.z))
 	assert_gte(sides.size(), 2)
 	assert_eq(sides[0], -sides[1], "one side, then the other")
+
+
+func test_pinned_at_one_spot_it_is_lifted_free() -> void:
+	var jamb := JambUnstick.new()
+	var body := _held_body()
+	var wanted := Vector3(3, 0, 0)
+	var steps := 0
+	var was_backing := false
+	while body.global_position.y == 0.0 and steps < 600:
+		var way := jamb.update(body, wanted, STEP)
+		if way.x < 0.0 and not was_backing:
+			steps += 1
+		was_backing = way.x < 0.0
+	assert_eq(steps, JambUnstick.PINNED_TRIES + 1, "after a few steps back that led nowhere")
+	assert_almost_eq(body.global_position.y, JambUnstick.LIFT, 0.001)

@@ -18,6 +18,13 @@ const BACK_TIME := 0.4
 const GOAL_CLEARANCE := 2.5
 ## Angle between straight back and the way it steps back, in degrees.
 const SIDE_ANGLE := 50.0
+## Still held at the same spot after this many steps back, it is pinned (its
+## capsule caught in a corner, which happened on one platform's physics only,
+## T-167): it is lifted this high, in meters, to fall free.
+const PINNED_TRIES := 3
+const LIFT := 0.3
+## Within this of where it was last held, in meters, it is the same spot.
+const SAME_SPOT := 0.1
 
 var _stuck_for := 0.0
 var _backing_for := 0.0
@@ -25,6 +32,9 @@ var _backing_for := 0.0
 var _side := 1.0
 ## The way it steps back, as a share of what it wanted (length PUSH).
 var _back := Vector3.ZERO
+## Steps back in a row that ended at the same spot, and where.
+var _tries := 0
+var _held_at := Vector3.INF
 
 
 ## The horizontal velocity to move the body at, from the one it wants.
@@ -41,7 +51,18 @@ func update(body: CharacterBody3D, horizontal: Vector3, delta: float) -> Vector3
 	if _stuck_for < STUCK_TIME:
 		return horizontal
 	_stuck_for = 0.0
+	_lift_if_pinned(body)
 	_backing_for = BACK_TIME
 	_back = -horizontal.normalized().rotated(Vector3.UP, deg_to_rad(SIDE_ANGLE) * _side) * PUSH
 	_side = -_side
 	return _back * wanted
+
+
+func _lift_if_pinned(body: CharacterBody3D) -> void:
+	var at := body.global_position
+	_tries = _tries + 1 if at.distance_to(_held_at) < SAME_SPOT else 1
+	_held_at = at
+	if _tries > PINNED_TRIES:
+		body.global_position += Vector3.UP * LIFT
+		_tries = 0
+		_held_at = Vector3.INF
