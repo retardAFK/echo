@@ -213,9 +213,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : séquence de capture vue par le chassé, qui respecte la règle des 2 secondes (2.3)
   - Dépend de : T-126
   - Fait le 15/11/2026 : la tête du chassé se tourne vers le monstre qui le saisit, 1,2 s, puis l'écran ; en solo et en ligne
-- [ ] T-128 — Vérification finale de S-011
+- [x] T-128 — Vérification finale de S-011
   - Résultat vérifiable : critères cochés, mesure de performance avec 4 personnages animés, spec livrée
   - Dépend de : T-127
+  - Fait le 16/11/2026 : critères cochés, 60 images/s confirmées par Maxime sur sa machine
 
 ---
 
@@ -480,7 +481,7 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [x] T-270 — Vérification finale de S-018
   - Résultat vérifiable : critères cochés, budget de 300 appels de dessin et 60 images/s tenus
   - Dépend de : T-267, T-268, T-269
-  - Fait le 16/11/2026 : critères vérifiés et 297 appels de dessin au pire point ; validée par Maxime (« T-270 ok pour moi ») ; la mesure des 60 images/s sur la machine de référence reste à faire avec T-128
+  - Fait le 16/11/2026 : critères vérifiés et 297 appels de dessin au pire point ; validée par Maxime (« T-270 ok pour moi ») ; 60 images/s confirmées par Maxime avec T-128
 
 ---
 
