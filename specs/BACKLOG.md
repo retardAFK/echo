@@ -341,7 +341,7 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [x] T-187 — Brancards et fauteuils roulants
   - Résultat vérifiable : brancards qu'on pousse et qui bloquent, fauteuils qu'on lance (Q7), bruyants, synchronisés en ligne ; tests GUT
   - Dépend de : T-183
-- [ ] T-188 — L'hôpital dans la boucle de partie
+- [x] T-188 — L'hôpital dans la boucle de partie
   - Résultat vérifiable : 6 emplacements de fusibles, 15 cachettes, terminal, caméra, haut-parleur, relais et code placés dans l'hôpital (Q8, Q9) ; l'ambulance à alarme ; la boucle de la cité (transformateur, tunnel) reste la même
   - Dépend de : T-184, T-186, T-187
 - [ ] T-189 — Assets de l'hôpital

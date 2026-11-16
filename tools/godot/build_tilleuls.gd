@@ -915,8 +915,9 @@ func _add_network() -> void:
 	desks.add_to_group("navigation_source", true)
 	network.add_child(desks)
 	desks.owner = _root
-	for i in TERMINALS.size():
-		var entry: Array = TERMINALS[i]
+	var terminals_list: Array = TERMINALS + Hospital.TERMINALS  # S-014.
+	for i in terminals_list.size():
+		var entry: Array = terminals_list[i]
 		var terminal: Terminal = TERMINAL.instantiate()
 		terminal.name = "Terminal%d" % (i + 1)
 		var at: Vector3 = entry[0]
@@ -930,8 +931,9 @@ func _add_network() -> void:
 	cameras.name = "Cameras"
 	network.add_child(cameras)
 	cameras.owner = _root
-	for i in CAMERAS.size():
-		var entry: Array = CAMERAS[i]
+	var cameras_list: Array = CAMERAS + Hospital.CAMERAS  # S-014.
+	for i in cameras_list.size():
+		var entry: Array = cameras_list[i]
 		var camera: SecurityCamera = SECURITY_CAMERA.instantiate()
 		camera.name = "Camera%d" % (i + 1)
 		var at: Vector3 = entry[0]
@@ -946,8 +948,9 @@ func _add_network() -> void:
 	speakers.name = "Loudspeakers"
 	network.add_child(speakers)
 	speakers.owner = _root
-	for i in SPEAKERS.size():
-		var entry: Array = SPEAKERS[i]
+	var speakers_list: Array = SPEAKERS + Hospital.SPEAKERS  # S-014.
+	for i in speakers_list.size():
+		var entry: Array = speakers_list[i]
 		var speaker: Node3D = LOUDSPEAKER.instantiate()
 		speaker.name = "Loudspeaker%d" % (i + 1)
 		var at: Vector3 = entry[0]
@@ -1310,7 +1313,7 @@ func _buildings() -> Dictionary:
 				Vector3(178.5, -3, 111), Vector3(110, -3, 97.2)]],
 		"Garages": [GARAGES, 0.0, GARAGE_HEIGHT, [], []],
 	}
-	# Spec S-014: one volume per level of the hospital; no fuse slot before T-188.
+	# Spec S-014: one volume per level of the hospital.
 	for level: Array in Hospital.scan_levels():
 		data[level[0]] = level[2]
 	return data
@@ -1376,7 +1379,7 @@ func _add_buildings() -> void:
 		if entry[4].is_empty():
 			continue
 		var slots := Node3D.new()
-		slots.name = building_name
+		slots.name = Hospital.COMPLEX if level >= 0 else building_name
 		slots_parent.add_child(slots)
 		slots.owner = _root
 		for i in entry[4].size():
@@ -1466,8 +1469,9 @@ func _place_fuse_boxes() -> void:
 ## each terminal's desk (not the keypad's).
 func _place_objectives() -> void:
 	var relays := _group("Relays")
-	for i in RELAYS.size():
-		var entry: Array = RELAYS[i]
+	var relays_list: Array = RELAYS + Hospital.RELAYS  # S-014.
+	for i in relays_list.size():
+		var entry: Array = relays_list[i]
 		var at: Vector3 = entry[0]
 		var marker := kit.world(at.x, at.z, at.y)
 		var switch: Node3D = RELAY_SWITCH.instantiate()
@@ -1532,7 +1536,7 @@ func _place_ruses() -> void:
 		_place_spot(spots, DUMPSTER, "Dumpster%d" % (i + 1), DUMPSTERS[i])
 	var families := {"Low": LOW_SPOT, "Makeshift": MAKESHIFT_SPOT, "Metal": METAL_SPOT}
 	var counts := {}
-	for entry: Array in FAMILY_SPOTS:
+	for entry: Array in FAMILY_SPOTS + Hospital.SPOTS:
 		counts[entry[0]] = counts.get(entry[0], 0) + 1
 		var node_name := "%s%d" % [entry[0], counts[entry[0]]]
 		if entry.size() > 2:
@@ -1713,7 +1717,7 @@ func _furniture_pieces() -> Array:
 	for piece: Array in FURNITURE:
 		pieces.append([piece[0], piece[1], piece[2], piece[3] if piece.size() > 3 else 1.0])
 	var keep_clear: Array = CLOSETS + BOTTLES + DECOYS + HIDING_SPOTS + PREY_ROUTE + PATROL_ROUTE
-	for spot: Array in FAMILY_SPOTS:
+	for spot: Array in FAMILY_SPOTS + Hospital.SPOTS:
 		keep_clear.append(spot[1])
 	for entry: Array in _buildings().values():
 		keep_clear.append_array(entry[4])

@@ -48,7 +48,7 @@ func _ray_hits(map: Node3D, from: Vector3, to: Vector3) -> bool:
 func test_a_loudspeaker_blares_once() -> void:
 	var map := _map()
 	var network := CityNetwork.of(map)
-	assert_eq(network.speakers.size(), 3)
+	assert_eq(network.speakers.size(), 4)
 	var speaker := network.speakers[0]
 	assert_true(speaker.trigger())
 	assert_false(speaker.trigger(), "once per game")
@@ -122,7 +122,7 @@ func test_picked_at_a_terminal_and_shown_online() -> void:
 	assert_string_ends_with(lines[speaker_line], tr("HUD_TERMINAL_USED"))
 	assert_string_ends_with(lines[shutter_line], tr("HUD_TERMINAL_DOWN"))
 	var state := network.state()
-	assert_eq(state[2], [false, false, true])
+	assert_eq(state[2], [false, false, true, false])
 	assert_eq(state[3][0], [true, ceili(SETTINGS.shutter_recharge)])
 	var client: GameMap = MAP_SCENE.instantiate()
 	add_child_autofree(client)
