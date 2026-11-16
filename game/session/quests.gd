@@ -44,6 +44,11 @@ var map_node: Node
 ## Online client: the room decides; this one shows what it says.
 var mirror := false
 
+## AI prey at the relay switches (T-268): RelaySwitch -> prey that goes
+## there, and prey -> game time it last waited at its switch.
+var _relay_claims := {}
+var _relay_ready := {}
+var _clock := 0.0
 ## What each keypad got so far: Terminal -> digits typed.
 var _typed := {}
 var _disk_noise_left := 0.0
@@ -177,6 +182,7 @@ func drop_disk(user: Node) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_clock += delta
 	if mirror:
 		return
 	_download(delta)
@@ -186,6 +192,38 @@ func _physics_process(delta: float) -> void:
 			for switch in relays:
 				switch.set_down(false)
 			changed.emit()
+
+
+## An AI prey takes a relay switch nobody else goes to (or the first one).
+func claim_relay(prey: Node) -> RelaySwitch:
+	for switch in relays:
+		if _relay_claims.get(switch) == prey:
+			return switch
+	for switch in relays:
+		var other: Variant = _relay_claims.get(switch)
+		if other == null or not is_instance_valid(other) or not CaptureState.is_free_hunted(other):
+			_relay_claims[switch] = prey
+			return switch
+	return relays[0] if not relays.is_empty() else null
+
+
+## An AI prey stands at its relay switch, ready to throw it.
+func ready_at_relay(prey: Node) -> void:
+	_relay_ready[prey] = _clock
+
+
+## Whether a prey at its switch may throw it: the other one is down, or a
+## teammate stands ready at it.
+func relay_partner_ready(prey: Node) -> bool:
+	for switch in relays:
+		if _relay_claims.get(switch) == prey:
+			continue
+		if switch.is_down:
+			return true
+		var other: Variant = _relay_claims.get(switch)
+		if other != null and _clock - float(_relay_ready.get(other, -10.0)) < 0.5:
+			return true
+	return false
 
 
 func _download(delta: float) -> void:

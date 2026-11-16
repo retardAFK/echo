@@ -14,8 +14,9 @@ extends RefCounted
 signal state_changed(state: State)
 
 enum State { WANDER, FLEE, HIDE, FREEZE, SEARCH, WORK, ESCAPE }
-## What the loop asks for now: fuses, the transformer, the exit.
-enum Goal { FUSES, REPAIR, EXIT }
+## What the loop asks for now: fuses, the transformer, the exit, or a task
+## of the other objectives (S-018, T-268) at a point.
+enum Goal { FUSES, REPAIR, EXIT, TASK }
 
 var state := State.WANDER
 ## Where the prey is heading.
@@ -23,6 +24,9 @@ var target := Vector3.ZERO
 ## Game loop (S-007): what it goes for, and the fuse slot it is heading to.
 var goal := Goal.FUSES
 var slot_index := 0
+
+## It runs to its task: a relay switch against the clock (S-018, T-268).
+var rush := false
 
 var _settings: PreySettings
 var _wander_points: Array[Vector3] = []
@@ -38,6 +42,7 @@ var _loop := false
 var _slots: Array[Vector3] = []
 var _transformer_point := Vector3.ZERO
 var _exit_point := Vector3.ZERO
+var _task_point := Vector3.ZERO
 
 
 func _init(settings: PreySettings, rng_seed := 0) -> void:
@@ -134,6 +139,9 @@ func get_gait() -> PlayerMotion.Gait:
 			return PlayerMotion.Gait.SPRINT
 		State.HIDE:
 			return PlayerMotion.Gait.CROUCH
+		State.SEARCH:
+			if goal == Goal.TASK and rush:
+				return PlayerMotion.Gait.SPRINT
 	return PlayerMotion.Gait.WALK
 
 
@@ -202,6 +210,21 @@ func give_up() -> void:
 				next_slot()
 
 
+## Goes for a task of the other objectives (S-018) at a point.
+func go_task(point: Vector3, run := false) -> void:
+	goal = Goal.TASK
+	_task_point = point
+	rush = run
+	_resume()
+
+
+## Goes for a goal of the loop: the fuses, the transformer, the exit.
+func go_for(new_goal: Goal) -> void:
+	goal = new_goal
+	rush = false
+	_resume()
+
+
 ## Sends the prey to wander from scratch, at a position (after a catch).
 func reset(at_index: int) -> void:
 	_breath_left = 0.0
@@ -219,6 +242,8 @@ func _goal_point() -> Vector3:
 			return _transformer_point
 		Goal.EXIT:
 			return _exit_point
+		Goal.TASK:
+			return _task_point
 	return _slots[slot_index] if not _slots.is_empty() else target
 
 
@@ -238,6 +263,9 @@ func _resume() -> void:
 		Goal.EXIT:
 			target = _exit_point
 			_set_state(State.ESCAPE)
+		Goal.TASK:
+			target = _task_point
+			_set_state(State.SEARCH)
 
 
 ## Runs to the hiding spot farthest from the monster. In the game loop, to the

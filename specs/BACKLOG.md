@@ -461,9 +461,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : prison, terminaux, caméras, rideaux et objectifs synchronisés ; un chassé ne reçoit jamais la position d'un autre, sauf ce qu'il voit sur une caméra ; test à 4 clients
   - Dépend de : T-264, T-265, T-266
   - Fait le 16/11/2026 : objectifs synchronisés, choix de menu des clients acceptés par la salle, `net_match` tape le code ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
-- [ ] T-268 — IA
+- [x] T-268 — IA
   - Résultat vérifiable : le monstre IA éteint les terminaux et passe voir la prison ; la proie IA fait les nouveaux objectifs et utilise les leurres à distance ; 20 parties simulées sans blocage
   - Dépend de : T-266
+  - Fait le 16/11/2026 : la proie IA fait code, téléchargement et relais et déclenche les haut-parleurs ; le monstre IA casse les caméras, éteint les terminaux et repasse par la prison ; délai des relais 25 s ; 20 parties simulées sans blocage ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
 - [ ] T-269 — Modèles et sons
   - Résultat vérifiable : terminal, caméra, haut-parleur, rideau, cages ; clavier, disque dur, sonnerie, rideau ; montrés à Maxime avant intégration
   - Dépend de : T-261

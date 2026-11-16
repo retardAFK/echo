@@ -35,8 +35,9 @@ var catch_count := 0
 var sees_player := false
 ## Rolls whether it opens a hiding spot after losing a chase (S-008, Q7).
 var rng := RandomNumberGenerator.new()
-## The hiding spot it is going to open, or null.
-var open_target: HidingSpot
+## The hiding spot it is going to open, or the camera to smash or the
+## terminal to switch off (S-018, T-268), or null.
+var open_target: Node3D
 ## Its concentration gauge for the building scan (S-009, Q3, D-009).
 var scan: ScanGauge
 ## Building it is scanning, or null.
@@ -52,6 +53,8 @@ var _was_hidden := false
 var _noise: MonsterNoise
 ## Time left standing still over a hunted it just caught (T-127).
 var _still_left := 0.0
+var _sabotage_left := 0.0
+var _prison_left := 0.0
 var _jamb := JambUnstick.new()
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
@@ -154,6 +157,8 @@ func _physics_process(delta: float) -> void:
 	if scan_target != null and brain.state != MonsterBrain.State.SCAN:
 		_end_scan()  # Spotted the hunted, or heard something.
 	_update_opening(delta, arrived)
+	_look_for_sabotage(delta)
+	_visit_prison(delta)
 	if _agent.target_position.distance_to(brain.target) > RETARGET_DISTANCE:
 		_agent.target_position = brain.target
 	var before := global_position
@@ -283,6 +288,10 @@ func _update_opening(delta: float, arrived: bool) -> void:
 		open_target.release(self)
 		open_target = null  # Something more urgent: a chase.
 		return
+	if not (open_target is HidingSpot) and _sabotage_done(open_target):
+		open_target = null
+		brain.done_opening()
+		return
 	if not brain.is_opening(arrived):
 		return
 	var at := Vector3(
@@ -290,10 +299,81 @@ func _update_opening(delta: float, arrived: bool) -> void:
 	)
 	if at.distance_to(global_position) > 0.01:
 		look_at(at, Vector3.UP)
+	if not (open_target is HidingSpot):
+		open_target.hold(self, delta)  # Smashes or switches off once held long enough.
+		return
 	if open_target.hold(self, delta):
 		open_target.release(self)
 		open_target = null
 		brain.done_opening()
+
+
+## Goes to smash a lit camera or switch off a terminal in use (S-018, T-268).
+func go_sabotage(target: Node3D) -> void:
+	open_target = target
+	var at := target.global_position
+	if target is Terminal:
+		at = (target as Terminal).seat_point()
+	brain.go_open(at)
+	_agent.target_position = brain.target
+
+
+func _sabotage_done(target: Node3D) -> bool:
+	if not is_instance_valid(target):
+		return true
+	if target is SecurityCamera:
+		return (target as SecurityCamera).broken
+	if target is Terminal:
+		return not (target as Terminal).is_on()
+	return true
+
+
+## Now and then on its rounds, a lit camera or a terminal in use (or
+## downloading) in sight draws it (S-018, T-268).
+func _look_for_sabotage(delta: float) -> void:
+	_sabotage_left -= delta
+	if _sabotage_left > 0.0 or open_target != null:
+		return
+	_sabotage_left = settings.sabotage_interval
+	if brain.state not in [MonsterBrain.State.PATROL, MonsterBrain.State.SEARCH]:
+		return
+	var eye := get_ear_position()
+	var space := get_world_3d().direct_space_state
+	for camera: SecurityCamera in get_tree().get_nodes_in_group(SecurityCamera.GROUP):
+		if camera.broken or not camera.is_led_lit():
+			continue
+		if _in_sight(eye, camera.global_position, space):
+			go_sabotage(camera)
+			return
+	var quests := Quests.of(self)
+	for terminal: Terminal in get_tree().get_nodes_in_group(Terminal.GROUP):
+		if not terminal.is_on():
+			continue
+		var busy := terminal.is_in_use()
+		if quests != null and terminal == quests.download_terminal:
+			busy = busy or quests.download_ratio() >= 0.0
+		if busy and _in_sight(eye, terminal.global_position + Vector3.UP, space):
+			go_sabotage(terminal)
+			return
+
+
+func _in_sight(eye: Vector3, at: Vector3, space: PhysicsDirectSpaceState3D) -> bool:
+	return (
+		eye.distance_to(at) <= settings.sabotage_range
+		and MonsterVision.has_line_of_sight(space, eye, at)
+	)
+
+
+## While someone waits in a cage, it comes back by the prison now and then
+## (S-018, T-268), as for a noise heard in a building.
+func _visit_prison(delta: float) -> void:
+	_prison_left -= delta
+	if _prison_left > 0.0:
+		return
+	_prison_left = settings.prison_visit_interval
+	var prison := Prison.of(get_parent())
+	if prison != null and prison.cages.any(func(cage: Cage) -> bool: return cage.is_occupied()):
+		brain.remember(prison.global_position)
 
 
 ## Lost the chase: it may open the hiding spot nearest to where it last saw

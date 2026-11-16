@@ -40,6 +40,8 @@ var brain: PreyBrain
 var sees_monster := false
 ## The game it plays (S-007), null outside the game loop.
 var game_loop: GameLoop
+## The objectives besides fuses (S-018, T-268).
+var tasks: PreyTasks
 ## What it carries (S-008, Q9).
 var inventory: Inventory
 ## The hiding spot it is in, or null.
@@ -131,6 +133,7 @@ func start_loop(loop: GameLoop, boxes: Array[FuseBox], rng_seed := 0) -> void:
 	var exit := loop.exit_zone.global_position
 	exit.y = global_position.y
 	brain.set_loop(slots, transformer.global_position + side, exit)
+	tasks = PreyTasks.new(self, loop.quests)
 	_agent.target_position = brain.target
 
 
@@ -242,14 +245,44 @@ func _play_loop(delta: float, arrived: bool) -> void:
 				_arrive()
 		PreyBrain.State.WORK:
 			work_on = _work_target()
+	if brain.state != PreyBrain.State.WORK and tasks != null:
+		tasks.drop()  # Fled from a terminal: up first.
 	_hold.update(self, work_on, work_on != null, delta)
-	if brain.state == PreyBrain.State.WORK and _work_finished():
-		var rules := game_loop.rules
-		brain.work_done(rules.found(), rules.fuse_count, rules.is_repaired())
+	if brain.goal == PreyBrain.Goal.TASK and brain.state == PreyBrain.State.WORK:
+		if tasks.work(delta):
+			next_goal()
+	elif brain.state == PreyBrain.State.WORK and _work_finished():
+		next_goal()
+
+
+## After a piece of work (S-018, T-268): the exit once repaired, the fuses
+## still to find, the transformer with what it carries, the other
+## objectives, else the transformer to wait there as before.
+func next_goal() -> void:
+	var rules := game_loop.rules
+	var carries := game_loop.carried_by(self) > 0
+	if game_loop.quests != null and game_loop.quests.carries_disk(self):
+		carries = true
+	if rules.is_repaired():
+		brain.go_for(PreyBrain.Goal.EXIT)
+	elif rules.found() < rules.fuse_count:
+		brain.work_done(rules.found(), rules.fuse_count, false)
+	elif carries:
+		brain.go_for(PreyBrain.Goal.REPAIR)
+	elif tasks != null and tasks.choose() != PreyTasks.Kind.NONE:
+		brain.go_task(tasks.point(), tasks.is_rush())
+	else:
+		brain.go_for(PreyBrain.Goal.REPAIR)
 
 
 ## It reached the slot or the transformer it was heading to.
 func _arrive() -> void:
+	if brain.goal == PreyBrain.Goal.TASK:
+		if tasks.arrive():
+			brain.start_work()
+		else:
+			next_goal()
+		return
 	if brain.goal == PreyBrain.Goal.REPAIR:
 		if _decoy != null and is_instance_valid(_decoy):
 			if _decoy.timer.state == DecoyTimer.State.TICKING:
@@ -258,14 +291,14 @@ func _arrive() -> void:
 	elif _boxes[brain.slot_index].has_fuse:
 		brain.start_work()  # It sees the red LED.
 	elif game_loop.rules.found() >= game_loop.rules.fuse_count:
-		# Teammates found the rest (S-010, T-100): on to the transformer or the exit.
-		var rules := game_loop.rules
-		brain.work_done(rules.found(), rules.fuse_count, rules.is_repaired())
+		next_goal()  # Teammates found the rest (S-010, T-100).
 	else:
 		brain.next_slot()
 
 
 func _work_target() -> Node:
+	if brain.goal == PreyBrain.Goal.TASK:
+		return tasks.work_target()
 	if brain.goal == PreyBrain.Goal.REPAIR:
 		return game_loop.transformer
 	return _boxes[brain.slot_index]
@@ -273,7 +306,8 @@ func _work_target() -> Node:
 
 func _work_finished() -> bool:
 	if brain.goal == PreyBrain.Goal.REPAIR:
-		return game_loop.carried_by(self) == 0 or game_loop.rules.is_repaired()
+		var disk := game_loop.quests != null and game_loop.quests.carries_disk(self)
+		return (game_loop.carried_by(self) == 0 and not disk) or game_loop.rules.is_repaired()
 	return not _boxes[brain.slot_index].has_fuse
 
 
