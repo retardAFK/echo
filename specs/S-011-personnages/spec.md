@@ -1,6 +1,6 @@
 # S-011 — Personnages et animations
 
-**Statut** : en cours (14/11/2026). Q1 et Q2 validées par Maxime ; Q3 à Q6 proposées par Claude
+**Statut** : livrée (16/11/2026). Q1 et Q2 validées par Maxime ; Q3 à Q6 proposées par Claude
 **Piliers servis** : P3 (asymétrie) — deux rôles qui se lisent d'un coup d'œil ; P2 (le dilemme) — on reconnaît le coéquipier à sauver
 **Phase** : 11 — Personnages et animations (voir `specs/BACKLOG.md`)
 
@@ -28,11 +28,11 @@ Léa joue la jeune femme à la parka. Au coin du bâtiment C, elle voit une silh
 - Les animations d'action (lancer, ramasser, réparer, cachette) : T-125 suite, après validation du monstre.
 
 ## Critères d'acceptation (vérifiables à la main)
-- [ ] Les trois chassés sont en jeu, sous 2 500 triangles chacun, textures de 64 à 256 px en pixels nets.
-- [ ] Un chassé IA ou distant marche, court, s'accroupit et se met à genoux selon son état.
-- [ ] En ligne, chaque place a son personnage ; rien de nouveau n'est envoyé par le réseau.
-- [ ] Le choix de l'animation est couvert par des tests GUT.
-- [ ] La base CC0 est citée dans `CREDITS.md`.
-- [ ] Le budget de performance tient avec 4 personnages animés.
+- [x] Les trois chassés sont en jeu, sous 2 500 triangles chacun, textures de 64 à 256 px en pixels nets. (2 377 à 2 478 triangles ; les textures de chaque partie sont rassemblées dans un atlas de 512 px par personnage, PR #129.)
+- [x] Un chassé IA ou distant marche, court, s'accroupit et se met à genoux selon son état.
+- [x] En ligne, chaque place a son personnage ; rien de nouveau n'est envoyé par le réseau.
+- [x] Le choix de l'animation est couvert par des tests GUT.
+- [x] La base CC0 est citée dans `CREDITS.md`.
+- [x] Le budget de performance tient avec 4 personnages animés. (60 images/s confirmées par Maxime sur sa machine, 16/11/2026.)
 
 ## Notes de playtest

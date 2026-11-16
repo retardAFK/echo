@@ -1,6 +1,6 @@
 # S-018 — Prison et réseau de la cité
 
-**Statut** : livrée (16/11/2026), validée par Maxime ; la mesure des 60 images/s reste à faire sur la machine de référence avec celle de T-128. Validée dans ses grandes lignes (15/11/2026, Maxime : libération « sur place ou à distance », mécanismes « outils + quêtes tirées au sort »). Les chiffres restent des propositions de Claude, ajustables à la construction.
+**Statut** : livrée (16/11/2026), validée par Maxime, 60 images/s confirmées sur sa machine. Validée dans ses grandes lignes (15/11/2026, Maxime : libération « sur place ou à distance », mécanismes « outils + quêtes tirées au sort »). Les chiffres restent des propositions de Claude, ajustables à la construction.
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : hors feuille de route, demandée par Maxime le 15/11/2026 (« une prison où il peut être libéré » et « des mécanismes à distance, un peu informatiques, qui font varier les quêtes »)
 
@@ -68,7 +68,7 @@ Cette spec ajoute deux choses qui se renforcent :
 - [x] Chaque partie tire 3 objectifs selon Q13, et chaque type d'objectif peut se terminer, en solo et en ligne.
 - [x] Tout est synchronisé en ligne ; un chassé ne reçoit jamais la position d'un autre par le réseau, sauf ce qu'il voit lui-même sur une caméra.
 - [x] 20 parties simulées sans blocage d'IA ; la durée moyenne ne baisse pas.
-- [ ] Budget tenu : 300 appels de dessin au pire endroit, 60 images/s mesurées. (Appels de dessin tenus : 297 au pire point, 268 au pire du balayage ; 60 images/s à mesurer sur la machine de référence.)
+- [x] Budget tenu : 300 appels de dessin au pire endroit, 60 images/s mesurées. (Appels de dessin tenus : 297 au pire point, 268 au pire du balayage ; 60 images/s confirmées par Maxime sur sa machine, 16/11/2026.)
 
 ## Hors périmètre
 - Transport du chassé par le monstre, crochets ou exécutions.
