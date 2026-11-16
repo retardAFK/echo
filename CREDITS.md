@@ -3,6 +3,8 @@
 Liste de tous les assets externes utilisés dans Écho (règle 2.7 de `ECHO_PROJET.md`).
 Seuls les assets faits par nous ou sous licence **CC0** sont acceptés, plus la licence **SIL OFL** pour les polices (D-017).
 
+## Assets externes
+
 | Asset | Auteur | Licence | Lien | Utilisé dans |
 |---|---|---|---|---|
 | Universal Base Characters (corps et squelette des chassés, cheveux) | Quaternius | CC0 | https://quaternius.com | Chassés et chasseur, `assets/models/hunted/` et `assets/models/hunter/` (S-011, T-122, T-124), sources dans `art_src/quaternius_ubc/`, adaptés par `tools/blender/hunted.py` et `tools/blender/hunter.py` |
@@ -16,7 +18,16 @@ Seuls les assets faits par nous ou sous licence **CC0** sont acceptés, plus la 
 | Sons d'ambiance (vent, autoroute, train, balançoire), `assets/audio/ambience/` | Bruit filtré, synthétisé par `tools/audio/ambience.py` | Cité des Tilleuls (S-006, T-050) |
 | Sons de la boucle de partie (boîtier à fusible, étincelles, ronflement du transformateur, sirène), `assets/audio/loop/` | Bruit filtré et oscillateurs, synthétisés par `tools/audio/loop_sounds.py` | Boucle de partie (S-007, T-059) |
 | Sons des ruses (bouteille brisée, tic-tac et sonnerie du réveil, réveil écrasé, porte de casier, couvercle de benne), `assets/audio/ruses/` | Bruit filtré et oscillateurs, synthétisés par `tools/audio/ruse_sounds.py` | Ruses et attracteurs (S-008, T-070) |
+| Sons des intérieurs (portes, portes coupe-feu, rideaux de fer, cachettes), `assets/audio/interiors/` | Bruit filtré et oscillateurs, synthétisés par `tools/audio/interior_sounds.py` | Intérieurs des bâtiments (S-016, T-242) |
+| Sons de la prison et du réseau (clavier, disque dur, sonnerie, haut-parleurs, grille de cage, digicode, relais, caméra cassée), `assets/audio/network/` | Bruit filtré et oscillateurs, synthétisés par `tools/audio/network_sounds.py` | Prison et réseau de la cité (S-018, T-269) |
+| Modèles 3D de la cité (lampadaire, bancs, arbre, façades, voitures, galerie, parking, mobilier, portes, ruses, terminaux, caméras, cages, relais), `assets/models/` | Modélisés et texturés par les scripts Blender de `tools/blender/` | Cité des Tilleuls (S-005 à S-018) |
 | Fonds des menus, `assets/textures/ui/` | Vues de la cité des Tilleuls capturées dans le jeu et étalonnées par `tools/godot/capture_menu_backgrounds.gd` | Menus (S-013, T-162) |
+
+## Moteur
+
+| Asset | Auteur | Licence | Lien |
+|---|---|---|---|
+| Godot Engine 4.7 | Juan Linietsky, Ariel Manzur et les contributeurs de Godot | MIT | https://godotengine.org/license |
 
 ## Outils de développement
 

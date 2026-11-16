@@ -34,9 +34,10 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import, export web, ca
   - Résultat vérifiable : chargement sous 10 s affiché avec une progression ; conseils de premier lancement pour chaque rôle
   - Dépend de : T-162
   - Fait le 16/11/2026 : `LoadingScreen` (`game/ui/loading_screen.tscn`) entre le menu (solo ou salon en ligne) et la cité. Le build web n'a pas de threads : la map se charge par étapes, une par image (ses 121 dépendances dans un budget de 40 ms par image, puis la scène, puis son instance), et la barre ocre avance entre elles. La première fois qu'un rôle est joué, ses trois « premiers pas » s'affichent et le jeu attend Entrée ou un clic (jamais en ligne, où les autres attendent) ; ensuite un conseil du rôle tiré au hasard (5 pour le chassé, 4 pour le monstre) et la partie démarre dès que tout est chargé. Lu une fois, enregistré dans les réglages (`first_steps_hunted`, `first_steps_monster`). En ligne, la salle attend déjà que la map du joueur soit prête (`say_ready`) : rien ne change pour elle. Chargement mesuré à 3,4 s jusqu'à la barre pleine et 4,9 s jusqu'à la partie (rendu logiciel, sans carte graphique) ; 5 tests GUT
-- [ ] T-167 — Crédits en jeu
+- [x] T-167 — Crédits en jeu
   - Résultat vérifiable : contenu de `CREDITS.md` affiché dans le jeu
   - Dépend de : T-162
+  - Fait le 16/11/2026 : entrée « Crédits » de l'accueil ; `CreditsMenu` lit `CREDITS.md` dans le jeu (ajouté à l'export par `include_filter`), donc les deux ne diffèrent jamais : un titre par section, une ligne par asset (asset, auteur, licence), sans les chemins du dépôt ni les outils de développement. `CREDITS.md` complété : sons des intérieurs et du réseau, modèles 3D faits par nos scripts Blender, moteur Godot (MIT). Défilement aux flèches ou à la molette, barre ocre ; 3 tests GUT
 - [ ] T-168 — Vérification finale de S-013
   - Résultat vérifiable : critères cochés, spec livrée
   - Dépend de : T-163, T-164, T-165, T-166, T-167, T-169
