@@ -109,6 +109,7 @@ func test_ai_monster_walks_into_the_buildings() -> void:
 	monster.player = null
 	var settings: MonsterSettings = monster.settings.duplicate()
 	settings.prowl_speed = 6.0
+	settings.sabotage_range = 0.0  # A lit camera in sight would draw it away (S-018).
 	monster.settings = settings
 	monster.brain.settings = settings
 	await _nav_map()
