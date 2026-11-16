@@ -35,6 +35,9 @@ var _back := Vector3.ZERO
 ## Steps back in a row that ended at the same spot, and where.
 var _tries := 0
 var _held_at := Vector3.INF
+## Set when a step back ends: the body may now be behind a corner of its
+## path it had passed, so its path must be planned again (take_replan).
+var _replan := false
 
 
 ## The horizontal velocity to move the body at, from the one it wants.
@@ -42,6 +45,7 @@ func update(body: CharacterBody3D, horizontal: Vector3, delta: float) -> Vector3
 	var wanted := Vector2(horizontal.x, horizontal.z).length()
 	if _backing_for > 0.0:
 		_backing_for -= delta
+		_replan = _backing_for <= 0.0
 		return _back * wanted
 	var real := body.get_real_velocity()
 	if wanted < 0.01 or Vector2(real.x, real.z).length() > 0.2 * wanted:
@@ -66,3 +70,11 @@ func _lift_if_pinned(body: CharacterBody3D) -> void:
 		body.global_position += Vector3.UP * LIFT
 		_tries = 0
 		_held_at = Vector3.INF
+
+
+## Whether a step back just ended: its path must be planned again from where
+## it stands, or it heads for a point past the doorway, through the wall.
+func take_replan() -> bool:
+	var replan := _replan
+	_replan = false
+	return replan

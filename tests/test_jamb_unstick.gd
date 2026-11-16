@@ -35,6 +35,8 @@ func test_held_still_it_steps_back_then_walks_on() -> void:
 		backing += STEP
 	assert_almost_eq(backing, JambUnstick.BACK_TIME, 2 * STEP)
 	assert_eq(way, wanted, "then walks on")
+	assert_true(jamb.take_replan(), "on a path planned again")
+	assert_false(jamb.take_replan(), "once")
 
 
 func test_standing_still_on_purpose_is_not_being_stuck() -> void:
