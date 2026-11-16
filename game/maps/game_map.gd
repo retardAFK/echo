@@ -663,10 +663,9 @@ func _setup_game_loop() -> void:
 	elif NetSession.mode == NetSession.Mode.CLIENT:
 		game_loop.mirror = true  # The room's loop decides (T-099).
 		game_loop.hunted = null
-	# Objectives besides fuses (S-018, Q13): for hunted players, solo or
-	# online (T-267), as long as no AI prey takes part (it learns them, T-268).
-	var no_ai := not _online_hunted.any(func(one: Node3D) -> bool: return one is Prey)
-	if (NetSession.mode == NetSession.Mode.SOLO and avatar == null) or (room and no_ai):
+	# Objectives besides fuses (S-018, Q13), for players and AI prey alike
+	# (T-268).
+	if NetSession.mode != NetSession.Mode.CLIENT:
 		game_loop.allowed = [
 			LoopRules.Objective.CODE, LoopRules.Objective.DOWNLOAD, LoopRules.Objective.RELAY
 		]

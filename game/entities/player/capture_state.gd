@@ -18,6 +18,9 @@ signal changed(state: State)
 
 enum State { FREE, CAPTURED, OUT }
 
+## Every hunted's capture rule, free or not (T-268).
+const GROUP := &"capture_states"
+
 var state := State.FREE
 ## Times the monster caught it.
 var catches := 0
@@ -38,6 +41,7 @@ var _noise: NoiseSettings = NoiseBus.settings
 
 
 func _ready() -> void:
+	add_to_group(GROUP)
 	_settings = _hunted.get("motion") if _hunted is Prey else _hunted.get("settings")
 	if _settings == null:
 		_settings = PlayerSettings.new()

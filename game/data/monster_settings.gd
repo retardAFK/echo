@@ -122,3 +122,12 @@ extends Resource
 @export_range(0.5, 30.0, 0.5, "suffix:s") var ai_scan_time: float = 4.0
 ## Time before the AI monster scans the same building again, in seconds.
 @export_range(0.0, 600.0, 5.0, "suffix:s") var ai_scan_cooldown: float = 30.0
+
+@export_group("AI and the network (S-018, T-268)")
+## The AI monster goes to smash a lit camera, or to switch off a terminal in
+## use or downloading, that it sees this close, in meters.
+@export_range(0.0, 100.0, 0.5, "suffix:m") var sabotage_range: float = 20.0
+## Seconds between two looks for such a thing.
+@export_range(0.1, 10.0, 0.1, "suffix:s") var sabotage_interval: float = 1.0
+## While someone waits in a cage, it passes by the prison every so often.
+@export_range(0.0, 600.0, 5.0, "suffix:s") var prison_visit_interval: float = 60.0

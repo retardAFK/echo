@@ -53,7 +53,7 @@ Cette spec ajoute deux choses qui se renforcent :
   - **Fusible** (actuel) : trouver un fusible et le poser au transformateur.
   - **Code** : un code à 4 chiffres est écrit quelque part dans un bâtiment (tableau blanc, post-it, écran) ; le taper sur le terminal du transformateur.
   - **Téléchargement** : lancer un téléchargement sur un terminal tiré au sort ; il dure **45 s** et le disque dur gratte (bruit de **5 m** toutes les 3 s). On peut s'éloigner, mais si le monstre éteint le terminal, il repart de zéro. À la fin, emporter la disquette au transformateur.
-  - **Relais** : actionner deux interrupteurs dans deux bâtiments différents à moins de **15 s** d'écart. À deux, c'est facile ; seul, il faut courir, donc faire du bruit.
+  - **Relais** : actionner deux interrupteurs dans deux bâtiments différents à moins de **25 s** d'écart (15 s proposés au départ ; portés à 25 s par T-268, car deux leviers d'une paire sont jusqu'à 90 m l'un de l'autre par les chemins, 17 s en courant). À deux, c'est facile ; seul, il faut courir, donc faire du bruit.
 - Q14 : Comment le chassé sait-il quoi faire ? → Proposition : la liste des 3 objectifs s'affiche avec Tab, à côté de la carte (S-017), **sans position** (D-018 reste vrai : la carte ne donne aucun indice). Les terminaux, eux, sont toujours aux mêmes places et dessinés sur la carte comme des bâtiments, sans icône.
 
 ### Partie D — Déroulé

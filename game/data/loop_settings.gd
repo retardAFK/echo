@@ -43,8 +43,10 @@ extends Resource
 @export_range(0.5, 20.0, 0.5, "suffix:s") var disk_noise_interval: float = 3.0
 ## The wrong code's beep on the transformer's keypad, in meters.
 @export_range(0.0, 20.0, 0.5, "suffix:m") var beep_range: float = 3.0
-## Both relay switches must be thrown within this many seconds (Q13).
-@export_range(1.0, 120.0, 1.0, "suffix:s") var relay_window: float = 15.0
+## Both relay switches must be thrown within this many seconds (Q13). 25 s
+## (15 s in the spec, T-268): the two switches of a pair are up to 90 m apart
+## by the paths, 17 s at a sprint, 30 s at a walk; alone, one must run.
+@export_range(1.0, 120.0, 1.0, "suffix:s") var relay_window: float = 25.0
 ## The noise of a relay switch, in meters.
 @export_range(0.0, 30.0, 0.5, "suffix:m") var relay_range: float = 6.0
 ## The two relay switches drawn are at most this far apart, in meters.
