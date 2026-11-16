@@ -503,6 +503,7 @@ func _ready() -> void:
 	kit.build(_root)
 	_add_doors()
 	_add_buildings()
+	Hospital.new(self).add_gameplay()  # Monitors and ventilation (S-014, T-186).
 	_add_props()
 	_add_navigation()
 	_add_facade_dressing()

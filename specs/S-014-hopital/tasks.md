@@ -23,10 +23,10 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-184 — Scan par niveau
   - Résultat vérifiable : 4 volumes `Building` d'un même complexe, viseur qui nomme le niveau, monstre IA ; tests GUT
   - Dépend de : T-183
-- [ ] T-186 — Ventilation et moniteurs
+- [x] T-186 — Ventilation et moniteurs
   - Résultat vérifiable : zones `Ventilation` (bruits ≤ 4 m ignorés), entité `Monitor`, synchronisées en ligne ; tests GUT
   - Dépend de : T-183
-- [ ] T-187 — Brancards et fauteuils roulants
+- [x] T-187 — Brancards et fauteuils roulants
   - Résultat vérifiable : entités `Gurney` et `Wheelchair`, bruits `ROLL`, monstre qui dégage, synchronisés en ligne ; tests GUT
   - Dépend de : T-183
 - [ ] T-188 — L'hôpital dans la boucle de partie

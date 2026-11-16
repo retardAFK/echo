@@ -20,6 +20,8 @@ func emit_noise(
 	type: NoiseEvent.Type, position: Vector3, noise_range: float, source: Node = null
 ) -> NoiseEvent:
 	var event := NoiseEvent.new(type, position, noise_range, source)
+	if noise_range <= settings.ventilation_mask and is_inside_tree():
+		event.masked = Ventilation.covers(get_tree(), position)
 	if mirror and source != null and source != local_source:
 		return event
 	noise_emitted.emit(event)

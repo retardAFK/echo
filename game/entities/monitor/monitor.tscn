@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/monitor/monitor.gd" id="1_monitor"]
+[ext_resource type="Resource" path="res://game/data/hospital_settings.tres" id="2_settings"]
+
+[sub_resource type="BoxMesh" id="Mesh_stand"]
+size = Vector3(0.5, 1.1, 0.45)
+
+[sub_resource type="BoxMesh" id="Mesh_screen"]
+size = Vector3(0.42, 0.3, 0.04)
+
+[node name="Monitor" type="Node3D"]
+script = ExtResource("1_monitor")
+settings = ExtResource("2_settings")
+
+[node name="Stand" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("Mesh_stand")
+
+[node name="Screen" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, -0.1)
+mesh = SubResource("Mesh_screen")

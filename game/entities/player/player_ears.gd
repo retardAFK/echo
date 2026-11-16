@@ -50,6 +50,7 @@ func _ready() -> void:
 	_sounds[NoiseEvent.Type.BELL] = SOUND_BELL
 	_sounds[NoiseEvent.Type.DISK] = SOUND_DISK
 	_sounds[NoiseEvent.Type.BEEP] = SOUND_BEEP
+	_sounds[NoiseEvent.Type.MONITOR] = SOUND_BEEP  # Until the hospital sounds (T-191).
 	for i in VOICES:
 		var voice := AudioStreamPlayer3D.new()
 		voice.top_level = true
@@ -63,6 +64,8 @@ func _on_noise_emitted(event: NoiseEvent) -> void:
 		return
 	if event.type in SELF_VOICED:
 		return
+	if event.masked and Door.is_monster(_listener):
+		return  # Lost in the roar of a ventilation zone (S-014, Q5).
 	if not NoiseBus.can_hear(event, _listener.get_eye_position()):
 		return
 	heard_count += 1

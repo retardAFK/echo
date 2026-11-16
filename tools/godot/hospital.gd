@@ -145,6 +145,36 @@ const MAIN_DOORS := Vector2(92.8, 95.2)
 const EMERGENCY_DOORS := Vector2(104.8, 107.2)
 const PHARMACY_EXIT := 85.6
 
+## Monitors (Q6): plan point (x, height, y), and which wall it stands
+## against (-1 west, 1 east). Reanimation, the emergency boxes, a room.
+const MONITORS := [
+	[Vector3(10.6, 6.0, 106.0), -1],
+	[Vector3(10.6, 6.0, 118.0), -1],
+	[Vector3(31.4, 6.0, 102.0), 1],
+	[Vector3(31.4, 6.0, 116.0), 1],
+	[Vector3(10.6, 0.0, 120.0), -1],
+	[Vector3(10.6, 3.0, 106.5), -1],
+]
+## Ventilation zones (Q5): plan rectangle, level. The boiler room of the
+## basement, the operating theatres.
+const VENTILATION := [[Rect2(10, 96, 9.5, 31), -3.0], [Rect2(10, 70, 9.5, 30), 6.0]]
+const MONITOR := preload("res://game/entities/monitor/monitor.tscn")
+## Gurneys (Q7), along a corridor wall, and wheelchairs: plan points.
+const GURNEYS := [
+	Vector3(20.0, 0.0, 68.0),
+	Vector3(20.0, 3.0, 114.0),
+	Vector3(20.0, -3.0, 118.0),
+	Vector3(22.0, 6.0, 87.0),
+]
+const WHEELCHAIRS := [
+	Vector3(14.0, 0.0, 98.0),
+	Vector3(29.0, 0.0, 99.0),
+	Vector3(22.0, 3.0, 93.0),
+	Vector3(14.0, 6.0, 112.0),
+]
+const GURNEY := preload("res://game/entities/gurney/gurney.tscn")
+const WHEELCHAIR := preload("res://game/entities/wheelchair/wheelchair.tscn")
+
 ## Lights that flicker under a scan: plan point (x, height, y), range.
 const LIGHTS := [
 	[Vector3(21, 2.6, 94), 8.0],
@@ -218,6 +248,47 @@ func build() -> void:
 	_quay(s, concrete)
 	_canopy(s, concrete)
 	_fire_escape(s)
+
+
+## The gameplay nodes of the hospital, once the map is built: the monitors,
+## the gurneys and wheelchairs, the ventilation zones.
+func add_gameplay() -> void:
+	var monitors := Node3D.new()
+	monitors.name = "Monitors"
+	_builder._add(monitors)
+	for i in MONITORS.size():
+		var at: Vector3 = MONITORS[i][0]
+		var monitor: Node3D = MONITOR.instantiate()
+		monitor.name = "Monitor%d" % (i + 1)
+		monitor.position = kit.world(at.x, at.z, at.y)
+		monitor.rotation.y = -PI / 2.0 * MONITORS[i][1]  # Facing the room.
+		monitors.add_child(monitor)
+		monitor.owner = monitors.owner
+	var rolling := Node3D.new()
+	rolling.name = "Rolling"
+	_builder._add(rolling)
+	for i in GURNEYS.size() + WHEELCHAIRS.size():
+		var is_gurney := i < GURNEYS.size()
+		var at: Vector3 = GURNEYS[i] if is_gurney else WHEELCHAIRS[i - GURNEYS.size()]
+		var thing: Node3D = (GURNEY if is_gurney else WHEELCHAIR).instantiate()
+		thing.name = (
+			"Gurney%d" % (i + 1) if is_gurney else "Wheelchair%d" % (i - GURNEYS.size() + 1)
+		)
+		thing.position = kit.world(at.x, at.z, at.y)
+		rolling.add_child(thing)
+		thing.owner = rolling.owner
+	var zones := Node3D.new()
+	zones.name = "Ventilation"
+	_builder._add(zones)
+	for i in VENTILATION.size():
+		var rect: Rect2 = VENTILATION[i][0]
+		var h: float = VENTILATION[i][1]
+		var zone := Ventilation.new()
+		zone.name = "Zone%d" % (i + 1)
+		zone.size = Vector3(rect.size.x, STOREY, rect.size.y)
+		zone.position = kit.world(rect.get_center().x, rect.get_center().y, h + STOREY / 2.0)
+		zones.add_child(zone)
+		zone.owner = zones.owner
 
 
 ## Outer walls of a level: windows above the basement, the doors out on the

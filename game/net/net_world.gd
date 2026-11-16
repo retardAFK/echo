@@ -17,6 +17,9 @@ var pickups: Array[Pickup] = []
 var alarms: Array[CarAlarm] = []
 var spots: Array[HidingSpot] = []
 var doors: Array[Door] = []
+var monitors: Array[Monitor] = []
+var gurneys: Array[Gurney] = []
+var chairs: Array[Wheelchair] = []
 var transformer: Transformer
 var prison: Prison
 var network: CityNetwork
@@ -35,6 +38,12 @@ func _init(map: Node) -> void:
 			spots.append(node)
 		elif node is Door:
 			doors.append(node)
+		elif node is Monitor:
+			monitors.append(node)
+		elif node is Gurney:
+			gurneys.append(node)
+		elif node is Wheelchair:
+			chairs.append(node)
 		elif node is Transformer:
 			transformer = node
 		elif node is Prison:
@@ -47,7 +56,8 @@ func _init(map: Node) -> void:
 ## alarm, values of the game loop, where the dropped fuses lie (T-107),
 ## whether each door is open (S-016), the cages of the prison, the
 ## terminals and cameras of the network, the objectives besides fuses
-## (S-018)].
+## (S-018), the state of each monitor of the hospital, where its gurneys and
+## wheelchairs stand (S-014)].
 func state() -> Array:
 	var fuses := []
 	for box in boxes:
@@ -61,6 +71,15 @@ func state() -> Array:
 	var open := []
 	for door in doors:
 		open.append(door.is_open)
+	var screens := []
+	for monitor in monitors:
+		screens.append(monitor.state)
+	var beds := []
+	for gurney in gurneys:
+		beds.append(gurney.state())
+	var wheels := []
+	for chair in chairs:
+		wheels.append(chair.state())
 	return [
 		fuses,
 		present,
@@ -71,6 +90,9 @@ func state() -> Array:
 		prison.state() if prison != null else [],
 		network.state() if network != null else [],
 		game_loop.quests.state() if game_loop != null and game_loop.quests != null else [],
+		screens,
+		beds,
+		wheels,
 	]
 
 
@@ -105,6 +127,17 @@ func apply(values: Array) -> void:
 		network.apply(values[7])
 	if values.size() >= 9 and game_loop != null and game_loop.quests != null:
 		game_loop.quests.apply(values[8])
+	if values.size() >= 10:
+		var screens: Array = values[9]
+		for i in mini(screens.size(), monitors.size()):
+			monitors[i].mirror_state(screens[i])
+	if values.size() >= 12:
+		var beds: Array = values[10]
+		for i in mini(beds.size(), gurneys.size()):
+			gurneys[i].mirror_state(beds[i])
+		var wheels: Array = values[11]
+		for i in mini(wheels.size(), chairs.size()):
+			chairs[i].mirror_state(wheels[i])
 
 
 ## Client side: the sound of a noise made in the room by something of the map

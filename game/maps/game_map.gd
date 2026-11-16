@@ -204,6 +204,8 @@ func _setup_online() -> void:
 		if net.is_room:
 			_prison.timed_out.connect(_on_prison_timed_out)
 	net.world = NetWorld.new(self)  # Before the loop draws or takes anything.
+	for thing: Node in net.world.monitors + net.world.gurneys + net.world.chairs:
+		thing.set("mirror", not net.is_room)  # S-014: the room's things move and beep.
 	if net.is_room:
 		_setup_online_room(net)
 	else:

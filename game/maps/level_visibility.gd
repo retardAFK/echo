@@ -28,6 +28,8 @@ const GROUPS := [
 	"CodeSpots",
 	"Prison",
 	"Network",
+	"Monitors",
+	"Rolling",
 ]
 ## Height of a level, in meters.
 const STOREY := 3.0

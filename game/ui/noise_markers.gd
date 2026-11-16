@@ -77,7 +77,7 @@ func _settings() -> MonsterSettings:
 
 
 func _on_noise_emitted(event: NoiseEvent) -> void:
-	if monster == null or event.source == monster:
+	if monster == null or event.source == monster or event.masked:
 		return
 	if monster.has_method("scan_reveals") and monster.scan_reveals(event):
 		show_noise(event)  # The scan hears it, however faint (S-004, Q3).
