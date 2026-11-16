@@ -10,6 +10,7 @@ extends Node
 
 const MapKit := preload("res://tools/godot/map_kit.gd")
 const InteriorLining := preload("res://tools/godot/interior_lining.gd")
+const Hospital := preload("res://tools/godot/hospital.gd")
 
 ## Binary and compressed (T-194): 1 MB instead of 11 MB in the web build.
 const SCENE_PATH := "res://game/maps/tilleuls/tilleuls.scn"
@@ -154,7 +155,6 @@ const PATHS := [
 const FACADES := {
 	"BarreA": [Rect2(15, 22, 70, 12), 5, Vector2(47, 53)],
 	"BarreB": [Rect2(125, 22, 70, 12), 5, Vector2(150, 160)],
-	"BarreC": [Rect2(15, 60, 12, 70), 5, null],
 	"BarreD": [Rect2(185, 55, 12, 55), 5, null],
 	"BarreE": [Rect2(45, 192, 55, 12), 5, Vector2(70, 76)],
 	"BarreF": [Rect2(125, 160, 12, 40), 4, null],
@@ -347,7 +347,7 @@ const LAMPPOSTS := [
 const CAR_ALARMS := [
 	[Vector2(36, 45), Vector2.RIGHT], [Vector2(120, 45), Vector2.RIGHT],
 	[Vector2(205, 140), Vector2.UP], [Vector2(85, 170), Vector2.RIGHT],
-	[Vector2(35, 120), Vector2.UP], [Vector2(186, 206), Vector2.RIGHT],
+	[Vector2(35, 106), Vector2.UP], [Vector2(186, 206), Vector2.RIGHT],
 ]
 
 ## Benches and trees: plan position and the direction they face.
@@ -357,7 +357,7 @@ const BENCHES := [
 	[Vector2(44, 160), Vector2.LEFT, false],
 ]
 const TREES := [
-	Vector2(48, 68), Vector2(74, 72), Vector2(49, 95), Vector2(31, 55), Vector2(82, 160),
+	Vector2(48, 68), Vector2(74, 72), Vector2(49, 95), Vector2(36, 53), Vector2(82, 160),
 	Vector2(120, 140), Vector2(176, 128), Vector2(140, 40), Vector2(112, 60), Vector2(64, 120),
 	Vector2(20, 186), Vector2(185, 170),
 ]
@@ -447,7 +447,7 @@ const FURNITURE_TALL := 1.5
 
 ## 6 dumpsters outside, against the blocks of flats (Q5).
 const DUMPSTERS := [
-	Vector3(30, 0, 35), Vector3(28, 0, 110), Vector3(180, 0, 35),
+	Vector3(30, 0, 35), Vector3(33.2, 0, 128), Vector3(180, 0, 35),
 	Vector3(184, 0, 92), Vector3(185, 0, 144), Vector3(90, 0, 191),
 ]
 ## 20 bottles, all there every game (Q1): low walls, benches, halls, car park.
@@ -495,6 +495,7 @@ func _ready() -> void:
 	_build_gallery()
 	_build_car_park()
 	_build_cellars()
+	Hospital.new(self).build()  # Spec S-014, in place of block C.
 	_build_garages()
 	_build_furniture()
 	var lining := InteriorLining.new(self)
@@ -545,6 +546,7 @@ func _ready() -> void:
 
 func _build_ground() -> void:
 	var holes: Array[Rect2] = [CAR_PARK_RAMP, CAR_PARK_STAIRS, CAR_PARK_NORTH_STAIRS, CELLAR_STAIRS]
+	holes.append_array(Hospital.ground_holes())
 	kit.slab_tiles(
 		"Tile", Rect2(0, 0, MAP_SIZE, MAP_SIZE), holes, -GROUND_THICKNESS, 0.0, MAT_DIRT,
 		GROUND_TILE
@@ -1306,6 +1308,8 @@ func _buildings() -> Dictionary:
 			[Vector3(142, -3, 97), Vector3(178, -3, 97), Vector3(142, -3, 115), Vector3(166, -3, 115),
 				Vector3(178.5, -3, 111), Vector3(110, -3, 97.2)]],
 		"Garages": [GARAGES, 0.0, GARAGE_HEIGHT, [], []],
+		# Spec S-014: no fuse slot before T-188.
+		"Hospital": Hospital.scan_box() + [Hospital.LIGHTS, []],
 	}
 
 
@@ -1321,6 +1325,7 @@ func _extra_boxes() -> Dictionary:
 	return {
 		"Tower": [[c, -CAR_PARK_DEPTH, 0.0]],
 		"CarPark": [[under, -CAR_PARK_DEPTH, -GROUND_THICKNESS], [cages, -CAR_PARK_DEPTH, -GROUND_THICKNESS]],
+		"Hospital": Hospital.extra_boxes(),
 	}
 
 

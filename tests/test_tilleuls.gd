@@ -115,7 +115,7 @@ func test_exit_tunnel_is_closed_by_its_gate() -> void:
 
 func test_blocks_of_flats_are_walls() -> void:
 	# They hide the hunted and muffle noise (S-002).
-	for block in ["BarreA", "BarreB", "BarreC", "BarreD", "BarreE", "BarreF", "BarreG"]:
+	for block in ["BarreA", "BarreB", "BarreD", "BarreE", "BarreF", "BarreG"]:
 		var body: StaticBody3D = _map.get_node("Structures/%s/Walls" % block)
 		assert_eq(body.collision_layer, NoiseBus.WALLS_COLLISION_MASK, block)
 

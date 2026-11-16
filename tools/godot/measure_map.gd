@@ -32,7 +32,7 @@ const VIEWS := [
 	["parking_dedans", Vector3(142, -1.4, 102), Vector3(178, -2, 108)],
 	["laverie", Vector3(56.6, 1.6, 136), Vector3(58, 1, 146)],
 	["salle_centre_social", Vector3(158, 1.6, 82), Vector3(142, 1, 64)],
-	["barre_c", Vector3(42, 1.6, 100), Vector3(27, 7, 92)],
+	["hopital", Vector3(44, 1.6, 100), Vector3(27, 7, 92)],
 	["barre_b_porche", Vector3(162, 1.6, 52), Vector3(153, 5, 34)],
 	["tour_dehors", Vector3(128, 1.6, 128), Vector3(106, 18, 102)],
 	["barre_g", Vector3(160, 1.6, 132), Vector3(172, 5, 145)],
@@ -51,6 +51,16 @@ const VIEWS := [
 	# Final check of S-016 (T-244): another landing, the cellars.
 	["tour_palier_2", Vector3(94, 7.6, 100), Vector3(115, 7, 100)],
 	["caves", Vector3(100, -1.4, 97.2), Vector3(135, -2, 97.2)],
+	# The hospital (S-014, T-183): the long corridors, the basement, the stairs.
+	["hopital_auvent", Vector3(39, 1.6, 120), Vector3(30, 2, 95)],
+	["hopital_couloir_rdc", Vector3(21, 1.6, 59), Vector3(21, 1.4, 131)],
+	["hopital_couloir_1", Vector3(21, 4.6, 129), Vector3(21, 4.4, 57)],
+	["hopital_couloir_2", Vector3(21, 7.6, 59), Vector3(21, 7.4, 131)],
+	["hopital_sous_sol", Vector3(21, -1.4, 129), Vector3(21, -1.6, 57)],
+	["hopital_hall", Vector3(30, 1.6, 94), Vector3(20, 1.4, 94)],
+	["hopital_escalier", Vector3(21, 1.6, 64), Vector3(25, 3, 58)],
+	["hopital_quai", Vector3(8, 1.6, 74), Vector3(8, -2, 92)],
+	["hopital_secours", Vector3(34, 1.6, 140), Vector3(24, 5, 133)],
 ]
 
 ## Grid step of the sweep, in meters.

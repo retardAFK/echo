@@ -316,7 +316,7 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [x] T-181 — Plan sur papier de l'hôpital
   - Résultat vérifiable : plan dessiné (`plan-hopital.svg`, comme `plan-map.svg` de S-006), validé par Maxime avec la spec
   - Dépend de : T-180
-- [ ] T-182 — Plan et tâches de S-014
+- [x] T-182 — Plan et tâches de S-014
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-181
 - [x] T-194 — Map enregistrée en binaire compressé
@@ -325,7 +325,7 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [x] T-195 — Visibilité par niveau
   - Résultat vérifiable : les intérieurs d'un niveau (revêtement, mobilier, portes, lumières) ne sont dessinés que si la caméra est à ce niveau, à côté, ou dehors à moins de 25 m ; pire point de la map actuelle mesuré avant et après ; tests GUT
   - Dépend de : T-194
-- [ ] T-183 — Greybox sur plusieurs niveaux
+- [x] T-183 — Greybox sur plusieurs niveaux
   - Résultat vérifiable : l'hôpital remplace la barre C dans le générateur de la cité (`build_tilleuls`), 4 niveaux, escaliers, escalier de secours, rampe du quai, navigation des IA entre niveaux et avec le reste de la cité, carte des chassés régénérée ; traversée en courant sous 45 s ; tests GUT
   - Dépend de : T-195
 - [ ] T-184 — Scan par niveau
