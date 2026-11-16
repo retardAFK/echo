@@ -8,6 +8,8 @@ extends RefCounted
 
 var target: Node
 var holding := false
+## Set by wait_release: a key still held does nothing until it is let go.
+var _wait_release := false
 
 
 ## One frame: the target in reach (or null), and whether "interact" is held.
@@ -17,13 +19,21 @@ func update(user: Node, new_target: Node, held: bool, delta: float) -> void:
 	if new_target != target:
 		_let_go(user)
 		target = new_target
+	if not held:
+		_wait_release = false
 	if target == null:
 		return
-	if held:
+	if held and not _wait_release:
 		holding = true
 		target.hold(user, delta)
 	else:
 		_let_go(user)
+
+
+## The key held now was for something else (getting up from a terminal):
+## it must be let go before it holds anything (S-018, Q10).
+func wait_release() -> void:
+	_wait_release = true
 
 
 ## Progress of the current hold, from 0 to 1 (0 when nothing is held).

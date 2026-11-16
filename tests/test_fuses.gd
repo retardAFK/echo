@@ -126,6 +126,19 @@ func test_letting_go_of_a_box_starts_over() -> void:
 	assert_true(box.has_fuse)
 
 
+func test_a_key_still_held_from_getting_up_holds_nothing() -> void:
+	var box := _make_box()
+	var hold := HoldInteraction.new()
+	var user := Node.new()
+	add_child_autofree(user)
+	hold.wait_release()  # "interact" just got it up from a terminal (S-018).
+	hold.update(user, box, true, 1.5)
+	assert_eq(box.get_hold_ratio(), 0.0, "not until the key is let go")
+	hold.update(user, box, false, 0.1)
+	hold.update(user, box, true, 1.5)
+	assert_almost_eq(hold.get_ratio(), 0.75, 0.001, "then it holds again")
+
+
 func test_player_holds_e_on_a_box_and_sees_the_ring() -> void:
 	var box := _make_box()
 	var floor_body := StaticBody3D.new()

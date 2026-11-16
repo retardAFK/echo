@@ -318,13 +318,16 @@ func _type_code(player: Player, delta: float) -> void:
 	if player.terminal == null:
 		_phase = "helper" if not quests.wants_code() else "to_keypad"
 		return
-	if not quests.wants_code():
-		_wanted["interact"] = true  # Done: gets up.
-		return
 	_key_left -= delta
 	if _key_left > 0.0:
 		return
 	_key_left = KEY_TIME
+	if not quests.wants_code():
+		# Done: gets up. A press, as a key gives: a held "interact" alone
+		# pushes no action (LocalControls reads key events).
+		player.commands.push(PlayerCommands.Action.INTERACT)
+		_key_left = KEY_TIME * 5.0
+		return
 	if _typed >= quests.code.length():
 		_typed = 0  # Not taken: once more after a pause.
 		_key_left = KEY_TIME * 5.0

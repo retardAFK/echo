@@ -56,6 +56,8 @@ var watching_catcher: bool:
 ## client by what the room says.
 var terminal: Terminal:
 	set(value):
+		if value == null and terminal != null:
+			_hold.wait_release()  # "interact" got it up: not to sit straight back.
 		terminal = value
 		if value != null:
 			_sit_at(value)
