@@ -12,7 +12,7 @@ extends Node3D
 const GROUP := &"security_cameras"
 const LED_ON := Color(1.0, 0.08, 0.05)
 const LED_OFF := Color(0.12, 0.03, 0.03)
-const SOUND_SMASH := preload("res://assets/audio/ruses/glass_break.wav")
+const SOUND_SMASH := preload("res://assets/audio/network/camera_break.wav")
 ## What blocks its view: the walls (layer 2), like a player's eyes.
 const SIGHT_MASK := 2
 
@@ -29,7 +29,7 @@ var _led_material: StandardMaterial3D
 
 @onready var _lens: Node3D = $Lens
 @onready var _led: MeshInstance3D = $Led
-@onready var _body: MeshInstance3D = $Body
+@onready var _body: Node3D = $Body
 @onready var _sound: AudioStreamPlayer3D = $Sound
 
 

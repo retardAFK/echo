@@ -11,7 +11,7 @@ extends Node3D
 signal thrown(user: Node)
 
 const GROUP := &"relay_switches"
-const SOUND := preload("res://assets/audio/interiors/crash_bar.wav")
+const SOUND := preload("res://assets/audio/network/relay_click.wav")
 
 @export var settings: LoopSettings
 @export var building_name := ""

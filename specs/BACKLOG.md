@@ -465,9 +465,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : le monstre IA éteint les terminaux et passe voir la prison ; la proie IA fait les nouveaux objectifs et utilise les leurres à distance ; 20 parties simulées sans blocage
   - Dépend de : T-266
   - Fait le 16/11/2026 : la proie IA fait code, téléchargement et relais et déclenche les haut-parleurs ; le monstre IA casse les caméras, éteint les terminaux et repasse par la prison ; délai des relais 25 s ; 20 parties simulées sans blocage ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
-- [ ] T-269 — Modèles et sons
+- [x] T-269 — Modèles et sons
   - Résultat vérifiable : terminal, caméra, haut-parleur, rideau, cages ; clavier, disque dur, sonnerie, rideau ; montrés à Maxime avant intégration
   - Dépend de : T-261
+  - Fait le 16/11/2026 : 9 modèles et 8 sons faits par script, branchés, rendus montrés à Maxime ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
 - [ ] T-270 — Vérification finale de S-018
   - Résultat vérifiable : critères cochés, budget de 300 appels de dessin et 60 images/s tenus
   - Dépend de : T-267, T-268, T-269

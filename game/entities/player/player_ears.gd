@@ -28,7 +28,9 @@ const SELF_VOICED := [
 	NoiseEvent.Type.SWITCH,
 ]
 ## The prison's bell (S-018, Q4), played where it rings.
-const SOUND_BELL := preload("res://assets/audio/interiors/shop_bell.wav")
+const SOUND_BELL := preload("res://assets/audio/network/prison_bell.wav")
+const SOUND_DISK := preload("res://assets/audio/network/hard_disk.wav")
+const SOUND_BEEP := preload("res://assets/audio/network/keypad_beep.wav")
 
 var heard_count := 0
 
@@ -46,8 +48,8 @@ func _ready() -> void:
 	_sounds[NoiseEvent.Type.CALL] = PlaceholderSounds.call_for_help()
 	_sounds[NoiseEvent.Type.RESCUE] = PlaceholderSounds.rescue()
 	_sounds[NoiseEvent.Type.BELL] = SOUND_BELL
-	_sounds[NoiseEvent.Type.DISK] = PlaceholderSounds.disk()
-	_sounds[NoiseEvent.Type.BEEP] = PlaceholderSounds.beep()
+	_sounds[NoiseEvent.Type.DISK] = SOUND_DISK
+	_sounds[NoiseEvent.Type.BEEP] = SOUND_BEEP
 	for i in VOICES:
 		var voice := AudioStreamPlayer3D.new()
 		voice.top_level = true

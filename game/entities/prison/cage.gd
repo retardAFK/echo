@@ -19,7 +19,8 @@ const INSIDE := Vector3(0.0, 0.0, -0.6)
 const OUTSIDE := Vector3(0.0, 0.0, 0.6)
 const LAMP_AT := Vector3(0.0, 2.55, -0.15)
 const OPEN_TIME := 0.4
-const SOUND_GATE := preload("res://assets/audio/interiors/door_open.wav")
+const LAMP_LIGHT := Color(1.0, 0.92, 0.65)
+const SOUND_GATE := preload("res://assets/audio/network/cage_gate.wav")
 
 @export var settings: PrisonSettings
 
@@ -36,8 +37,8 @@ var _clock := 0.0
 
 @onready var _hinge: Node3D = $Hinge
 @onready var _shape: CollisionShape3D = $Hinge/Gate/CollisionShape3D
-@onready var _gate_mesh: MeshInstance3D = $Hinge/Gate/Mesh
-@onready var _lamp: MeshInstance3D = $Lamp
+@onready var _gate_mesh: Node3D = $Hinge/Gate/Mesh
+@onready var _lamp: Node3D = $Lamp
 @onready var _creak: AudioStreamPlayer3D = $Creak
 
 
@@ -47,13 +48,13 @@ func _ready() -> void:
 	box.size = GATE_SIZE
 	_shape.shape = box
 	_shape.position = Vector3(GATE_SIZE.x / 2.0, GATE_SIZE.y / 2.0, 0.0)
-	var mesh := BoxMesh.new()
-	mesh.size = GATE_SIZE
-	_gate_mesh.mesh = mesh
 	_gate_mesh.position = _shape.position
 	_lamp.position = LAMP_AT
-	_lamp_material = _lamp.get_surface_override_material(0).duplicate()
-	_lamp.set_surface_override_material(0, _lamp_material)
+	_lamp_material = StandardMaterial3D.new()
+	_lamp_material.emission = LAMP_LIGHT
+	_lamp_material.emission_energy_multiplier = 2.0
+	for mesh: MeshInstance3D in _lamp.find_children("*", "MeshInstance3D", true, false):
+		mesh.material_override = _lamp_material
 	_show_lamp(false)
 	DrawRange.limit(self, DrawRange.INDOOR)
 	add_to_group(Interactable.GROUP)
