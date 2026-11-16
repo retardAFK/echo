@@ -48,6 +48,9 @@ const VIEWS := [
 	["galerie_boutiques", Vector3(64, 1.6, 141), Vector3(78, 1, 143)],
 	["centre_cuisine", Vector3(153, 1.6, 79), Vector3(159, 1, 83)],
 	["centre_scene", Vector3(152, 1.6, 70), Vector3(141, 1.5, 70)],
+	# Final check of S-016 (T-244): another landing, the cellars.
+	["tour_palier_2", Vector3(94, 7.6, 100), Vector3(115, 7, 100)],
+	["caves", Vector3(100, -1.4, 97.2), Vector3(135, -2, 97.2)],
 ]
 
 ## Grid step of the sweep, in meters.

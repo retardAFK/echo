@@ -46,6 +46,7 @@ static func is_monster(user: Node) -> bool:
 func _ready() -> void:
 	add_to_group(Interactable.GROUP)
 	add_to_group(GROUP)
+	DrawRange.limit(self, DrawRange.OUTDOOR)
 
 
 ## Whether a monster's eye looking along `forward` misses a body: anyone not

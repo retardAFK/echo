@@ -56,6 +56,9 @@ const BODIES_LAYERS := (1 << 2) | (1 << 3)
 @export var start_open := false
 ## A bell over the door rings when it opens (bell_range).
 @export var bell := false
+## Between two rooms of a building, not on an outer wall: drawn only near
+## the camera, since no one sees it from the street (T-244).
+@export var indoor := false
 
 var is_open := false
 ## The last one who opened or closed it, or null.
@@ -87,6 +90,7 @@ func _ready() -> void:
 	leaf.name = "Model"
 	leaf.scale = box.size / LEAF_MODEL_SIZE
 	_leaf.add_child(leaf)
+	DrawRange.limit(self, DrawRange.INDOOR if indoor else DrawRange.OUTDOOR)
 	_set_open(start_open, false)
 
 
