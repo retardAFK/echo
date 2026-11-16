@@ -138,6 +138,8 @@ HUD_TERMINAL_TITLE,RÉSEAU DE LA CITÉ
 HUD_TERMINAL_HELP,"1 à 9, ou molette et clic : choisir. {interact} ou bouger : partir."
 HUD_TERMINAL_CAMERA,Caméra : %s
 HUD_TERMINAL_BROKEN,(hors service)
+HUD_TERMINAL_OPEN_CAGES,Ouvrir les cages de la prison
+HUD_TERMINAL_NOBODY,(personne en prison)
 HUD_CAMERA_CAPTION,CAM %d · %s
 NET_CAM_CELLARS,couloir des caves
 NET_CAM_CAR_PARK,parking

@@ -47,6 +47,9 @@ var user: Node3D
 var off_left := 0.0
 ## Online client: someone sits at it in the room.
 var remote_in_use := false
+## What it is doing for the one at it, from 0 to 1 (the guard's terminal
+## opening the cages, T-264), 0 when nothing.
+var progress := 0.0
 ## Online client: the room's loop and objects decide.
 var mirror := false
 

@@ -118,6 +118,13 @@ func _line_text(network: CityNetwork, i: int) -> String:
 	var entry: Array = _entries[i]
 	var text := "%d  %s" % [i + 1, tr("HUD_TERMINAL_CAMERA") % tr(entry[2])]
 	match entry[0]:
+		CityNetwork.Entry.OPEN_CAGES:
+			text = "%d  %s" % [i + 1, tr(entry[2])]
+			var progress := player.terminal.progress
+			if progress > 0.0:
+				text += "  %d %%" % roundi(progress * 100.0)
+			elif not network.has_prisoners():
+				text += "  " + tr("HUD_TERMINAL_NOBODY")
 		CityNetwork.Entry.CAMERA:
 			var camera := network.cameras[entry[1]]
 			if camera.broken:

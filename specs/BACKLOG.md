@@ -445,9 +445,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : s'installer à un terminal (E 1 s, bruit de clavier, écran qui éclaire), voir une caméra ; lumière rouge visible du monstre, caméra cassée par le monstre ; vue des caméras pour le prisonnier ; tests GUT
   - Dépend de : T-262
   - Fait le 16/11/2026 : 6 terminaux et 8 caméras dans la cité, menu du terminal, vue verte des caméras, monstre qui éteint et casse ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
-- [ ] T-264 — Terminal du gardien
+- [x] T-264 — Terminal du gardien
   - Résultat vérifiable : ouvre toutes les cages en 10 s, sonnerie à la prison ; tests GUT
   - Dépend de : T-263
+  - Fait le 16/11/2026 : ligne « Ouvrir les cages » du terminal de la pharmacie ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
 - [ ] T-265 — Haut-parleurs et rideaux métalliques
   - Résultat vérifiable : leurres à distance (une fois chacun) et rideaux baissés 20 s (recharge 60 s), selon la spec ; le monstre éteint les terminaux ; tests GUT
   - Dépend de : T-263
