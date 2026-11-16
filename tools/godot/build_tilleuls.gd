@@ -380,7 +380,7 @@ const SPOT_RAY_HEIGHT := 0.5
 const CLOSETS := [
 	Vector3(93, 0, 109), Vector3(93.5, 3, 90), Vector3(103, 9, 109.5),  # Tower: bin room, flats.
 	Vector3(164.2, 0, 61.5), Vector3(148, 0, 61), Vector3(176.8, 0, 82.5),  # Social centre.
-	Vector3(54.2, 0, 141), Vector3(70.9, 0, 141.5), Vector3(45.8, 0, 141),  # Gallery.
+	Vector3(54.2, 0, 141), Vector3(77.9, 0, 145.8), Vector3(45.8, 0, 141),  # Gallery.
 	Vector3(141, -3, 112), Vector3(179, -3, 106), Vector3(152, -3, 95.8),  # Car park.
 ]
 ## The other families (S-016, Q6): low (under a bed), makeshift (behind a
