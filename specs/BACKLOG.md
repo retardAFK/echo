@@ -433,9 +433,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [x] T-260 — Spec S-018
   - Résultat vérifiable : spec validée par Maxime (libération sur place ou à distance, outils et quêtes tirées au sort)
   - Dépend de : —
-- [ ] T-261 — Plan et tâches de S-018
+- [x] T-261 — Plan et tâches de S-018
   - Résultat vérifiable : `plan.md` et `tasks.md`, emplacements des cages, des terminaux, des caméras, des haut-parleurs et des rideaux sur le plan de la cité
   - Dépend de : T-260, fin de S-016
+  - Fait le 16/11/2026 : [`plan.md`](S-018-prison-et-reseau/plan.md) et [`tasks.md`](S-018-prison-et-reseau/tasks.md) ; le terminal du gardien va dans la galerie (90 m des cages) pour tenir les 80 m de Q4
 - [ ] T-262 — La prison
   - Résultat vérifiable : capture → écran noir → cage ; libération sur place (E 4 s, une cage) ; séjours de 120 s puis 60 s, élimination à la 3e prise, chrono arrêté quand le monstre est à moins de 15 m ; victoire du monstre quand tous sont en prison ou éliminés ; solo inchangé ; tests GUT
   - Dépend de : T-261
