@@ -215,6 +215,32 @@ const PRISON_GATE_WIDTH := 1.4
 const CAGE := preload("res://game/entities/prison/cage.tscn")
 const PRISON_SCRIPT := preload("res://game/entities/prison/prison.gd")
 const PRISON_SETTINGS := preload("res://game/data/prison_settings.tres")
+## The network of the cité (S-018, Q9 to Q11), Vector3(x, h, y) on the plan.
+## Terminals: where the front of the desk stands, the way the screen and the
+## one at the keyboard face (degrees, 0 = south, 90 = east, 180 = north,
+## -90 = west), the kind, the name.
+const TERMINALS := [
+	[Vector3(115.3, 0.0, 106.0), -90.0, Terminal.Kind.NORMAL, "NET_TERM_TOWER"],
+	[Vector3(177.3, 0.0, 62.0), -90.0, Terminal.Kind.NORMAL, "NET_TERM_CENTRE_OFFICE"],
+	[Vector3(150.0, 0.0, 83.3), 180.0, Terminal.Kind.NORMAL, "NET_TERM_CENTRE_HALL"],
+	[Vector3(80.0, 0.0, 146.4), 180.0, Terminal.Kind.NORMAL, "NET_TERM_BAKERY"],
+	[Vector3(176.5, -3.0, 102.4), 0.0, Terminal.Kind.NORMAL, "NET_TERM_CAR_PARK"],
+	[Vector3(51.5, 0.0, 146.4), 180.0, Terminal.Kind.GUARD, "NET_TERM_GUARD"],
+]
+## Cameras: where it hangs, what it looks at, its name.
+const CAMERAS := [
+	[Vector3(137.5, -0.6, 96.3), Vector3(121.0, -2.5, 95.5), "NET_CAM_CELLARS"],
+	[Vector3(179.5, -0.6, 116.5), Vector3(155.0, -3.0, 103.0), "NET_CAM_CAR_PARK"],
+	[Vector3(127.0, 2.6, 99.6), Vector3(138.0, -2.0, 102.0), "NET_CAM_RAMP"],
+	[Vector3(115.5, 2.6, 111.5), Vector3(104.0, 1.0, 96.0), "NET_CAM_TOWER_HALL"],
+	[Vector3(159.5, 3.4, 60.5), Vector3(145.0, 0.5, 78.0), "NET_CAM_CENTRE_HALL"],
+	[Vector3(86.5, 3.0, 135.5), Vector3(50.0, 0.5, 137.0), "NET_CAM_ARCADE"],
+	[Vector3(108.0, 3.0, 160.0), Vector3(100.5, 1.0, 153.5), "NET_CAM_TRANSFORMER"],
+	[Vector3(110.0, 3.5, 112.4), Vector3(105.0, 0.0, 128.0), "NET_CAM_TOWER_SOUTH"],
+]
+const TERMINAL := preload("res://game/entities/network/terminal.tscn")
+const SECURITY_CAMERA := preload("res://game/entities/network/security_camera.tscn")
+const NETWORK_SCRIPT := preload("res://game/entities/network/city_network.gd")
 
 const SOCIAL_CENTRE := Rect2(140, 60, 38, 24)
 const SOCIAL_CENTRE_HEIGHT := 4.0
@@ -326,7 +352,7 @@ const SPOT_RAY_HEIGHT := 0.5
 const CLOSETS := [
 	Vector3(93, 0, 109), Vector3(93.5, 3, 90), Vector3(103, 9, 109.5),  # Tower: bin room, flats.
 	Vector3(164.2, 0, 61.5), Vector3(148, 0, 61), Vector3(176.8, 0, 82.5),  # Social centre.
-	Vector3(54.2, 0, 141), Vector3(77.8, 0, 141), Vector3(45.8, 0, 141),  # Gallery.
+	Vector3(54.2, 0, 141), Vector3(70.9, 0, 141.5), Vector3(45.8, 0, 141),  # Gallery.
 	Vector3(141, -3, 112), Vector3(179, -3, 106), Vector3(152, -3, 95.8),  # Car park.
 ]
 ## The other families (S-016, Q6): low (under a bed), makeshift (behind a
@@ -836,10 +862,52 @@ func _add_doors() -> void:
 		parent.add_child(door)
 		door.owner = _root
 	_add_prison()
+	_add_network()
 	var metal := _group("MetalFloors")
 	for floor_box in _metal_floors:
 		metal.add_child(floor_box)
 		floor_box.owner = _root
+
+
+## The network of the cité (S-018): its terminals (their desks are navigation
+## sources) and its cameras.
+func _add_network() -> void:
+	var network := Node.new()
+	network.name = "Network"
+	network.set_script(NETWORK_SCRIPT)
+	_add(network)
+	var desks := Node3D.new()
+	desks.name = "Terminals"
+	desks.add_to_group("navigation_source", true)
+	network.add_child(desks)
+	desks.owner = _root
+	for i in TERMINALS.size():
+		var entry: Array = TERMINALS[i]
+		var terminal: Terminal = TERMINAL.instantiate()
+		terminal.name = "Terminal%d" % (i + 1)
+		var at: Vector3 = entry[0]
+		terminal.position = kit.world(at.x, at.z, at.y)
+		terminal.rotation_degrees.y = entry[1]
+		terminal.kind = entry[2]
+		terminal.label_key = entry[3]
+		desks.add_child(terminal)
+		terminal.owner = _root
+	var cameras := Node3D.new()
+	cameras.name = "Cameras"
+	network.add_child(cameras)
+	cameras.owner = _root
+	for i in CAMERAS.size():
+		var entry: Array = CAMERAS[i]
+		var camera: SecurityCamera = SECURITY_CAMERA.instantiate()
+		camera.name = "Camera%d" % (i + 1)
+		var at: Vector3 = entry[0]
+		var target: Vector3 = entry[1]
+		var from := kit.world(at.x, at.z, at.y)
+		var to := kit.world(target.x, target.z, target.y)
+		camera.transform = Transform3D(Basis.looking_at(to - from, Vector3.UP), from)
+		camera.label_key = entry[2]
+		cameras.add_child(camera)
+		camera.owner = _root
 
 
 ## The prison (S-018, Q1): a Cage in each prison cage's grille. Not a

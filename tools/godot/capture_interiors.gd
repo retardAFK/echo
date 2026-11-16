@@ -30,7 +30,23 @@ const VIEWS := [
 	["boulangerie", Vector3(85.5, 1.6, 140.5), Vector3(80, 1.2, 146.5)],
 	["parking_tubes", Vector3(145, -1.4, 106), Vector3(165, -2.0, 99)],
 	["prison", Vector3(130, -1.4, 97.8), Vector3(119, -2.0, 95.0)],
+	["terminal_tour", Vector3(113.2, 1.5, 107.2), Vector3(115.3, 0.9, 106.0)],
+	["terminal_centre", Vector3(149.0, 1.5, 81.3), Vector3(150.0, 0.9, 83.3)],
+	["terminal_parking", Vector3(175.5, -1.5, 104.4), Vector3(176.5, -2.1, 102.4)],
+	["terminal_gardien", Vector3(50.5, 1.5, 144.4), Vector3(51.5, 0.9, 146.4)],
+	["cam_caves", Vector3(137.5, -0.8, 96.3), Vector3(121.0, -2.5, 95.5)],
+	["cam_parking", Vector3(179.5, -0.8, 116.5), Vector3(155.0, -3.0, 103.0)],
+	["cam_rampe", Vector3(127.0, 2.4, 99.6), Vector3(138.0, -2.0, 102.0)],
+	["cam_hall", Vector3(115.5, 2.4, 111.5), Vector3(104.0, 1.0, 96.0)],
+	["cam_centre", Vector3(159.5, 3.2, 60.5), Vector3(145.0, 0.5, 78.0)],
+	["cam_galerie", Vector3(86.5, 2.8, 135.5), Vector3(50.0, 0.5, 137.0)],
+	["cam_transfo", Vector3(108.0, 2.8, 160.0), Vector3(100.5, 1.0, 153.5)],
+	["cam_sud_tour", Vector3(110.0, 3.3, 112.4), Vector3(105.0, 0.0, 128.0)],
 ]
+## Views whose name starts with this are shown as a security camera shows
+## them (S-018): green and coarse.
+const FEED_PREFIX := "cam_"
+const FEED_SHADER := preload("res://game/fx/security_feed.gdshader")
 
 
 func _ready() -> void:
@@ -47,6 +63,13 @@ func _ready() -> void:
 	camera.far = VISUAL_SETTINGS.view_distance
 	camera.near = VISUAL_SETTINGS.near_clip
 	camera.make_current()
+	var feed := CanvasLayer.new()
+	var filter := ColorRect.new()
+	filter.set_anchors_preset(Control.PRESET_FULL_RECT)
+	filter.material = ShaderMaterial.new()
+	(filter.material as ShaderMaterial).shader = FEED_SHADER
+	feed.add_child(filter)
+	add_child(feed)
 	var only: PackedStringArray = args[1].split(",") if args.size() > 1 else PackedStringArray()
 	for view: Array in VIEWS:
 		if not only.is_empty() and not only.has(view[0]):
@@ -56,6 +79,7 @@ func _ready() -> void:
 		eye.y = view[1].y
 		target.y = view[2].y
 		camera.look_at_from_position(eye, target)
+		feed.visible = String(view[0]).begins_with(FEED_PREFIX)
 		for i in SETTLE_FRAMES:
 			await get_tree().process_frame
 		var draws := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)

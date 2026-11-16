@@ -51,6 +51,18 @@ var gesture := BodyGesture.new()
 var watching_catcher: bool:
 	get:
 		return _catcher_left > 0.0
+## The terminal it sits at (S-018, Q10), or null: it stays still there, in
+## front of the keyboard, facing the screen. Set by the terminal, or on a
+## client by what the room says.
+var terminal: Terminal:
+	set(value):
+		terminal = value
+		if value != null:
+			_sit_at(value)
+## The security camera it watches through (S-018, Q11), or null: its view
+## goes to the camera's lens. Set by the CityNetwork, or on a client by what
+## the room says.
+var watching: SecurityCamera
 
 var _gait := PlayerMotion.Gait.WALK
 var _wants_crouch := false
@@ -108,6 +120,9 @@ func _physics_process(delta: float) -> void:
 	if held:
 		_stay_down(delta)
 		return
+	if terminal != null:
+		_sit_still(delta)
+		return
 	if hiding_in != null:
 		# Hidden (S-008, Q6): no movement, only holding "interact" to get out.
 		_update_height(delta)
@@ -146,19 +161,77 @@ func _physics_process(delta: float) -> void:
 ## Applies the one-shot actions queued in the commands (S-010, T-106).
 func apply_actions() -> void:
 	for action in commands.take_actions():
-		if held:
-			continue  # Captured (T-107).
 		if mirror_world and action != PlayerCommands.Action.CROUCH:
 			continue  # The room does it and says so.
+		if held:
+			# Captured (T-107); in a cage, "interact" goes through the cameras (S-018, Q8).
+			if action == PlayerCommands.Action.INTERACT and _in_cage():
+				var network := CityNetwork.of(self)
+				if network != null:
+					network.next_camera(self)
+			continue
+		if (
+			terminal != null
+			and action in [PlayerCommands.Action.THROW, PlayerCommands.Action.DECOY]
+		):
+			continue  # Its hands are on the keyboard.
+		var line := PlayerCommands.picked(action)
+		if line >= 0:
+			var network := CityNetwork.of(self)
+			if network != null:
+				network.pick(self, line)
+			continue
 		match action:
 			PlayerCommands.Action.CROUCH:
 				toggle_crouch()
 			PlayerCommands.Action.INTERACT:
-				interact()
+				if terminal != null:
+					terminal.leave()  # Gets up (Q10).
+				else:
+					interact()
 			PlayerCommands.Action.THROW:
 				throw_bottle()
 			PlayerCommands.Action.DECOY:
 				place_decoy()
+
+
+func _in_cage() -> bool:
+	return capture != null and capture.get_cage() != null
+
+
+## At a terminal (S-018, Q10): still, typing; moving gets it up.
+func _sit_still(delta: float) -> void:
+	velocity.x = 0.0
+	velocity.z = 0.0
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+	move_and_slide()
+	_update_height(delta)
+	_hold.update(self, null, false, delta)  # Lets go of the terminal it sat at.
+	if not mirror_world and not commands.move.is_zero_approx():
+		terminal.leave()
+
+
+func _sit_at(at: Terminal) -> void:
+	velocity = Vector3.ZERO
+	var seat := at.seat_point()
+	global_position = Vector3(seat.x, global_position.y, seat.z)
+	rotation.y = at.global_rotation.y
+	_pitch = PlayerMotion.clamp_pitch(-0.2, settings)
+	_head.rotation.x = _pitch
+	commands.yaw = rotation.y
+	commands.pitch = _pitch
+
+
+func _process(_delta: float) -> void:
+	# The view goes to the camera's lens while it watches (S-018, Q11).
+	var camera := watching if is_instance_valid(watching) and not watching.broken else null
+	if camera != null:
+		_camera.top_level = true
+		_camera.global_transform = camera.eye_transform()
+	elif _camera.top_level:
+		_camera.top_level = false
+		_camera.transform = Transform3D.IDENTITY
 
 
 ## Captured (T-107): on its knees where it is, still falling if in the air.
@@ -212,7 +285,7 @@ func set_look(yaw: float, pitch: float) -> void:
 ## The nearest thing in reach, in front of the crosshair, that the player can
 ## use (a car alarm, S-006), or null. A pickup it has no room for is skipped.
 func get_interactable() -> Node:
-	if held:
+	if held or terminal != null:
 		return null
 	if hiding_in != null:
 		return hiding_in  # Hidden: the only thing in reach is the way out.
@@ -321,7 +394,7 @@ func leave_hiding() -> void:
 ## What its hands do, as the others see it: working while it holds
 ## "interact" on something, else the last gesture, for its length.
 func get_gesture() -> HuntedBody.Gesture:
-	if _hold.holding:
+	if _hold.holding or terminal != null:
 		return HuntedBody.Gesture.WORK
 	return gesture.kind as HuntedBody.Gesture
 

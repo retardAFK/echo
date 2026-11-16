@@ -7,8 +7,10 @@ extends Node
 ## Client side: the player's own avatar is predicted (Prediction) and nudged
 ## to the room's position; the others are NetPuppets moved between snapshots.
 ## Snapshot: {"ack": last command applied, "you": [position, velocity, yaw,
-## gait, hidden, hold ratio, bottles, alarm clocks, hiding spot index, held],
-## "others": [[seat, position, yaw, gait, down, gesture], ...]}; gesture is
+## gait, hidden, hold ratio, bottles, alarm clocks, hiding spot index, held,
+## terminal index, camera index (S-018)],
+## "others": [[seat, position, yaw, gait, down, gesture], ...]}: those it
+## sees with its own eyes or through the camera it watches (S-018); gesture is
 ## what its body shows (S-011): a HuntedBody.Gesture, or for the monster a
 ## MonsterBody.Action.
 ## A spectator (a hunted out of the game, T-107) gets instead what the
@@ -360,9 +362,15 @@ func snapshot_for(place: int) -> Dictionary:
 			inventory.count(Inventory.Kind.DECOY) if inventory != null else 0,
 			world.spot_index(spot) if world != null else -1,
 			viewer.get("held") == true,
+			world.network.terminal_index(viewer.get("terminal")) if _has_network() else -1,
+			world.network.camera_index(viewer) if _has_network() else -1,
 		],
 		"others": _seen_by(viewer),
 	}
+
+
+func _has_network() -> bool:
+	return world != null and world.network != null
 
 
 ## What a spectator sees: what the teammate it watches sees, that teammate
@@ -382,13 +390,25 @@ func _spectator_snapshot(place: int) -> Dictionary:
 	return snapshot
 
 
-## The others a player sees, as snapshot entries.
+## The others a player sees, as snapshot entries: with its own eyes, or
+## through the camera it watches (S-018).
 func _seen_by(viewer: Node3D) -> Array:
+	var camera: SecurityCamera = world.network.watched_by(viewer) if _has_network() else null
 	var others := []
 	for other in _entities():
-		if other[1] != viewer and sees(viewer, other[1]):
+		if other[1] == viewer:
+			continue
+		if sees(viewer, other[1]) or (camera != null and camera_sees(camera, other[1])):
 			others.append(_entry(other[0], other[1]))
 	return others
+
+
+## Room side: whether a camera sees target; a hiding spot hides from it too.
+func camera_sees(camera: SecurityCamera, target: Node3D) -> bool:
+	if HidingSpot.is_hidden(target):
+		return false
+	var skip: Array[RID] = [target.get_rid()]
+	return camera.sees(target.get_eye_position(), skip)
 
 
 func _entry(seat: int, node: Node3D) -> Array:
@@ -542,6 +562,8 @@ func _apply_own_state(you: Array) -> void:
 	if not own is Player or world == null:
 		return
 	var player := own as Player
+	if you.size() >= 12 and world.network != null:
+		_apply_network_state(player, you[10], you[11])
 	var index: int = you[8]
 	var spot: HidingSpot = world.spots[index] if index >= 0 and index < world.spots.size() else null
 	if spot == player.hiding_in:
@@ -553,6 +575,27 @@ func _apply_own_state(you: Array) -> void:
 		spot.occupant = player
 		player.hide_in(spot)
 	prediction.restart(player.commands.seq)  # Moved by the room, not by its steps.
+
+
+## Client side: the terminal the room has the player sit at, and the camera
+## it watches through (S-018).
+func _apply_network_state(player: Player, terminal_at: int, camera_at: int) -> void:
+	var network := world.network
+	var terminal: Terminal = (
+		network.terminals[terminal_at]
+		if terminal_at >= 0 and terminal_at < network.terminals.size()
+		else null
+	)
+	if terminal != player.terminal:
+		player.terminal = terminal
+		prediction.restart(player.commands.seq)  # Moved by the room, not by its steps.
+	var camera: SecurityCamera = (
+		network.cameras[camera_at]
+		if camera_at >= 0 and camera_at < network.cameras.size()
+		else null
+	)
+	if camera != player.watching:
+		player.watching = camera
 
 
 func _spawn_copy(scene: PackedScene, at: Vector3) -> Node3D:

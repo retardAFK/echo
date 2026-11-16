@@ -4,7 +4,8 @@ extends RefCounted
 
 ## CALL and RESCUE: a captured hunted calling for help, a teammate freeing it
 ## (S-010, T-107). DOOR: a door opened, closed or smashed (S-016). CAGE: a
-## cage's gate opened by a teammate; BELL: the prison's bell (S-018).
+## cage's gate opened by a teammate; BELL: the prison's bell; KEYBOARD: a
+## hunted at a terminal; CAMERA: the monster smashing a camera (S-018).
 enum Type {
 	FOOTSTEP,
 	BREATH,
@@ -21,6 +22,8 @@ enum Type {
 	DOOR,
 	CAGE,
 	BELL,
+	KEYBOARD,
+	CAMERA,
 }
 
 var type: Type

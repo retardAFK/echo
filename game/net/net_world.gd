@@ -2,9 +2,9 @@ class_name NetWorld
 extends RefCounted
 ## The things of a map that change during an online game (S-010, T-099): fuse
 ## boxes, pickups (bottles and alarm clocks), car alarms, hiding spots, doors
-## (S-016), the prison (S-018) and the game loop. Both sides list them in the
-## same order from the same map, before anything is drawn or taken, so an
-## index means the same thing everywhere.
+## (S-016), the prison and the network of the cité (S-018) and the game
+## loop. Both sides list them in the same order from the same map, before
+## anything is drawn or taken, so an index means the same thing everywhere.
 ## The room sends state() when it changes; a client shows it with apply(). What
 ## a hunted could not know is never in it: who hides where stays in the room.
 
@@ -19,6 +19,7 @@ var spots: Array[HidingSpot] = []
 var doors: Array[Door] = []
 var transformer: Transformer
 var prison: Prison
+var network: CityNetwork
 var game_loop: GameLoop
 
 
@@ -38,11 +39,14 @@ func _init(map: Node) -> void:
 			transformer = node
 		elif node is Prison:
 			prison = node
+		elif node is CityNetwork:
+			network = node
 
 
 ## Room side: [fuse in each box, each pickup still there, state of each car
 ## alarm, values of the game loop, where the dropped fuses lie (T-107),
-## whether each door is open (S-016), the cages of the prison (S-018)].
+## whether each door is open (S-016), the cages of the prison, the
+## terminals and cameras of the network (S-018)].
 func state() -> Array:
 	var fuses := []
 	for box in boxes:
@@ -64,6 +68,7 @@ func state() -> Array:
 		game_loop.drop_positions() if game_loop != null else [],
 		open,
 		prison.state() if prison != null else [],
+		network.state() if network != null else [],
 	]
 
 
@@ -94,10 +99,13 @@ func apply(values: Array) -> void:
 			doors[i].mirror(open[i])  # Swings with its sound, like in the room.
 	if values.size() >= 7 and prison != null:
 		prison.apply(values[6])
+	if values.size() >= 8 and network != null:
+		network.apply(values[7])
 
 
 ## Client side: the sound of a noise made in the room by something of the map
-## that plays its own sound (a fuse box, the transformer, a hiding spot).
+## that plays its own sound (a fuse box, the transformer, a hiding spot, a
+## terminal's keyboard, a smashed camera).
 func voice(type: NoiseEvent.Type, at: Vector3) -> void:
 	var candidates: Array = []
 	match type:
@@ -107,6 +115,10 @@ func voice(type: NoiseEvent.Type, at: Vector3) -> void:
 			candidates = [transformer] if transformer != null else []
 		NoiseEvent.Type.HIDE:
 			candidates = spots
+		NoiseEvent.Type.KEYBOARD:
+			candidates = network.terminals if network != null else []
+		NoiseEvent.Type.CAMERA:
+			candidates = network.cameras if network != null else []
 	var best: Node3D = null
 	var best_distance := VOICE_REACH
 	for node: Node3D in candidates:

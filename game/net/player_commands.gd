@@ -12,6 +12,11 @@ signal action_pushed(action: Action)
 ## One-shot actions, applied once by the avatar.
 enum Action { CROUCH, INTERACT, THROW, DECOY }
 
+## A line picked in a terminal's menu (S-018): PICK_BASE + its number, from
+## 0, so a tampered client picks only lines the menu has, and nothing else.
+const PICK_BASE := 32
+const PICK_COUNT := 16
+
 ## Held flags, packed in one byte by to_bytes().
 const FLAG_SPRINT := 1
 const FLAG_INTERACT := 2
@@ -37,6 +42,17 @@ var _actions: Array[Action] = []
 func push(action: Action) -> void:
 	_actions.append(action)
 	action_pushed.emit(action)
+
+
+## Queues the pick of line n (from 0) of a terminal's menu.
+func push_pick(n: int) -> void:
+	if n >= 0 and n < PICK_COUNT:
+		push((PICK_BASE + n) as Action)
+
+
+## The line an action picks, or -1 if it is not a pick.
+static func picked(action: int) -> int:
+	return action - PICK_BASE if action >= PICK_BASE and action < PICK_BASE + PICK_COUNT else -1
 
 
 ## Copies what is held and where it looks (not the queued actions) from other.
@@ -108,6 +124,6 @@ static func from_bytes(bytes: PackedByteArray) -> PlayerCommands:
 	commands.scan = flags & FLAG_SCAN != 0
 	for i in count:
 		var action := bytes.decode_u8(HEADER_SIZE + i)
-		if action < Action.size():
+		if action < Action.size() or picked(action) >= 0:
 			commands.push(action as Action)
 	return commands

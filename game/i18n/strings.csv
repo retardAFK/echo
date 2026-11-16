@@ -130,6 +130,29 @@ HUD_RESCUED,Libéré
 HUD_ELIMINATED,Éliminé
 HUD_INTERACT_FREE_CAGE,Maintenir {interact} : ouvrir la cage
 HUD_PRISON_TIME,Prison : %d:%02d
+HUD_PRISON_CAMERAS,{interact} : caméra suivante
+HUD_INTERACT_TERMINAL,Maintenir {interact} : s'installer au terminal
+HUD_MONSTER_SWITCH_OFF,Maintenir {interact} : éteindre le terminal
+HUD_MONSTER_SMASH_CAMERA,Maintenir {interact} : casser la caméra
+HUD_TERMINAL_TITLE,RÉSEAU DE LA CITÉ
+HUD_TERMINAL_HELP,"1 à 9, ou molette et clic : choisir. {interact} ou bouger : partir."
+HUD_TERMINAL_CAMERA,Caméra : %s
+HUD_TERMINAL_BROKEN,(hors service)
+HUD_CAMERA_CAPTION,CAM %d · %s
+NET_CAM_CELLARS,couloir des caves
+NET_CAM_CAR_PARK,parking
+NET_CAM_RAMP,rampe du parking
+NET_CAM_TOWER_HALL,hall de la tour
+NET_CAM_CENTRE_HALL,grande salle du centre social
+NET_CAM_ARCADE,arcade de la galerie
+NET_CAM_TRANSFORMER,transformateur
+NET_CAM_TOWER_SOUTH,carrefour au sud de la tour
+NET_TERM_TOWER,loge de la tour
+NET_TERM_CENTRE_OFFICE,bureau du centre social
+NET_TERM_CENTRE_HALL,accueil du centre social
+NET_TERM_BAKERY,arrière-boutique de la boulangerie
+NET_TERM_CAR_PARK,local technique du parking
+NET_TERM_GUARD,arrière-boutique de la pharmacie
 HUD_SPECTATOR,"Tu regardes un coéquipier, clic pour changer"
 HUD_RECONNECTING,"Connexion perdue, reconnexion…"
 MENU_TITLE,Écho

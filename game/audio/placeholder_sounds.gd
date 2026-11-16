@@ -19,6 +19,9 @@ const CALL_LOW_HZ := 360.0
 const CALL_VOLUME := 0.35
 const RESCUE_LENGTH := 0.5
 const RESCUE_CUTOFF := 0.15
+const KEYS_LENGTH := 0.6
+const KEYS_COUNT := 5
+const KEY_LENGTH := 0.025
 
 
 ## A dull thump: low-passed noise with a fast decay.
@@ -62,6 +65,23 @@ static func call_for_help() -> AudioStreamWAV:
 ## A rescue: the rustle of a struggle.
 static func rescue() -> AudioStreamWAV:
 	return _noise_burst(RESCUE_LENGTH, RESCUE_CUTOFF, true, 37)
+
+
+## Keys clacking on an old keyboard (S-018): a few short bright clicks.
+static func keys() -> AudioStreamWAV:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 53
+	var count := int(KEYS_LENGTH * MIX_RATE)
+	var data := PackedByteArray()
+	data.resize(count * 2)
+	var click := int(KEY_LENGTH * MIX_RATE)
+	for k in KEYS_COUNT:
+		var start := int(rng.randf_range(0.0, KEYS_LENGTH - KEY_LENGTH) * MIX_RATE)
+		for i in click:
+			var t := float(i) / click
+			var sample := rng.randf_range(-1.0, 1.0) * pow(1.0 - t, 4.0) * PEAK * 0.6
+			data.encode_s16((start + i) * 2, int(sample * 32767.0))
+	return _stream(data)
 
 
 static func _noise_burst(
