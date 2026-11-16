@@ -1,6 +1,6 @@
 # S-013 — Interface, menus et options
 
-**Statut** : validée (14/11/2026), Q1 tranchée par Maxime, Q2 à Q8 proposées par Claude
+**Statut** : livrée (16/11/2026). Validée le 14/11/2026, Q1 tranchée par Maxime, Q2 à Q8 proposées par Claude
 **Piliers servis** : P3 (l'inquiétante familiarité) et P4 (le rétro qui dérange) dès le premier écran ; P1 par des réglages de son qui laissent entendre les bruits
 **Phase** : 13 — Interface, menus et options (voir `specs/BACKLOG.md`), commencée avant les phases 11 et 12 à la demande de Maxime (14/11/2026)
 **Maquettes** : https://claude.ai/artifact/9uoNuSUbyjuRZcnAdZ9wrA (trois styles, cinq écrans chacun)
@@ -47,14 +47,14 @@ En pleine partie, elle appuie sur Échap : le menu de pause s'ouvre par-dessus l
 - La traduction dans d'autres langues (Q-011, S-015) ; tous les textes passent déjà par `game/i18n/strings.csv`.
 
 ## Critères d'acceptation (vérifiables à la main)
-- [ ] Les écrans 1 à 6 suivent le style choisi en Q1, sur la base 640 × 360, lisibles en 1280 × 720 et en 1920 × 1080.
-- [ ] Chaque écran se parcourt entièrement au clavier (flèches, Entrée, Échap) et à la souris, avec une sélection toujours visible.
-- [ ] Les réglages changent le jeu tout de suite et survivent à un rechargement de la page dans le navigateur.
-- [ ] Une touche modifiée marche en partie et s'affiche avec son nouveau nom dans les commandes et les invites.
-- [ ] En solo la pause arrête le jeu ; en ligne la partie continue et le joueur peut reprendre ou quitter proprement.
-- [ ] Le salon montre le code, les quatre places, les IA et qui est prêt, et garde tout ce que fait le salon actuel (T-096 à T-099).
-- [ ] Aucune couleur orange de bruit dans les menus (section 2.3).
-- [ ] Tests GUT sur l'enregistrement et la relecture des réglages, et sur la navigation au clavier.
-- [ ] Le build web reste sous 60 Mo avec les polices et les images de fond.
+- [x] Les écrans 1 à 6 suivent le style choisi en Q1, sur la base 640 × 360, lisibles en 1280 × 720 et en 1920 × 1080.
+- [x] Chaque écran se parcourt entièrement au clavier (flèches, Entrée, Échap) et à la souris, avec une sélection toujours visible.
+- [x] Les réglages changent le jeu tout de suite et survivent à un rechargement de la page dans le navigateur.
+- [x] Une touche modifiée marche en partie et s'affiche avec son nouveau nom dans les commandes et les invites.
+- [x] En solo la pause arrête le jeu ; en ligne la partie continue et le joueur peut reprendre ou quitter proprement.
+- [x] Le salon montre le code, les quatre places, les IA et qui est prêt, et garde tout ce que fait le salon actuel (T-096 à T-099).
+- [x] Aucune couleur orange de bruit dans les menus (section 2.3).
+- [x] Tests GUT sur l'enregistrement et la relecture des réglages, et sur la navigation au clavier.
+- [x] Le build web reste sous 60 Mo avec les polices et les images de fond (59 Mo au 16/11/2026 : il ne reste presque plus de marge).
 
 ## Notes de playtest

@@ -292,7 +292,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [x] T-167 — Crédits en jeu
   - Résultat vérifiable : contenu de `CREDITS.md` affiché dans le jeu
   - Dépend de : T-162
-- [ ] T-168 — Vérification finale de S-013
+- [x] T-168 — Vérification finale de S-013
   - Résultat vérifiable : critères cochés, spec livrée
   - Dépend de : T-163, T-164, T-165, T-166, T-167
 
@@ -469,10 +469,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : terminal, caméra, haut-parleur, rideau, cages ; clavier, disque dur, sonnerie, rideau ; montrés à Maxime avant intégration
   - Dépend de : T-261
   - Fait le 16/11/2026 : 9 modèles et 8 sons faits par script, branchés, rendus montrés à Maxime ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
-- [ ] T-270 — Vérification finale de S-018
+- [x] T-270 — Vérification finale de S-018
   - Résultat vérifiable : critères cochés, budget de 300 appels de dessin et 60 images/s tenus
   - Dépend de : T-267, T-268, T-269
-  - En cours le 16/11/2026 : critères vérifiés et 297 appels de dessin au pire point ; reste la mesure des 60 images/s sur la machine de référence, avec T-128
+  - Fait le 16/11/2026 : critères vérifiés et 297 appels de dessin au pire point ; validée par Maxime (« T-270 ok pour moi ») ; la mesure des 60 images/s sur la machine de référence reste à faire avec T-128
 
 ---
 

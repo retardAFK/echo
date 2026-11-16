@@ -38,6 +38,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import, export web, ca
   - Résultat vérifiable : contenu de `CREDITS.md` affiché dans le jeu
   - Dépend de : T-162
   - Fait le 16/11/2026 : entrée « Crédits » de l'accueil ; `CreditsMenu` lit `CREDITS.md` dans le jeu (ajouté à l'export par `include_filter`), donc les deux ne diffèrent jamais : un titre par section, une ligne par asset (asset, auteur, licence), sans les chemins du dépôt ni les outils de développement. `CREDITS.md` complété : sons des intérieurs et du réseau, modèles 3D faits par nos scripts Blender, moteur Godot (MIT). Défilement aux flèches ou à la molette, barre ocre ; 3 tests GUT
-- [ ] T-168 — Vérification finale de S-013
+- [x] T-168 — Vérification finale de S-013
   - Résultat vérifiable : critères cochés, spec livrée
   - Dépend de : T-163, T-164, T-165, T-166, T-167, T-169
+  - Fait le 16/11/2026 : `tools/godot/capture_menus.tscn` capture tous les écrans (accueil, jouer seul, les quatre onglets d'Options, crédits, jouer en ligne avec le digicode, chargement et premiers pas, pause sur le jeu), relus en 1280 × 720 et en 1920 × 1080 : le style A tient, le texte reste net (facteur entier). Les neuf critères sont cochés : navigation au clavier et à la souris, réglages, touches, pause et salon par les tests GUT de T-162 à T-169 (709 tests en tout) et le test à 4 clients du CI ; aucun orange de bruit (test du thème) ; build web à 59 Mo pour 60, la marge est presque épuisée et devra être regardée avant d'ajouter de gros assets (S-012, son)
