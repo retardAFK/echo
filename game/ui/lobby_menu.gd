@@ -244,7 +244,7 @@ static func enter_game(tree: SceneTree, state: LobbyState) -> void:
 		GameSession.Role.MONSTER if seat == LobbyState.MONSTER_SEAT else GameSession.Role.HUNTED
 	)
 	tree.paused = false
-	tree.change_scene_to_file(MAP_SCENE)
+	LoadingScreen.open(tree, MAP_SCENE)  # T-166.
 
 
 func _on_unreachable() -> void:

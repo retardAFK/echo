@@ -286,7 +286,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [x] T-165 — HUD final
   - Résultat vérifiable : HUD des deux rôles repris sur la base 640 × 360 (D-011), lisible à toutes les tailles d'écran
   - Dépend de : T-161
-- [ ] T-166 — Écran de chargement et premiers pas
+- [x] T-166 — Écran de chargement et premiers pas
   - Résultat vérifiable : chargement sous 10 s affiché avec une progression ; conseils de premier lancement pour chaque rôle
   - Dépend de : T-162
 - [ ] T-167 — Crédits en jeu
