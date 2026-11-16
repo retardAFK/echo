@@ -10,7 +10,8 @@ const VOICES := 4
 ## Noises whose maker plays its own sound where it is (S-007): the fuse boxes,
 ## the transformer and its siren, a breaking bottle and a ringing alarm clock, a
 ## hiding spot's door (S-008), a door (S-016), a cage, a terminal's keyboard,
-## a smashed camera, a loudspeaker, a shutter (S-018). The ears add nothing.
+## a smashed camera, a loudspeaker, a shutter, a relay switch (S-018). The
+## ears add nothing.
 const SELF_VOICED := [
 	NoiseEvent.Type.FUSE,
 	NoiseEvent.Type.REPAIR,
@@ -24,6 +25,7 @@ const SELF_VOICED := [
 	NoiseEvent.Type.CAMERA,
 	NoiseEvent.Type.SPEAKER,
 	NoiseEvent.Type.SHUTTER,
+	NoiseEvent.Type.SWITCH,
 ]
 ## The prison's bell (S-018, Q4), played where it rings.
 const SOUND_BELL := preload("res://assets/audio/interiors/shop_bell.wav")
@@ -44,6 +46,8 @@ func _ready() -> void:
 	_sounds[NoiseEvent.Type.CALL] = PlaceholderSounds.call_for_help()
 	_sounds[NoiseEvent.Type.RESCUE] = PlaceholderSounds.rescue()
 	_sounds[NoiseEvent.Type.BELL] = SOUND_BELL
+	_sounds[NoiseEvent.Type.DISK] = PlaceholderSounds.disk()
+	_sounds[NoiseEvent.Type.BEEP] = PlaceholderSounds.beep()
 	for i in VOICES:
 		var voice := AudioStreamPlayer3D.new()
 		voice.top_level = true

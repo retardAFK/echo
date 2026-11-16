@@ -306,7 +306,10 @@ func _receive_held(bytes: PackedByteArray) -> void:
 @rpc("any_peer", "call_remote", "reliable")
 func _receive_action(action: int) -> void:
 	var sender_place: int = players.get(_api.get_remote_sender_id(), 0) if is_room else 0
-	if sender_place != 0 and action >= 0 and action < PlayerCommands.Action.size():
+	if sender_place == 0 or action < 0:
+		return
+	# An action, or the pick of a line of a terminal's menu (S-018).
+	if action < PlayerCommands.Action.size() or PlayerCommands.picked(action) >= 0:
 		commands_for(sender_place).push(action as PlayerCommands.Action)
 
 

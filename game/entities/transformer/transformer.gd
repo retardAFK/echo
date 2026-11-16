@@ -140,4 +140,4 @@ func _has_fuse_to_place() -> bool:
 
 ## Someone carries the floppy disk of the download (S-018).
 func _carries_disk() -> bool:
-	return game_loop != null and game_loop.quests != null and game_loop.quests.disk_carrier != null
+	return game_loop != null and game_loop.quests != null and game_loop.quests.is_disk_carried()

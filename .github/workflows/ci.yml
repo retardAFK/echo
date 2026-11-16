@@ -167,6 +167,10 @@ jobs:
           file build/server/echo_server.arm64 | grep -q "ARM aarch64"
 
       - name: Connect 4 players to the server and play online
+        env:
+          # S-018, T-267: two fuses and the code on the transformer's keypad,
+          # for the rooms the lobby starts and for net_match's own check.
+          ECHO_OBJECTIVES: fuse,fuse,code
         run: |
           build/server/echo_server.x86_64 --headless -- --lobby > build/server/lobby.log 2>&1 &
           sleep 2

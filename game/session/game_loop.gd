@@ -251,6 +251,7 @@ func setup(map: Node, rng_seed := 0) -> void:
 	_map = map
 	_boxes = _all(map, FuseBox)
 	if mirror:
+		_add_quests()
 		_wire(map)
 		fuses_changed.emit(rules.found(), rules.placed)
 		return
@@ -287,11 +288,20 @@ func _draw_objectives(map: Node) -> void:
 			return  # settings.fuse_count fuses, as before S-018.
 		kinds = LoopRules.draw_objectives(drawable, settings.objectives_per_game, _rng)
 	rules.set_objectives(kinds)
+	_add_quests()
+	quests.setup(map, rules, _rng)
+
+
+## The node of the objectives besides fuses; on a client, it shows the
+## room's (T-267).
+func _add_quests() -> void:
 	quests = Quests.new()
 	quests.name = "Quests"
 	quests.settings = settings
+	quests.rules = rules
+	quests.mirror = mirror
+	quests.map_node = _map
 	add_child(quests)
-	quests.setup(map, rules, _rng)
 	quests.changed.connect(_on_quests_changed)
 
 

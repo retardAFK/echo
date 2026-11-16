@@ -46,7 +46,8 @@ func _init(map: Node) -> void:
 ## Room side: [fuse in each box, each pickup still there, state of each car
 ## alarm, values of the game loop, where the dropped fuses lie (T-107),
 ## whether each door is open (S-016), the cages of the prison, the
-## terminals and cameras of the network (S-018)].
+## terminals and cameras of the network, the objectives besides fuses
+## (S-018)].
 func state() -> Array:
 	var fuses := []
 	for box in boxes:
@@ -69,6 +70,7 @@ func state() -> Array:
 		open,
 		prison.state() if prison != null else [],
 		network.state() if network != null else [],
+		game_loop.quests.state() if game_loop != null and game_loop.quests != null else [],
 	]
 
 
@@ -101,6 +103,8 @@ func apply(values: Array) -> void:
 		prison.apply(values[6])
 	if values.size() >= 8 and network != null:
 		network.apply(values[7])
+	if values.size() >= 9 and game_loop != null and game_loop.quests != null:
+		game_loop.quests.apply(values[8])
 
 
 ## Client side: the sound of a noise made in the room by something of the map

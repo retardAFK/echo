@@ -6,7 +6,10 @@ extends Node
 ## - Index 0 creates the game and writes its code to <dir>/code; the others
 ##   join with the code. The roles are drawn at launch; each plays its seat.
 ## - Each hunted takes the fuse of one box (seat 1 the first fused box, and
-##   so on). The monster then catches the hunted of seat 2 at its box and
+##   so on). With fewer fuses, a hunted left without one types the code on
+##   the transformer's keypad when the game has one (S-018, T-267: the CI's
+##   lobby imposes ECHO_OBJECTIVES=fuse,fuse,code), reading it from the
+##   post-it as its client shows it. The monster then catches the hunted of seat 2 at its box and
 ##   walks away; the caught one wakes up in a cage of the prison (S-018); a
 ##   free teammate frees it at the grille once the monster is far (any
 ##   hunted caught on the way is freed the same way); the freed one goes back
@@ -40,6 +43,8 @@ const FREED_WAIT := 4.0
 const CLEARANCE := 6.0
 ## Seconds between two lines on what each player is doing.
 const STATUS_TIME := 10.0
+## Seconds between two keys typed on the keypad.
+const KEY_TIME := 0.4
 const ACTIONS: Array[String] = [
 	"move_forward", "move_back", "move_left", "move_right", "sprint", "interact"
 ]
@@ -76,6 +81,9 @@ var _seen := []
 var _away_point := Vector3.ZERO
 var _sidesteps := 0
 var _status_left := STATUS_TIME
+## Keypad: digits typed, and seconds before the next one.
+var _typed := 0
+var _key_left := 0.0
 
 
 func _ready() -> void:
@@ -242,9 +250,22 @@ func _play_hunted(delta: float) -> void:
 			var fused := _map.get_fuse_boxes().filter(
 				func(box: FuseBox) -> bool: return box.has_fuse
 			)
-			if fused.size() == loop.settings.fuse_count:
+			if fused.size() == loop.rules.fuse_count and _seat - 1 < fused.size():
 				_box = fused[_seat - 1]
 				_phase = "to_box"
+			elif fused.size() == loop.rules.fuse_count and _wants_code():
+				_phase = "to_keypad"
+		"to_keypad":
+			var keypad := _keypad()
+			if player.terminal == keypad:
+				_phase = "typing"
+				_typed = 0
+			elif _go_to(keypad.seat_point(), delta, 0.4):
+				_hold_on(keypad.global_position + Vector3.UP * 0.9)
+		"typing":
+			_type_code(player, delta)
+		"helper":  # Nothing left to do but free the others.
+			_rescue(delta)
 		"to_box":
 			if _go_to(_box.get_approach_point(), delta, 0.4):
 				_hold_on(_box.global_position)
@@ -275,6 +296,42 @@ func _play_hunted(delta: float) -> void:
 				_phase = "fuse"  # Back to the transformer after.
 				return
 			_hold_on(_map.game_loop.transformer.global_position)
+
+
+## The game has a code to type and this client shows it.
+func _wants_code() -> bool:
+	var quests := _map.game_loop.quests
+	return quests != null and quests.wants_code() and quests.code.length() == 4
+
+
+func _keypad() -> Terminal:
+	for terminal: Terminal in CityNetwork.of(_map).terminals:
+		if terminal.kind == Terminal.Kind.CODE:
+			return terminal
+	return null
+
+
+## Seated at the keypad: types the code read on the post-it, a key at a
+## time, then gets up. Typed again if the room did not take it.
+func _type_code(player: Player, delta: float) -> void:
+	var quests := _map.game_loop.quests
+	if player.terminal == null:
+		_phase = "helper" if not quests.wants_code() else "to_keypad"
+		return
+	if not quests.wants_code():
+		_wanted["interact"] = true  # Done: gets up.
+		return
+	_key_left -= delta
+	if _key_left > 0.0:
+		return
+	_key_left = KEY_TIME
+	if _typed >= quests.code.length():
+		_typed = 0  # Not taken: once more after a pause.
+		_key_left = KEY_TIME * 5.0
+		return
+	var digit := int(quests.code[_typed])
+	player.commands.push_pick(9 if digit == 0 else digit - 1)
+	_typed += 1
 
 
 ## The one teammate who frees a captured hunted: the first other one still
@@ -482,11 +539,18 @@ func _own_position() -> Vector3:
 
 
 func _finish(won: bool) -> void:
+	var rules := _map.game_loop.rules
+	var kinds := Array(rules.objectives).map(
+		func(kind: int) -> String: return LoopRules.Objective.keys()[kind].to_lower()
+	)
 	var result := (
-		"seat %d, phase %s, hunted won %s, seen %s, %.0f s"
-		% [_seat, _phase, won, _seen, _map.game_loop.get_duration()]
+		"seat %d, phase %s, hunted won %s, objectives %s, seen %s, %.0f s"
+		% [_seat, _phase, won, ",".join(kinds), _seen, _map.game_loop.get_duration()]
 	)
 	var planned := won and "2:CAPTURED" in _seen and "2:FREE" in _seen
+	var wanted := OS.get_environment("ECHO_OBJECTIVES")
+	if wanted != "" and ",".join(kinds) != wanted:
+		planned = false  # The room's objectives did not reach this client.
 	if not planned:
 		_fail(result)
 		return

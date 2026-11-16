@@ -457,9 +457,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : 3 objectifs par partie parmi fusible, code, téléchargement et relais ; liste sur l'écran de la carte (Tab), sans position ; solo et en ligne ; tests GUT
   - Dépend de : T-263
   - Fait le 16/11/2026 : code, téléchargement et relais en solo (en ligne avec T-267) ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
-- [ ] T-267 — Synchronisation en ligne
+- [x] T-267 — Synchronisation en ligne
   - Résultat vérifiable : prison, terminaux, caméras, rideaux et objectifs synchronisés ; un chassé ne reçoit jamais la position d'un autre, sauf ce qu'il voit sur une caméra ; test à 4 clients
   - Dépend de : T-264, T-265, T-266
+  - Fait le 16/11/2026 : objectifs synchronisés, choix de menu des clients acceptés par la salle, `net_match` tape le code ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
 - [ ] T-268 — IA
   - Résultat vérifiable : le monstre IA éteint les terminaux et passe voir la prison ; la proie IA fait les nouveaux objectifs et utilise les leurres à distance ; 20 parties simulées sans blocage
   - Dépend de : T-266

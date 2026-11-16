@@ -87,7 +87,7 @@ func _physics_process(delta: float) -> void:
 	var result := (
 		"place %d back as %d, %d fuses mirrored" % [_place, NetSession.get_place(), fuses.size()]
 	)
-	if NetSession.get_place() != _place or fuses.size() != _map.game_loop.settings.fuse_count:
+	if NetSession.get_place() != _place or fuses.size() != _map.game_loop.rules.fuse_count:
 		_fail(result)
 		return
 	print("ECHO_NET_REJOIN ok " + result)

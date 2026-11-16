@@ -202,3 +202,53 @@ func test_relay_switches_hang_on_a_wall() -> void:
 		var at := switch.global_position + Vector3.UP * 1.3 + switch.global_basis.z * 0.3
 		var behind := PhysicsRayQueryParameters3D.create(at, at - switch.global_basis.z * 0.6, 2)
 		assert_false(space.intersect_ray(behind).is_empty(), "wall behind %s" % switch.name)
+
+
+func test_a_client_shows_the_room_s_objectives() -> void:
+	var room := _map("fuse,code,download,relay")
+	var room_world := NetWorld.new(room)
+	room_world.game_loop = room.game_loop
+	var client := _map("fuse")
+	var client_world := NetWorld.new(client)
+	client_world.game_loop = client.game_loop
+	client.game_loop.quests.free()
+	client.game_loop.mirror = true
+	client.game_loop._add_quests()
+	var mirror := client.game_loop.quests
+	var quests := room.game_loop.quests
+	# The room's game: the code typed halfway, the download done, a relay down.
+	var network: CityNetwork = room.get_node("Network")
+	var keypad: Terminal = network.terminals[-1]
+	quests.type_digit(keypad, int(quests.code[0]))
+	quests.start_download(quests.download_terminal)
+	quests._physics_process(LOOP_SETTINGS.download_time + 0.1)
+	quests.relays[0].thrown.emit(room.get_node("Player"))
+	client_world.apply(room_world.state())
+	var rules := client.game_loop.rules
+	assert_eq(Array(rules.objectives), Array(room.game_loop.rules.objectives))
+	assert_eq(rules.fuse_count, 1)
+	assert_eq(mirror.code_spot.get_parent().get_child_count(), 6)
+	assert_eq(mirror.code, quests.code)
+	assert_eq(mirror.code_spot.get_index(), quests.code_spot.get_index(), "the same post-it")
+	assert_eq(mirror.typed_on(client.get_node("Network").terminals[-1]), quests.code[0])
+	assert_eq(mirror.download_terminal.name, quests.download_terminal.name)
+	assert_not_null(mirror.disk, "the floppy disk lies by the terminal")
+	assert_true(mirror.disk.global_position.is_equal_approx(quests.disk.global_position))
+	assert_eq(mirror.relays.size(), 2)
+	assert_true(mirror.relays[0].is_down)
+	assert_false(mirror.relays[1].is_down)
+	assert_true(mirror.relays[1].armed)
+	# Taken, then the relay and the code done: the disk goes, the HUD counts.
+	quests.disk.hold(room.get_node("Player"), LOOP_SETTINGS.pickup_time + 0.1)
+	quests.relays[1].thrown.emit(room.get_node("Player"))
+	for character in quests.code.substr(1):
+		quests.type_digit(keypad, int(character))
+	watch_signals(client.game_loop)
+	client_world.apply(room_world.state())
+	assert_null(mirror.disk)
+	assert_true(mirror.carries_disk(client.get_node("Player")))
+	assert_true(rules.is_done(LoopRules.Objective.RELAY))
+	assert_true(rules.is_done(LoopRules.Objective.CODE))
+	assert_false(mirror.wants_code())
+	assert_signal_emitted(client.game_loop, "fuses_changed")
+	assert_false(client.game_loop.is_exit_open(), "the fuse and the disk are missing")

@@ -196,7 +196,7 @@ func test_a_client_sees_the_cages_and_its_time_left() -> void:
 	map._online_catch(hunted)
 	map._jail(hunted)
 	var state := net.world.state()
-	assert_eq(state.size(), 8)
+	assert_eq(state.size(), 9)
 	assert_eq(state[6][0], [1, false, ceili(SETTINGS.first_stay)])
 	var client: GameMap = MAP_SCENE.instantiate()
 	NetSession.mode = NetSession.Mode.SOLO  # Shown alone: only its prison is used.

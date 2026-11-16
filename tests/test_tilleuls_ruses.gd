@@ -127,3 +127,21 @@ func test_no_alarm_clock_lies_in_front_of_a_fuse_box() -> void:
 		for slot: Marker3D in slots:
 			var gap := pickup.global_position.distance_to(slot.global_position)
 			assert_gt(gap, 2.0, "%s near %s" % [pickup.name, slot.get_path()])
+
+
+func test_no_hiding_spot_stands_where_a_fuse_box_is_used() -> void:
+	# A closet of the gallery once stood where one uses a fuse box: it
+	# blocked the way and caught the aim (the online test of 4 players got
+	# stuck there, S-018).
+	var map: GameMap = MAP_SCENE.instantiate()
+	add_child_autofree(map)
+	var spots := map.find_children("*", "", true, false).filter(
+		func(node: Node) -> bool: return node is HidingSpot
+	)
+	assert_gt(spots.size(), 0)
+	for box: FuseBox in map.get_fuse_boxes():
+		var at := box.get_approach_point()
+		for spot: Node3D in spots:
+			var gap := Vector2(spot.global_position.x - at.x, spot.global_position.z - at.z)
+			var near := gap.length() < 1.5 and absf(spot.global_position.y - at.y) < 2.0
+			assert_false(near, "%s near %s" % [spot.name, box.get_path()])
