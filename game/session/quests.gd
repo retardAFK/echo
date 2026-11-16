@@ -12,6 +12,8 @@ extends Node
 ## - RELAY: two relay switches in two buildings are armed; both must be
 ##   thrown within relay_window, else the first one clicks back.
 ## GameLoop adds it as a child and tells it what to draw (setup).
+## Online (T-267), the room sends state() in NetWorld; a client's mirror
+## shows it with apply().
 
 ## An objective was done, or something shown changed.
 signal changed
@@ -37,12 +39,18 @@ var disk_carrier: Node
 ## The two relay switches armed this game.
 var relays: Array[RelaySwitch] = []
 
+## The map of the game.
+var map_node: Node
+## Online client: the room decides; this one shows what it says.
+var mirror := false
+
 ## What each keypad got so far: Terminal -> digits typed.
 var _typed := {}
 var _disk_noise_left := 0.0
 ## Seconds left to throw the second relay switch, 0 when none is down.
 var _relay_left := 0.0
-var _map: Node
+## Online client: some hunted carries the floppy disk.
+var _disk_carried := false
 
 
 static func of(node: Node) -> Quests:
@@ -72,7 +80,7 @@ static func offered_by(map: Node, p_settings: LoopSettings) -> Array:
 
 ## Prepares the drawn objectives (rules.objectives) on the map.
 func setup(map: Node, p_rules: LoopRules, rng: RandomNumberGenerator) -> void:
-	_map = map
+	map_node = map
 	rules = p_rules
 	for spot: CodeSpot in _all(map, CodeSpot):
 		spot.show_code("")
@@ -120,7 +128,7 @@ func type_digit(terminal: Terminal, digit: int) -> void:
 			NoiseEvent.Type.BEEP,
 			terminal.global_position + Vector3.UP,
 			settings.beep_range,
-			terminal.user
+			terminal
 		)
 		changed.emit()
 
@@ -142,9 +150,16 @@ func start_download(terminal: Terminal) -> void:
 		_disk_noise_left = 0.0
 
 
-## A hunted carries the floppy disk.
+## A hunted carries the floppy disk (on a client: one of them does).
 func carries_disk(user: Node) -> bool:
+	if mirror:
+		return user != null and _disk_carried
 	return user != null and user == disk_carrier
+
+
+## Someone carries the floppy disk.
+func is_disk_carried() -> bool:
+	return _disk_carried if mirror else disk_carrier != null
 
 
 ## The floppy disk is placed in the transformer.
@@ -162,6 +177,8 @@ func drop_disk(user: Node) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if mirror:
+		return
 	_download(delta)
 	if _relay_left > 0.0:
 		_relay_left -= delta
@@ -198,7 +215,7 @@ func _download(delta: float) -> void:
 func _spawn_disk(at: Vector3) -> void:
 	disk = DISK_SCENE.instantiate()
 	disk.has_fuse = true
-	_map.add_child(disk)
+	map_node.add_child(disk)
 	disk.global_position = at
 	disk.fuse_taken.connect(_on_disk_taken)
 
@@ -231,6 +248,89 @@ func _on_thrown(user: Node, switch: RelaySwitch) -> void:
 func _complete(kind: int) -> void:
 	rules.complete(kind)
 	changed.emit()
+
+
+## Room side: [objectives, those still to do, index of the post-it with the
+## code (-1), the code, index of the download's terminal (-1), the download
+## in percent (-1 before it starts), where the floppy disk lies (null), whether
+## someone carries it, indexes of the relay switches drawn, each one down,
+## [terminal index, digits typed] per keypad in use].
+func state() -> Array:
+	var spots := _all(map_node, CodeSpot)
+	var terminals := _all(map_node, Terminal)
+	var switches := _all(map_node, RelaySwitch)
+	var typed := []
+	for terminal: Terminal in _typed:
+		typed.append([terminals.find(terminal), _typed[terminal]])
+	var ratio := download_ratio()
+	return [
+		rules.objectives.duplicate(),
+		rules.pending.duplicate(),
+		spots.find(code_spot) if code_spot != null else -1,
+		code,
+		terminals.find(download_terminal) if download_terminal != null else -1,
+		roundi(ratio * 100.0) if ratio >= 0.0 else -1,
+		disk.global_position if disk != null else null,
+		disk_carrier != null,
+		relays.map(func(switch: RelaySwitch) -> int: return switches.find(switch)),
+		relays.map(func(switch: RelaySwitch) -> bool: return switch.is_down),
+		typed,
+	]
+
+
+## Client side: shows the room's objectives.
+func apply(values: Array) -> void:
+	if values.size() < 11:
+		return
+	var before := [rules.objectives.duplicate(), rules.pending.duplicate(), _disk_carried]
+	if Array(values[0]) != Array(rules.objectives):
+		rules.set_objectives(values[0])
+	rules.pending.assign(values[1])
+	var spots := _all(map_node, CodeSpot)
+	code = values[3]
+	var spot_at: int = values[2]
+	code_spot = spots[spot_at] if spot_at >= 0 and spot_at < spots.size() else null
+	for spot: CodeSpot in spots:
+		spot.show_code(code if spot == code_spot else "")
+	var terminals := _all(map_node, Terminal)
+	var terminal_at: int = values[4]
+	download_terminal = (
+		terminals[terminal_at] if terminal_at >= 0 and terminal_at < terminals.size() else null
+	)
+	download_done = values[5] / 100.0 * settings.download_time if values[5] >= 0 else -1.0
+	_mirror_disk(values[6])
+	_disk_carried = values[7]
+	var switches := _all(map_node, RelaySwitch)
+	relays.clear()
+	for i in (values[8] as Array).size():
+		var at: int = values[8][i]
+		if at >= 0 and at < switches.size():
+			relays.append(switches[at])
+			switches[at].set_down(values[9][i])
+	for switch: RelaySwitch in switches:
+		switch.armed = switch in relays and not rules.is_done(LoopRules.Objective.RELAY)
+	_typed.clear()
+	for entry: Array in values[10]:
+		if entry[0] >= 0 and entry[0] < terminals.size():
+			_typed[terminals[entry[0]]] = entry[1]
+	if str(before) != str([rules.objectives, rules.pending, _disk_carried]):
+		changed.emit()
+
+
+## Client side: the floppy disk lies where the room says, or nowhere.
+func _mirror_disk(at: Variant) -> void:
+	if at == null:
+		if disk != null:
+			disk.queue_free()
+			disk = null
+		return
+	if disk != null and disk.global_position.is_equal_approx(at):
+		return
+	if disk == null:
+		disk = DISK_SCENE.instantiate()
+		disk.has_fuse = true
+		map_node.add_child(disk)
+	disk.global_position = at
 
 
 static func _switch_places(map: Node) -> Array:

@@ -86,7 +86,7 @@ func _physics_process(delta: float) -> void:
 	if (
 		distance < MIN_DISTANCE
 		or net.worst_error >= _settings.correction_threshold
-		or fuses.size() != _map.game_loop.settings.fuse_count
+		or fuses.size() != _map.game_loop.rules.fuse_count
 	):
 		_fail(result)
 		return
