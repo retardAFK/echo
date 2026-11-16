@@ -308,44 +308,52 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 **Terminé quand** : une partie complète dans la cité avec l'hôpital se joue en solo et en ligne, sous le budget de performance.
 
+Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-hopital.svg`](S-014-hopital/plan-hopital.svg) (16/11/2026). Les tâches T-194 et T-195 (budget) passent avant la greybox, car le build web (59,5 Mo sur 60) et les appels de dessin (294 sur 300) n'ont presque plus de marge.
+
 - [ ] T-180 — Spec S-014
-  - Résultat vérifiable : spec validée (emplacement dans la cité : à la place d'une barre en façade ou en agrandissant la map, taille, nombre d'étages, ailes visitables, ce que devient le scan dans un grand bâtiment, place des fusibles, si la prison de S-018 y déménage)
+  - Résultat vérifiable : spec validée (emplacement dans la cité, taille, nombre d'étages, ailes visitables, ce que devient le scan dans un grand bâtiment, place des fusibles, si la prison de S-018 y déménage)
   - Dépend de : T-168
 - [ ] T-181 — Plan sur papier de l'hôpital
-  - Résultat vérifiable : plan dessiné (comme `plan-map.svg` de S-006), validé par Maxime
+  - Résultat vérifiable : plan dessiné (`plan-hopital.svg`, comme `plan-map.svg` de S-006), validé par Maxime avec la spec
   - Dépend de : T-180
 - [ ] T-182 — Plan et tâches de S-014
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-181
-- [ ] T-183 — Greybox sur plusieurs niveaux
-  - Résultat vérifiable : l'hôpital ajouté au générateur de la cité (`build_tilleuls`), escaliers, navigation des IA entre étages et avec le reste de la cité ; tests GUT
+- [ ] T-194 — Map enregistrée en binaire compressé
+  - Résultat vérifiable : le générateur écrit la map en `.scn` compressé (14 Mo de texte, 1,1 Mo compressé) ; build web sous 50 Mo ; tests GUT et test en ligne inchangés
   - Dépend de : T-182
-- [ ] T-184 — Scan par aile ou par étage
-  - Résultat vérifiable : la règle retenue en T-180 marche pour le monstre joueur et le monstre IA ; tests GUT
+- [ ] T-195 — Visibilité par niveau
+  - Résultat vérifiable : les intérieurs d'un niveau (revêtement, mobilier, portes, lumières) ne sont dessinés que si la caméra est à ce niveau, à côté, ou dehors à moins de 25 m ; pire point de la map actuelle mesuré avant et après ; tests GUT
+  - Dépend de : T-194
+- [ ] T-183 — Greybox sur plusieurs niveaux
+  - Résultat vérifiable : l'hôpital remplace la barre C dans le générateur de la cité (`build_tilleuls`), 4 niveaux, escaliers, escalier de secours, rampe du quai, navigation des IA entre niveaux et avec le reste de la cité, carte des chassés régénérée ; traversée en courant sous 45 s ; tests GUT
+  - Dépend de : T-195
+- [ ] T-184 — Scan par niveau
+  - Résultat vérifiable : le scan n'entend que le niveau visé (Q4), pour le monstre joueur et le monstre IA, et le viseur nomme le niveau ; tests GUT
   - Dépend de : T-183
-- [ ] T-185 — Portes mobiles (faites en S-016, T-232 à T-234 : l'hôpital les réutilise)
+- [x] T-185 — Portes mobiles (faites en S-016, T-232 à T-234 : l'hôpital les réutilise)
   - Résultat vérifiable : ouvrir et fermer une porte fait un bruit de 6 m (section 6.2) et coupe la vue ; le monstre les ouvre ; tests GUT
   - Dépend de : T-183
 - [ ] T-186 — Ventilation et moniteurs
-  - Résultat vérifiable : zones où les petits bruits sont couverts, moniteurs qui bipent et qu'on peut faire sonner ; tests GUT
+  - Résultat vérifiable : zones où les bruits de 4 m ou moins sont couverts (Q5), moniteurs qu'on fait biper (Q6), synchronisés en ligne ; tests GUT
   - Dépend de : T-183
 - [ ] T-187 — Brancards et fauteuils roulants
-  - Résultat vérifiable : objets qu'on pousse pour bloquer ou faire diversion, bruyants ; tests GUT
+  - Résultat vérifiable : brancards qu'on pousse et qui bloquent, fauteuils qu'on lance (Q7), bruyants, synchronisés en ligne ; tests GUT
   - Dépend de : T-183
 - [ ] T-188 — L'hôpital dans la boucle de partie
-  - Résultat vérifiable : emplacements de fusibles, cachettes (lits, placards) et ruses placés dans l'hôpital ; la boucle de la cité (transformateur, tunnel) reste la même
-  - Dépend de : T-184, T-185, T-186, T-187
+  - Résultat vérifiable : 6 emplacements de fusibles, 15 cachettes, terminal, caméra, haut-parleur, relais et code placés dans l'hôpital (Q8, Q9) ; l'ambulance à alarme ; la boucle de la cité (transformateur, tunnel) reste la même
+  - Dépend de : T-184, T-186, T-187
 - [ ] T-189 — Assets de l'hôpital
-  - Résultat vérifiable : kit de couloirs, chambres, carrelage, néons verts, mobilier ; scripts dans `tools/blender/` ; rendus validés par Maxime
+  - Résultat vérifiable : kit de couloirs, chambres, carrelage, néons verts, lits, brancards, fauteuils, moniteurs, tiroirs de morgue, ambulance ; scripts dans `tools/blender/` ; rendus validés par Maxime
   - Dépend de : T-182
 - [ ] T-190 — Habillage et éclairage précalculé
-  - Résultat vérifiable : map habillée, néons qui grésillent, budget de lumières tenu
+  - Résultat vérifiable : hôpital habillé, néons qui grésillent, traces d'évacuation, brouillard intérieur ; budget de lumières et d'appels de dessin tenu
   - Dépend de : T-188, T-189
 - [ ] T-191 — Ambiance sonore de l'hôpital
-  - Résultat vérifiable : ventilation, bourdonnement des néons, bruits lointains ; montrée à Maxime
+  - Résultat vérifiable : ventilation, bourdonnement des néons, bruits lointains qui ne sont pas des bruits de jeu (Q3) ; montrée à Maxime
   - Dépend de : T-190
 - [ ] T-192 — IA à l'hôpital
-  - Résultat vérifiable : monstre IA et proie IA jouent la cité avec l'hôpital sans blocage (simulation de 20 parties) ; la durée moyenne reste dans la cible
+  - Résultat vérifiable : monstre IA (scan par niveau, moniteurs, brancards) et proie IA (leurres de l'hôpital) jouent la cité avec l'hôpital sans blocage (simulation de 20 parties) ; la durée moyenne reste dans la cible ; partie à 4 de la CI verte
   - Dépend de : T-190
 - [ ] T-193 — Vérification finale de S-014
   - Résultat vérifiable : critères cochés, performance mesurée sur la machine de référence, spec livrée
