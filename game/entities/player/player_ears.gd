@@ -10,7 +10,7 @@ const VOICES := 4
 ## Noises whose maker plays its own sound where it is (S-007): the fuse boxes,
 ## the transformer and its siren, a breaking bottle and a ringing alarm clock, a
 ## hiding spot's door (S-008), a door (S-016), a cage, a terminal's keyboard,
-## a smashed camera (S-018). The ears add nothing.
+## a smashed camera, a loudspeaker, a shutter (S-018). The ears add nothing.
 const SELF_VOICED := [
 	NoiseEvent.Type.FUSE,
 	NoiseEvent.Type.REPAIR,
@@ -22,6 +22,8 @@ const SELF_VOICED := [
 	NoiseEvent.Type.CAGE,
 	NoiseEvent.Type.KEYBOARD,
 	NoiseEvent.Type.CAMERA,
+	NoiseEvent.Type.SPEAKER,
+	NoiseEvent.Type.SHUTTER,
 ]
 ## The prison's bell (S-018, Q4), played where it rings.
 const SOUND_BELL := preload("res://assets/audio/interiors/shop_bell.wav")

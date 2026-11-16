@@ -238,6 +238,21 @@ const CAMERAS := [
 	[Vector3(108.0, 3.0, 160.0), Vector3(100.5, 1.0, 153.5), "NET_CAM_TRANSFORMER"],
 	[Vector3(110.0, 3.5, 112.4), Vector3(105.0, 0.0, 128.0), "NET_CAM_TOWER_SOUTH"],
 ]
+## Loudspeakers: where they hang, the yaw of their back to the wall (degrees,
+## their front looks along -Z), the name.
+const SPEAKERS := [
+	[Vector3(141.6, 2.6, 70.0), -90.0, "NET_SPEAKER_STAGE"],
+	[Vector3(115.8, 2.2, 101.0), 90.0, "NET_SPEAKER_TOWER"],
+	[Vector3(66.0, 2.4, 139.1), 0.0, "NET_SPEAKER_ARCADE"],
+]
+## Metal shutters: the bottom middle of the opening, its yaw (90: across a
+## north-south way), width, height, the name.
+const SHUTTERS := [
+	[Vector3(140.0, -3.0, 102.0), 90.0, 4.0, 2.8, "NET_SHUTTER_RAMP"],
+	[Vector3(85.9, 0.0, 148.0), 90.0, 1.7, 3.5, "NET_SHUTTER_GALLERY"],
+]
+const LOUDSPEAKER := preload("res://game/entities/network/loudspeaker.tscn")
+const REMOTE_SHUTTER := preload("res://game/entities/network/remote_shutter.tscn")
 const TERMINAL := preload("res://game/entities/network/terminal.tscn")
 const SECURITY_CAMERA := preload("res://game/entities/network/security_camera.tscn")
 const NETWORK_SCRIPT := preload("res://game/entities/network/city_network.gd")
@@ -870,7 +885,8 @@ func _add_doors() -> void:
 
 
 ## The network of the cité (S-018): its terminals (their desks are navigation
-## sources) and its cameras.
+## sources), its cameras, loudspeakers and metal shutters (not navigation
+## sources: the mesh goes under a shutter, the AIs see it down on their way).
 func _add_network() -> void:
 	var network := Node.new()
 	network.name = "Network"
@@ -908,6 +924,36 @@ func _add_network() -> void:
 		camera.label_key = entry[2]
 		cameras.add_child(camera)
 		camera.owner = _root
+	var speakers := Node3D.new()
+	speakers.name = "Loudspeakers"
+	network.add_child(speakers)
+	speakers.owner = _root
+	for i in SPEAKERS.size():
+		var entry: Array = SPEAKERS[i]
+		var speaker: Node3D = LOUDSPEAKER.instantiate()
+		speaker.name = "Loudspeaker%d" % (i + 1)
+		var at: Vector3 = entry[0]
+		speaker.position = kit.world(at.x, at.z, at.y)
+		speaker.rotation_degrees.y = entry[1]
+		speaker.set("label_key", entry[2])
+		speakers.add_child(speaker)
+		speaker.owner = _root
+	var shutters := Node3D.new()
+	shutters.name = "Shutters"
+	network.add_child(shutters)
+	shutters.owner = _root
+	for i in SHUTTERS.size():
+		var entry: Array = SHUTTERS[i]
+		var shutter: Node3D = REMOTE_SHUTTER.instantiate()
+		shutter.name = "Shutter%d" % (i + 1)
+		var at: Vector3 = entry[0]
+		shutter.position = kit.world(at.x, at.z, at.y)
+		shutter.rotation_degrees.y = entry[1]
+		shutter.set("width", entry[2])
+		shutter.set("height", entry[3])
+		shutter.set("label_key", entry[4])
+		shutters.add_child(shutter)
+		shutter.owner = _root
 
 
 ## The prison (S-018, Q1): a Cage in each prison cage's grille. Not a

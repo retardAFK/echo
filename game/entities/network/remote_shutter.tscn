@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/network/remote_shutter.gd" id="1_shutter"]
+[ext_resource type="Resource" path="res://game/data/network_settings.tres" id="2_settings"]
+
+[sub_resource type="StandardMaterial3D" id="Metal"]
+albedo_color = Color(0.42, 0.43, 0.42, 1)
+metallic = 0.6
+roughness = 0.5
+
+[node name="RemoteShutter" type="Node3D"]
+script = ExtResource("1_shutter")
+settings = ExtResource("2_settings")
+
+[node name="Body" type="StaticBody3D" parent="."]
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
+disabled = true
+
+[node name="Curtain" type="MeshInstance3D" parent="."]
+material_override = SubResource("Metal")
+
+[node name="Roll" type="MeshInstance3D" parent="."]
+material_override = SubResource("Metal")
+
+[node name="Sound" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+max_distance = 15.0

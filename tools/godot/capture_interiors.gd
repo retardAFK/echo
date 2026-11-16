@@ -42,7 +42,11 @@ const VIEWS := [
 	["cam_galerie", Vector3(86.5, 2.8, 135.5), Vector3(50.0, 0.5, 137.0)],
 	["cam_transfo", Vector3(108.0, 2.8, 160.0), Vector3(100.5, 1.0, 153.5)],
 	["cam_sud_tour", Vector3(110.0, 3.3, 112.4), Vector3(105.0, 0.0, 128.0)],
+	["rideau_rampe", Vector3(146.0, -1.4, 102.0), Vector3(140.0, -1.6, 102.0)],
+	["rideau_galerie", Vector3(80.0, 1.6, 148.0), Vector3(86.0, 1.4, 148.0)],
 ]
+## Views whose name starts with this show the metal shutters down (S-018).
+const SHUTTER_PREFIX := "rideau_"
 ## Views whose name starts with this are shown as a security camera shows
 ## them (S-018): green and coarse.
 const FEED_PREFIX := "cam_"
@@ -80,6 +84,10 @@ func _ready() -> void:
 		target.y = view[2].y
 		camera.look_at_from_position(eye, target)
 		feed.visible = String(view[0]).begins_with(FEED_PREFIX)
+		if String(view[0]).begins_with(SHUTTER_PREFIX):
+			for shutter in get_tree().get_nodes_in_group(RemoteShutter.GROUP):
+				if not shutter.is_down():
+					shutter.lower()
 		for i in SETTLE_FRAMES:
 			await get_tree().process_frame
 		var draws := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
