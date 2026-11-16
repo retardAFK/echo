@@ -1,7 +1,7 @@
 extends GutTest
 ## The visitable buildings of the cité des Tilleuls (spec S-006, Q3 to Q6, T-040).
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const ORIGIN := Vector3(110, 0, 110)
 const VISITABLE := ["Tower", "SocialCentre", "Gallery", "CarPark"]
 const SCANNABLE := ["Tower", "SocialCentre", "Gallery", "CarPark", "Garages"]

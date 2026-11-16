@@ -3,7 +3,7 @@ extends GutTest
 ## four ways out (ramp, south-east stairs, new north stairs, the cellars),
 ## the technical room, spots in the wrecks and in a cellar cage.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const ORIGIN := Vector3(110, 0, 110)
 const REACH := 1.0
 

@@ -3,7 +3,7 @@ extends GutTest
 ## (S-016, T-244): the map has no occlusion culling, and behind the walls they
 ## cost about a hundred draw calls (constitution 2.2: 300 at worst).
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 
 var _map: GameMap
 

@@ -2,7 +2,7 @@ extends GutTest
 ## Online game loop and ruses (S-010, T-099): the room's map and loop, copied
 ## on the clients; a client's world only mirrors the room's.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const PLAYER_SCENE := preload("res://game/entities/player/player.tscn")
 const END_SCENE := preload("res://game/ui/end_screen.tscn")
 

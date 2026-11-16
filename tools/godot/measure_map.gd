@@ -7,7 +7,7 @@ extends Node
 ##     tools/godot/measure_map.tscn -- [out_dir]
 ## Screenshots go to out_dir (default: user://measure).
 
-const MAP_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
+const MAP_PATH := "res://game/maps/tilleuls/tilleuls.scn"
 ## Frames to wait at each viewpoint before measuring.
 const SETTLE_FRAMES := 8
 ## Lights closer than this, in view and not behind a wall, count as visible

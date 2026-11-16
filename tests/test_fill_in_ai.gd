@@ -4,7 +4,7 @@ extends GutTest
 ## fuses a captured hunted dropped; the AI monster plays when the monster
 ## seat is empty.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const LOOP_SETTINGS := preload("res://game/data/loop_settings.tres")
 const PRISON_SETTINGS := preload("res://game/data/prison_settings.tres")
 

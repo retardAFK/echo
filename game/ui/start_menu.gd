@@ -8,7 +8,7 @@ extends Control
 
 signal role_chosen(role: GameSession.Role)
 
-const MAP_SCENE := "res://game/maps/tilleuls/tilleuls.tscn"
+const MAP_SCENE := "res://game/maps/tilleuls/tilleuls.scn"
 const BENCH_SCENE := "res://game/bench/bench.tscn"
 const LOBBY_SCENE := "res://game/ui/lobby_menu.tscn"
 const ROLES := {

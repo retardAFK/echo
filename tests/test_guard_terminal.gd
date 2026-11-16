@@ -4,7 +4,7 @@ extends GutTest
 ## occupied cage opens with the bell. Getting up or the monster switching it
 ## off starts over.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const PRISON_SETTINGS := preload("res://game/data/prison_settings.tres")
 
 var _heard := []

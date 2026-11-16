@@ -3,7 +3,7 @@ extends GutTest
 ## centre, gallery and car park furnished, never on a hiding spot, a fuse box
 ## or a pickup, and drawn only near the camera.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 ## Pieces that only show: the stage curtain, the lift doors on their shaft.
 const GHOSTS := ["StageCurtain", "LiftDoors"]
 

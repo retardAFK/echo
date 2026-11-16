@@ -105,7 +105,7 @@ func test_start_points_are_far_apart() -> void:
 
 
 func test_the_cite_has_three_far_apart_start_points() -> void:
-	var map: GameMap = load("res://game/maps/tilleuls/tilleuls.tscn").instantiate()
+	var map: GameMap = load("res://game/maps/tilleuls/tilleuls.scn").instantiate()
 	add_child_autofree(map)
 	var chosen := GameMap.far_apart(
 		map.get_node("PlayerSpawns").get_children(),

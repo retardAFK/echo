@@ -4,7 +4,7 @@ extends GutTest
 ## lined rooms in one material, the decor of each storey in one draw call drawn
 ## near it only, a few live lamps baked like the street lights.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const MapKit := preload("res://tools/godot/map_kit.gd")
 const LINING := preload("res://game/fx/materials/interior_lining.tres")
 const InteriorLining := preload("res://tools/godot/interior_lining.gd")

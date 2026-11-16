@@ -6,7 +6,7 @@ extends Node
 ##   xvfb-run -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 \
 ##     tools/godot/capture_hud.tscn -- <out_dir> [monster]
 
-const MAP_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
+const MAP_PATH := "res://game/maps/tilleuls/tilleuls.scn"
 const ORIGIN := Vector3(110, 0, 110)
 const SETTLE_FRAMES := 10
 

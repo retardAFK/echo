@@ -4,7 +4,7 @@ extends GutTest
 const CAR_SCENE := preload("res://game/entities/car_alarm/car_alarm.tscn")
 const PLAYER_SCENE := preload("res://game/entities/player/player.tscn")
 const PROMPT_SCENE := preload("res://game/ui/interact_prompt.tscn")
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 
 var _car: CarAlarm
 var _alarms: Array[NoiseEvent] = []

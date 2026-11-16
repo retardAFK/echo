@@ -1,7 +1,7 @@
 extends GutTest
 ## Navigation and AI across the cité des Tilleuls (spec S-006, T-041).
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const PLAYER_SETTINGS := preload("res://game/data/player_settings.tres")
 const ORIGIN := Vector3(110, 0, 110)
 ## Spec S-006: running across the map takes less than this.

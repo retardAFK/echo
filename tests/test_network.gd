@@ -4,7 +4,7 @@ extends GutTest
 ## terminal off and smashes a camera; a hunted in a cage goes through the
 ## cameras; online, a hunted also sees what its camera sees.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const PLAYER_SCENE := preload("res://game/entities/player/player.tscn")
 const TERMINAL_SCENE := preload("res://game/entities/network/terminal.tscn")
 const CAMERA_SCENE := preload("res://game/entities/network/security_camera.tscn")

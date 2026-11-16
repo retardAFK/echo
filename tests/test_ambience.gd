@@ -1,7 +1,7 @@
 extends GutTest
 ## Ambient sounds of the cité des Tilleuls (spec S-006, T-050).
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const ORIGIN := Vector3(110, 0, 110)
 
 var _map: Node3D

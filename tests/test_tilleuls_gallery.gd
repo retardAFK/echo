@@ -3,7 +3,7 @@ extends GutTest
 ## back, a delivery corridor open at both ends, a shutter to roll up, a bell,
 ## steep metal stairs up to the roof.
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const ORIGIN := Vector3(110, 0, 110)
 const REACH := 1.0
 const PLACES := {

@@ -5,7 +5,7 @@ extends Node
 ##   xvfb-run -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 \
 ##     tools/godot/capture_interiors.tscn -- [out_dir] [view,view...]
 
-const MAP_PATH := "res://game/maps/tilleuls/tilleuls.tscn"
+const MAP_PATH := "res://game/maps/tilleuls/tilleuls.scn"
 const SETTLE_FRAMES := 8
 const VISUAL_SETTINGS := preload("res://game/data/visual_settings.tres")
 const ORIGIN := Vector3(110, 0, 110)

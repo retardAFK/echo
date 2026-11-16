@@ -23,7 +23,7 @@ extends Node
 const TIMEOUT := 420.0
 const LATENCY_MS := 75
 const PLAYERS := 4
-const MAP := "res://game/maps/tilleuls/tilleuls.tscn"
+const MAP := "res://game/maps/tilleuls/tilleuls.scn"
 ## Close enough to a point of the path to aim at the next one, in meters.
 const WAYPOINT_REACH := 0.6
 ## Seconds between two paths, and without progress before trying around.

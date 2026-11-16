@@ -1,7 +1,7 @@
 extends GutTest
 ## The hunted's map (spec S-017, T-251 and T-252).
 
-const TILLEULS := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const TILLEULS := preload("res://game/maps/tilleuls/tilleuls.scn")
 const GREYBOX := preload("res://game/maps/greybox_test.tscn")
 const SCREEN_SCENE := preload("res://game/ui/map_screen.tscn")
 const PLAN := preload("res://game/maps/tilleuls/tilleuls_plan.tres")

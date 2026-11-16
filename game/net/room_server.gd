@@ -11,7 +11,7 @@ const LOAD_REPORT_TIME := 30.0
 const WARMUP_FRAMES := 120
 
 @export var settings: NetSettings = preload("res://game/data/net_settings.tres")
-@export var map_scene: PackedScene = preload("res://game/maps/tilleuls/tilleuls.tscn")
+@export var map_scene: PackedScene = preload("res://game/maps/tilleuls/tilleuls.scn")
 
 var _link: RoomLink
 var _frames := 0

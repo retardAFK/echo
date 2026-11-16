@@ -1,7 +1,7 @@
 extends GutTest
 ## Transformer, siren and exit of the game loop (spec S-007, T-055).
 
-const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
+const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 
 var _map: GameMap
 var _loop: GameLoop
