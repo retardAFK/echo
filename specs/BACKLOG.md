@@ -449,9 +449,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
   - Résultat vérifiable : ouvre toutes les cages en 10 s, sonnerie à la prison ; tests GUT
   - Dépend de : T-263
   - Fait le 16/11/2026 : ligne « Ouvrir les cages » du terminal de la pharmacie ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
-- [ ] T-265 — Haut-parleurs et rideaux métalliques
+- [x] T-265 — Haut-parleurs et rideaux métalliques
   - Résultat vérifiable : leurres à distance (une fois chacun) et rideaux baissés 20 s (recharge 60 s), selon la spec ; le monstre éteint les terminaux ; tests GUT
   - Dépend de : T-263
+  - Fait le 16/11/2026 : 3 haut-parleurs et 2 rideaux dans la cité, au menu des terminaux ; voir le compte rendu de [`tasks.md`](S-018-prison-et-reseau/tasks.md)
 - [ ] T-266 — Quêtes tirées au sort
   - Résultat vérifiable : 3 objectifs par partie parmi fusible, code, téléchargement et relais ; liste sur l'écran de la carte (Tab), sans position ; solo et en ligne ; tests GUT
   - Dépend de : T-263

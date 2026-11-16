@@ -118,6 +118,17 @@ func _line_text(network: CityNetwork, i: int) -> String:
 	var entry: Array = _entries[i]
 	var text := "%d  %s" % [i + 1, tr("HUD_TERMINAL_CAMERA") % tr(entry[2])]
 	match entry[0]:
+		CityNetwork.Entry.SPEAKER:
+			text = "%d  %s" % [i + 1, tr("HUD_TERMINAL_SPEAKER") % tr(entry[2])]
+			if network.speakers[entry[1]].used:
+				text += "  " + tr("HUD_TERMINAL_USED")
+		CityNetwork.Entry.SHUTTER:
+			text = "%d  %s" % [i + 1, tr("HUD_TERMINAL_SHUTTER") % tr(entry[2])]
+			var shutter := network.shutters[entry[1]]
+			if shutter.is_down():
+				text += "  " + tr("HUD_TERMINAL_DOWN")
+			elif not shutter.is_ready():
+				text += "  " + tr("HUD_TERMINAL_RECHARGE") % ceili(shutter.recharge_left)
 		CityNetwork.Entry.OPEN_CAGES:
 			text = "%d  %s" % [i + 1, tr(entry[2])]
 			var progress := player.terminal.progress

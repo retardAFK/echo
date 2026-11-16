@@ -105,7 +105,7 @@ func apply(values: Array) -> void:
 
 ## Client side: the sound of a noise made in the room by something of the map
 ## that plays its own sound (a fuse box, the transformer, a hiding spot, a
-## terminal's keyboard, a smashed camera).
+## terminal's keyboard, a smashed camera, a loudspeaker, a shutter).
 func voice(type: NoiseEvent.Type, at: Vector3) -> void:
 	var candidates: Array = []
 	match type:
@@ -119,6 +119,10 @@ func voice(type: NoiseEvent.Type, at: Vector3) -> void:
 			candidates = network.terminals if network != null else []
 		NoiseEvent.Type.CAMERA:
 			candidates = network.cameras if network != null else []
+		NoiseEvent.Type.SPEAKER:
+			candidates = network.speakers if network != null else []
+		NoiseEvent.Type.SHUTTER:
+			candidates = network.shutters if network != null else []
 	var best: Node3D = null
 	var best_distance := VOICE_REACH
 	for node: Node3D in candidates:

@@ -1,20 +1,22 @@
 class_name CityNetwork
 extends Node
 ## The network of the cité (spec S-018, part B): its terminals and its
-## security cameras, and the guard's terminal that opens the prison (Q4)
-## (loudspeakers, shutters and the objectives join it with T-265 and T-266).
+## security cameras, its loudspeakers and metal shutters, and the guard's
+## terminal that opens the prison (Q4) (the objectives join it with T-266).
 ## It lists them in a fixed order, the same on the room and on every client,
 ## says what a terminal's menu offers, carries out what a hunted picks there
 ## (a PICK action), and keeps who watches which camera.
 ## Online, the room sends state() in NetWorld; a client shows it with apply().
 
 ## What a line of a terminal's menu does.
-enum Entry { CAMERA, OPEN_CAGES }
+enum Entry { CAMERA, SPEAKER, SHUTTER, OPEN_CAGES }
 
 const GROUP := &"city_network"
 
 var terminals: Array[Terminal] = []
 var cameras: Array[SecurityCamera] = []
+var speakers: Array[Loudspeaker] = []
+var shutters: Array[RemoteShutter] = []
 ## The prison the guard's terminal opens, or null.
 var prison: Prison
 ## Online client: the room decides.
@@ -23,6 +25,10 @@ var mirror := false:
 		mirror = value
 		for terminal in terminals:
 			terminal.mirror = value
+		for speaker in speakers:
+			speaker.mirror = value
+		for shutter in shutters:
+			shutter.mirror = value
 
 ## Who watches which camera: watcher -> SecurityCamera.
 var _watching := {}
@@ -45,6 +51,10 @@ func _ready() -> void:
 			(node as Terminal).left.connect(_on_left)
 		elif node is SecurityCamera:
 			cameras.append(node)
+		elif node is Loudspeaker:
+			speakers.append(node)
+		elif node is RemoteShutter:
+			shutters.append(node)
 		elif node is Prison:
 			prison = node
 
@@ -55,6 +65,10 @@ func entries_for(terminal: Terminal) -> Array:
 	var entries := []
 	for i in cameras.size():
 		entries.append([Entry.CAMERA, i, cameras[i].label_key])
+	for i in speakers.size():
+		entries.append([Entry.SPEAKER, i, speakers[i].label_key])
+	for i in shutters.size():
+		entries.append([Entry.SHUTTER, i, shutters[i].label_key])
 	if terminal != null and terminal.kind == Terminal.Kind.GUARD and prison != null:
 		entries.append([Entry.OPEN_CAGES, 0, "HUD_TERMINAL_OPEN_CAGES"])
 	return entries
@@ -73,6 +87,10 @@ func pick(user: Node3D, n: int) -> void:
 		Entry.CAMERA:
 			var camera := cameras[entry[1]]
 			watch(user, null if watched_by(user) == camera else camera)
+		Entry.SPEAKER:
+			speakers[entry[1]].trigger()
+		Entry.SHUTTER:
+			shutters[entry[1]].lower()
 		Entry.OPEN_CAGES:
 			if has_prisoners() and not _opening.has(terminal):
 				_opening[terminal] = 0.0
@@ -188,7 +206,8 @@ func _count(camera: SecurityCamera) -> void:
 
 
 ## Room side: [[off, in use, progress in percent] per terminal, [watched,
-## broken] per camera].
+## broken] per camera, used per loudspeaker, [down, whole seconds before it
+## is ready] per shutter].
 func state() -> Array:
 	var used := []
 	for terminal in terminals:
@@ -196,7 +215,13 @@ func state() -> Array:
 	var seen := []
 	for camera in cameras:
 		seen.append([camera.is_watched(), camera.broken])
-	return [used, seen]
+	var blared := []
+	for speaker in speakers:
+		blared.append(speaker.used)
+	var lowered := []
+	for shutter in shutters:
+		lowered.append([shutter.is_down(), ceili(shutter.recharge_left)])
+	return [used, seen, blared, lowered]
 
 
 ## Client side: shows what the room says.
@@ -211,3 +236,11 @@ func apply(values: Array) -> void:
 	var seen: Array = values[1]
 	for i in mini(seen.size(), cameras.size()):
 		cameras[i].mirror_state(seen[i][0], seen[i][1])
+	if values.size() < 4:
+		return
+	var blared: Array = values[2]
+	for i in mini(blared.size(), speakers.size()):
+		speakers[i].mirror_state(blared[i])
+	var lowered: Array = values[3]
+	for i in mini(lowered.size(), shutters.size()):
+		shutters[i].mirror_state(lowered[i][0], lowered[i][1])

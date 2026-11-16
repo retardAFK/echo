@@ -140,6 +140,16 @@ HUD_TERMINAL_CAMERA,Caméra : %s
 HUD_TERMINAL_BROKEN,(hors service)
 HUD_TERMINAL_OPEN_CAGES,Ouvrir les cages de la prison
 HUD_TERMINAL_NOBODY,(personne en prison)
+HUD_TERMINAL_SPEAKER,Haut-parleur : %s
+HUD_TERMINAL_SHUTTER,Rideau : %s
+HUD_TERMINAL_USED,(déjà utilisé)
+HUD_TERMINAL_DOWN,(baissé)
+HUD_TERMINAL_RECHARGE,(prêt dans %d s)
+NET_SPEAKER_STAGE,sono de la scène du centre social
+NET_SPEAKER_TOWER,alarme incendie du hall de la tour
+NET_SPEAKER_ARCADE,interphone de l'arcade de la galerie
+NET_SHUTTER_RAMP,entrée du parking par la rampe
+NET_SHUTTER_GALLERY,couloir de livraison de la galerie
 HUD_CAMERA_CAPTION,CAM %d · %s
 NET_CAM_CELLARS,couloir des caves
 NET_CAM_CAR_PARK,parking
