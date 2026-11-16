@@ -6,6 +6,7 @@ extends GutTest
 const PLAYER_SCENE := preload("res://game/entities/player/player.tscn")
 const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
 const LOOP_SETTINGS := preload("res://game/data/loop_settings.tres")
+const PRISON_SETTINGS := preload("res://game/data/prison_settings.tres")
 
 var _heard := []
 
@@ -293,13 +294,21 @@ func test_online_room_capture_rule_on_the_cite() -> void:
 	assert_eq(map.game_loop.drops.size(), 1, "its fuse at its feet")
 	assert_does_not_have(monster.get_targets(), hunted, "the AI monster leaves it")
 	assert_has(net.sent_events, [11, [NetGame.Event.CAUGHT, 1, CaptureState.State.CAPTURED]])
-	teammate.global_position = hunted.global_position + Vector3(0.5, 0, 0)
-	hunted.capture.hold(teammate, teammate.settings.rescue_time + 0.1)
+	# In prison (S-018): freed at the grille of its cage.
+	map._jail(hunted)
+	var cage := hunted.capture.get_cage()
+	assert_not_null(cage)
+	teammate.global_position = cage.outside_point()
+	hunted.capture.hold(teammate, PRISON_SETTINGS.free_time + 0.1)
 	assert_false(hunted.held)
+	assert_true(cage.is_open)
 	assert_has(monster.get_targets(), hunted, "chased again")
 	assert_has(net.sent_events, [12, [NetGame.Event.CAUGHT, 1, CaptureState.State.FREE]])
 	map._online_catch(hunted)
-	assert_eq(hunted.capture.state, CaptureState.State.OUT)
+	assert_eq(hunted.capture.state, CaptureState.State.CAPTURED, "a second stay")
+	hunted.capture.set_free()
+	map._online_catch(hunted)
+	assert_eq(hunted.capture.state, CaptureState.State.OUT, "out the third time")
 	assert_eq(hunted.process_mode, Node.PROCESS_MODE_DISABLED)
 	assert_eq(map.game_loop.free_count(), 2, "its teammate and the AI prey of seat 3")
 	assert_false(map.game_loop.is_over)

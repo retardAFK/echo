@@ -6,6 +6,7 @@ extends GutTest
 
 const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.tscn")
 const LOOP_SETTINGS := preload("res://game/data/loop_settings.tres")
+const PRISON_SETTINGS := preload("res://game/data/prison_settings.tres")
 
 
 func after_each() -> void:
@@ -101,12 +102,15 @@ func test_an_ai_prey_frees_a_captured_teammate_when_it_is_safe() -> void:
 	var prey: Prey = net.ai_hunted[2]
 	_freeze(net.ai_hunted[3])
 	await wait_physics_frames(3)  # The navigation map is ready.
-	captured.global_position = _open_point(prey, 6.0)
 	map._online_catch(captured)
-	assert_true(captured.held)
-	await wait_physics_frames(int((captured.settings.rescue_time + 6.0) * 60))
+	map._jail(captured)  # Without waiting for the black screen (S-018).
+	var cage := captured.capture.get_cage()
+	assert_not_null(cage, "in a cage of the prison")
+	prey.global_position = cage.outside_point() + Vector3(6, 0, 0)  # Along the corridor.
+	await wait_physics_frames(int((PRISON_SETTINGS.free_time + 6.0) * 60))
 	assert_false(captured.held, "freed by the AI prey")
 	assert_eq(captured.capture.state, CaptureState.State.FREE)
+	assert_true(cage.is_open)
 	assert_null(prey._errand, "then back to its goal")
 
 
@@ -119,9 +123,11 @@ func test_an_ai_prey_stays_away_when_the_monster_is_near() -> void:
 	var prey: Prey = net.ai_hunted[2]
 	_freeze(net.ai_hunted[3])
 	await wait_physics_frames(3)
-	captured.global_position = _open_point(prey, 30.0)
-	monster.global_position = captured.global_position + Vector3(0, 0, 5)
 	map._online_catch(captured)
+	map._jail(captured)
+	var cage := captured.capture.get_cage()
+	prey.global_position = cage.outside_point() + Vector3(10, 0, 0)
+	monster.global_position = cage.outside_point() + Vector3(-2, 0, 0)
 	await wait_physics_frames(60)
 	assert_null(prey._errand, "a trap: it does not go")
 	assert_true(captured.held)

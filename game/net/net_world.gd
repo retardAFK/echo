@@ -2,8 +2,9 @@ class_name NetWorld
 extends RefCounted
 ## The things of a map that change during an online game (S-010, T-099): fuse
 ## boxes, pickups (bottles and alarm clocks), car alarms, hiding spots, doors
-## (S-016) and the game loop. Both sides list them in the same order from the same map, before
-## anything is drawn or taken, so an index means the same thing everywhere.
+## (S-016), the prison (S-018) and the game loop. Both sides list them in the
+## same order from the same map, before anything is drawn or taken, so an
+## index means the same thing everywhere.
 ## The room sends state() when it changes; a client shows it with apply(). What
 ## a hunted could not know is never in it: who hides where stays in the room.
 
@@ -17,6 +18,7 @@ var alarms: Array[CarAlarm] = []
 var spots: Array[HidingSpot] = []
 var doors: Array[Door] = []
 var transformer: Transformer
+var prison: Prison
 var game_loop: GameLoop
 
 
@@ -34,11 +36,13 @@ func _init(map: Node) -> void:
 			doors.append(node)
 		elif node is Transformer:
 			transformer = node
+		elif node is Prison:
+			prison = node
 
 
 ## Room side: [fuse in each box, each pickup still there, state of each car
 ## alarm, values of the game loop, where the dropped fuses lie (T-107),
-## whether each door is open (S-016)].
+## whether each door is open (S-016), the cages of the prison (S-018)].
 func state() -> Array:
 	var fuses := []
 	for box in boxes:
@@ -59,6 +63,7 @@ func state() -> Array:
 		game_loop.mirror_values() if game_loop != null else [],
 		game_loop.drop_positions() if game_loop != null else [],
 		open,
+		prison.state() if prison != null else [],
 	]
 
 
@@ -87,6 +92,8 @@ func apply(values: Array) -> void:
 		var open: Array = values[5]
 		for i in mini(open.size(), doors.size()):
 			doors[i].mirror(open[i])  # Swings with its sound, like in the room.
+	if values.size() >= 7 and prison != null:
+		prison.apply(values[6])
 
 
 ## Client side: the sound of a noise made in the room by something of the map

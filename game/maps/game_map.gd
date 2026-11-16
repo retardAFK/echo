@@ -65,6 +65,8 @@ var _player_path := ""
 ## Client side, hunted: what its screen shows of its own player, hidden once
 ## it watches a teammate (T-107).
 var _own_huds: Array[Node] = []
+## Online (S-018): where the captured hunted wait, null on a map without one.
+var _prison: Prison
 
 @onready var _player: Player = $Player
 @onready var _monster: Monster = $Monster
@@ -174,6 +176,11 @@ func _setup_online() -> void:
 	net.is_room = NetSession.mode == NetSession.Mode.ROOM
 	net.buildings = get_buildings()
 	_net = net
+	_prison = Prison.of(self)
+	if _prison != null:
+		_prison.mirror = not net.is_room
+		if net.is_room:
+			_prison.timed_out.connect(_on_prison_timed_out)
 	net.world = NetWorld.new(self)  # Before the loop draws or takes anything.
 	if net.is_room:
 		_setup_online_room(net)
@@ -266,6 +273,7 @@ func _new_player(net: NetGame, place: int, seat: int) -> Player:
 ## Room side: the capture rule of a hunted (T-107).
 func _give_capture(one: Node3D, like: CaptureState = null) -> CaptureState:
 	var capture := CaptureState.new()
+	capture.prison = _prison
 	if like != null:
 		capture.copy_from(like)
 	one.add_child(capture)
@@ -356,6 +364,8 @@ func _swap_hunted(old: Node3D, new: Node3D) -> void:
 		if capture.is_free():
 			_monster.add_target(new)
 	_net.replace_watched(old, new)
+	if _prison != null and _prison.cage_of(old) != null:
+		_prison.cage_of(old).occupant = new  # Waits in the same cage.
 	if capture.state == CaptureState.State.OUT:
 		new.process_mode = Node.PROCESS_MODE_DISABLED
 		new.global_position = Vector3(0, -60, 0)
@@ -446,6 +456,11 @@ func _setup_online_client(net: NetGame) -> void:
 		add_child(highlights)
 		_add_map_screen()
 		_own_huds.assign([carry, mask, highlights, _gauge])
+		if _prison != null:
+			var prison_hud := PrisonHud.new()
+			prison_hud.prison = _prison
+			add_child(prison_hud)
+			_own_huds.append(prison_hud)
 		if map_screen != null:
 			_own_huds.append(map_screen)
 		_own_huds.append_array(_player.find_children("*", "CanvasLayer", true, false))
@@ -486,12 +501,21 @@ func _on_capture_changed(state: CaptureState.State, player: Node3D) -> void:
 				_monster.forget(player)
 				_monster.hold_still(_monster.settings.catch_show_time)  # T-127.
 				_monster.walk_away(player.global_position)
+			if _prison != null:
+				# To a cage once the black screen is up (S-018, Q2).
+				get_tree().create_timer(_prison.settings.jail_delay, false).timeout.connect(
+					_jail.bind(player)
+				)
 		CaptureState.State.FREE:
 			if game_loop != null:
 				game_loop.set_captured(player, false)
 			if _monster != null:
 				_monster.add_target(player)
+			if _prison != null:
+				_prison.release(player, true)
 		CaptureState.State.OUT:
+			if _prison != null:
+				_prison.release(player, false)
 			if game_loop != null:
 				game_loop.drop_fuses(player)
 				game_loop.hunted_out(player)
@@ -502,6 +526,25 @@ func _on_capture_changed(state: CaptureState.State, player: Node3D) -> void:
 			_net.spectate(player)
 			player.process_mode = Node.PROCESS_MODE_DISABLED
 			player.global_position = Vector3(0, -60, 0)
+
+
+## Room side (S-018, Q2): a captured hunted goes to a free cage, if it is
+## still captured and not in one yet.
+func _jail(player: Node3D) -> void:
+	if not is_instance_valid(player) or _prison == null:
+		return
+	var capture: CaptureState = player.get("capture")
+	if capture == null or capture.state != CaptureState.State.CAPTURED:
+		return
+	if _prison.cage_of(player) == null:
+		_prison.jail(player, _net.seat_of(player), capture.catches)
+
+
+## Room side (S-018, Q5): a stay in prison is over: out of the game.
+func _on_prison_timed_out(hunted: Node3D) -> void:
+	var capture: CaptureState = hunted.get("capture")
+	if capture != null:
+		capture.time_out()
 
 
 ## Client side (T-102): the connection to the room broke. It connects again
