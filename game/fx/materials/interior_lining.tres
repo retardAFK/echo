@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" path="res://assets/textures/interior_atlas.png" id="1_tex"]
 
 [resource]
-metadata/atlas_grid = Vector2(4, 3)
+metadata/atlas_grid = Vector2(4, 4)
 albedo_color = Color(1, 1, 1, 1)
 albedo_texture = ExtResource("1_tex")
 texture_filter = 0

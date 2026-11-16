@@ -202,4 +202,5 @@ func mirror_state(values: Array) -> void:
 
 func _show_tipped() -> void:
 	_model.rotation.z = PI / 2.0
+	_model.position.y = 0.35  # On its side, not through the floor.
 	_model.position.y = 0.45

@@ -38,6 +38,13 @@ const VIEWS := [
 	["cam_parking", Vector3(179.5, -0.8, 116.5), Vector3(155.0, -3.0, 103.0)],
 	["cam_rampe", Vector3(127.0, 2.4, 99.6), Vector3(138.0, -2.0, 102.0)],
 	["cam_hall", Vector3(115.5, 2.4, 111.5), Vector3(104.0, 1.0, 96.0)],
+	# The hospital (S-014).
+	["hopital_couloir_rdc", Vector3(21, 1.6, 64), Vector3(21, 1.3, 120)],
+	["hopital_hall", Vector3(30, 1.6, 98), Vector3(22, 1.2, 92)],
+	["hopital_morgue", Vector3(18, -1.4, 72), Vector3(11, -2.2, 58)],
+	["hopital_couloir_1er", Vector3(21, 4.6, 126), Vector3(21, 4.3, 70)],
+	["hopital_chambre", Vector3(19, 4.6, 70), Vector3(11, 3.8, 75)],
+	["hopital_bloc", Vector3(18.5, 7.6, 86), Vector3(11, 6.8, 94)],
 	["cam_centre", Vector3(159.5, 3.2, 60.5), Vector3(145.0, 0.5, 78.0)],
 	["cam_galerie", Vector3(86.5, 2.8, 135.5), Vector3(50.0, 0.5, 137.0)],
 	["cam_transfo", Vector3(108.0, 2.8, 160.0), Vector3(100.5, 1.0, 153.5)],

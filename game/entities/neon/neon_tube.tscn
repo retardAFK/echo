@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/neon/neon_tube.gd" id="1_neon"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_lit"]
+shading_mode = 0
+albedo_color = Color(0.55, 1, 0.7, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_dead"]
+albedo_color = Color(0.33, 0.34, 0.32, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_tube"]
+size = Vector3(1.2, 0.04, 0.08)
+
+[node name="NeonTube" type="Node3D"]
+script = ExtResource("1_neon")
+lit_material = SubResource("Mat_lit")
+dead_material = SubResource("Mat_dead")
+
+[node name="Tube" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.06, 0)
+mesh = SubResource("Mesh_tube")
+
+[node name="Light" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
+light_color = Color(0.55, 1, 0.7, 1)
+light_energy = 1.4
+omni_range = 6.0

@@ -13,6 +13,7 @@ extends RefCounted
 ## Called from build_tilleuls.gd with the builder, whose constants give the plan.
 
 const MapKit := preload("res://tools/godot/map_kit.gd")
+const Hospital := preload("res://tools/godot/hospital.gd")
 const LINING := preload("res://game/fx/materials/interior_lining.tres")
 const MAT_CONCRETE := preload("res://game/fx/materials/concrete_wall.tres")
 const MAT_OBSTACLE := preload("res://game/fx/materials/concrete_obstacle.tres")
@@ -89,6 +90,14 @@ const BUNTING := [
 	Color(0.45, 0.1, 0.1), Color(0.12, 0.2, 0.42), Color(0.42, 0.4, 0.12), Color(0.12, 0.32, 0.18)
 ]
 
+## The hospital's corridors: decor meshes per level, tube spacing, the share
+## of tubes still alive.
+const HOSPITAL_STRETCHES := 3
+const HOSPITAL_TUBE_STEP := 6.0
+const HOSPITAL_ALIVE := 0.3
+## Far enough to see the next stretch's tubes down the corridor, into the fog.
+const HOSPITAL_DECOR_DISTANCE := 32.0
+
 ## Atlas tiles, in the order of make_interior_atlas.gd.
 enum Tile {
 	HALL,
@@ -103,6 +112,10 @@ enum Tile {
 	LINO,
 	PARQUET,
 	CONCRETE,
+	WARD_CORRIDOR,
+	FAIENCE,
+	WARD,
+	WARD_LINO,
 }
 
 var _constants: Dictionary
@@ -132,6 +145,7 @@ func add_zones(kit: RefCounted) -> void:
 	_social_centre(kit)
 	_gallery(kit)
 	_car_park(kit)
+	_hospital(kit)
 
 
 func _tower(kit: RefCounted) -> void:
@@ -264,6 +278,117 @@ func _car_park(kit: RefCounted) -> void:
 	)
 
 
+## The hospital (S-014): its stairwells, then the rooms of each level by
+## Hospital.ROOM_TILES (the order of WEST_ROOMS and EAST_ROOMS), the lift
+## lobby, then the corridor.
+func _hospital(kit: RefCounted) -> void:
+	var r := Hospital.RECT
+	var levels: Array = Hospital.LEVELS
+	var top: float = levels[-1] + Hospital.STOREY
+	var west := Vector2(r.position.x, Hospital.CORRIDOR.x)
+	var east := Vector2(Hospital.CORRIDOR.y, r.end.x)
+	for stairs: Rect2 in [
+		_rect(east.x, r.position.y, east.y, Hospital.NORTH_STAIRS.end.y + 0.3),
+		_rect(west.x, Hospital.SOUTH_STAIRS.position.y - 0.3, west.y, r.end.y),
+	]:
+		kit.zone(stairs, levels[0], top, Tile.STAIRS, Tile.TERRAZZO, Tile.CEILING)
+	for h: float in levels:
+		var tiles: Array = Hospital.ROOM_TILES[h]
+		for side in 2:
+			var span := west if side == 0 else east
+			var rooms: Array = (Hospital.WEST_ROOMS if side == 0 else Hospital.EAST_ROOMS)[h]
+			for i in rooms.size():
+				var pair: Array = tiles[side][i]
+				kit.zone(
+					_rect(span.x, rooms[i][0], span.y, rooms[i][1]),
+					h,
+					h + Hospital.STOREY,
+					Tile[pair[0]],
+					Tile[pair[1]],
+					Tile.CEILING
+				)
+		var floor_tile := Tile.CONCRETE if h < 0.0 else Tile.WARD_LINO
+		var lobby := _rect(east.x, Hospital.LIFT.position.y - 0.2, east.y, 91.0)
+		kit.zone(lobby, h, h + Hospital.STOREY, Tile.WARD_CORRIDOR, floor_tile, Tile.CEILING)
+		var corridor := _rect(west.y, r.position.y, east.x, r.end.y)
+		kit.zone(corridor, h, h + Hospital.STOREY, Tile.WARD_CORRIDOR, floor_tile, Tile.CEILING)
+
+
+# --- Hospital decor ---
+
+## The hospital (S-014, T-190): the corridor of each level cut in three
+## stretches, each its own decor mesh, drawn near it only: its tubes along the
+## ceiling, mostly dead, the live ones baked; one tube per room; papers; the
+## exit signs. The tubes that stutter are NeonTube scenes (Hospital.NEONS),
+## their place on the ceiling left to them.
+func _hospital_decor(node: Node3D, lights: Node3D) -> void:
+	var levels: Array = Hospital.LEVELS
+	var x := (Hospital.CORRIDOR.x + Hospital.CORRIDOR.y) / 2.0
+	var r := Hospital.RECT
+	var stretch := r.size.y / HOSPITAL_STRETCHES
+	for li in levels.size():
+		var h: float = levels[li]
+		var ceiling: float = h + Hospital.STOREY - _c("SLAB")
+		for k in HOSPITAL_STRETCHES:
+			var y0 := r.position.y + k * stretch
+			var y1 := y0 + stretch
+			_begin(_kit.world(x, (y0 + y1) / 2.0, h + 1.5))
+			var y := y0 + HOSPITAL_TUBE_STEP / 2.0
+			var first := true
+			while y < y1:
+				if not _is_neon(x, h, y):
+					# One live tube at least in each stretch, the first.
+					var alive := first or _rng.randf() < HOSPITAL_ALIVE
+					first = false
+					_tube_y(x, y, ceiling, alive)
+					if alive:
+						_light(lights, x, y, ceiling - 0.3, TUBE_COLOR, 1.1, 6.0)
+				y += HOSPITAL_TUBE_STEP
+			for side in 2:
+				var rooms: Array = (Hospital.WEST_ROOMS if side == 0 else Hospital.EAST_ROOMS)[h]
+				var cx := (r.position.x + Hospital.CORRIDOR.x) / 2.0
+				if side == 1:
+					cx = (Hospital.CORRIDOR.y + r.end.x) / 2.0
+				for room: Array in rooms:
+					var cy := (float(room[0]) + float(room[1])) / 2.0
+					if cy < y0 or cy >= y1 or _is_neon(cx, h, cy):
+						continue
+					var alive := _rng.randf() < HOSPITAL_ALIVE
+					_tube_y(cx, cy, ceiling, alive)
+					if alive:
+						_light(lights, cx, cy, ceiling - 0.3, TUBE_COLOR, 0.8, 5.0)
+			var w: float = _c("WALL")
+			_papers(Rect2(x - 1.2, y0, 2.4, stretch), h, 6)
+			# Green exit signs over the stairwells' ends of the corridor.
+			for end_y: float in [r.position.y + w, r.end.y - w]:
+				if end_y >= y0 and end_y < y1:
+					var dy := 0.03 if end_y < y1 - 1.0 else -0.03
+					_box(
+						x - 0.3,
+						end_y,
+						h + 2.3,
+						x + 0.3,
+						end_y + dy,
+						h + 2.47,
+						EXIT_COLOR,
+						true
+					)
+			_commit(node, "Hospital%d_%d" % [li, k], HOSPITAL_DECOR_DISTANCE)
+
+
+## Whether a stuttering NeonTube hangs there (its case is drawn here, dark).
+func _is_neon(x: float, h: float, y: float) -> bool:
+	for neon: Vector3 in Hospital.NEONS:
+		if is_equal_approx(neon.y, h) and Vector2(neon.x - x, neon.z - y).length() < 1.0:
+			_tube_y(x, y, _kit_ceiling(h), false)
+			return true
+	return false
+
+
+func _kit_ceiling(h: float) -> float:
+	return h + Hospital.STOREY - _c("SLAB")
+
+
 # --- Decor and lamps ------------------------------------------------------------
 
 
@@ -310,6 +435,7 @@ func dress(root: Node3D) -> void:
 	_begin(_kit.world(160, 106, -1.5))
 	_car_park_decor(lights)
 	_commit(node, "CarPark", WIDE_DECOR_DISTANCE)
+	_hospital_decor(node, lights)
 
 
 func _begin(origin: Vector3) -> void:
@@ -474,6 +600,15 @@ func _tube(x: float, y: float, top: float, alive: bool) -> void:
 		TUBE_COLOR if alive else DEAD_GLASS,
 		alive
 	)
+
+
+## The same tube along y (plan north-south).
+func _tube_y(x: float, y: float, top: float, alive: bool) -> void:
+	_box(x - 0.07, y - 0.65, top - 0.04, x + 0.07, y + 0.65, top, Color(0.3, 0.31, 0.3))
+	if alive:
+		_box(x - 0.04, y - 0.6, top - 0.07, x + 0.04, y + 0.6, top - 0.04, TUBE_COLOR, true)
+	elif not is_nan(top):
+		_box(x - 0.04, y - 0.6, top - 0.07, x + 0.04, y + 0.6, top - 0.04, DEAD_GLASS)
 
 
 ## A painted seven-segment digit on a wall facing +Y, its bottom-left at x, z.
