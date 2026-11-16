@@ -23,6 +23,7 @@ static func build() -> Theme:
 	_panels(theme)
 	_digicode_and_intercom(theme)
 	_hud(theme)
+	_scroll_bars(theme)
 	return theme
 
 
@@ -193,3 +194,16 @@ static func _hud(theme: Theme) -> void:
 	screen.set_border_width_all(1)
 	theme.set_type_variation("ScreenPanel", "PanelContainer")
 	theme.set_stylebox("panel", "ScreenPanel", screen)
+
+
+## The vertical scroll bar of the credits (T-167): a thin dark rail and a
+## sodium grabber, no buttons.
+static func _scroll_bars(theme: Theme) -> void:
+	var rail := _flat(Color(STYLE.FAINT, 0.35), Vector4(2, 0, 2, 0))
+	var grabber := _flat(Color(STYLE.SODIUM, 0.7), Vector4(2, 0, 2, 0))
+	var grabber_lit := _flat(STYLE.SODIUM, Vector4(2, 0, 2, 0))
+	theme.set_stylebox("scroll", "VScrollBar", rail)
+	theme.set_stylebox("scroll_focus", "VScrollBar", rail)
+	theme.set_stylebox("grabber", "VScrollBar", grabber)
+	theme.set_stylebox("grabber_highlight", "VScrollBar", grabber_lit)
+	theme.set_stylebox("grabber_pressed", "VScrollBar", grabber_lit)

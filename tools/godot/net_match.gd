@@ -318,13 +318,16 @@ func _type_code(player: Player, delta: float) -> void:
 	if player.terminal == null:
 		_phase = "helper" if not quests.wants_code() else "to_keypad"
 		return
-	if not quests.wants_code():
-		_wanted["interact"] = true  # Done: gets up.
-		return
 	_key_left -= delta
 	if _key_left > 0.0:
 		return
 	_key_left = KEY_TIME
+	if not quests.wants_code():
+		# Done: gets up. A press, as a key gives: a held "interact" alone
+		# pushes no action (LocalControls reads key events).
+		player.commands.push(PlayerCommands.Action.INTERACT)
+		_key_left = KEY_TIME * 5.0
+		return
 	if _typed >= quests.code.length():
 		_typed = 0  # Not taken: once more after a pause.
 		_key_left = KEY_TIME * 5.0
@@ -399,10 +402,22 @@ func _play_monster(delta: float) -> void:
 		"leave":
 			var there := _go_to(_away_point, delta, 1.0)
 			var gone := _own_position().distance_to(_caught_at)
-			if there or gone >= AWAY_DISTANCE + 10.0:
+			if (there or gone >= AWAY_DISTANCE + 10.0) and _clear_of_cages():
 				_phase = "away"
 		"away":
 			pass
+
+
+## Far enough from the cages for the hunted to free the caught one there
+## (S-018): stopping on its way past them, it kept them from coming.
+func _clear_of_cages() -> bool:
+	var prison := Prison.of(_map)
+	if prison == null:
+		return true
+	for cage: Cage in prison.cages:
+		if _own_position().distance_to(cage.outside_point()) < SAFE_DISTANCE + 5.0:
+			return false
+	return true
 
 
 ## The monster steps back from a hunted it is not after, so as not to catch

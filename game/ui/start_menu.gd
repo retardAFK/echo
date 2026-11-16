@@ -1,8 +1,9 @@
 class_name StartMenu
 extends Control
-## Home screen (spec S-013, T-162, style A): play alone or online. "Jouer
-## seul" opens the role choice (S-004, Q1), with the goal and the controls of
-## the role under the cursor (S-009, Q5); choosing a role starts the game.
+## Home screen (spec S-013, T-162, style A): play alone or online, options
+## and credits (T-167). "Jouer seul" opens the role choice (S-004, Q1), with
+## the goal and the controls of the role under the cursor (S-009, Q5);
+## choosing a role starts the game.
 ## It is the main scene, so the choice also works in the web build.
 
 signal role_chosen(role: GameSession.Role)
@@ -28,6 +29,7 @@ const ROLES := {
 @onready var _version: Label = %Version
 @onready var _foot: Control = %Foot
 @onready var _options: OptionsMenu = %Options
+@onready var _credits: CreditsMenu = %Credits
 
 
 func _ready() -> void:
@@ -46,6 +48,7 @@ func _ready() -> void:
 	_main_list.chosen.connect(_on_main_chosen)
 	_role_list.chosen.connect(_on_role_chosen)
 	_options.closed.connect(show_home)
+	_credits.closed.connect(show_home)
 	for key: String in ROLES:
 		_role_list.item(key).focus_entered.connect(preview.bind(ROLES[key]))
 	var version := str(ProjectSettings.get_setting("application/config/version", ""))
@@ -61,6 +64,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func show_home() -> void:
 	_options.visible = false
+	_credits.visible = false
 	_foot.visible = true
 	_solo.visible = false
 	_home.visible = true
@@ -79,6 +83,13 @@ func show_options() -> void:
 	_home.visible = false
 	_foot.visible = false
 	_options.open()
+
+
+## The credits, from CREDITS.md (T-167).
+func show_credits() -> void:
+	_home.visible = false
+	_foot.visible = false
+	_credits.open()
 
 
 ## Shows the goal and the controls of a role.
@@ -114,6 +125,8 @@ func _on_main_chosen(key: String) -> void:
 			play_online()
 		"MENU_OPTIONS":
 			show_options()
+		"MENU_CREDITS":
+			show_credits()
 
 
 func _on_role_chosen(key: String) -> void:

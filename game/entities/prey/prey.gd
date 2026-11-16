@@ -824,6 +824,8 @@ func _move(delta: float) -> void:
 				_opened_door = door
 	if global_position.distance_to(_agent.target_position) > JambUnstick.GOAL_CLEARANCE:
 		horizontal = _jamb.update(self, horizontal, delta)  # Not at its goal: a jamb.
+		if _jamb.take_replan():
+			_agent.target_position = _agent.target_position  # Plans its path again.
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	if is_on_floor():

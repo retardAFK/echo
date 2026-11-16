@@ -250,3 +250,5 @@ TIP_MONSTER_1,"Rôder ({crouch}) rend tes pas silencieux : les chassés ne t'ent
 TIP_MONSTER_2,Un bruit isolé peut être une ruse : une bouteille ou un réveil posé par un chassé.
 TIP_MONSTER_3,Une caméra allumée filme pour les prisonniers. Casse-la pour les rendre aveugles.
 TIP_MONSTER_4,"Passe de temps en temps près de la prison : tant que tu es proche, la peine des prisonniers ne baisse pas."
+MENU_CREDITS,Crédits
+CREDITS_HELP,Flèches ou molette : faire défiler · Échap : retour

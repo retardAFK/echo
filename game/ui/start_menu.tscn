@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://assets/textures/ui/menu_parking.jpg" id="4_bg"]
 [ext_resource type="Script" path="res://game/ui/menu/menu_list.gd" id="5_list"]
 [ext_resource type="PackedScene" path="res://game/ui/options_menu.tscn" id="6_options"]
+[ext_resource type="PackedScene" path="res://game/ui/credits_menu.tscn" id="7_credits"]
 
 [node name="StartMenu" type="Control"]
 layout_mode = 3
@@ -78,7 +79,7 @@ offset_top = 150.0
 offset_right = 224.0
 offset_bottom = 290.0
 script = ExtResource("5_list")
-keys = PackedStringArray("MENU_SOLO", "MENU_ONLINE", "MENU_OPTIONS")
+keys = PackedStringArray("MENU_SOLO", "MENU_ONLINE", "MENU_OPTIONS", "MENU_CREDITS")
 
 [node name="Solo" type="Control" parent="."]
 unique_name_in_owner = true
@@ -147,6 +148,11 @@ theme_type_variation = &"HintLabel"
 autowrap_mode = 3
 
 [node name="Options" parent="." instance=ExtResource("6_options")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
+[node name="Credits" parent="." instance=ExtResource("7_credits")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1

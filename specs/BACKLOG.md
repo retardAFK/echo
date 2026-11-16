@@ -289,7 +289,7 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 - [x] T-166 — Écran de chargement et premiers pas
   - Résultat vérifiable : chargement sous 10 s affiché avec une progression ; conseils de premier lancement pour chaque rôle
   - Dépend de : T-162
-- [ ] T-167 — Crédits en jeu
+- [x] T-167 — Crédits en jeu
   - Résultat vérifiable : contenu de `CREDITS.md` affiché dans le jeu
   - Dépend de : T-162
 - [ ] T-168 — Vérification finale de S-013
