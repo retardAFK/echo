@@ -32,6 +32,8 @@ const STUCK_TIME := 1.5
 const AWAY_DISTANCE := 30.0
 ## A teammate goes to free a captured hunted once the monster is that far.
 const SAFE_DISTANCE := 20.0
+## Seconds a freed hunted waits in its cage, so its rescuer goes out first.
+const FREED_WAIT := 4.0
 ## A hunted waits while the monster it is not prey to is this close; the
 ## monster steps back only within half of it, so it can walk past (and
 ## from further when it stands away, so the waiting hunted can go on).
@@ -63,6 +65,8 @@ var _path_target := Vector3.INF
 var _path_index := 0
 var _repath_left := 0.0
 var _stuck_left := STUCK_TIME
+## Freed: seconds before it walks out of the prison.
+var _freed_wait := 0.0
 ## Monster: where it caught the hunted of seat 2.
 var _caught_at := Vector3.ZERO
 var _last_position := Vector3.ZERO
@@ -251,6 +255,9 @@ func _play_hunted(delta: float) -> void:
 		"captured":
 			if not player.held:
 				_phase = "freed"
+				_freed_wait = FREED_WAIT
+		"freed" when _freed_wait > 0.0:  # Lets its rescuer walk out first.
+			_freed_wait -= delta
 		"freed":  # Takes back the fuse it dropped where it was caught.
 			var drop := _nearest_drop()
 			if drop != null:
@@ -268,6 +275,15 @@ func _play_hunted(delta: float) -> void:
 				_phase = "fuse"  # Back to the transformer after.
 				return
 			_hold_on(_map.game_loop.transformer.global_position)
+
+
+## The one teammate who frees a captured hunted: the first other one still
+## free. Two of them would wedge in the narrow cellar doors (S-018).
+func _rescuer_of(seat: int) -> int:
+	for other in [1, 2, 3]:
+		if other != seat and _read(other).get("phase") != "captured":
+			return other
+	return -1
 
 
 ## The nearest fuse lying on the ground.
@@ -290,7 +306,7 @@ func _rescue(delta: float) -> bool:
 	var prison := Prison.of(_map)
 	for seat in [1, 2, 3]:
 		var mate := _read(seat)
-		if seat == _seat or mate.get("phase") != "captured":
+		if seat == _seat or mate.get("phase") != "captured" or _rescuer_of(seat) != _seat:
 			continue
 		var cage := prison.cage_of_seat(seat) if prison != null else null
 		if prison != null and cage == null:

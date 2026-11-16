@@ -105,6 +105,7 @@ func _ready() -> void:
 		highlights.player = _player
 		add_child(highlights)
 		_add_map_screen()
+		_add_network_huds()
 	for spot in get_hiding_spots():
 		spot.found.connect(_on_hidden_found)
 	_setup_game_loop()
@@ -153,6 +154,23 @@ func _setup_monster_role() -> void:
 	_monster = null
 
 
+## The hunted's view of a security camera and its terminal menu (S-018), if
+## the map has a network. Returns them.
+func _add_network_huds() -> Array[Node]:
+	var huds: Array[Node] = []
+	if CityNetwork.of(self) == null:
+		return huds
+	var feed := SecurityFeed.new()
+	feed.player = _player
+	feed.prison = _prison
+	add_child(feed)
+	var menu := TerminalMenu.new()
+	menu.player = _player
+	add_child(menu)
+	huds.assign([feed, menu])
+	return huds
+
+
 ## The hunted's map (S-017, T-252), if the map has a plan.
 func _add_map_screen() -> void:
 	var plan := MapPlan.for_scene(scene_file_path)
@@ -176,6 +194,9 @@ func _setup_online() -> void:
 	net.is_room = NetSession.mode == NetSession.Mode.ROOM
 	net.buildings = get_buildings()
 	_net = net
+	var network := CityNetwork.of(self)
+	if network != null:
+		network.mirror = not net.is_room
 	_prison = Prison.of(self)
 	if _prison != null:
 		_prison.mirror = not net.is_room
@@ -463,6 +484,7 @@ func _setup_online_client(net: NetGame) -> void:
 			_own_huds.append(prison_hud)
 		if map_screen != null:
 			_own_huds.append(map_screen)
+		_own_huds.append_array(_add_network_huds())
 		_own_huds.append_array(_player.find_children("*", "CanvasLayer", true, false))
 		_overlay.monster = null
 		_free_node(_monster)  # The room runs the monster; here it is a puppet.

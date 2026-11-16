@@ -114,8 +114,9 @@ func apply_actions() -> void:
 			toggle_prowl()
 
 
-## The hiding spot (S-008, Q7) or the door (S-016) in reach in front of the
-## crosshair, that it can use by holding "interact", or null.
+## The hiding spot (S-008, Q7), the door (S-016), the terminal or the camera
+## (S-018) in reach in front of the crosshair, that it can use by holding
+## "interact", or null.
 func get_interactable() -> Node:
 	var best: Node = null
 	var best_distance := INF
@@ -123,9 +124,12 @@ func get_interactable() -> Node:
 	var aim := Vector2(forward.x, forward.z).normalized()
 	var usable := get_tree().get_nodes_in_group(HidingSpot.GROUP)
 	usable.append_array(get_tree().get_nodes_in_group(Door.GROUP))
+	usable.append_array(get_tree().get_nodes_in_group(Terminal.MONSTER_GROUP))
 	for node in usable:
 		var spot := node as Node3D
 		if not spot.can_interact(global_position):
+			continue
+		if spot.has_method("wanted_by") and not spot.wanted_by(self):
 			continue
 		var gap := spot.global_position - global_position
 		var flat := Vector2(gap.x, gap.z)
