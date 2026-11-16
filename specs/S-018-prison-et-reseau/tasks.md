@@ -32,9 +32,10 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-269 — Modèles et sons
   - Résultat vérifiable : terminal, caméra, haut-parleur, rideau, grille et lampe de cage, interrupteur, disquette, tableau et post-it ; clavier, disque dur, sonnerie, rideau, grille, bip, déclic, caméra cassée ; rendus et sons montrés à Maxime
   - Dépend de : T-261
-- [ ] T-270 — Vérification finale de S-018
+- [x] T-270 — Vérification finale de S-018
   - Résultat vérifiable : critères cochés, budget de 300 appels de dessin tenu au pire endroit, 60 images/s mesurées sur la machine de référence (avec la mesure de T-128)
   - Dépend de : T-267, T-268, T-269
+  - Fait le 16/11/2026 : validée par Maxime ; la mesure des 60 images/s reste à faire avec celle de T-128
 
 ## Compte rendu
 - T-260 (15/11/2026) : spec validée par Maxime, PR #134 (D-020).

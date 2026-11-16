@@ -1,6 +1,6 @@
 # S-018 — Prison et réseau de la cité
 
-**Statut** : livrée (16/11/2026), sauf la mesure des 60 images/s, à faire sur la machine de référence avec celle de T-128. Validée dans ses grandes lignes (15/11/2026, Maxime : libération « sur place ou à distance », mécanismes « outils + quêtes tirées au sort »). Les chiffres restent des propositions de Claude, ajustables à la construction.
+**Statut** : livrée (16/11/2026), validée par Maxime ; la mesure des 60 images/s reste à faire sur la machine de référence avec celle de T-128. Validée dans ses grandes lignes (15/11/2026, Maxime : libération « sur place ou à distance », mécanismes « outils + quêtes tirées au sort »). Les chiffres restent des propositions de Claude, ajustables à la construction.
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : hors feuille de route, demandée par Maxime le 15/11/2026 (« une prison où il peut être libéré » et « des mécanismes à distance, un peu informatiques, qui font varier les quêtes »)
 
