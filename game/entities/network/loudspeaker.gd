@@ -50,7 +50,7 @@ func _physics_process(delta: float) -> void:
 	_next_noise -= delta
 	if _next_noise <= 0.0:
 		_next_noise = settings.speaker_interval
-		_sound.play()
+		SoundSpace.play(_sound)
 		NoiseBus.emit_noise(NoiseEvent.Type.SPEAKER, global_position, settings.speaker_range, self)
 	sounding_left = maxf(sounding_left - delta, 0.0)
 
@@ -62,4 +62,4 @@ func mirror_state(is_used: bool) -> void:
 
 ## Online client: its blare heard from the room.
 func voice() -> void:
-	_sound.play()
+	SoundSpace.play(_sound)

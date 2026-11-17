@@ -3,7 +3,7 @@ extends Node
 ## Emits one noise per footstep of its parent (spec S-002, T-010): the hunted
 ## Player, or the AI prey (S-004), any body with get_gait().
 ## Footsteps are counted on horizontal distance walked on the floor. On a
-## metal floor (S-016, Q9) they carry farther.
+## metal floor (S-016, Q9) or in a puddle (S-012, Q4) they carry farther.
 
 ## A move longer than this in one frame is a jump in or out of a hiding spot,
 ## not a walk (S-008), in meters.
@@ -36,9 +36,10 @@ func _physics_process(_delta: float) -> void:
 	if _distance < stride:
 		return
 	_distance = fmod(_distance, stride)
+	var surface := FloorSurface.at(get_tree(), position)
 	NoiseBus.emit_noise(
 		NoiseEvent.Type.FOOTSTEP,
 		position + Vector3.UP * settings.emit_height,
-		NoiseMath.range_for_gait(settings, gait, MetalFloor.under(get_tree(), position)),
+		NoiseMath.range_for_gait(settings, gait, surface),
 		_player
 	)

@@ -8,10 +8,10 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-141 — Plan et tâches de S-012
   - Résultat vérifiable : `plan.md` et `tasks.md`
   - Dépend de : T-140
-- [ ] T-142 — Spatialisation et occlusion
+- [x] T-142 — Spatialisation et occlusion
   - Résultat vérifiable : `SoundMath`, `SpatialSound`, versions étouffées ; tous les bruits de jeu joués en 3D passent par `SpatialSound` ; tests GUT sur les volumes et l'étouffement
   - Dépend de : T-141
-- [ ] T-143 — Pas selon le sol
+- [x] T-143 — Pas selon le sol
   - Résultat vérifiable : 6 sols, flaques (portées 2/8/20 m), `SurfaceMap` générée, mes propres pas, raclement du monstre, `by_monster` en ligne ; sons montrés à Maxime ; tests GUT
   - Dépend de : T-142
 - [ ] T-144 — Le vent de la cité
@@ -34,4 +34,5 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
   - Dépend de : T-147
 
 ## Compte rendu
-- T-140, T-141 (17/11/2026) : spec, plan et tâches.
+- T-140, T-141 (17/11/2026) : spec, plan et tâches, PR #167.
+- T-142, T-143 (17/11/2026) : autoload `SoundSpace` (et non une classe `SpatialSound`) ; 31 sons de jeu et 28 pas ont leur version étouffée (`tools/audio/muffle.py`) ; 4 pas par sol et 4 raclements (`tools/audio/footsteps.py`) ; `SurfaceMap` de 169 boîtes générée avec la map, 12 flaques dehors (un seul maillage) et 5 au parking ; mes propres pas et mon souffle ; `by_monster` dans les messages de la salle. Sons sur la page d'écoute envoyée à Maxime.

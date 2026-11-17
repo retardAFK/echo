@@ -307,9 +307,9 @@ func _set_open(open: bool, animate: bool, sound: AudioStream = null) -> void:
 	if animate and is_inside_tree():
 		if sound != null:
 			_creak.stream = sound
-			_creak.play()
+			SoundSpace.play(_creak)
 		if bell and open:
-			_bell.play()
+			SoundSpace.play(_bell)
 		_tween = create_tween()
 		_tween.tween_property(_hinge, property, value, settings.swing_time)
 	else:

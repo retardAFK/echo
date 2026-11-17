@@ -97,6 +97,6 @@ func _leave_shards(at: Vector3) -> void:
 	sound.stream = GLASS_SOUND
 	sound.max_distance = SOUND_DISTANCE
 	shards.add_child(sound)
-	sound.play()
+	SoundSpace.play(sound)
 	if settings.shards_time > 0.0:
 		get_tree().create_timer(settings.shards_time).timeout.connect(shards.queue_free)

@@ -11,6 +11,7 @@ extends Node
 const MapKit := preload("res://tools/godot/map_kit.gd")
 const InteriorLining := preload("res://tools/godot/interior_lining.gd")
 const Hospital := preload("res://tools/godot/hospital.gd")
+const FloorBuilder := preload("res://tools/godot/floor_builder.gd")
 
 ## Binary and compressed (T-194): 1 MB instead of 11 MB in the web build.
 const SCENE_PATH := "res://game/maps/tilleuls/tilleuls.scn"
@@ -522,6 +523,8 @@ func _ready() -> void:
 	_add_outdoor_dressing()
 	_add_furniture()
 	lining.dress(_root)
+	var floors := FloorBuilder.new(self, kit)
+	floors.add_puddles(_root, _root)  # Spec S-012, T-143.
 	_add_ambience()
 	get_tree().root.add_child.call_deferred(_root)
 	await get_tree().physics_frame
@@ -542,6 +545,10 @@ func _ready() -> void:
 	)
 	_root.get_parent().remove_child(_root)
 	_add_gameplay()
+	var surfaces := FloorSurfaces.new()
+	surfaces.name = "FloorSurfaces"
+	surfaces.surfaces = floors.save_surfaces(lining.puddles)
+	_add(surfaces)
 	var packed := PackedScene.new()
 	error = packed.pack(_root)
 	if error == OK:

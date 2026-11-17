@@ -206,5 +206,5 @@ func _show_tipped() -> void:
 	_model.position.y = 0.35  # On its side, not through the floor.
 	var crash := get_node_or_null("Crash") as AudioStreamPlayer3D
 	if crash != null and is_inside_tree():
-		crash.play()
+		SoundSpace.play(crash)
 	_model.position.y = 0.45

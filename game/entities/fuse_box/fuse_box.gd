@@ -78,10 +78,10 @@ func get_hold_ratio() -> float:
 
 ## Online client (S-010, T-099): the clank of a fuse taken in the room.
 func voice() -> void:
-	_sound.play()
+	SoundSpace.play(_sound)
 
 
 ## The metal of the box, heard as made by the hunted holding it.
 func _clank(user: Node) -> void:
-	_sound.play()
+	SoundSpace.play(_sound)
 	NoiseBus.emit_noise(NoiseEvent.Type.FUSE, global_position, settings.fuse_noise_range, user)

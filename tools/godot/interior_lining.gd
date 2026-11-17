@@ -118,6 +118,9 @@ enum Tile {
 	WARD_LINO,
 }
 
+## The car park's puddles, world boxes at floor level (S-012, T-143).
+var puddles: Array[AABB] = []
+
 var _constants: Dictionary
 var _kit: RefCounted
 var _rng := RandomNumberGenerator.new()
@@ -1316,6 +1319,8 @@ func _car_park_decor(lights: Node3D) -> void:
 			_rng.randf_range(r.position.x + 2.0, r.end.x - 8.0),
 			_rng.randf_range(r.position.y + 6.0, r.end.y - 6.0)
 		)
+		# A puddle for the footsteps too (S-012, T-143).
+		puddles.append(AABB(_kit.world(p.x - 0.8, p.y - 0.8, floor_h), Vector3(1.6, 0.01, 1.6)))
 		_box(
 			p.x - 1.0,
 			p.y - 0.6,

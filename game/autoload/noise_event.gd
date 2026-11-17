@@ -47,6 +47,9 @@ var source: Node
 ## Lost in the roar of a ventilation zone (S-014, Q5): the monster and its
 ## scan do not hear it; the hunted still do.
 var masked := false
+## Made by the monster (S-012, Q6): the ears play its scrape and its breath.
+## Online, the room's message carries it, since a client's copy has no source.
+var by_monster := false
 ## Engine time of the emission, in milliseconds.
 var time_msec: int
 
