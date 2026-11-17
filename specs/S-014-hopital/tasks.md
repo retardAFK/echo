@@ -44,8 +44,16 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-192 — IA à l'hôpital
   - Résultat vérifiable : 20 parties simulées sans blocage, durée moyenne qui ne baisse pas, partie à 4 de la CI verte
   - Dépend de : T-190
-- [ ] T-193 — Vérification finale de S-014
+- [x] T-193 — Vérification finale de S-014
   - Résultat vérifiable : critères cochés, spec livrée
   - Dépend de : T-191, T-192
 
 ## Compte rendu
+Vérification finale (T-193, 17/11/2026) :
+- **Plan** : l'hôpital remplace la barre C, 4 niveaux visitables, deux escaliers à chaque niveau, quai, escalier de secours ; tous les couloirs et pièces atteignables (`test_hospital.gd`). Traversées de la map en courant : 36,6 à 44,0 s, sous 45 s (`test_tilleuls_navigation.gd`).
+- **Scan par niveau** : de dehors (fenêtre visée, quai pour le sous-sol) et de dedans, joueur et IA (`test_hospital_scan.gd`, `test_hospital_ai.gd`).
+- **Bruits** : ventilation qui couvre les bruits de 4 m ou moins, 6 moniteurs, 4 brancards, 4 fauteuils, en solo et en ligne (`test_hospital_devices.gd`, `test_hospital_sounds.gd`).
+- **Objectifs** : 6 emplacements de fusible, 15 cachettes (dont 3 en métal), terminal, caméra, haut-parleur, relais et code (`test_tilleuls_buildings.gd`, `test_network.gd`, `test_fuses.gd`).
+- **IA** : 20 parties simulées, 12 sorties, 8 captures, aucun blocage, durée moyenne 7,6 min (5,3 min en phase 7). Partie à 4 en ligne de la CI verte (PR #165).
+- **Montré à Maxime** : 8 modèles (« C'est parfait », 17/11) et 8 sons (« Go », 17/11).
+- **Budget** : pire point de la map 264 appels de dessin (palier de la tour), 230 au pire du balayage, 68 à 132 dans l'hôpital ; au plus 4 lumières dynamiques visibles ; build web environ 48 Mo sur 60 (contrôle CI). Reste à mesurer les 60 images/s sur la machine de référence ; le pire point a baissé depuis la dernière mesure à 60 images/s (294 appels de dessin, S-016).

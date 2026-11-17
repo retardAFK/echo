@@ -1,6 +1,6 @@
 # S-014 — L'hôpital dans la cité
 
-**Statut** : validée (16/11/2026) : emplacement choisi par Maxime (Q1) ; les autres réponses sont les propositions de Claude, retenues sans objection et ajustables à la construction
+**Statut** : livrée (17/11/2026), sauf la mesure des 60 images/s, à refaire sur la machine de référence. Validée (16/11/2026) : emplacement choisi par Maxime (Q1) ; les autres réponses sont les propositions de Claude, retenues sans objection et ajustables à la construction
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : 14 — L'hôpital dans la cité (D-019 : intégré à la cité des Tilleuls, vraiment effrayant)
 
@@ -60,13 +60,13 @@ Voir [`plan-hopital.svg`](plan-hopital.svg), généré par `tools/plans/make_hos
 - Q13 : Dans quel ordre ? → Proposition : budget d'abord (map compressée, visibilité par niveau), puis greybox jouable sur les 4 niveaux, scan par niveau, ventilation et moniteurs, brancards et fauteuils, l'hôpital dans la boucle, IA, puis modèles (rendus montrés à Maxime), habillage et lumière, sons (montrés à Maxime), et vérification finale. Les portes de T-185 sont déjà faites (S-016).
 
 ## Critères d'acceptation
-- [ ] L'hôpital remplace la barre C ; il est fermé, explorable sur 4 niveaux, avec 7 issues vers l'extérieur et au moins 2 escaliers à chaque niveau (jamais de niveau en cul-de-sac) ; la traversée de la map en courant reste sous 45 s.
-- [ ] Le scan n'entend que le niveau visé, de dehors comme de dedans, pour le monstre joueur et le monstre IA.
-- [ ] Dans les zones de ventilation, les bruits de 4 m ou moins ne sont pas entendus ; les moniteurs, brancards et fauteuils font les bruits de Q6 et Q7.
-- [ ] 6 emplacements de fusible, 15 cachettes, le terminal, la caméra, le haut-parleur, le relais et le code marchent dans l'hôpital, en solo et en ligne.
-- [ ] Le monstre IA et la proie IA jouent la cité avec l'hôpital : 20 parties simulées sans blocage, durée moyenne qui ne baisse pas.
-- [ ] La partie à 4 du test en ligne (CI) passe toujours.
-- [ ] Les modèles et les sons de l'hôpital ont été montrés à Maxime sur rendu et à l'écoute.
+- [x] L'hôpital remplace la barre C ; il est fermé, explorable sur 4 niveaux, avec 7 issues vers l'extérieur et au moins 2 escaliers à chaque niveau (jamais de niveau en cul-de-sac) ; la traversée de la map en courant reste sous 45 s.
+- [x] Le scan n'entend que le niveau visé, de dehors comme de dedans, pour le monstre joueur et le monstre IA.
+- [x] Dans les zones de ventilation, les bruits de 4 m ou moins ne sont pas entendus ; les moniteurs, brancards et fauteuils font les bruits de Q6 et Q7.
+- [x] 6 emplacements de fusible, 15 cachettes, le terminal, la caméra, le haut-parleur, le relais et le code marchent dans l'hôpital, en solo et en ligne.
+- [x] Le monstre IA et la proie IA jouent la cité avec l'hôpital : 20 parties simulées sans blocage, durée moyenne qui ne baisse pas.
+- [x] La partie à 4 du test en ligne (CI) passe toujours.
+- [x] Les modèles et les sons de l'hôpital ont été montrés à Maxime sur rendu et à l'écoute.
 - [ ] Budget tenu : 300 appels de dessin au pire point de la map, au plus 4 lumières dynamiques visibles, build web sous 60 Mo, 60 images/s mesurées sur la machine de référence.
 
 ## Hors périmètre
