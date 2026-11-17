@@ -1902,7 +1902,7 @@ func _add_outdoor_dressing() -> void:
 ## through NoiseBus, so they betray nobody.
 func _add_ambience() -> void:
 	var node := _group("Ambience")
-	var wind := AudioStreamPlayer.new()
+	var wind := CityWind.new()  # Its gusts cut the small noises outdoors (S-012, T-144).
 	wind.name = "Wind"
 	wind.stream = WIND_SOUND
 	wind.volume_db = -12.0

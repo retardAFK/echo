@@ -8,6 +8,7 @@ extends Area3D
 signal scan_changed(is_scanned: bool)
 
 const SCAN_LAYER := 1 << 4
+const GROUP := &"buildings"
 
 @export var settings: MonsterSettings
 ## Size of the box volume, in meters. Set on each building of a map: the shape
@@ -42,6 +43,7 @@ var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	add_to_group(GROUP)
 	var box := BoxShape3D.new()
 	box.size = size
 	_shape.shape = box
@@ -96,6 +98,15 @@ func contains(point: Vector3) -> bool:
 	var own := global_transform.affine_inverse() * point
 	for extra in extra_boxes:
 		if extra.has_point(own):
+			return true
+	return false
+
+
+## True if a world position lies inside any building: indoors, out of the
+## wind (S-012, T-144).
+static func any_contains(tree: SceneTree, point: Vector3) -> bool:
+	for node in tree.get_nodes_in_group(GROUP):
+		if (node as Building).contains(point):
 			return true
 	return false
 

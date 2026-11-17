@@ -14,7 +14,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-143 — Pas selon le sol
   - Résultat vérifiable : 6 sols, flaques (portées 2/8/20 m), `SurfaceMap` générée, mes propres pas, raclement du monstre, `by_monster` en ligne ; sons montrés à Maxime ; tests GUT
   - Dépend de : T-142
-- [ ] T-144 — Le vent de la cité
+- [x] T-144 — Le vent de la cité
   - Résultat vérifiable : rafales (portée des bruits ≤ 6 m divisée par deux dehors), audibles, synchronisées en ligne ; tests GUT
   - Dépend de : T-142
 - [ ] T-145 — Voix du monstre
@@ -36,3 +36,4 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 ## Compte rendu
 - T-140, T-141 (17/11/2026) : spec, plan et tâches, PR #167.
 - T-142, T-143 (17/11/2026) : autoload `SoundSpace` (et non une classe `SpatialSound`) ; 31 sons de jeu et 28 pas ont leur version étouffée (`tools/audio/muffle.py`) ; 4 pas par sol et 4 raclements (`tools/audio/footsteps.py`) ; `SurfaceMap` de 169 boîtes générée avec la map, 12 flaques dehors (un seul maillage) et 5 au parking ; mes propres pas et mon souffle ; `by_monster` dans les messages de la salle. Sons sur la page d'écoute envoyée à Maxime.
+- T-144 (17/11/2026) : `WindGusts` (calendrier tiré d'une graine) et `CityWind` (boucle de vent qui monte de 9 dB, sifflement `gust.wav`, plus sourde dedans) ; pendant une rafale, un bruit dehors de portée ≤ 6 m porte moitié moins loin (`NoiseBus.wind_cut`, `Building.any_contains`) ; en ligne, la force du vent est la 13e entrée de l'état du monde.

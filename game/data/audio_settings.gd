@@ -27,3 +27,17 @@ extends Resource
 ## Quietest and loudest of one's own sounds, in decibels.
 @export_range(-60.0, 0.0, 1.0, "suffix:dB") var self_min_db: float = -32.0
 @export_range(-60.0, 0.0, 1.0, "suffix:dB") var self_max_db: float = -8.0
+
+@export_group("Wind (T-144)")
+## Seconds between the ends of two gusts, at random between these.
+@export var gust_interval := Vector2(25.0, 50.0)
+## Seconds a gust blows at full strength, at random between these.
+@export var gust_length := Vector2(6.0, 10.0)
+## Seconds the wind takes to rise before a gust, and to fall after.
+@export_range(0.1, 10.0, 0.1, "suffix:s") var gust_rise: float = 2.0
+## Volume the wind gains at the height of a gust, in decibels.
+@export_range(0.0, 24.0, 0.5, "suffix:dB") var gust_db: float = 9.0
+## Volume the wind loses indoors, in decibels.
+@export_range(-40.0, 0.0, 0.5, "suffix:dB") var indoor_wind_db: float = -12.0
+## Volume of the gust's whistle at its height, in decibels.
+@export_range(-40.0, 0.0, 0.5, "suffix:dB") var whistle_db: float = -10.0
