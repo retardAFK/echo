@@ -322,6 +322,7 @@ func _use_ruses(delta: float, threat: Vector3) -> void:
 	_close_door_behind(fleeing)
 	if fleeing:
 		_set_off_car_alarms()
+		_use_hospital_decoys(threat)
 		_look_for_hiding_spot(delta, threat)
 	else:
 		_car_detour = null
@@ -483,6 +484,28 @@ func _set_off_car_alarms() -> void:
 		brain.flee_to(_flee_target)
 	if _car_detour == null and _hide_spot == null:
 		_swerve_to_car_alarm()
+
+
+## Fleeing in the hospital (S-014, T-192), like a car alarm in the street: it
+## switches on a monitor it passes, and sends a wheelchair rolling off to the
+## side, away from where it runs, so the noise draws the monster aside.
+func _use_hospital_decoys(threat: Vector3) -> void:
+	for node in get_tree().get_nodes_in_group(Monitor.GROUP):
+		var monitor := node as Monitor
+		if monitor.wanted_by(self) and monitor.can_interact(global_position):
+			monitor.interact(self)
+			_count_ruse(&"monitor")
+	var away := global_position - threat
+	away.y = 0.0
+	var side := Vector3(-away.z, 0.0, away.x).normalized()
+	for node in get_tree().get_nodes_in_group(Wheelchair.GROUP):
+		var chair := node as Wheelchair
+		if chair.wanted_by(self) and chair.can_interact(global_position):
+			# Pushed sideways, away from the hunted.
+			var to_chair := chair.global_position - global_position
+			chair.launch(side if side.dot(to_chair) >= 0.0 else -side)
+			_count_ruse(&"wheelchair")
+			return
 
 
 ## A resting car alarm a few steps off its way: it swerves to set it off in
