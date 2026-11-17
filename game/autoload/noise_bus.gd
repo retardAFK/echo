@@ -15,11 +15,17 @@ var mirror := false
 var local_source: Node
 
 
-## Announces a noise to every listener and returns it.
+## Announces a noise to every listener and returns it. by_monster is for a
+## copy of a noise the monster made somewhere else (an online client).
 func emit_noise(
-	type: NoiseEvent.Type, position: Vector3, noise_range: float, source: Node = null
+	type: NoiseEvent.Type,
+	position: Vector3,
+	noise_range: float,
+	source: Node = null,
+	by_monster := false
 ) -> NoiseEvent:
 	var event := NoiseEvent.new(type, position, noise_range, source)
+	event.by_monster = by_monster or (source != null and Door.is_monster(source))
 	if noise_range <= settings.ventilation_mask and is_inside_tree():
 		event.masked = Ventilation.covers(get_tree(), position)
 	if mirror and source != null and source != local_source:

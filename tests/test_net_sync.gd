@@ -187,10 +187,12 @@ func test_noise_goes_to_who_hears_it_without_its_maker() -> void:
 	await wait_physics_frames(2)
 	var near := NoiseEvent.new(NoiseEvent.Type.FOOTSTEP, other.global_position, 8.0, other)
 	var message := NetGame.noise_message(near, hunted, false)
-	assert_eq(message, [NetGame.Event.NOISE, NoiseEvent.Type.FOOTSTEP, other.global_position, 8.0])
+	assert_eq(
+		message, [NetGame.Event.NOISE, NoiseEvent.Type.FOOTSTEP, other.global_position, 8.0, false]
+	)
 	assert_eq(NetGame.noise_message(near, other, false), [], "not its own noise")
 	assert_eq(NetGame.noise_message(near, monster, false), [], "too far to hear")
-	assert_eq(NetGame.noise_message(near, monster, true).size(), 4, "the monster gets every noise")
+	assert_eq(NetGame.noise_message(near, monster, true).size(), 5, "the monster gets every noise")
 	var silent := NoiseEvent.new(NoiseEvent.Type.FOOTSTEP, Vector3.ZERO, 0.0, other)
 	assert_eq(NetGame.noise_message(silent, monster, true), [])
 

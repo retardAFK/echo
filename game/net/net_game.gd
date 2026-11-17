@@ -266,7 +266,7 @@ static func noise_message(event: NoiseEvent, viewer: Node3D, viewer_is_monster: 
 		return []  # Lost in a ventilation zone (S-014, Q5).
 	if not viewer_is_monster and not NoiseBus.can_hear(event, viewer.get_eye_position()):
 		return []
-	return [Event.NOISE, event.type, event.position, event.noise_range]
+	return [Event.NOISE, event.type, event.position, event.noise_range, event.by_monster]
 
 
 ## A spectator hears what the teammate it watches hears.
@@ -512,9 +512,9 @@ func apply_event(event: Array) -> void:
 	if event.is_empty():
 		return
 	match event[0]:
-		Event.NOISE when event.size() == 4:
+		Event.NOISE when event.size() >= 4:
 			var type: NoiseEvent.Type = event[1]
-			NoiseBus.emit_noise(type, event[2], event[3])
+			NoiseBus.emit_noise(type, event[2], event[3], null, event.size() >= 5 and event[4])
 			if world != null:
 				world.voice(type, event[2])
 		Event.SCAN when event.size() == 3:

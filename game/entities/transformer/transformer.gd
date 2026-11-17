@@ -92,7 +92,7 @@ func hold(user: Node, delta: float) -> void:
 	_noise_left -= delta
 	if _noise_left <= 0.0:
 		_noise_left = settings.repair_noise_interval
-		_sparks.play()
+		SoundSpace.play(_sparks)
 		NoiseBus.emit_noise(
 			NoiseEvent.Type.REPAIR, global_position + Vector3.UP, settings.repair_noise_range, user
 		)
@@ -111,7 +111,7 @@ func hold(user: Node, delta: float) -> void:
 
 ## The siren over the whole cité, once repaired (Q4). GameLoop sends its noise.
 func start_siren() -> void:
-	_siren.play()
+	SoundSpace.play(_siren)
 
 
 func is_humming() -> bool:
@@ -129,7 +129,7 @@ func get_hold_ratio() -> float:
 
 ## Online client (S-010, T-099): the sparks of a repair in the room.
 func voice() -> void:
-	_sparks.play()
+	SoundSpace.play(_sparks)
 
 
 func _has_fuse_to_place() -> bool:

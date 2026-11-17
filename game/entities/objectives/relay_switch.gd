@@ -69,11 +69,11 @@ func set_down(down: bool) -> void:
 
 ## Online client: its clack heard from the room.
 func voice() -> void:
-	_sound.play()
+	SoundSpace.play(_sound)
 
 
 func _show(sound: bool) -> void:
 	_lever.rotation.x = deg_to_rad(-60.0 if is_down else 60.0)
 	_lamp.visible = is_down
 	if sound and is_inside_tree():
-		_sound.play()
+		SoundSpace.play(_sound)

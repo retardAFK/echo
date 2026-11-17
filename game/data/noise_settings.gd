@@ -14,6 +14,12 @@ extends Resource
 @export_range(0.0, 50.0, 0.1, "suffix:m") var metal_walk_range: float = 6.0
 ## Running on metal, in meters (S-016, Q9). Crouched stays at crouch_range.
 @export_range(0.0, 50.0, 0.1, "suffix:m") var metal_sprint_range: float = 18.0
+## Crouching in a puddle, in meters (S-012, Q4: water doubles a noise).
+@export_range(0.0, 50.0, 0.1, "suffix:m") var puddle_crouch_range: float = 2.0
+## Walking in a puddle, in meters (S-012, Q4).
+@export_range(0.0, 50.0, 0.1, "suffix:m") var puddle_walk_range: float = 8.0
+## Running in a puddle, in meters (S-012, Q4).
+@export_range(0.0, 50.0, 0.1, "suffix:m") var puddle_sprint_range: float = 20.0
 
 @export_group("Strides")
 ## Distance between two crouched footsteps, in meters.
