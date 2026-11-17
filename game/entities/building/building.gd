@@ -9,6 +9,8 @@ signal scan_changed(is_scanned: bool)
 
 const SCAN_LAYER := 1 << 4
 const GROUP := &"buildings"
+const CRACKLE := preload("res://assets/audio/voices/scan_crackle.wav")
+const AUDIO := preload("res://game/data/audio_settings.tres")
 
 @export var settings: MonsterSettings
 ## Size of the box volume, in meters. Set on each building of a map: the shape
@@ -32,12 +34,15 @@ var scanned := false:
 		scanned = value
 		if not value:
 			_restore_lights()
+		_crackle(value)
 		scan_changed.emit(value)
 
 var _lights: Array[Light3D] = []
 var _energies: Array[float] = []
 var _flicker_timer := 0.0
 var _rng := RandomNumberGenerator.new()
+## The lights crackle while they flicker (S-012, T-145), made on first scan.
+var _crackle_player: AudioStreamPlayer3D
 
 @onready var _shape: CollisionShape3D = $CollisionShape3D
 
@@ -129,3 +134,32 @@ func _restore_lights() -> void:
 	_flicker_timer = 0.0
 	for i in _lights.size():
 		_lights[i].light_energy = _energies[i]
+
+
+func _crackle(on: bool) -> void:
+	if not on:
+		if _crackle_player != null:
+			_crackle_player.stop()
+		return
+	if _crackle_player == null:
+		var audio: AudioSettings = AUDIO
+		_crackle_player = AudioStreamPlayer3D.new()
+		_crackle_player.name = "Crackle"
+		_crackle_player.stream = CRACKLE
+		_crackle_player.bus = &"Ambiance"
+		_crackle_player.volume_db = audio.crackle_db
+		_crackle_player.max_distance = audio.crackle_range
+		_crackle_player.position = _lights_centre()
+		add_child(_crackle_player)
+	if _crackle_player.is_inside_tree():
+		_crackle_player.play()
+
+
+## Middle of the building's lights, in its own space; its centre without lights.
+func _lights_centre() -> Vector3:
+	if _lights.is_empty():
+		return Vector3.ZERO
+	var sum := Vector3.ZERO
+	for light in _lights:
+		sum += light.position
+	return sum / _lights.size()

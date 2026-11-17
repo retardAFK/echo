@@ -25,6 +25,14 @@ extends Resource
 ## Time between two breaths, in seconds.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var breath_interval: float = 1.0
 
+@export_group("Voice (S-012, T-145)")
+## Range of the growl the monster lets out as it breaks into a run, in meters.
+@export_range(0.0, 50.0, 0.5, "suffix:m") var growl_range: float = 12.0
+## Seconds without running before a run starts with a growl.
+@export_range(0.0, 30.0, 0.5, "suffix:s") var growl_rest: float = 3.0
+## Range of its cry when it catches a hunted, in meters.
+@export_range(0.0, 80.0, 0.5, "suffix:m") var scream_range: float = 30.0
+
 @export_group("Vision")
 ## Full width of the field of view, in degrees.
 @export_range(10.0, 360.0, 1.0, "suffix:°") var vision_angle: float = 100.0

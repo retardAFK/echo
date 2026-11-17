@@ -200,6 +200,7 @@ func _check_catches() -> void:
 		):
 			monster.catch_count += 1
 			monster.gesture.play(MonsterBody.Action.CATCH, MonsterAvatar.BODY_SETTINGS.catch_time)
+			MonsterNoise.scream(monster)
 			hunted_caught.emit(hunted)  # GameMap applies the capture rule and tells everyone.
 
 
