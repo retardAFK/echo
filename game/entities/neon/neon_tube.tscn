@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/entities/neon/neon_tube.gd" id="1_neon"]
+[ext_resource type="AudioStream" path="res://assets/audio/hospital/neon_buzz.wav" id="2_buzz"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_lit"]
 shading_mode = 0
@@ -26,3 +27,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
 light_color = Color(0.55, 1, 0.7, 1)
 light_energy = 1.4
 omni_range = 6.0
+
+[node name="Buzz" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("2_buzz")
+volume_db = -6.0
+unit_size = 1.5
+max_distance = 9.0

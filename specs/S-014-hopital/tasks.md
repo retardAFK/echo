@@ -38,7 +38,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-190 — Habillage et éclairage précalculé
   - Résultat vérifiable : tuiles de l'hôpital dans l'atlas, mobilier, néons qui grésillent, brouillard du couloir ; budget tenu
   - Dépend de : T-188, T-189
-- [ ] T-191 — Ambiance sonore de l'hôpital
+- [x] T-191 — Ambiance sonore de l'hôpital
   - Résultat vérifiable : sons montrés à Maxime et intégrés
   - Dépend de : T-190
 - [x] T-192 — IA à l'hôpital

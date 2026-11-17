@@ -350,7 +350,7 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [x] T-190 — Habillage et éclairage précalculé
   - Résultat vérifiable : hôpital habillé, néons qui grésillent, traces d'évacuation, brouillard intérieur ; budget de lumières et d'appels de dessin tenu
   - Dépend de : T-188, T-189
-- [ ] T-191 — Ambiance sonore de l'hôpital
+- [x] T-191 — Ambiance sonore de l'hôpital
   - Résultat vérifiable : ventilation, bourdonnement des néons, bruits lointains qui ne sont pas des bruits de jeu (Q3) ; montrée à Maxime
   - Dépend de : T-190
 - [x] T-192 — IA à l'hôpital

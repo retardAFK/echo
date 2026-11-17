@@ -110,7 +110,8 @@ func shove(who: Node = null) -> void:
 	tipped = true
 	collision_layer = 0
 	_show_tipped()
-	NoiseBus.emit_noise(NoiseEvent.Type.ROLL, global_position, settings.gurney_shove_range, who)
+	# Steel on the tiles: the gurney plays its own crash (an IMPACT is self voiced).
+	NoiseBus.emit_noise(NoiseEvent.Type.IMPACT, global_position, settings.gurney_shove_range, who)
 
 
 ## Rolls to where the hunted pushing it wants it: gurney_lead in front of its
@@ -203,4 +204,7 @@ func mirror_state(values: Array) -> void:
 func _show_tipped() -> void:
 	_model.rotation.z = PI / 2.0
 	_model.position.y = 0.35  # On its side, not through the floor.
+	var crash := get_node_or_null("Crash") as AudioStreamPlayer3D
+	if crash != null and is_inside_tree():
+		crash.play()
 	_model.position.y = 0.45
