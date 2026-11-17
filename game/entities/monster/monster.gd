@@ -180,6 +180,7 @@ func _physics_process(delta: float) -> void:
 		):
 			catch_count += 1
 			gesture.play(MonsterBody.Action.CATCH, _body.settings.catch_time)
+			MonsterNoise.scream(self)
 			hunted_caught.emit(hunted)
 			player_caught.emit()
 			break

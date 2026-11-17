@@ -83,16 +83,14 @@ func test_player_does_not_hear_itself() -> void:
 	assert_eq(_ears.heard_count, 0)
 
 
-func test_placeholder_sounds_are_generated() -> void:
-	var step := PlaceholderSounds.step()
-	var breath := PlaceholderSounds.breath()
-	var bytes_per_second := PlaceholderSounds.MIX_RATE * 2
-	assert_almost_eq(
-		float(step.data.size()) / bytes_per_second, PlaceholderSounds.STEP_LENGTH, 0.01
-	)
-	assert_almost_eq(
-		float(breath.data.size()) / bytes_per_second, PlaceholderSounds.BREATH_LENGTH, 0.01
-	)
+func test_our_own_sounds_replace_the_placeholders() -> void:  # S-012, T-149.
+	var sounds: Dictionary = _ears.get("_sounds")
+	assert_eq(sounds[NoiseEvent.Type.BREATH], PlayerEars.SOUND_BREATH)
+	assert_eq(sounds[NoiseEvent.Type.CAR_ALARM], PlayerEars.SOUND_CAR_ALARM)
+	assert_eq(sounds[NoiseEvent.Type.CALL], PlayerEars.SOUND_CALL)
+	assert_eq(sounds[NoiseEvent.Type.RESCUE], PlayerEars.SOUND_RESCUE)
+	for stream: AudioStream in sounds.values():
+		assert_false(stream is AudioStreamWAV and stream.resource_path == "", "made by code")
 
 
 func test_debug_overlay_shows_monster() -> void:

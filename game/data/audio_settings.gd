@@ -27,3 +27,47 @@ extends Resource
 ## Quietest and loudest of one's own sounds, in decibels.
 @export_range(-60.0, 0.0, 1.0, "suffix:dB") var self_min_db: float = -32.0
 @export_range(-60.0, 0.0, 1.0, "suffix:dB") var self_max_db: float = -8.0
+
+@export_group("Wind (T-144)")
+## Seconds between the ends of two gusts, at random between these.
+@export var gust_interval := Vector2(25.0, 50.0)
+## Seconds a gust blows at full strength, at random between these.
+@export var gust_length := Vector2(6.0, 10.0)
+## Seconds the wind takes to rise before a gust, and to fall after.
+@export_range(0.1, 10.0, 0.1, "suffix:s") var gust_rise: float = 2.0
+## Volume the wind gains at the height of a gust, in decibels.
+@export_range(0.0, 24.0, 0.5, "suffix:dB") var gust_db: float = 9.0
+## Volume the wind loses indoors, in decibels.
+@export_range(-40.0, 0.0, 0.5, "suffix:dB") var indoor_wind_db: float = -12.0
+## Volume of the gust's whistle at its height, in decibels.
+@export_range(-40.0, 0.0, 0.5, "suffix:dB") var whistle_db: float = -10.0
+
+@export_group("Monster voice (T-145)")
+## Volume of the scan's drone once the monster listens, in decibels.
+@export_range(-40.0, 0.0, 0.5, "suffix:dB") var drone_db: float = -14.0
+## Volume of the drone as the concentration begins, in decibels.
+@export_range(-60.0, 0.0, 0.5, "suffix:dB") var drone_min_db: float = -30.0
+## How much higher the drone sounds once the monster listens (0.15 = 15 %).
+@export_range(0.0, 1.0, 0.01) var drone_pitch_rise: float = 0.15
+## Volume of the crackle of a scanned building's lights, in decibels.
+@export_range(-40.0, 12.0, 0.5, "suffix:dB") var crackle_db: float = -4.0
+## Distance the crackle of the lights carries, in meters.
+@export_range(1.0, 60.0, 0.5, "suffix:m") var crackle_range: float = 18.0
+
+@export_group("Music (T-146)")
+## Distance to the monster under which the pulse joins in, in meters.
+@export_range(1.0, 100.0, 1.0, "suffix:m") var unease_range: float = 35.0
+## Distance to the monster under which the shrill strings join in, in meters.
+@export_range(1.0, 100.0, 1.0, "suffix:m") var dread_range: float = 15.0
+## Seconds a level is kept at least before the next change.
+@export_range(0.0, 20.0, 0.5, "suffix:s") var level_hold: float = 3.0
+## Seconds a layer takes to come in.
+@export_range(0.1, 30.0, 0.5, "suffix:s") var layer_rise: float = 4.0
+## Seconds a layer takes to go away.
+@export_range(0.1, 60.0, 0.5, "suffix:s") var layer_fall: float = 10.0
+## Monster role: a noise heard this close brings the pulse in, in meters.
+@export_range(1.0, 100.0, 1.0, "suffix:m") var monster_heard_range: float = 25.0
+## Monster role: seconds the pulse stays after the last such noise.
+@export_range(0.5, 30.0, 0.5, "suffix:s") var monster_heard_memory: float = 5.0
+## Volume of each layer at full, in decibels: background, pulse, strings.
+@export var layer_db := Vector3(0.0, 0.0, 0.0)

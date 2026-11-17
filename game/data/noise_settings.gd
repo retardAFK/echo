@@ -40,6 +40,12 @@ extends Resource
 ## neither the monster nor its scan hears it, in meters.
 @export_range(0.0, 20.0, 0.5, "suffix:m") var ventilation_mask: float = 4.0
 
+@export_group("Wind (S-012, T-144)")
+## During a gust, outdoors, a noise of this range or less is cut down, in meters.
+@export_range(0.0, 30.0, 0.5, "suffix:m") var wind_small_range: float = 6.0
+## What a gust multiplies such a noise's range by.
+@export_range(0.0, 1.0, 0.05) var wind_factor: float = 0.5
+
 @export_group("Capture (S-010, T-107)")
 ## Range of the call for help of a captured hunted, in meters.
 @export_range(0.0, 50.0, 0.5, "suffix:m") var call_range: float = 8.0

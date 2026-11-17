@@ -9,7 +9,9 @@ extends RefCounted
 ## loudspeaker set off from a terminal; SHUTTER: a metal shutter; DISK: a
 ## download's hard disk; BEEP: a wrong code; SWITCH: a relay switch (S-018).
 ## MONITOR: a hospital monitor beeping; ROLL: a gurney or a wheelchair
-## rolling, or a gurney shoved over (S-014).
+## rolling, or a gurney shoved over (S-014). GROWL: the monster breaking into a
+## run; SCREAM: the monster's cry when it catches a hunted (S-012, T-145).
+## New types go last: their numbers travel online.
 enum Type {
 	FOOTSTEP,
 	BREATH,
@@ -35,6 +37,8 @@ enum Type {
 	SWITCH,
 	MONITOR,
 	ROLL,
+	GROWL,
+	SCREAM,
 }
 
 var type: Type

@@ -14,16 +14,16 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-143 — Pas selon le sol
   - Résultat vérifiable : 6 sols, flaques (portées 2/8/20 m), `SurfaceMap` générée, mes propres pas, raclement du monstre, `by_monster` en ligne ; sons montrés à Maxime ; tests GUT
   - Dépend de : T-142
-- [ ] T-144 — Le vent de la cité
+- [x] T-144 — Le vent de la cité
   - Résultat vérifiable : rafales (portée des bruits ≤ 6 m divisée par deux dehors), audibles, synchronisées en ligne ; tests GUT
   - Dépend de : T-142
-- [ ] T-145 — Voix du monstre
+- [x] T-145 — Voix du monstre
   - Résultat vérifiable : souffle, grognement, cri de capture, bourdon du scan, grésillement des lampes ; bus Voix ; sons montrés à Maxime ; tests GUT
   - Dépend de : T-142
-- [ ] T-146 — Musique minimale et tension
+- [x] T-146 — Musique minimale et tension
   - Résultat vérifiable : trois nappes, paliers 35 m et 15 m, lents à changer ; montrées à Maxime ; tests GUT sur les paliers
   - Dépend de : T-142
-- [ ] T-149 — Sons provisoires remplacés
+- [x] T-149 — Sons provisoires remplacés
   - Résultat vérifiable : alarme de voiture, appel à l'aide, sauvetage faits par nous ; `PlaceholderSounds` supprimée
   - Dépend de : T-142
 - [ ] T-147 — Mixage
@@ -36,3 +36,6 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 ## Compte rendu
 - T-140, T-141 (17/11/2026) : spec, plan et tâches, PR #167.
 - T-142, T-143 (17/11/2026) : autoload `SoundSpace` (et non une classe `SpatialSound`) ; 31 sons de jeu et 28 pas ont leur version étouffée (`tools/audio/muffle.py`) ; 4 pas par sol et 4 raclements (`tools/audio/footsteps.py`) ; `SurfaceMap` de 169 boîtes générée avec la map, 12 flaques dehors (un seul maillage) et 5 au parking ; mes propres pas et mon souffle ; `by_monster` dans les messages de la salle. Sons sur la page d'écoute envoyée à Maxime.
+- T-144 (17/11/2026) : `WindGusts` (calendrier tiré d'une graine) et `CityWind` (boucle de vent qui monte de 9 dB, sifflement `gust.wav`, plus sourde dedans) ; pendant une rafale, un bruit dehors de portée ≤ 6 m porte moitié moins loin (`NoiseBus.wind_cut`, `Building.any_contains`) ; en ligne, la force du vent est la 13e entrée de l'état du monde.
+- T-145, T-149 (17/11/2026) : bruits `GROWL` (12 m, premier pas de course après 3 s) et `SCREAM` (30 m, à chaque capture : monstre IA, monstre joué seul ou en ligne, cachette ouverte) ; bus Voix envoyé dans Effets ; souffle rauque du monstre, 3 grognements jamais deux fois le même ; `ScanDrone` pour le monstre seul ; grésillement près des lampes du bâtiment scanné. Alarme, appel à l'aide, sauvetage et souffle des chassés faits par nous (`tools/audio/voices.py`), avec leur version étouffée ; `PlaceholderSounds` supprimée.
+- T-146 (17/11/2026) : `TensionMusic` lancé par la map (pas sur le serveur) : trois boucles de 32 s (`tools/audio/music.py`) jouées ensemble sur le bus Musique ; paliers 35 m et 15 m, palier tenu 3 s, nappe qui monte en 4 s et descend en 10 s ; le monstre en ligne est suivi par sa marionnette ; en monstre, la pulsation après un bruit entendu à moins de 25 m ; l'effroi pour tous quand la sortie est ouverte.

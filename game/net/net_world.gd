@@ -24,6 +24,7 @@ var transformer: Transformer
 var prison: Prison
 var network: CityNetwork
 var game_loop: GameLoop
+var wind: CityWind
 
 
 func _init(map: Node) -> void:
@@ -50,6 +51,8 @@ func _init(map: Node) -> void:
 			prison = node
 		elif node is CityNetwork:
 			network = node
+		elif node is CityWind:
+			wind = node
 
 
 ## Room side: [fuse in each box, each pickup still there, state of each car
@@ -57,7 +60,7 @@ func _init(map: Node) -> void:
 ## whether each door is open (S-016), the cages of the prison, the
 ## terminals and cameras of the network, the objectives besides fuses
 ## (S-018), the state of each monitor of the hospital, where its gurneys and
-## wheelchairs stand (S-014)].
+## wheelchairs stand (S-014), the wind's strength (S-012)].
 func state() -> Array:
 	var fuses := []
 	for box in boxes:
@@ -93,6 +96,7 @@ func state() -> Array:
 		screens,
 		beds,
 		wheels,
+		wind.shared_strength() if wind != null else 0.0,
 	]
 
 
@@ -138,6 +142,8 @@ func apply(values: Array) -> void:
 		var wheels: Array = values[11]
 		for i in mini(wheels.size(), chairs.size()):
 			chairs[i].mirror_state(wheels[i])
+	if values.size() >= 13 and wind != null:
+		wind.mirror_strength(values[12])
 
 
 ## Client side: the sound of a noise made in the room by something of the map

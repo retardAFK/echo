@@ -36,7 +36,11 @@ GAME_SOUNDS = [
     "assets/audio/hospital/roll.wav",
     "assets/audio/hospital/gurney_crash.wav",
     "assets/audio/steps/*.wav",
-    "assets/audio/voices/*.wav",
+    "assets/audio/voices/monster_*.wav",
+    "assets/audio/voices/hunted_breath.wav",
+    "assets/audio/voices/call_for_help.wav",
+    "assets/audio/voices/rescue.wav",
+    "assets/audio/voices/car_alarm.wav",
 ]
 
 

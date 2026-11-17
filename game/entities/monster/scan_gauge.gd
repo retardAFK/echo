@@ -40,6 +40,15 @@ func stop() -> void:
 	active = false
 
 
+## How far the concentration has gone, from 0 (not scanning) to 1 (listening).
+func get_focus_ratio() -> float:
+	if not active:
+		return 0.0
+	if _settings.scan_focus_time <= 0.0:
+		return 1.0
+	return clampf(1.0 - _focus_left / _settings.scan_focus_time, 0.0, 1.0)
+
+
 ## True once the concentration is over: the building can be heard.
 func is_listening() -> bool:
 	return active and _focus_left <= 0.0
