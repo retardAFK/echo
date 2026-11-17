@@ -27,6 +27,11 @@ func play(player: AudioStreamPlayer3D, from_position := 0.0) -> float:
 		player.set_meta(&"base_db", player.volume_db)
 	player.stream = clean_stream(player.stream)
 	player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
+	if player.max_distance > 0.0:
+		# Our curve, not Godot's: its own fade towards max_distance still cut
+		# the sounds in the browser (T-147). The range is kept aside.
+		player.set_meta(&"noise_range", player.max_distance)
+		player.max_distance = 0.0
 	var camera := player.get_viewport().get_camera_3d()
 	if camera == null:
 		player.play(from_position)  # No listener (a room on a server): nothing to shape.
@@ -44,9 +49,12 @@ func play(player: AudioStreamPlayer3D, from_position := 0.0) -> float:
 	return db
 
 
-## Range of a player's sound: its max_distance, or the default.
+## Range of a player's sound: its max_distance (kept aside by play()), or the
+## default.
 func range_of(player: AudioStreamPlayer3D) -> float:
-	return player.max_distance if player.max_distance > 0.0 else settings.default_range
+	if player.max_distance > 0.0:
+		return player.max_distance
+	return float(player.get_meta(&"noise_range", settings.default_range))
 
 
 ## Walls between a sound and the listener, as NoiseBus counts them, except a

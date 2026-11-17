@@ -1,6 +1,6 @@
 # S-012 — Audio complet
 
-**Statut** : validée (17/11/2026). Maxime a lancé la phase (« on peut partir sur l'audio ») ; les réponses ci-dessous sont les propositions de Claude, retenues sans objection et ajustables à la construction. Les sons sont montrés à Maxime avant d'être intégrés (T-143, T-145, T-146).
+**Statut** : livrée (17/11/2026), en attendant l'avis de Maxime sur la page d'écoute des sons. Validée (17/11/2026) : Maxime a lancé la phase (« on peut partir sur l'audio ») ; les réponses ci-dessous sont les propositions de Claude, retenues sans objection et ajustables à la construction. Les sons sont montrés à Maxime avant d'être intégrés (T-143, T-145, T-146).
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent), P3 (l'inquiétante familiarité)
 **Phase** : 12 — Audio complet (`specs/BACKLOG.md`)
 
@@ -57,17 +57,19 @@ Le cœur du jeu est le son, mais le chassé entend encore des bruits provisoires
 - Q12 : Et la taille du build ? → Proposition : sons mono à 22 050 Hz compressés en QOA par Godot, comme ceux d'avant (environ 4 bits par échantillon). Estimation : pas (6 sols × 4 variantes + monstre), versions étouffées, voix, musique (3 boucles de 32 s), alarme et appels : **moins de 2 Mo** dans le build web (48 Mo aujourd'hui, budget 60). Mesuré à chaque tâche.
 
 ## Critères d'acceptation
-- [ ] Au casque, un pas à gauche s'entend à gauche, un pas derrière s'entend plus sourd qu'un pas devant.
-- [ ] Un pas de course à 3 m s'entend nettement plus fort que le même à 12 m ; au-delà de 14 m, rien.
-- [ ] Derrière un mur, un pas de course à 5 m s'entend étouffé et plus faible ; derrière trois murs, rien (portée 14 m ÷ 8 < 5 m).
-- [ ] Mes pas sonnent différemment sur le bitume, la terre, le métal, le carrelage, le parquet et dans une flaque.
-- [ ] Dans une flaque, ma marche porte à 8 m (jauge et monstre IA).
-- [ ] Les pas du monstre ne ressemblent pas à ceux d'un chassé, en solo comme en ligne.
-- [ ] Pendant une rafale, dehors, ma marche ne porte qu'à 2 m ; dedans, rien ne change ; en ligne, la rafale tombe en même temps chez tous.
-- [ ] Le monstre grogne quand il se met à courir, crie quand il attrape, et entend son scan ; les lampes d'un bâtiment scanné grésillent.
-- [ ] La musique monte quand le monstre approche et redescend lentement quand il s'éloigne, sans qu'on puisse le localiser avec.
-- [ ] Il ne reste aucun son provisoire.
-- [ ] Rien ne sature dans le build web (niveaux mesurés), et le build web reste sous 60 Mo.
+- [x] Au casque, un pas à gauche s'entend à gauche, un pas derrière s'entend plus sourd qu'un pas devant.
+- [x] Un pas de course à 3 m s'entend nettement plus fort que le même à 12 m ; au-delà de 14 m, rien.
+- [x] Derrière un mur, un pas de course à 5 m s'entend étouffé et plus faible ; derrière trois murs, rien (portée 14 m ÷ 8 < 5 m).
+- [x] Mes pas sonnent différemment sur le bitume, la terre, le métal, le carrelage, le parquet et dans une flaque.
+- [x] Dans une flaque, ma marche porte à 8 m (jauge et monstre IA).
+- [x] Les pas du monstre ne ressemblent pas à ceux d'un chassé, en solo comme en ligne.
+- [x] Pendant une rafale, dehors, ma marche ne porte qu'à 2 m ; dedans, rien ne change ; en ligne, la rafale tombe en même temps chez tous.
+- [x] Le monstre grogne quand il se met à courir, crie quand il attrape, et entend son scan ; les lampes d'un bâtiment scanné grésillent.
+- [x] La musique monte quand le monstre approche et redescend lentement quand il s'éloigne, sans qu'on puisse le localiser avec.
+- [x] Il ne reste aucun son provisoire.
+- [x] Rien ne sature dans le build web (niveaux mesurés), et le build web reste sous 60 Mo.
+
+Vérifiés par les tests GUT (`test_sound_space`, `test_floor_sounds`, `test_city_wind`, `test_monster_voice`, `test_tension_music`, `test_mix`) et par le banc de mixage dans le build web ; l'écoute au casque reste à confirmer par Maxime.
 
 ## Hors périmètre
 - Le son 3D « binaural » (HRTF) : le navigateur le permettrait, mais pas le mode audio de Godot sur le web.
@@ -75,6 +77,32 @@ Le cœur du jeu est le son, mais le chassé entend encore des bruits provisoires
 - La voix des joueurs (Q-010).
 - Le doublage, les annonces parlées.
 - Les sons des menus (les menus de S-013 sont muets ; à voir avec S-015).
+
+## Mixage mesuré (T-147, 17/11/2026)
+Banc de mixage dans le build web (`?mix` dans l'adresse, `game/bench/mix_bench.gd`), écouté par le monstre (oreilles à 2 m de haut) sur l'esplanade ; sortie du navigateur mesurée avant les haut-parleurs (`tools/web/measure_mix.js`, Chromium sans écran). Volumes des options par défaut (Master 0,8, Musique 0,7).
+
+| Moment | Crête (dBFS) | Moyenne (dBFS) |
+|---|---|---|
+| Pas de marche d'un chassé à 2 m devant (2,8 m des oreilles) | −21 à −23 | — |
+| Pas de course d'un chassé à 3 m | −14 | — |
+| Pas et grognement du monstre à 3 m | −9 à −11 | −26 |
+| Mes propres pas de course (le monstre) | −16 | −32 |
+| Alarme de voiture à 4 m | −16 | −22 |
+| Cri du monstre à 3 m | −13 | −24 |
+| Sirène à 6 m | −13 | −22 |
+| Musique de fond seule | −15 à −22 | −31 |
+| Musique d'effroi (trois nappes) | −15 | −27 |
+| Ambiance seule | −13 à −19 | −29 à −32 |
+| Tout à la fois (course, alarme, cri, sirène, effroi, ambiance) | **−3,2 à −4,9** | −16 à −17 |
+
+Réglages qui en découlent :
+- nappes de musique à −10 dB ;
+- alarme −6 dB ; cri −5 dB ; sirène −6 dB ;
+- mes propres pas : −26 dB en marche, −14 dB au plus.
+
+Deux défauts trouvés en mesurant, corrigés :
+- **Godot étouffait encore nos bruits vers leur portée.** Le fondu propre au moteur, réglé par `max_distance`, s'ajoutait à notre courbe et coûtait jusqu'à −25 dB. `SoundSpace` le coupe maintenant et garde la portée à part.
+- **Les bruits courts pouvaient disparaître dans un navigateur trop lent.** En dessous d'environ 10 images/s, le moteur termine un son court avant que le navigateur ne le joue. Le banc coupe donc l'image 3D pour tourner à pleine vitesse. À 60 images/s, cela ne se produit pas.
 
 ## Notes de playtest
 - (à venir)

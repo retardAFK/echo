@@ -26,10 +26,10 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [x] T-149 — Sons provisoires remplacés
   - Résultat vérifiable : alarme de voiture, appel à l'aide, sauvetage faits par nous ; `PlaceholderSounds` supprimée
   - Dépend de : T-142
-- [ ] T-147 — Mixage
+- [x] T-147 — Mixage
   - Résultat vérifiable : niveaux mesurés dans le build web (rien au-dessus de −3 dBFS), notés dans la spec ; prêts pour les curseurs de S-013
   - Dépend de : T-143, T-144, T-145, T-146, T-149
-- [ ] T-148 — Vérification finale de S-012
+- [x] T-148 — Vérification finale de S-012
   - Résultat vérifiable : critères cochés, taille du build sous 60 Mo, spec livrée
   - Dépend de : T-147
 
@@ -39,3 +39,5 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - T-144 (17/11/2026) : `WindGusts` (calendrier tiré d'une graine) et `CityWind` (boucle de vent qui monte de 9 dB, sifflement `gust.wav`, plus sourde dedans) ; pendant une rafale, un bruit dehors de portée ≤ 6 m porte moitié moins loin (`NoiseBus.wind_cut`, `Building.any_contains`) ; en ligne, la force du vent est la 13e entrée de l'état du monde.
 - T-145, T-149 (17/11/2026) : bruits `GROWL` (12 m, premier pas de course après 3 s) et `SCREAM` (30 m, à chaque capture : monstre IA, monstre joué seul ou en ligne, cachette ouverte) ; bus Voix envoyé dans Effets ; souffle rauque du monstre, 3 grognements jamais deux fois le même ; `ScanDrone` pour le monstre seul ; grésillement près des lampes du bâtiment scanné. Alarme, appel à l'aide, sauvetage et souffle des chassés faits par nous (`tools/audio/voices.py`), avec leur version étouffée ; `PlaceholderSounds` supprimée.
 - T-146 (17/11/2026) : `TensionMusic` lancé par la map (pas sur le serveur) : trois boucles de 32 s (`tools/audio/music.py`) jouées ensemble sur le bus Musique ; paliers 35 m et 15 m, palier tenu 3 s, nappe qui monte en 4 s et descend en 10 s ; le monstre en ligne est suivi par sa marionnette ; en monstre, la pulsation après un bruit entendu à moins de 25 m ; l'effroi pour tous quand la sortie est ouverte.
+- T-147 (17/11/2026) : banc de mixage `?mix` dans le build web et mesure Playwright (`tools/web/measure_mix.js`) ; niveaux notés dans la spec, rien au-dessus de −3 dBFS ; `SoundSpace` coupe le fondu de Godot vers `max_distance` ; niveaux par type de bruit dans `AudioSettings` ; le bus Voix passe par le curseur Effets de S-013.
+- T-148 (17/11/2026) : critères cochés, build web de 50 Mo (budget 60), spec livrée ; l'avis de Maxime sur la page d'écoute reste attendu.

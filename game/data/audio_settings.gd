@@ -20,13 +20,13 @@ extends Resource
 
 @export_group("Own sounds (T-143)")
 ## Volume of one's own walking footstep (4 m), in decibels.
-@export_range(-60.0, 0.0, 1.0, "suffix:dB") var self_walk_db: float = -20.0
+@export_range(-60.0, 0.0, 1.0, "suffix:dB") var self_walk_db: float = -26.0
 ## Volume added each time a footstep's range doubles, in decibels: a run or a
 ## puddle sounds louder than a walk, a crouched step quieter.
 @export_range(0.0, 20.0, 0.5, "suffix:dB") var self_db_per_doubling: float = 8.0
 ## Quietest and loudest of one's own sounds, in decibels.
 @export_range(-60.0, 0.0, 1.0, "suffix:dB") var self_min_db: float = -32.0
-@export_range(-60.0, 0.0, 1.0, "suffix:dB") var self_max_db: float = -8.0
+@export_range(-60.0, 0.0, 1.0, "suffix:dB") var self_max_db: float = -14.0
 
 @export_group("Wind (T-144)")
 ## Seconds between the ends of two gusts, at random between these.
@@ -70,4 +70,20 @@ extends Resource
 ## Monster role: seconds the pulse stays after the last such noise.
 @export_range(0.5, 30.0, 0.5, "suffix:s") var monster_heard_memory: float = 5.0
 ## Volume of each layer at full, in decibels: background, pulse, strings.
-@export var layer_db := Vector3(0.0, 0.0, 0.0)
+@export var layer_db := Vector3(-10.0, -10.0, -10.0)
+
+@export_group("Mix (T-147)")
+## Level of the loudest noises, in decibels, so that everything at once stays
+## under -3 dBFS in the browser (measured with the mixing bench).
+@export_range(-24.0, 0.0, 0.5, "suffix:dB") var car_alarm_db: float = -6.0
+@export_range(-24.0, 0.0, 0.5, "suffix:dB") var scream_db: float = -5.0
+
+
+## Level of a noise type the ears play, in decibels.
+func level_db(type: NoiseEvent.Type) -> float:
+	match type:
+		NoiseEvent.Type.CAR_ALARM:
+			return car_alarm_db
+		NoiseEvent.Type.SCREAM:
+			return scream_db
+	return 0.0

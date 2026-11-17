@@ -117,6 +117,7 @@ func _on_noise_emitted(event: NoiseEvent) -> void:
 	voice.pitch_scale = _steps.pitch() if event.type == NoiseEvent.Type.FOOTSTEP else 1.0
 	voice.max_distance = event.noise_range
 	voice.global_position = event.position
+	voice.set_meta(&"base_db", audio.level_db(event.type))  # The mix (T-147).
 	SoundSpace.play(voice)  # Distance, walls and direction (S-012, T-142).
 
 
