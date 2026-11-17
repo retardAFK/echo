@@ -59,6 +59,9 @@ var _prison_left := 0.0
 var _jamb := JambUnstick.new()
 ## Seconds it has stood against a gurney, shoving it (S-014, Q7).
 var _shoving := 0.0
+## Where it last heard a noise in each complex of levels (S-014): complex name
+## to position, for the level it scans.
+var _heard_in := {}
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 @onready var _body: MonsterBody = $Body
@@ -167,6 +170,7 @@ func _physics_process(delta: float) -> void:
 	var before := global_position
 	_move(delta)
 	_make_noise(delta, before)
+	_silence_monitors()
 	if Decoy.crush_near(get_tree(), global_position, settings.catch_distance) > 0:  # S-008, Q4.
 		gesture.play(MonsterBody.Action.CRUSH, _body.settings.crush_time)
 	for hunted in get_targets():
@@ -390,7 +394,7 @@ func _on_chase_lost(last_seen: Vector3) -> void:
 ## It found nobody where it looked (S-009, Q3): if a building lies close by,
 ## it stops and scans it, when the gauge and the cooldown allow it.
 func _on_trace_lost(at: Vector3) -> void:
-	var building := nearest_building(at, settings.ai_scan_radius)
+	var building := scan_choice(nearest_building(at, settings.ai_scan_radius))
 	if building == null or not brain.can_scan(building, scan.can_start()):
 		return
 	if not scan.start():
@@ -402,6 +406,41 @@ func _on_trace_lost(at: Vector3) -> void:
 	center.y = global_position.y
 	if center.distance_to(global_position) > 0.01:
 		look_at(center, Vector3.UP)
+
+
+## The level of a complex to scan (S-014, T-192): the one it stands in, else
+## the one of the last noise it heard in the complex, else one at random. A
+## plain building is scanned as it is.
+func scan_choice(building: Building) -> Building:
+	if building == null or building.complex == "":
+		return building
+	var levels: Array[Building] = []
+	for other in buildings:
+		if other.complex == building.complex:
+			levels.append(other)
+	for level in levels:
+		if level.contains(global_position):
+			return level
+	if _heard_in.has(building.complex):
+		for level in levels:
+			if level.contains(_heard_in[building.complex]):
+				return level
+	return levels[rng.randi_range(0, levels.size() - 1)]
+
+
+## Walking past a monitor that beeps, it switches it off (S-014, T-192).
+func _silence_monitors() -> void:
+	for node in get_tree().get_nodes_in_group(Monitor.GROUP):
+		var monitor := node as Monitor
+		if (
+			monitor.state == Monitor.State.BEEPING
+			and (
+				monitor.global_position.distance_to(global_position)
+				<= HOSPITAL_SETTINGS.monitor_reach
+			)
+		):
+			monitor.switch_off()
+			gesture.play(MonsterBody.Action.CRUSH, _body.settings.crush_time)
 
 
 ## The building nearest to a position, within a distance, or null.
@@ -463,6 +502,8 @@ func _on_noise_emitted(event: NoiseEvent) -> void:
 		for building in buildings:
 			if building.contains(event.position):
 				brain.remember(event.position)
+				if building.complex != "":
+					_heard_in[building.complex] = event.position
 				break
 
 

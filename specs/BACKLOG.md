@@ -353,7 +353,7 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [ ] T-191 — Ambiance sonore de l'hôpital
   - Résultat vérifiable : ventilation, bourdonnement des néons, bruits lointains qui ne sont pas des bruits de jeu (Q3) ; montrée à Maxime
   - Dépend de : T-190
-- [ ] T-192 — IA à l'hôpital
+- [x] T-192 — IA à l'hôpital
   - Résultat vérifiable : monstre IA (scan par niveau, moniteurs, brancards) et proie IA (leurres de l'hôpital) jouent la cité avec l'hôpital sans blocage (simulation de 20 parties) ; la durée moyenne reste dans la cible ; partie à 4 de la CI verte
   - Dépend de : T-190
 - [ ] T-193 — Vérification finale de S-014

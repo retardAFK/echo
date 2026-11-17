@@ -41,7 +41,7 @@ Chaque tâche est vérifiée par Claude (tests GUT, lint, import et export web, 
 - [ ] T-191 — Ambiance sonore de l'hôpital
   - Résultat vérifiable : sons montrés à Maxime et intégrés
   - Dépend de : T-190
-- [ ] T-192 — IA à l'hôpital
+- [x] T-192 — IA à l'hôpital
   - Résultat vérifiable : 20 parties simulées sans blocage, durée moyenne qui ne baisse pas, partie à 4 de la CI verte
   - Dépend de : T-190
 - [ ] T-193 — Vérification finale de S-014
