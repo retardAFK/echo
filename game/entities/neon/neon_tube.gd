@@ -2,7 +2,7 @@ class_name NeonTube
 extends Node3D
 ## A fluorescent tube that buzzes and stutters (spec S-014, T-190): lit most
 ## of the time, now and then a burst of flickers, sometimes dead for a moment.
-## Its light is a real one, not baked, so the walls flicker with it; it lights
+## It buzzes while lit. Its light is a real one, not baked, so the walls flicker with it; it lights
 ## only while the camera is on its level, since it has no shadow and would
 ## shine through the slab above.
 
@@ -30,6 +30,7 @@ var _fit_left := 0.0
 
 @onready var _light: OmniLight3D = $Light
 @onready var _tube: MeshInstance3D = $Tube
+@onready var _buzz: AudioStreamPlayer3D = $Buzz
 
 
 func _ready() -> void:
@@ -75,3 +76,8 @@ func _show(on: bool) -> void:
 		_light.visible = on
 	if _tube != null:
 		_tube.material_override = lit_material if on else dead_material
+	if _buzz != null and _buzz.is_inside_tree():
+		if not on:
+			_buzz.stop()  # A dead tube is silent.
+		elif not _buzz.playing:
+			_buzz.play()

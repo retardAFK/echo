@@ -324,6 +324,16 @@ const FURNITURE := [
 ## in the morgue.
 const NEONS := [Vector3(21.0, 0.0, 129.0), Vector3(21.0, 3.0, 59.0), Vector3(14.75, -3.0, 65.0)]
 const NEON := preload("res://game/entities/neon/neon_tube.tscn")
+## Sounds (T-191, tools/audio/hospital_sounds.py): the roar of the
+## ventilation zones, water dripping in the morgue, far-off noises.
+const VENTILATION_SOUND := preload("res://assets/audio/hospital/ventilation.wav")
+const DRIP_SOUND := preload("res://assets/audio/hospital/drip.wav")
+const DISTANT_SOUNDS: Array[AudioStream] = [
+	preload("res://assets/audio/hospital/distant_roll.wav"),
+	preload("res://assets/audio/hospital/distant_slam.wav"),
+]
+## Where the water drips: plan x, level floor, plan y.
+const DRIPS := [Vector3(13.0, -3.0, 60.0), Vector3(27.0, -3.0, 110.0)]
 
 ## The network of the cité in the hospital (S-018 formats).
 const TERMINALS := [
@@ -482,6 +492,42 @@ func add_gameplay() -> void:
 		zone.position = kit.world(rect.get_center().x, rect.get_center().y, h + STOREY / 2.0)
 		zones.add_child(zone)
 		zone.owner = zones.owner
+		var roar := AudioStreamPlayer3D.new()
+		roar.name = "Roar"
+		roar.stream = VENTILATION_SOUND
+		roar.autoplay = true
+		roar.unit_size = 4.0
+		roar.max_distance = 16.0
+		zone.add_child(roar)
+		roar.owner = zones.owner
+	_add_sounds()
+
+
+## Water dripping in the basement, and the far-off noises of the whole
+## hospital: plain players, they betray nobody.
+func _add_sounds() -> void:
+	var node := Node3D.new()
+	node.name = "HospitalSounds"
+	_builder._add(node)
+	for i in DRIPS.size():
+		var at: Vector3 = DRIPS[i]
+		var drip := AudioStreamPlayer3D.new()
+		drip.name = "Drip%d" % (i + 1)
+		drip.stream = DRIP_SOUND
+		drip.autoplay = true
+		drip.unit_size = 2.0
+		drip.max_distance = 12.0
+		drip.position = kit.world(at.x, at.z, at.y + 2.0)
+		node.add_child(drip)
+		drip.owner = node.owner
+	var distant := DistantSounds.new()
+	distant.name = "Distant"
+	var top: float = LEVELS[-1] + STOREY
+	distant.size = Vector3(RECT.size.x, top - LEVELS[0], RECT.size.y)
+	distant.position = kit.world(RECT.get_center().x, RECT.get_center().y, (LEVELS[0] + top) / 2.0)
+	distant.streams = DISTANT_SOUNDS
+	node.add_child(distant)
+	distant.owner = node.owner
 
 
 ## Outer walls of a level: windows above the basement, the doors out on the

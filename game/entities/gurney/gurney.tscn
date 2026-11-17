@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://game/entities/gurney/gurney.gd" id="1_gurney"]
 [ext_resource type="Resource" path="res://game/data/hospital_settings.tres" id="2_settings"]
 [ext_resource type="PackedScene" path="res://assets/models/hospital/gurney.glb" id="3_model"]
+[ext_resource type="AudioStream" path="res://assets/audio/hospital/gurney_crash.wav" id="4_crash"]
 
 [sub_resource type="BoxShape3D" id="Shape_body"]
 size = Vector3(0.7, 0.85, 2.0)
@@ -21,3 +22,9 @@ shape = SubResource("Shape_body")
 
 [node name="Gurney" parent="Model" instance=ExtResource("3_model")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="Crash" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+stream = ExtResource("4_crash")
+unit_size = 4.0
+max_distance = 10.0

@@ -31,6 +31,9 @@ const SELF_VOICED := [
 const SOUND_BELL := preload("res://assets/audio/network/prison_bell.wav")
 const SOUND_DISK := preload("res://assets/audio/network/hard_disk.wav")
 const SOUND_BEEP := preload("res://assets/audio/network/keypad_beep.wav")
+## The hospital (S-014, T-191): a monitor's alarm, casters rolling.
+const SOUND_MONITOR := preload("res://assets/audio/hospital/monitor_beep.wav")
+const SOUND_ROLL := preload("res://assets/audio/hospital/roll.wav")
 
 var heard_count := 0
 
@@ -50,7 +53,8 @@ func _ready() -> void:
 	_sounds[NoiseEvent.Type.BELL] = SOUND_BELL
 	_sounds[NoiseEvent.Type.DISK] = SOUND_DISK
 	_sounds[NoiseEvent.Type.BEEP] = SOUND_BEEP
-	_sounds[NoiseEvent.Type.MONITOR] = SOUND_BEEP  # Until the hospital sounds (T-191).
+	_sounds[NoiseEvent.Type.MONITOR] = SOUND_MONITOR
+	_sounds[NoiseEvent.Type.ROLL] = SOUND_ROLL
 	for i in VOICES:
 		var voice := AudioStreamPlayer3D.new()
 		voice.top_level = true
