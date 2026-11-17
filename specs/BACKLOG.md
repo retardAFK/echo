@@ -22,7 +22,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 | 11 | S-011 | Personnages et animations | T-120 à T-139 | Phase 10 |
 | 12 | S-012 | Audio complet | T-140 à T-159 | Phase 11 |
 | 13 | S-013 | Interface, menus et options | T-160 à T-179 | Phase 12 |
-| 14 | S-014 | L'hôpital, intégré à la cité des Tilleuls (D-019) | T-180 à T-209 | Phase 13 |
+| 14 | S-014 | L'hôpital, intégré à la cité des Tilleuls (D-019), livrée le 17/11/2026 sauf la mesure des 60 images/s | T-180 à T-209 | Phase 13 |
 | 15 | S-015 | Finition et publication | T-210 à T-229 | Phase 14 |
 | — | S-016 | Intérieurs des bâtiments de la cité (demande du 15/11/2026, hors ordre des phases) | T-230 à T-249 | S-006, S-008, S-010 |
 | — | S-017 | Carte des chassés (demande du 15/11/2026, hors ordre des phases) | T-250 à T-259 | S-006, S-010 |
@@ -356,7 +356,7 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [x] T-192 — IA à l'hôpital
   - Résultat vérifiable : monstre IA (scan par niveau, moniteurs, brancards) et proie IA (leurres de l'hôpital) jouent la cité avec l'hôpital sans blocage (simulation de 20 parties) ; la durée moyenne reste dans la cible ; partie à 4 de la CI verte
   - Dépend de : T-190
-- [ ] T-193 — Vérification finale de S-014
+- [x] T-193 — Vérification finale de S-014
   - Résultat vérifiable : critères cochés, performance mesurée sur la machine de référence, spec livrée
   - Dépend de : T-191, T-192
 
