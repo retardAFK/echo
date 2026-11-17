@@ -51,6 +51,7 @@ func _ready() -> void:
 		return
 	_monster_body = MONSTER_BODY_SCENE.instantiate()
 	add_child(_monster_body)
+	add_to_group(TensionMusic.PUPPETS_GROUP)  # The hunted's music follows it (S-012).
 
 
 ## Moves to where the buffer has it at time (seconds).
