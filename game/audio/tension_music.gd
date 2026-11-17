@@ -73,6 +73,15 @@ func update(delta: float, target: Level) -> void:
 	_apply_gains()
 
 
+## Sets a level and its layers at once, without the slow fades (mixing bench).
+func hold(p_level: Level) -> void:
+	set_process(false)
+	level = p_level
+	for i in range(1, gains.size()):
+		gains[i] = 1.0 if level >= i else 0.0
+	_apply_gains()
+
+
 ## The level the distance to the monster asks for (-1: no monster).
 static func target_level(distance: float, exit_open: bool, p_audio: AudioSettings) -> Level:
 	if exit_open or (distance >= 0.0 and distance <= p_audio.dread_range):

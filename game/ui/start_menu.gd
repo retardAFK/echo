@@ -10,6 +10,7 @@ signal role_chosen(role: GameSession.Role)
 
 const MAP_SCENE := "res://game/maps/tilleuls/tilleuls.scn"
 const BENCH_SCENE := "res://game/bench/bench.tscn"
+const MIX_BENCH_SCENE := "res://game/bench/mix_bench.tscn"
 const LOBBY_SCENE := "res://game/ui/lobby_menu.tscn"
 const ROLES := {
 	"MENU_PLAY_HUNTED": GameSession.Role.HUNTED,
@@ -39,6 +40,10 @@ func _ready() -> void:
 		if ServerBoot.scene() != "":
 			get_tree().change_scene_to_file.call_deferred(ServerBoot.scene())
 			return
+	if change_scene and MixBench.is_requested():
+		# Mixing bench (S-012, T-147): typical moments heard one after the other.
+		get_tree().change_scene_to_file.call_deferred(MIX_BENCH_SCENE)
+		return
 	if change_scene and Bench.is_requested():
 		# Bench mode (S-009, T-075): straight to the camera tour, no menu.
 		get_tree().change_scene_to_file.call_deferred(BENCH_SCENE)
