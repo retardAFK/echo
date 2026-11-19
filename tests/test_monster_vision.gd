@@ -84,7 +84,7 @@ func test_does_not_see_behind_itself() -> void:
 
 
 func test_catch_resets_player_and_monster() -> void:
-	var spawn: Vector3 = _map.get("_spawn")
+	var spawn: Vector3 = _map.spawn
 	var player_at := OPEN_SPOT + Vector3(0.5, 0, 0)
 	_stage(OPEN_SPOT, player_at, player_at)
 	watch_signals(_monster)

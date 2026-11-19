@@ -93,10 +93,11 @@ extends Resource
 |---|---|---|
 | Une valeur de réglage | un `@export` dans le `*_settings.gd` du domaine, et sa valeur dans le `.tres` | `game/data/noise_settings.gd` |
 | Un type de bruit | à la fin de `NoiseEvent.Type`, sa portée dans les réglages de son domaine, son son dans `PlayerEars` (`SELF_VOICED` si l'objet le joue lui-même) | `NoiseEvent.Type.SWITCH` (portée `relay_range` de `loop_settings.gd`) |
-| Un écran ou un HUD | `game/ui/<nom>.tscn` + `.gd` (`CanvasLayer` pour un HUD), ajouté par `GameMap` pour le bon rôle | `game/ui/carry_hud.gd` |
+| Une règle propre à une façon de jouer (capture, respawn, départ d'un joueur, reconnexion) | la partie de la map qui joue ce cas : `game/maps/map_hunted_role.gd` (solo chassé), `map_monster_role.gd` (solo monstre, simulations), `map_online_room.gd` (salle en ligne), `map_online_client.gd` (écran d'un joueur en ligne). Une partie lit l'état partagé de `GameMap` et n'appelle jamais une autre partie | `MapOnlineRoom.catch_hunted` |
+| Un écran ou un HUD | `game/ui/<nom>.tscn` + `.gd` (`CanvasLayer` pour un HUD), ajouté par la partie de la map du bon rôle : `game/maps/hunted_huds.gd` pour le chassé, `map_monster_role.gd` pour le monstre, `game_map.gd` pour ce qui est commun | `game/ui/carry_hud.gd` |
 | Un menu | les briques de `game/ui/menu/` (`MenuList`, `MenuItem`, `OptionRow`) et le thème `game/ui/theme/` | `game/ui/pause_menu.gd` |
 | Une option du joueur | `game/settings/user_settings.gd` (clé, valeur par défaut, `_apply`) et une ligne de `options_menu.gd` | l'option de sensibilité |
-| Un objectif de partie | `game/session/quests.gd` (tirage et état), `loop_rules.gd`, `loop_settings.gd`, la proie IA (`prey_tasks.gd`), `net_world.gd`, la liste de la carte (`ui/map_screen.gd`) ; un indice lu sur place se montre par un petit HUD (`ui/post_it_reader.gd`, que `GameMap` n'ajoute que si la map a des post-it : le retirer ne casse rien) | l'objectif RELAY |
+| Un objectif de partie | `game/session/quests.gd` (tirage et état), `loop_rules.gd`, `loop_settings.gd`, la proie IA (`prey_tasks.gd`), `net_world.gd`, la liste de la carte (`ui/map_screen.gd`) ; un indice lu sur place se montre par un petit HUD (`ui/post_it_reader.gd`, que `HuntedHuds` n'ajoute que si la map a des post-it : le retirer ne casse rien) | l'objectif RELAY |
 | Un son d'ambiance | `game/audio/` (un nœud qui joue en boucle) et son script de fabrication dans `tools/audio/` | `game/audio/ambient_train.gd` |
 | Un service global | à éviter. Seulement s'il n'a pas d'autre maître que tout le jeu : autoload dans `project.godot`, documenté dans ARCHITECTURE.md | `NoiseBus` |
 

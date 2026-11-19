@@ -39,7 +39,7 @@ extends Node
 ##   the game time and the wind, which change every frame and so are not in
 ##   WORLD (which would then go out with every snapshot).
 
-## Room side: a human monster touched a hunted; GameMap captures it.
+## Room side: a human monster touched a hunted; MapOnlineRoom captures it.
 signal hunted_caught(hunted: Node3D)
 ## Client side: the room says the hunted in a seat was caught or freed.
 signal caught_reported(seat: int, state: CaptureState.State)
@@ -269,7 +269,7 @@ func _check_catches() -> void:
 			monster.catch_count += 1
 			monster.gesture.play(MonsterBody.Action.CATCH, MonsterAvatar.BODY_SETTINGS.catch_time)
 			MonsterNoise.scream(monster)
-			hunted_caught.emit(hunted)  # GameMap applies the capture rule and tells everyone.
+			hunted_caught.emit(hunted)  # MapOnlineRoom applies the capture rule and tells everyone.
 
 
 func _human_monster() -> MonsterAvatar:

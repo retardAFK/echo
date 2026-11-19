@@ -281,8 +281,8 @@ func test_in_a_cage_interact_goes_through_the_cameras() -> void:
 	var net: NetGame = map.get_node("NetGame")
 	var network := CityNetwork.of(map)
 	var hunted: Player = net.avatars[11]
-	map._online_catch(hunted)
-	map._jail(hunted)
+	map.room.catch_hunted(hunted)
+	map.room.jail(hunted)
 	hunted.commands.push(PlayerCommands.Action.INTERACT)
 	hunted.apply_actions()
 	assert_eq(hunted.watching, network.cameras[0])

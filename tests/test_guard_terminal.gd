@@ -74,8 +74,8 @@ func test_the_guard_terminal_opens_every_cage_with_the_bell() -> void:
 	)
 	var jailed: Array[Node3D] = [net.avatars[11], net.ai_hunted[3]]
 	for one in jailed:
-		map._online_catch(one)
-		map._jail(one)
+		map.room.catch_hunted(one)
+		map.room.jail(one)
 	var helper: Player = net.avatars[12]
 	_start(network, guard, helper)
 	network._physics_process(PRISON_SETTINGS.guard_time / 2.0)
@@ -102,8 +102,8 @@ func test_getting_up_or_switched_off_starts_over() -> void:
 	var network := CityNetwork.of(map)
 	var guard := _guard(network)
 	var prisoner: Player = net.avatars[11]
-	map._online_catch(prisoner)
-	map._jail(prisoner)
+	map.room.catch_hunted(prisoner)
+	map.room.jail(prisoner)
 	var helper: Player = net.avatars[12]
 	_start(network, guard, helper)
 	network._physics_process(PRISON_SETTINGS.guard_time - 1.0)

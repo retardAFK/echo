@@ -62,9 +62,9 @@ func _play(index: int) -> Dictionary:
 	map.end_screen.change_scene = false
 	var avatar := map.avatar
 	if _preys > 1:
-		map.add_ai_preys(_preys)
+		map.monster_role.add_ai_preys(_preys)
 	if _with_monster:
-		map.play_ai_against_ai()
+		map.monster_role.play_ai_against_ai()
 	else:
 		avatar.process_mode = Node.PROCESS_MODE_DISABLED
 		avatar.global_position = Vector3(0, -50, 0)  # Out of sight and hearing.

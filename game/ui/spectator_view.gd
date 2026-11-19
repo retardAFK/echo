@@ -2,7 +2,7 @@ class_name SpectatorView
 extends Node3D
 ## What a hunted out of the game sees (S-010, Q2, T-107): the view of a
 ## teammate still in the game, from its eyes, as the room sends it. A click
-## or "interact" asks the room for the next teammate. GameMap adds it on a
+## or "interact" asks the room for the next teammate. MapOnlineClient adds it on a
 ## client when NetGame starts spectating.
 
 ## The client's NetGame: the watched seat, its pitch and the puppets.
