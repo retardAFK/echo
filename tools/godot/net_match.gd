@@ -188,14 +188,16 @@ func _step(delta: float) -> void:
 		print(
 			(
 				(
-					"seat %d %s at %s, path %d/%d, %.1f m/s, gap %.2f m"
+					"seat %d %s at %s (room %s), path %d/%d, %.1f m/s, gap %.2f m (worst %.2f)"
 					% [
 						_seat,
 						_phase,
 						_own_position().snapped(Vector3.ONE * 0.1),
+						_net.room_position.snapped(Vector3.ONE * 0.1),
 						_path_index,
 						_path.size(),
 						speed,
+						_net.last_error,
 						_net.worst_error,
 					]
 				)
