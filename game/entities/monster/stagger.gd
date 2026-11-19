@@ -1,7 +1,8 @@
 class_name Stagger
 extends RefCounted
 ## The monster stopped short for a moment (S-020): a door it smashed open on
-## the run (T-307, piste E1). The AI monster and the played one both hold one.
+## the run (T-307, piste E1), a gurney it knocked over on the run (T-308,
+## piste E3). The AI monster and the played one both hold one.
 
 ## Seconds it still stands stopped.
 var left := 0.0
