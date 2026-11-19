@@ -180,16 +180,15 @@ maps/game_map.gd + maps/map_*.gd   ← assemblent le tout (les seuls à tout con
 
 1. Une entité **ne cherche pas** un nœud par chemin (`get_node("/root/...")` : 0 occurrence aujourd'hui, garde ça). Elle trouve les autres par **groupe** ou reçoit une référence de celui qui l'assemble.
 2. Les classes pures (`RefCounted`) ne touchent pas l'arbre des nœuds.
-3. Les entités ne devraient pas connaître le réseau : c'est `net/` qui les observe.
+3. Les entités ne connaissent pas le réseau (`NetSession`, `NetGame`, `RoomLink`) : c'est `net/` qui les observe, et la partie en ligne de la map (`map_online_client.gd`, `map_online_room.gd`) qui les branche. Par exemple, `MapOnlineClient` donne à `NetSession` les commandes de l'avatar du joueur. `tests/test_entity_rules.gd` le vérifie.
 4. Une valeur de gameplay vit dans `game/data/`, pas dans le code.
 
 ### Où le code s'en écarte aujourd'hui (dette connue)
 
-Mesuré le 19/11/2026 avec `tools/dev/module_map.py`. Ces écarts sont la cible de la tâche T-434 de S-022. `GameMap` (918 lignes, qui faisait tout) a été découpé par T-433 : `game_map.gd` ne garde que l'état partagé, la boucle et la pause, et chaque façon de jouer a sa partie dans `game/maps/map_*.gd`, aucune au-dessus de 400 lignes.
+Mesuré le 19/11/2026 avec `tools/dev/module_map.py`. Ce qui reste n'a pas encore de tâche. Déjà corrigé par S-022 : `GameMap` (918 lignes, qui faisait tout) a été découpé par T-433 ; `game_map.gd` ne garde que l'état partagé, la boucle et la pause, et chaque façon de jouer a sa partie dans `game/maps/map_*.gd`, aucune au-dessus de 400 lignes. Le joueur et le monstre jouable ne lisent plus `NetSession` (T-434).
 
 | Écart | Où | Effet |
 |---|---|---|
-| Le joueur et le monstre jouable lisent `NetSession` | `player.gd`, `monster_avatar.gd` | le réseau déborde dans les entités (T-434) |
 | Les IA connaissent chaque entité par son nom | `monster.gd` (19 modules), `prey.gd` (20 modules) | ajouter ou retirer une entité utilisable demande de toucher l'IA |
 | `NetWorld` liste chaque type d'entité synchronisée | `net/net_world.gd`, `net/net_game.gd` | idem pour le réseau |
 | `NoiseBus` connaît `Door` et `Ventilation` | `autoload/noise_bus.gd` | un service central dépend d'entités |

@@ -121,8 +121,6 @@ func _ready() -> void:
 		_controls = LocalControls.new()
 		_controls.commands = commands
 		add_child(_controls)
-		if NetSession.mode == NetSession.Mode.CLIENT:
-			NetSession.local_commands = commands  # Sent to the room (S-010, T-095).
 
 
 func _physics_process(delta: float) -> void:

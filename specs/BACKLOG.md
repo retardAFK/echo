@@ -502,8 +502,8 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 - [x] T-430 — `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/MODULES.md`, `docs/PIEGES.md`, règles de travail dans la constitution (D-022)
 - [x] T-431 — Corriger les documents périmés
 - [x] T-432 — Lint et format sur `tools/`, générateur de la cité sous 1 000 lignes par fichier
-- [ ] T-433 — Découper `game_map.gd` (après S-020 et T-450)
-- [ ] T-434 — Sortir `NetSession` du joueur et du monstre jouable
+- [x] T-433 — Découper `game_map.gd` (après S-020 et T-450)
+- [x] T-434 — Sortir `NetSession` du joueur et du monstre jouable
 ---
 
 ## Après la sortie (non planifié)

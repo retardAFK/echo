@@ -47,6 +47,9 @@ func setup(net: NetGame) -> void:
 		map.monster = null
 		net.own = map.player
 		net.spectating.connect(_on_spectating)
+	# Its own commands are sent to the room (S-010, T-095): the entity does
+	# not know the network (S-022, T-434).
+	NetSession.local_commands = net.own.get("commands")
 	net.caught_reported.connect(_on_caught_reported)
 	# The next game launched while this one's end screen is up (T-099), or
 	# this one again after a cut (T-102).
