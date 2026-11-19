@@ -57,7 +57,7 @@ const VIEWS := [
 	["relais_parking", Vector3(177.6, -1.5, 99.8), Vector3(177.6, -1.8, 101.8)],
 	["postit_tour", Vector3(113.6, 1.5, 106.6), Vector3(115.7, 1.4, 106.4)],
 	["postit_parking", Vector3(176.7, -1.5, 104.4), Vector3(176.9, -1.6, 102.2)],
-	["clavier_transfo", Vector3(108.8, 1.7, 155.0), Vector3(106.5, 0.9, 153.5)],
+	["clavier_transfo", Vector3(107.8, 1.7, 155.0), Vector3(105.0, 1.2, 153.5)],  # T-316: on the wall.
 ]
 ## Views whose name starts with this show a code on every post-it (T-266).
 const CODE_PREFIX := "postit_"
