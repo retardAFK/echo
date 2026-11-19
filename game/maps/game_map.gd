@@ -601,6 +601,7 @@ func _on_online_hidden_found(occupant: Node3D, by: Node3D) -> void:
 ## Room side: the game is over. Everyone gets the last state at once, and the
 ## room goes back to its waiting room a little later (the end screens are up).
 func _on_online_game_ended(_hunted_won: bool) -> void:
+	_net.send_clock()  # The final counts first, for the end screen (S-020, T-301).
 	_net.send_world()
 	get_tree().create_timer(NetSession.settings.end_return_delay).timeout.connect(
 		NetSession.end_game
