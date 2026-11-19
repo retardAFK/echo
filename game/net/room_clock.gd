@@ -1,15 +1,15 @@
 class_name RoomClock
 extends RefCounted
-## Client side: the room's time, read from the physics frame number each
-## snapshot carries (S-020, T-320). A snapshot's room time is its frame over
-## the physics rate; local time minus room time is the offset of the two
+## Client side: the room's time, read from the room's clock each snapshot
+## carries, in milliseconds (S-020, T-320). Not its physics frame number: a
+## room that falls behind plays fewer frames per second, and frames over 60
+## would then run slower than real time and make the clock jump. Local time
+## minus room time is the offset of the two
 ## clocks plus the trip. The clock keeps the smallest offset seen over a
 ## sliding window (the quickest trip: a late packet only adds to it), and
 ## follows it slowly, never by a jump, so the others play at an even pace even
 ## when snapshots come in bursts.
 
-## Room frames per second (the room runs the same project).
-var frames_per_second := float(Engine.physics_ticks_per_second)
 ## Seconds of snapshots the smallest offset is taken over.
 var window := 2.0
 ## Fastest the offset follows its target, in seconds per second: the others
@@ -32,14 +32,14 @@ func _init(settings: NetSettings = null) -> void:
 		max_drift = settings.clock_max_drift
 
 
-## Room time of a frame, in seconds.
-func room_time(frame: int) -> float:
-	return frame / frames_per_second
+## Room time of a snapshot stamped msec on the room's clock, in seconds.
+static func room_time(msec: int) -> float:
+	return msec / 1000.0
 
 
-## A snapshot of frame arrived at local time (seconds).
-func observe(frame: int, local: float) -> void:
-	var seen := local - room_time(frame)
+## A snapshot stamped msec arrived at local time (seconds).
+func observe(msec: int, local: float) -> void:
+	var seen := local - room_time(msec)
 	_sample_times.append(local)
 	_sample_offsets.append(seen)
 	while not _sample_times.is_empty() and _sample_times[0] < local - window:
