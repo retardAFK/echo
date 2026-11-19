@@ -69,11 +69,15 @@ func _play(index: int) -> Dictionary:
 		avatar.process_mode = Node.PROCESS_MODE_DISABLED
 		avatar.global_position = Vector3(0, -50, 0)  # Out of sight and hearing.
 	var loop := map.game_loop
+	var monsters := map.get_children().filter(func(n: Node) -> bool: return n is Monster)
+	var monster: Monster = monsters[0] if not monsters.is_empty() else null
+	var grid := TestGrid.new(monster)  # S-020, T-317.
 	var started := Time.get_ticks_msec()
 	var last_report := 0.0
 	var result := "stuck"
 	while loop.get_duration() < TIME_LIMIT:
 		await get_tree().physics_frame
+		grid.watch(monster, map.get_children().filter(func(n: Node) -> bool: return n is Prey))
 		if loop.is_over:
 			result = "out" if loop.hunted_won else "caught"
 			break
@@ -145,6 +149,8 @@ func _play(index: int) -> Dictionary:
 			]
 		)
 	)
+	var winner: String = {"out": "chassés", "caught": "monstre"}.get(result, "bloquée")
+	print("GRID " + grid.row("simulation", _preys, winner, duration / 60.0))
 	get_tree().paused = false
 	map.queue_free()
 	await get_tree().process_frame
