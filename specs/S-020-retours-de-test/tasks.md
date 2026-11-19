@@ -14,7 +14,7 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [x] T-308 — E3 : brancard bousculé = arrêt
 - [x] T-309 — E2 : sprint du monstre en jauge
 - [x] T-310 — H1 : fouiller une cachette vide coûte
-- [ ] T-311 — H2 : retenir son souffle
+- [x] T-311 — H2 : retenir son souffle
 - [ ] T-312 — R1 : pétard assourdissant
 - [ ] T-313 — R2 : réveil réglable
 - [ ] T-314 — T5 : IA de complément, une règle dans le guide et le code (Maxime choisit)

@@ -44,6 +44,7 @@ const TABS := [
 			["move_right", OptionRow.Kind.KEY, "OPTIONS_KEY_RIGHT"],
 			["sprint", OptionRow.Kind.KEY, "OPTIONS_KEY_SPRINT"],
 			["crouch", OptionRow.Kind.KEY, "OPTIONS_KEY_CROUCH"],
+			["hold_breath", OptionRow.Kind.KEY, "OPTIONS_KEY_HOLD_BREATH"],
 			["interact", OptionRow.Kind.KEY, "OPTIONS_KEY_INTERACT"],
 			["map", OptionRow.Kind.KEY, "OPTIONS_KEY_MAP"],
 		],
