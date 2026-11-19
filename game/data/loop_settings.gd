@@ -41,6 +41,10 @@ extends Resource
 ## The hard disk scratching while it downloads, in meters, and how often.
 @export_range(0.0, 30.0, 0.5, "suffix:m") var disk_noise_range: float = 5.0
 @export_range(0.5, 20.0, 0.5, "suffix:s") var disk_noise_interval: float = 3.0
+## A hunted reads a post-it from this close, in meters, the crosshair within
+## code_read_angle of it: the HUD then writes what it says (T-271).
+@export_range(0.5, 10.0, 0.1, "suffix:m") var code_read_reach: float = 2.5
+@export_range(5.0, 90.0, 1.0, "suffix:°") var code_read_angle: float = 25.0
 ## The wrong code's beep on the transformer's keypad, in meters.
 @export_range(0.0, 20.0, 0.5, "suffix:m") var beep_range: float = 3.0
 ## Both relay switches must be thrown within this many seconds (Q13). 25 s

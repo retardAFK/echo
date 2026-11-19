@@ -1,0 +1,67 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/network/terminal.gd" id="1_terminal"]
+[ext_resource type="Resource" path="res://game/data/network_settings.tres" id="2_settings"]
+
+[sub_resource type="BoxShape3D" id="CaseShape"]
+size = Vector3(0.36, 0.5, 0.12)
+
+[sub_resource type="BoxMesh" id="CaseMesh"]
+size = Vector3(0.36, 0.5, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="CaseMaterial"]
+albedo_color = Color(0.32, 0.34, 0.3, 1)
+metallic = 0.6
+roughness = 0.55
+
+[sub_resource type="BoxMesh" id="PadMesh"]
+size = Vector3(0.2, 0.18, 0.02)
+
+[sub_resource type="StandardMaterial3D" id="PadMaterial"]
+albedo_color = Color(0.08, 0.08, 0.08, 1)
+roughness = 0.8
+
+[sub_resource type="QuadMesh" id="ScreenMesh"]
+size = Vector2(0.22, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="ScreenMaterial"]
+albedo_color = Color(0.1, 0.45, 0.2, 1)
+emission_enabled = true
+emission = Color(0.1, 0.45, 0.2, 1)
+emission_energy_multiplier = 1.5
+
+[node name="TerminalKeypad" type="Node3D"]
+script = ExtResource("1_terminal")
+settings = ExtResource("2_settings")
+kind = 2
+
+[node name="Case" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0.06)
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Case"]
+shape = SubResource("CaseShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="Case"]
+mesh = SubResource("CaseMesh")
+surface_material_override/0 = SubResource("CaseMaterial")
+
+[node name="Pad" type="MeshInstance3D" parent="Case"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.09, 0.065)
+mesh = SubResource("PadMesh")
+surface_material_override/0 = SubResource("PadMaterial")
+
+[node name="Screen" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.38, 0.121)
+mesh = SubResource("ScreenMesh")
+surface_material_override/0 = SubResource("ScreenMaterial")
+
+[node name="ScreenLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.38, 0.35)
+visible = false
+light_color = Color(0.45, 1, 0.55, 1)
+light_energy = 0.8
+omni_range = 3.0
+
+[node name="Keys" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0.1)
