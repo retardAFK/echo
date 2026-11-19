@@ -45,7 +45,7 @@ La CI (`.github/workflows/ci.yml`) fait tout cela, plus l'export web (budget de 
 - Les entités communiquent par **signaux** et **groupes**, jamais par chemin de nœud absolu.
 - Tout bruit passe par l'autoload **`NoiseBus`**. Un nouveau type de bruit va **à la fin** de `NoiseEvent.Type`.
 - La logique testable sans affichage vit dans une classe `RefCounted` pure (`*_brain`, `*_rules`, `*_math`) et a des **tests GUT**.
-- Code, noms et commentaires **en anglais** ; textes affichés **en français**, par des clés de traduction (`game/i18n/`).
+- Code, noms et commentaires **en anglais** ; textes affichés **en français**, par des clés de `game/i18n/strings.csv` lues avec la classe `Text` (jamais `tr()` directement ; guide : `game/i18n/README.md`).
 - Chaque script commence par un commentaire `##` qui dit ce qu'il fait et cite sa spec et sa tâche (`spec S-018, Q11`, `T-263`). Garde cette habitude : c'est ce qui relie le code aux décisions.
 - La cité (`game/maps/tilleuls/tilleuls.scn`) est **générée** par `tools/godot/build_tilleuls.gd` : ne l'édite jamais à la main.
 - Budgets (constitution 2.2) : 60 images/s, 300 appels de dessin (la cité est déjà près de la limite), 60 Mo de build web.

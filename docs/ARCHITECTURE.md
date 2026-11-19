@@ -2,7 +2,7 @@
 
 > Carte du code pour toute personne ou tout agent qui reprend le projet (spec S-022, T-430).
 > Le **quoi** et le **pourquoi** sont dans [`ECHO_PROJET.md`](../ECHO_PROJET.md) et `specs/` ; ce document dit **où** et **comment**.
-> Mis à jour le 19/11/2026. Si le code et ce document ne disent pas la même chose, le code a raison : corrige ce document dans la même PR.
+> Mis à jour le 19/11/2026 (T-431). Si le code et ce document ne disent pas la même chose, le code a raison : corrige ce document dans la même PR.
 
 Pour regénérer les chiffres de cette page :
 
@@ -47,7 +47,7 @@ Il n'y a **qu'une map jouable**, la cité des Tilleuls (avec l'hôpital intégr�
 | `audio/` | Sons qui ne sont pas des entités : vent, musique, pas selon le sol, calcul pur du son | `sound_math.gd` (pur), `footstep_sounds.gd`, `tension_music.gd`, `city_wind.gd` |
 | `fx/` | Rendu : nuit et brouillard, filtre rétro, look du scan, précompilation des shaders | `night_environment.gd`, `retro_surface.gd`, `shader_warmup.gd` |
 | `bench/` | Bancs d'essai : performance (`?bench`) et mixage (`?mix`) | `bench.gd`, `mix_bench.gd` |
-| `i18n/` | Textes affichés, en CSV (`strings.csv`). La façon de traduire est en cours de refonte (T-450) : voir `game/i18n/README.md` quand il existera | `strings.csv` |
+| `i18n/` | Textes affichés : `strings.csv` (clé, texte français) et la classe `Text`, seule porte d'entrée (`Text.t`, `Text.count`, `Text.with_keys`). Les entités renvoient des clés, l'interface les traduit. Guide : [`game/i18n/README.md`](../game/i18n/README.md) | `text.gd`, `strings.csv` |
 | `shaders/`, `assets/` | Vides (`.gitkeep`) : les shaders sont dans `fx/`, les assets à la racine dans `assets/` | — |
 
 ### Hors de `game/`
@@ -182,14 +182,14 @@ Mesuré le 19/11/2026 avec `tools/dev/module_map.py`. Ces écarts sont la cible 
 
 | Écart | Où | Effet |
 |---|---|---|
-| `GameMap` fait tout : rôles, partie en ligne, boucle, captures, 15 écrans | `game/maps/game_map.gd` (917 lignes) | presque toute nouvelle fonctionnalité le modifie (T-433) |
+| `GameMap` fait tout : rôles, partie en ligne, boucle, captures, 15 écrans | `game/maps/game_map.gd` (918 lignes) | presque toute nouvelle fonctionnalité le modifie (T-433) |
 | Le joueur et le monstre jouable lisent `NetSession` | `player.gd`, `monster_avatar.gd` | le réseau déborde dans les entités (T-434) |
 | Les IA connaissent chaque entité par son nom | `monster.gd` (19 modules), `prey.gd` (20 modules) | ajouter ou retirer une entité utilisable demande de toucher l'IA |
 | `NetWorld` liste chaque type d'entité synchronisée | `net/net_world.gd`, `net/net_game.gd` | idem pour le réseau |
 | `NoiseBus` connaît `Door` et `Ventilation` | `autoload/noise_bus.gd` | un service central dépend d'entités |
 | Le générateur de la map dépasse 1 000 lignes et n'est pas contrôlé par `gdlint` | `tools/godot/build_tilleuls.gd` (2 233), `interior_lining.gd` (1 342) | T-432 |
 
-Fichiers de plus de 500 lignes dans `game/` : `game_map.gd` (917), `prey.gd` (858), `net_game.gd` (634), `monster.gd` (591), `player.gd` (562). Avant d'y ajouter du code, demande-toi s'il ne mérite pas sa propre classe.
+Fichiers de plus de 500 lignes dans `game/` : `game_map.gd` (918), `prey.gd` (858), `net_game.gd` (654), `monster.gd` (591), `player.gd` (562). Avant d'y ajouter du code, demande-toi s'il ne mérite pas sa propre classe.
 
 ---
 
