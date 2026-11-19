@@ -19,7 +19,8 @@ var leader := 0
 ## Game code, shown in the waiting room.
 var code := ""
 var started := false
-## How many play, monster included: hunted seats from game_size on are closed.
+## How many humans may join, monster included. The game always has 3 hunted:
+## the seats left free are played by AI preys (S-020, T-314).
 var game_size := SEATS
 ## Draws the roles at launch; tests seed it.
 var rng := RandomNumberGenerator.new()

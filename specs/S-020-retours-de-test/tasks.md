@@ -17,7 +17,7 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [ ] T-311 — H2 : retenir son souffle
 - [ ] T-312 — R1 : pétard assourdissant
 - [ ] T-313 — R2 : réveil réglable
-- [ ] T-314 — T5 : IA de complément, une règle dans le guide et le code (Maxime choisit)
+- [x] T-314 — T5 : IA de complément, une règle dans le guide et le code (Maxime choisit)
 - [ ] T-315 — N1 : caméras accrochées aux murs
 - [ ] T-316 — N2 : clavier du transformateur en boîtier mural
 - [ ] T-317 — J2 : grille de test commune
@@ -29,3 +29,4 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - T-303 (19/11/2026) : écran F3 en ligne : écart de prédiction (dernier, pire sur 5 s), taille et nombre des messages de carte sur 5 s, images par seconde de la salle. Mesure avec `net_walk` (6 s de course) : 25 messages de carte de 3 Ko avant la seconde partie de T-301 (chaque pas changeait `noise_count`), 3 après.
 - T-304 (19/11/2026) : un client se lève du terminal dès qu'il bouge, sans attendre la salle ; un instantané parti avant que la salle le sache ne le rassoit pas (1,5 s). Test GUT dans `test_network`.
 - T-305 (19/11/2026) : `gust_db` 9 → 4 dB et `whistle_db` -10 → -16 dB (`audio_settings.gd`), pour que le vent ne couvre plus les pas du monstre.
+- T-314 (19/11/2026) : règle choisie par Maxime : une partie en ligne a toujours 3 chassés ; le chef choisit 2 à 4 joueurs humains et les places sans joueur sont jouées par des IA chassées (`GameMap._setup_online_room`). L'interphone montre les 4 places (les vides en « IA »). Guide du jeu et ECHO_PROJET.md alignés. Tests GUT dans `test_fill_in_ai` et `test_online_menu`.
