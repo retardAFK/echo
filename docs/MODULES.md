@@ -60,7 +60,7 @@ extends Resource
 - Si l'entité joue elle-même le son de son bruit, ajoute son type à `PlayerEars.SELF_VOICED` (`game/entities/player/player_ears.gd`), sinon il est joué deux fois.
 
 ### 1.7 La placer dans la cité
-- La cité est générée : ajoute la position dans `tools/godot/build_tilleuls.gd` (constantes de positions en coordonnées du plan, puis un appel `_place(...)` ou `_place_spot(...)`), ou dans `tools/godot/hospital.gd` pour l'hôpital.
+- La cité est générée : ajoute la position dans `tools/godot/tilleuls_layout.gd` (constantes en coordonnées du plan), puis l'appel `_place(...)` ou `_place_spot(...)` dans `build_tilleuls.gd` (gameplay, habillage) ou dans le fichier du lieu (`tilleuls_tower.gd`, `tilleuls_places.gd`) ; pour l'hôpital, `tools/godot/hospital.gd`. La chaîne des fichiers est décrite dans ARCHITECTURE.md §5.
 - Relance `godot --headless tools/godot/build_tilleuls.tscn`, puis **commite** `game/maps/tilleuls/tilleuls.scn` et `tilleuls_navmesh.res` (LFS).
 - Vérifie le budget de 300 appels de dessin (`?bench`, voir `game/bench/bench.gd`) : la cité est déjà près de la limite.
 - Ajoute ses règles de placement dans le `tests/test_tilleuls_*.gd` qui convient (pas devant une porte, pas sur un emplacement de fusible…).
@@ -96,7 +96,7 @@ extends Resource
 | Un écran ou un HUD | `game/ui/<nom>.tscn` + `.gd` (`CanvasLayer` pour un HUD), ajouté par `GameMap` pour le bon rôle | `game/ui/carry_hud.gd` |
 | Un menu | les briques de `game/ui/menu/` (`MenuList`, `MenuItem`, `OptionRow`) et le thème `game/ui/theme/` | `game/ui/pause_menu.gd` |
 | Une option du joueur | `game/settings/user_settings.gd` (clé, valeur par défaut, `_apply`) et une ligne de `options_menu.gd` | l'option de sensibilité |
-| Un objectif de partie | `game/session/quests.gd` (tirage et état), `loop_rules.gd`, `loop_settings.gd`, la proie IA (`prey_tasks.gd`), `net_world.gd`, la liste de la carte (`ui/map_screen.gd`) | l'objectif RELAY |
+| Un objectif de partie | `game/session/quests.gd` (tirage et état), `loop_rules.gd`, `loop_settings.gd`, la proie IA (`prey_tasks.gd`), `net_world.gd`, la liste de la carte (`ui/map_screen.gd`) ; un indice lu sur place se montre par un petit HUD (`ui/post_it_reader.gd`, que `GameMap` n'ajoute que si la map a des post-it : le retirer ne casse rien) | l'objectif RELAY |
 | Un son d'ambiance | `game/audio/` (un nœud qui joue en boucle) et son script de fabrication dans `tools/audio/` | `game/audio/ambient_train.gd` |
 | Un service global | à éviter. Seulement s'il n'a pas d'autre maître que tout le jeu : autoload dans `project.godot`, documenté dans ARCHITECTURE.md | `NoiseBus` |
 
@@ -111,7 +111,7 @@ Dans cet ordre, pour que chaque étape reste vérifiable :
    python3 tools/dev/module_map.py --refs Gurney
    ```
    La liste montre le code, les scènes, les tests, les scripts d'assets, les specs et les fichiers d'assets (`file …`).
-2. **Le sortir de la map** : retire ses positions et ses appels dans `tools/godot/build_tilleuls.gd` (ou `hospital.gd`), regénère la cité, commite la scène et le maillage de navigation.
+2. **Le sortir de la map** : retire ses positions dans `tools/godot/tilleuls_layout.gd` et ses appels dans `build_tilleuls.gd`, `tilleuls_tower.gd`, `tilleuls_places.gd` ou `hospital.gd`, regénère la cité, commite la scène et le maillage de navigation.
 3. **Le sortir du réseau** : son tableau, `state()` et `apply()` dans `net_world.gd`, ses événements dans `net_game.gd`. Le format des snapshots change : les clients et le serveur doivent être déployés ensemble (c'est le cas à chaque fusion sur `main`).
 4. **Le sortir des IA** : les références dans `monster.gd`, `prey.gd`, `prey_tasks.gd`, et les cerveaux.
 5. **Le sortir de l'interface et du joueur** : HUD, invites, `player.gd`, `monster_avatar.gd`.
@@ -127,7 +127,7 @@ Dans cet ordre, pour que chaque étape reste vérifiable :
 ## 4. Avant d'ouvrir la PR
 
 - [ ] La tâche `T-xxx` est citée dans le commit et la PR, une PR par tâche.
-- [ ] `gdformat --check game tests` et `gdlint game tests` passent.
+- [ ] `gdformat --check game tests tools` et `gdlint game tests tools` passent.
 - [ ] `godot --headless --import` puis GUT passent.
 - [ ] Si la map a changé : regénérée, scène et navigation commitées, budget de draw calls tenu.
 - [ ] Si l'état est visible en ligne : `net_world.gd` à jour et testé.

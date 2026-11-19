@@ -487,6 +487,10 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
   - Résultat vérifiable : critères cochés, budget de 300 appels de dessin et 60 images/s tenus
   - Dépend de : T-267, T-268, T-269
   - Fait le 16/11/2026 : critères vérifiés et 297 appels de dessin au pire point ; validée par Maxime (« T-270 ok pour moi ») ; 60 images/s confirmées par Maxime avec T-128
+- [x] T-271 — Post-it du code lisibles
+  - Résultat vérifiable : chiffres plus grands et foncés, lecture du post-it au HUD (code ou vierge), liste des objectifs qui dit où chercher et rappelle le code lu, rappel au clavier du transformateur ; tests GUT
+  - Dépend de : T-266
+  - Fait le 19/11/2026, après le test de Maxime (« il ne semble pas y avoir de code sur les post-it »)
 
 
 ---
@@ -497,7 +501,7 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 
 - [x] T-430 — `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/MODULES.md`, `docs/PIEGES.md`, règles de travail dans la constitution (D-022)
 - [x] T-431 — Corriger les documents périmés
-- [ ] T-432 — Lint et format sur `tools/`, générateur de la cité sous 1 000 lignes par fichier
+- [x] T-432 — Lint et format sur `tools/`, générateur de la cité sous 1 000 lignes par fichier
 - [ ] T-433 — Découper `game_map.gd` (après S-020 et T-450)
 - [ ] T-434 — Sortir `NetSession` du joueur et du monstre jouable
 ---
