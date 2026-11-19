@@ -49,6 +49,8 @@ var gesture := BodyGesture.new()
 var body_action: MonsterBody.Action:
 	get = _get_action
 
+## Stopped short (S-020, T-307): a door smashed open on the run.
+var stagger := Stagger.new()
 var _vision_timer := 0.0
 var _was_hidden := false
 var _noise: MonsterNoise
@@ -147,6 +149,8 @@ func _physics_process(delta: float) -> void:
 	if _still_left > 0.0:
 		_still_left -= delta
 		return
+	if stagger.update(delta):
+		return  # Stopped short (T-307).
 	var arrived := _agent.is_navigation_finished()
 	var player_position := Vector3.ZERO
 	var distance := 0.0
