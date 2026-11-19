@@ -51,6 +51,8 @@ var body_action: MonsterBody.Action:
 
 ## Stopped short (S-020, T-307): a door smashed open on the run.
 var stagger := Stagger.new()
+## Its run as a gauge (S-020, T-309).
+var sprint: MonsterSprint
 var _vision_timer := 0.0
 var _was_hidden := false
 var _noise: MonsterNoise
@@ -78,6 +80,7 @@ func _ready() -> void:
 	brain.trace_lost.connect(_on_trace_lost)
 	brain.scan_finished.connect(_end_scan)
 	scan = ScanGauge.new(settings)
+	sprint = MonsterSprint.new(settings)
 	rng.randomize()
 	brain.set_patrol(get_patrol_points(), start_index)
 	_agent.target_position = brain.target
@@ -514,6 +517,7 @@ func _on_noise_emitted(event: NoiseEvent) -> void:
 
 func _move(delta: float) -> void:
 	var horizontal := Vector3.ZERO
+	sprint.update(delta, brain.get_pace() == MonsterBrain.Pace.RUN)
 	var scanning := brain.state == MonsterBrain.State.SCAN
 	if brain.lingering:
 		rotate_y(deg_to_rad(settings.look_around_speed) * delta)
@@ -523,7 +527,7 @@ func _move(delta: float) -> void:
 		direction.y = 0.0
 		if direction.length_squared() > 0.0001:
 			direction = direction.normalized()
-			horizontal = direction * MonsterBrain.speed_for(brain.get_pace(), settings)
+			horizontal = direction * MonsterBrain.speed_for(brain.get_pace(), settings, sprint)
 			look_at(global_position + direction, Vector3.UP)
 			_open_door(direction)
 			if _clear_gurney(direction, delta):

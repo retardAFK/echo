@@ -58,6 +58,8 @@ var body_action: MonsterBody.Action:
 
 ## Stopped short (S-020, T-307): a door smashed open on the run.
 var stagger := Stagger.new()
+## Its run as a gauge, shown under the crosshair's left (S-020, T-309).
+var sprint: MonsterSprint
 var _pace := MonsterBrain.Pace.WALK
 var _prowling := false
 var _pitch := 0.0
@@ -83,11 +85,13 @@ func _ready() -> void:
 	add_to_group(Prison.MONSTERS_GROUP)  # The prison's clock stops near it (S-018).
 	_noise = MonsterNoise.new(settings)
 	scan = ScanGauge.new(settings)
+	sprint = MonsterSprint.new(settings)
 	_head.position.y = settings.ear_height
 	_camera.current = true
 	_apply_view_settings("")
 	Settings.changed.connect(_apply_view_settings)
 	if local_controls:
+		add_child(SprintBar.new(sprint))
 		add_child(ScanDrone.new(scan))  # Only the monster hears it (S-012, T-145).
 		_controls = LocalControls.new()
 		_controls.commands = commands
@@ -161,6 +165,7 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 		velocity.x = 0.0
 		velocity.z = 0.0
 	_pace = resolve_pace(_prowling, sprinting, not input.is_zero_approx())
+	sprint.update(delta, _pace == MonsterBrain.Pace.RUN)
 	var target := PlayerMotion.wish_direction(input, rotation.y) * get_speed()
 	var horizontal := PlayerMotion.approach_velocity(
 		Vector3(velocity.x, 0.0, velocity.z), target, controls, delta
@@ -354,7 +359,7 @@ func get_pace() -> MonsterBrain.Pace:
 
 ## Target speed of the current pace, in m/s.
 func get_speed() -> float:
-	return MonsterBrain.speed_for(_pace, settings)
+	return MonsterBrain.speed_for(_pace, settings, sprint)
 
 
 func get_ear_position() -> Vector3:

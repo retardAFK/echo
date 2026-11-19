@@ -10,6 +10,15 @@ extends Resource
 @export_range(0.1, 15.0, 0.1, "suffix:m/s") var walk_speed: float = 3.5
 ## Speed while running after the player, in meters per second.
 @export_range(0.1, 15.0, 0.1, "suffix:m/s") var run_speed: float = 6.0
+## Seconds of running at run_speed before it is out of breath (S-020, T-309,
+## piste E2).
+@export_range(0.5, 60.0, 0.5, "suffix:s") var sprint_time: float = 5.0
+## Out of breath, it runs at this speed only...
+@export_range(0.1, 15.0, 0.1, "suffix:m/s") var winded_speed: float = 5.0
+## ...for this long, then the gauge is full again.
+@export_range(0.0, 60.0, 0.5, "suffix:s") var winded_time: float = 4.0
+## Seconds of gauge regained per second without running.
+@export_range(0.0, 10.0, 0.1) var sprint_refill: float = 1.0
 
 @export_group("Own noise (D-009)")
 ## Footstep range while prowling, in meters. 0 means silent.
