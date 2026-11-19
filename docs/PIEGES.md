@@ -20,6 +20,9 @@
 ## Godot et GUT
 
 - Après avoir ajouté une `class_name`, lance `godot --headless --import` avant GUT, sinon « Identifier not declared ».
+- `-gtest=` de GUT **ajoute** un fichier aux dossiers de `.gutconfig.json` au lieu de filtrer : pour un seul fichier, utilise `-gselect=test_car_alarm`.
+- `Script.get_script_constant_map()` ne renvoie que les constantes du script lui-même, pas celles des scripts qu'il étend : `interior_lining_kit.gd` remonte la chaîne avec `get_base_script()`. Pense-y si tu découpes un script en plusieurs fichiers par héritage.
+- Le binaire `tilleuls.scn` change à chaque génération même sans changement réel (identifiants internes) : pour vérifier qu'un changement du générateur ne change pas la map, compare un vidage des nœuds et de leurs propriétés, pas les octets : `godot --headless tools/dev/dump_scene.tscn -- res://game/maps/tilleuls/tilleuls.scn avant.txt`, puis la même chose après, et `diff`.
 - Le générateur de la cité se lance comme une **scène** (`godot --headless tools/godot/build_tilleuls.tscn`), pas avec `-s` : les autoloads doivent être chargés.
 
 ## CI et parties en ligne

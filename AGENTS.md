@@ -25,11 +25,11 @@ pip install gdtoolkit==4.5.0
 git clone --depth 1 --branch v9.7.1 https://github.com/bitwes/Gut.git /tmp/gut \
   && mkdir -p addons && cp -r /tmp/gut/addons/gut addons/gut    # GUT n'est pas versionné
 
-gdformat --check game tests        # format (gdformat game tests pour corriger)
-gdlint game tests                  # lint
+gdformat --check game tests tools  # format (gdformat game tests tools pour corriger)
+gdlint game tests tools            # lint
 godot --headless --import          # import, obligatoire après une nouvelle class_name
 godot --headless -s addons/gut/gut_cmdln.gd                       # tous les tests
-godot --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_car_alarm.gd   # un fichier
+godot --headless -s addons/gut/gut_cmdln.gd -gselect=test_car_alarm   # un fichier (-gtest ajoute, ne filtre pas)
 
 godot --headless tools/godot/build_tilleuls.tscn     # regénère la cité (puis commiter .scn et navmesh)
 godot --headless res://tools/godot/simulate_games.tscn   # parties IA contre IA en accéléré
