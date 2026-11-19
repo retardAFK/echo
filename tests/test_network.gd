@@ -137,6 +137,30 @@ func test_interact_gets_up_and_hands_stay_on_the_keyboard() -> void:
 	assert_null(player.terminal)
 
 
+func test_online_a_hunted_gets_up_at_once_when_it_moves() -> void:
+	# S-020, T-304: the terminal screen stayed up until the room answered.
+	_ground()
+	var network := _small_network()
+	var terminal := network.terminals[0]
+	var player := _player(terminal.seat_point())
+	player.mirror_world = true  # A client's own avatar.
+	player.terminal = terminal
+	player.commands.move = Vector2(0, -1)
+	await wait_physics_frames(2)
+	assert_null(player.terminal, "up without waiting for the room")
+	assert_eq(player.left_terminal, terminal)
+	var net := NetGame.new()
+	autofree(net)
+	net.world = NetWorld.new(network.get_parent())
+	net.prediction = Prediction.new(net.settings)
+	net._apply_network_state(player, 0, -1)
+	assert_null(player.terminal, "a late snapshot does not sit it back")
+	net._apply_network_state(player, -1, -1)
+	assert_null(player.left_terminal, "the room knows")
+	net._apply_network_state(player, 0, -1)
+	assert_eq(player.terminal, terminal, "sat again by the room later: it is so")
+
+
 func test_the_monster_switches_a_terminal_off() -> void:
 	_ground()
 	var network := _small_network()

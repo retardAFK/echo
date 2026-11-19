@@ -63,6 +63,11 @@ var terminal: Terminal:
 		terminal = value
 		if value != null:
 			_sit_at(value)
+## Online client (S-020, T-304): the terminal it got up from on its own,
+## when it moved, and when (Time.get_ticks_msec), so a snapshot sent before
+## the room knew does not sit it back down.
+var left_terminal: Terminal
+var left_terminal_msec := 0
 ## The security camera it watches through (S-018, Q11), or null: its view
 ## goes to the camera's lens. Set by the CityNetwork, or on a client by what
 ## the room says.
@@ -216,7 +221,14 @@ func _sit_still(delta: float) -> void:
 	move_and_slide()
 	_update_height(delta)
 	_hold.update(self, null, false, delta)  # Lets go of the terminal it sat at.
-	if not mirror_world and not commands.move.is_zero_approx():
+	if commands.move.is_zero_approx():
+		return
+	if mirror_world:
+		# Online client: up at once, without waiting for the room (T-304).
+		left_terminal = terminal
+		left_terminal_msec = Time.get_ticks_msec()
+		terminal = null
+	else:
 		terminal.leave()
 
 
