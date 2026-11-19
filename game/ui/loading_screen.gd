@@ -103,7 +103,7 @@ func _process(_delta: float) -> void:
 		_set_progress(1.0)
 		_done = true
 		if _first_steps and wait_first_time:
-			_status.text = Settings.fill(tr("LOADING_READY"))
+			_status.text = Text.with_keys("LOADING_READY")
 		else:
 			finish()
 
@@ -156,18 +156,18 @@ func _load_dependencies() -> void:
 func _set_progress(value: float) -> void:
 	progress = value
 	_bar.anchor_right = value
-	_status.text = tr("LOADING_STEP") % roundi(value * 100.0)
+	_status.text = Text.t("LOADING_STEP", roundi(value * 100.0))
 	progressed.emit(value)
 
 
 func _show_tips() -> void:
-	_heading.text = tr("LOADING_FIRST_STEPS" if _first_steps else "LOADING_TIP")
+	_heading.text = Text.t("LOADING_FIRST_STEPS" if _first_steps else "LOADING_TIP")
 	var keys := tip_keys(role, _first_steps)
 	if not _first_steps:
 		keys = [keys.pick_random()]
 	var lines: PackedStringArray = []
 	for key in keys:
-		lines.append(Settings.fill(tr(key)))
+		lines.append(Text.with_keys(key))
 	_tips.text = "\n\n".join(lines)
 
 

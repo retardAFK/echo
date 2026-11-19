@@ -38,7 +38,7 @@ func _process(_delta: float) -> void:
 ## "Prison : 1:42" for 102 seconds left.
 static func text_for(seconds: float) -> String:
 	var whole := maxi(ceili(seconds), 0)
-	return TranslationServer.translate("HUD_PRISON_TIME") % [whole / 60, whole % 60]
+	return Text.t("HUD_PRISON_TIME", [whole / 60, whole % 60])
 
 
 func get_text() -> String:

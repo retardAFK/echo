@@ -64,6 +64,37 @@ func test_a_client_map_and_loop_follow_the_room() -> void:
 	assert_true(client.end_screen.visible)
 
 
+func test_the_world_state_holds_still_while_nothing_happens() -> void:
+	# S-020, T-300: the game time and the wind change every frame; they are not
+	# in the state, else the room would send the whole map with every snapshot.
+	var room_world: NetWorld = _map(7)[1]
+	await wait_physics_frames(2)
+	var before := room_world.state()
+	var clock_before := room_world.clock()
+	await wait_physics_frames(30)
+	room_world.game_loop.noise_count += 3  # Footsteps.
+	assert_eq(room_world.state(), before)
+	assert_gt(room_world.clock()[0], clock_before[0], "the game time goes on")
+	assert_gt(room_world.clock()[2], clock_before[2], "the wind too")
+
+
+func test_the_clock_sets_the_game_time_and_the_wind() -> void:
+	var room_world: NetWorld = _map(8)[1]
+	var made := _map(9)
+	var client: GameMap = made[0]
+	var client_world: NetWorld = made[1]
+	client.game_loop.mirror = true
+	room_world.game_loop.elapsed = 42.0
+	room_world.game_loop.noise_count = 17
+	room_world.wind.time = 100.0
+	client_world.apply_clock(room_world.clock())
+	assert_eq(client.game_loop.get_duration(), 42.0)
+	assert_eq(client.game_loop.noise_count, 17, "the end screen's counts")
+	assert_eq(client_world.wind.seed_used, room_world.wind.seed_used, "the same gusts")
+	assert_eq(client_world.wind.time, 100.0)
+	assert_eq(client_world.wind.strength, room_world.wind.gusts.strength(100.0))
+
+
 func test_the_room_draws_alarm_clocks_the_client_removes_them() -> void:
 	var room_world: NetWorld = _map(5)[1]
 	assert_eq(room_world.pickups.size(), 30, "listed before the draw")
@@ -172,4 +203,4 @@ func test_online_end_screen_goes_back_to_the_waiting_room() -> void:
 	screen.online = true
 	screen.change_scene = false
 	add_child_autofree(screen)
-	assert_eq((screen.get_node("%ReplayButton") as Button).text, "END_BACK_TO_LOBBY")
+	assert_eq((screen.get_node("%ReplayButton") as Button).text, Text.t("END_BACK_TO_LOBBY"))

@@ -56,8 +56,8 @@ func can_open() -> bool:
 
 
 func open() -> void:
-	_title.text = tr(plan.title_key)
-	_hint.text = Settings.fill(tr("MAP_HINT"))
+	_title.text = Text.t(plan.title_key)
+	_hint.text = Text.with_keys("MAP_HINT")
 	var objectives := objective_lines()
 	if not objectives.is_empty():
 		_hint.text = "\n".join(objectives) + "\n\n" + _hint.text
@@ -74,12 +74,12 @@ func objective_lines() -> PackedStringArray:
 		return lines
 	var rules := game_loop.rules
 	if rules.fuse_count > 0:
-		lines.append(tr("MAP_OBJECTIVE_FUSES") % [rules.placed, rules.fuse_count])
+		lines.append(Text.t("MAP_OBJECTIVE_FUSES", [rules.placed, rules.fuse_count]))
 	for kind in [LoopRules.Objective.CODE, LoopRules.Objective.DOWNLOAD, LoopRules.Objective.RELAY]:
 		if kind in rules.objectives:
 			var key: String = "MAP_OBJECTIVE_" + LoopRules.Objective.keys()[kind]
-			var done := "  " + tr("MAP_OBJECTIVE_DONE") if rules.is_done(kind) else ""
-			lines.append(tr(key) + done)
+			var done := "  " + Text.t("MAP_OBJECTIVE_DONE") if rules.is_done(kind) else ""
+			lines.append(Text.t(key) + done)
 	return lines
 
 

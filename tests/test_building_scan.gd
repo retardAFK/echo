@@ -137,6 +137,6 @@ func test_pressing_scan_with_a_low_gauge_says_why() -> void:
 func test_reticle_names_the_building_and_lists_scannable_ones() -> void:
 	var reticle: ScanReticle = _map.find_children("*", "ScanReticle", false, false)[0]
 	_avatar.update_aim()
-	assert_string_contains(reticle.hint_text(), _building.get_display_name())
+	assert_string_contains(reticle.hint_text(), ScanReticle.building_name(_building))
 	var nothing := reticle.miss_text(MonsterAvatar.ScanMiss.NOTHING)
-	assert_string_contains(nothing, _building.get_display_name())
+	assert_string_contains(nothing, ScanReticle.building_name(_building))

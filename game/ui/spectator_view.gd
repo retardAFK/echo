@@ -19,7 +19,7 @@ func _ready() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 15
 	add_child(layer)
-	_hint.text = "HUD_SPECTATOR"
+	_hint.text = Text.t("HUD_SPECTATOR")
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint.theme = load(MenuStyle.THEME_PATH)
 	_hint.theme_type_variation = &"HudLabel"

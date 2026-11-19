@@ -79,13 +79,13 @@ func hint_text() -> String:
 	if _miss_time > 0.0:
 		return _miss_text
 	if monster.aimed_building != null:
-		var aimed := monster.aimed_building.get_display_name()
+		var aimed := building_name(monster.aimed_building)
 		if monster.scan.can_start():
-			return tr("HUD_SCAN_HINT") % aimed
-		return tr("HUD_SCAN_RECHARGING") % aimed
+			return Text.t("HUD_SCAN_HINT", aimed)
+		return Text.t("HUD_SCAN_RECHARGING", aimed)
 	if monster.far_building != null:
 		var far := monster.far_building
-		return tr("HUD_SCAN_TOO_FAR") % [far.get_display_name(), _far_distance(far)]
+		return Text.t("HUD_SCAN_TOO_FAR", [building_name(far), _far_distance(far)])
 	return ""
 
 
@@ -93,16 +93,21 @@ func hint_text() -> String:
 func miss_text(reason: MonsterAvatar.ScanMiss) -> String:
 	match reason:
 		MonsterAvatar.ScanMiss.GAUGE_LOW:
-			return tr("HUD_SCAN_GAUGE_LOW")
+			return Text.t("HUD_SCAN_GAUGE_LOW")
 		MonsterAvatar.ScanMiss.TOO_FAR:
 			var far := monster.aim_far_building()
-			var label := far.get_display_name() if far != null else tr("BUILDING_DEFAULT")
-			return tr("HUD_SCAN_TOO_FAR") % [label, _far_distance(far)]
+			var label := building_name(far) if far != null else Text.t("BUILDING_DEFAULT")
+			return Text.t("HUD_SCAN_TOO_FAR", [label, _far_distance(far)])
 	var names: Array[String] = []
 	for building in buildings:
-		if not names.has(building.get_display_name()):
-			names.append(building.get_display_name())
-	return tr("HUD_SCAN_NOTHING") % ", ".join(names)
+		if not names.has(building_name(building)):
+			names.append(building_name(building))
+	return Text.t("HUD_SCAN_NOTHING", ", ".join(names))
+
+
+## The name of a building, as the reticle shows it.
+static func building_name(building: Building) -> String:
+	return Text.t(building.display_key)
 
 
 func _far_distance(building: Building) -> String:
@@ -210,7 +215,7 @@ func _draw_frame(frame: Rect2, pale: Color, dim: Color) -> void:
 	_draw_corners(frame.grow(OUTER_GAP), OUTER_BRACKET, dim, 1.0)
 	# "Listening" and the sound meter above the frame.
 	var font := _font
-	var label := TranslationServer.translate("HUD_SCAN_LISTENING")
+	var label := Text.t("HUD_SCAN_LISTENING")
 	var base := frame.position - Vector2(0, LABEL_OFFSET)
 	_canvas.draw_string(font, base, label, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, pale)
 	var meter_x := (

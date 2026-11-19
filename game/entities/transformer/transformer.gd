@@ -47,10 +47,9 @@ func update_label() -> void:
 	_label.visible = true
 	var missing := game_loop.rules.missing()
 	if missing == 0:
-		_label.text = tr("HUD_TRANSFORMER_WAITS_OTHER")
+		_label.text = Text.t("HUD_TRANSFORMER_WAITS_OTHER")
 		return
-	var key := "HUD_TRANSFORMER_WAITS_ONE" if missing == 1 else "HUD_TRANSFORMER_WAITS"
-	_label.text = tr(key) % missing
+	_label.text = Text.count("HUD_TRANSFORMER_WAITS", missing)
 
 
 func get_prompt() -> String:

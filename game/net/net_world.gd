@@ -60,7 +60,10 @@ func _init(map: Node) -> void:
 ## whether each door is open (S-016), the cages of the prison, the
 ## terminals and cameras of the network, the objectives besides fuses
 ## (S-018), the state of each monitor of the hospital, where its gurneys and
-## wheelchairs stand (S-014), the wind's strength (S-012)].
+## wheelchairs stand (S-014)]. What changes every frame (the game time, the
+## wind) is in clock() instead, sent once a second (S-020, T-300), so this
+## state only changes, and is only sent, when something happens. So do the
+## counts of the end screen, which change with every footstep.
 func state() -> Array:
 	var fuses := []
 	for box in boxes:
@@ -96,8 +99,33 @@ func state() -> Array:
 		screens,
 		beds,
 		wheels,
-		wind.shared_strength() if wind != null else 0.0,
 	]
+
+
+## Room side: [game time, seed of the wind's gusts, wind time, noises, scans
+## and ruses counted for the end screen] (T-301).
+func clock() -> Array:
+	return [
+		game_loop.get_duration() if game_loop != null else 0.0,
+		wind.seed_used if wind != null else 0,
+		wind.time if wind != null else 0.0,
+		game_loop.noise_count if game_loop != null else 0,
+		game_loop.scan_count if game_loop != null else 0,
+		game_loop.ruse_count if game_loop != null else 0,
+	]
+
+
+## Client side: sets the game time and the wind to the room's.
+func apply_clock(values: Array) -> void:
+	if values.size() < 6:
+		return
+	if game_loop != null:
+		game_loop.elapsed = values[0]
+		game_loop.noise_count = values[3]
+		game_loop.scan_count = values[4]
+		game_loop.ruse_count = values[5]
+	if wind != null:
+		wind.sync(values[1], values[2])
 
 
 ## Client side: makes the map look like the room's.
@@ -142,8 +170,6 @@ func apply(values: Array) -> void:
 		var wheels: Array = values[11]
 		for i in mini(wheels.size(), chairs.size()):
 			chairs[i].mirror_state(wheels[i])
-	if values.size() >= 13 and wind != null:
-		wind.mirror_strength(values[12])
 
 
 ## Client side: the sound of a noise made in the room by something of the map

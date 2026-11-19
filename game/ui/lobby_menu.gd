@@ -41,31 +41,22 @@ var lobby: LobbyState
 @onready var _status: Label = %Status
 
 
-## What a seat shows: who sits there, seen from player me.
-static func occupant_text(state: LobbyState, seat: int, me: int) -> String:
+## Who sits on a seat, seen from player me: the AI, you, or player n.
+static func player_name(state: LobbyState, seat: int, me: int) -> String:
 	var player := state.seats[seat]
 	if player == 0:
-		return TranslationServer.translate("LOBBY_AI")
-	var text: String = (
-		TranslationServer.translate("LOBBY_YOU")
-		if player == me
-		else TranslationServer.translate("LOBBY_PLAYER") % player
-	)
-	if player == state.leader:
-		text += " " + TranslationServer.translate("LOBBY_LEADER")
-	if state.is_ready(player):
-		text += " · " + TranslationServer.translate("LOBBY_IS_READY")
-	return text
+		return Text.t("LOBBY_AI")
+	return Text.t("LOBBY_YOU") if player == me else Text.t("LOBBY_PLAYER", player)
 
 
 static func seat_name(seat: int) -> String:
 	if seat == LobbyState.MONSTER_SEAT:
-		return TranslationServer.translate("LOBBY_SEAT_MONSTER")
-	return TranslationServer.translate("LOBBY_SEAT_HUNTED") % seat
+		return Text.t("LOBBY_SEAT_MONSTER")
+	return Text.t("LOBBY_SEAT_HUNTED", seat)
 
 
 static func error_text(reason: String) -> String:
-	return TranslationServer.translate(ERROR_KEYS.get(reason, "LOBBY_ERROR_OTHER"))
+	return Text.t(ERROR_KEYS.get(reason, "LOBBY_ERROR_OTHER"))
 
 
 func _ready() -> void:
@@ -104,7 +95,7 @@ func _exit_tree() -> void:
 
 ## Asks the lobby for a new game.
 func create() -> void:
-	_set_status(tr("LOBBY_CONNECTING"))
+	_set_status(Text.t("LOBBY_CONNECTING"))
 	lobby_client.create(NetAddress.lobby_url(settings))
 
 
@@ -114,7 +105,7 @@ func join_code(text: String) -> void:
 	if not RoomCode.is_valid(code):
 		_show_error("bad_code")
 		return
-	_set_status(tr("LOBBY_CONNECTING"))
+	_set_status(Text.t("LOBBY_CONNECTING"))
 	lobby_client.join(NetAddress.lobby_url(settings), code)
 
 
@@ -149,11 +140,11 @@ func show_lobby(state: LobbyState) -> void:
 		"LOBBY_NOT_READY" if state.is_ready(me) else "LOBBY_READY"
 	)
 	var size_item := _room_list.item("LOBBY_GAME_SIZE")
-	size_item.text = (tr("LOBBY_GAME_SIZE") % state.game_size).to_upper()
+	size_item.text = Text.t("LOBBY_GAME_SIZE", state.game_size).to_upper()
 	_room_list.set_item_visible("LOBBY_GAME_SIZE", me == state.leader)
 	_room_list.set_item_visible("LOBBY_START", me == state.leader)
 	_room_list.item("LOBBY_START").disabled = not state.can_start(me)
-	_hint.text = tr("LOBBY_WAIT_READY") if me == state.leader else tr("LOBBY_WAIT_LEADER")
+	_hint.text = Text.t("LOBBY_WAIT_READY") if me == state.leader else Text.t("LOBBY_WAIT_LEADER")
 	if arriving:
 		_room_list.focus_first()
 
@@ -222,12 +213,12 @@ func _on_lobby_answered(reply: Dictionary) -> void:
 
 
 func _on_joined(_place: int) -> void:
-	_set_status(tr("LOBBY_CONNECTING"))
+	_set_status(Text.t("LOBBY_CONNECTING"))
 
 
 func _on_game_started(state: LobbyState) -> void:
 	show_lobby(state)
-	_set_status(tr("LOBBY_STARTING"))
+	_set_status(Text.t("LOBBY_STARTING"))
 	_room_list.item("LOBBY_READY").disabled = true
 	_room_list.item("LOBBY_START").disabled = true
 	var seat := state.seat_of(NetSession.get_place())

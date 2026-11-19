@@ -85,14 +85,16 @@ func value_text() -> String:
 			if setting == "fov":
 				return "%d°" % roundi(value)
 			if setting == "sensitivity":
-				return ("× %.2f" % value).replace(".", ",")
+				return "× " + Text.decimal(value)
 			return "%d %%" % roundi(value * 100.0)
 		Kind.FLAG:
-			return tr("OPTIONS_ON") if Settings.get_value(setting) else tr("OPTIONS_OFF")
+			return Text.t("OPTIONS_ON") if Settings.get_value(setting) else Text.t("OPTIONS_OFF")
 		Kind.CHOICE:
-			return "‹ %s ›" % tr("OPTIONS_CHOICE_" + str(Settings.get_value(setting)).to_upper())
+			return (
+				"‹ %s ›" % Text.t("OPTIONS_CHOICE_" + str(Settings.get_value(setting)).to_upper())
+			)
 		_:
-			return tr("OPTIONS_PRESS_KEY") if waiting else Settings.key_label(setting)
+			return Text.t("OPTIONS_PRESS_KEY") if waiting else Settings.key_label(setting)
 
 
 func is_lit() -> bool:
@@ -109,7 +111,7 @@ func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, size), Color(MenuStyle.SODIUM, 0.5), false, 1.0)
 	var baseline := (size.y + font.get_ascent(font_size) - font.get_descent(font_size)) / 2.0
 	var color := MenuStyle.CREAM if _lit else MenuStyle.TEXT
-	draw_string(font, Vector2(8, baseline), tr(label_key).to_upper(), 0, -1, font_size, color)
+	draw_string(font, Vector2(8, baseline), Text.t(label_key).to_upper(), 0, -1, font_size, color)
 	if kind == Kind.NUMBER:
 		var bar := _bar_rect()
 		var lit_segments := roundi(Settings.ratio(setting) * SEGMENTS)

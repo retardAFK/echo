@@ -123,9 +123,9 @@ func test_carry_hud_shows_what_is_carried() -> void:
 	var label: Label = hud.get_node("Label")
 	assert_eq(label.text, "")
 	player.inventory.take(Inventory.Kind.BOTTLE)
-	assert_eq(label.text, tr("HUD_CARRY_BOTTLE"))
+	assert_eq(label.text, Text.count("HUD_CARRY_BOTTLES", 1))
 	player.inventory.take(Inventory.Kind.BOTTLE)
-	assert_eq(label.text, tr("HUD_CARRY_BOTTLES") % 2)
+	assert_eq(label.text, Text.count("HUD_CARRY_BOTTLES", 2))
 
 
 func test_no_bottle_no_throw() -> void:

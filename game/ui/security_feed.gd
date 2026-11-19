@@ -43,7 +43,7 @@ func _process(_delta: float) -> void:
 		_material.set_shader_parameter(&"time_seed", floorf(Time.get_ticks_msec() / 80.0))
 	_hint.visible = is_caged()
 	if _hint.visible:
-		_hint.text = Settings.fill(tr("HUD_PRISON_CAMERAS"))
+		_hint.text = Text.with_keys("HUD_PRISON_CAMERAS")
 
 
 ## Waiting in a cage: "interact" goes through the cameras.
@@ -59,7 +59,7 @@ func _show(camera: SecurityCamera) -> void:
 	if camera != null:
 		var network := CityNetwork.of(player)
 		var number := network.cameras.find(camera) + 1 if network != null else 0
-		_caption.text = tr("HUD_CAMERA_CAPTION") % [number, tr(camera.label_key)]
+		_caption.text = Text.t("HUD_CAMERA_CAPTION", [number, Text.t(camera.label_key)])
 
 
 ## The caption or the hint, in the green of the screens.

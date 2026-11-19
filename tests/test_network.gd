@@ -303,9 +303,29 @@ func test_online_a_hunted_sees_what_its_camera_sees() -> void:
 	assert_false(1 in net.snapshot_for(12)["others"].map(func(e: Array) -> int: return e[0]))
 	# The world state says the LED is lit and the terminal used, not by whom.
 	var state: Array = net.world.state()
-	assert_eq(state.size(), 13)  # The wind came last (S-012).
+	assert_eq(state.size(), 12)  # The wind goes with the clock (S-020, T-300).
 	assert_eq(state[7][0][0], [false, true, 0])
 	assert_eq(state[7][1][0], [true, false])
+
+
+func test_the_room_sends_the_map_only_when_it_changes() -> void:
+	# S-020, T-300: before, the game time made every snapshot carry the map.
+	var map := _room([0, 11, 12, 0])
+	var net: NetGame = map.get_node("NetGame")
+	var count_of := func(kind: NetGame.Event) -> int:
+		return net.sent_events.filter(func(sent: Array) -> bool: return sent[1][0] == kind).size()
+	net.send_world()
+	var first: int = count_of.call(NetGame.Event.WORLD)
+	assert_gt(first, 0)
+	for i in 3:
+		await wait_physics_frames(5)
+		net.send_world()
+	assert_eq(count_of.call(NetGame.Event.WORLD), first, "nothing changed")
+	map.get_node("Network").cameras[5].smash()
+	net.send_world()
+	assert_gt(count_of.call(NetGame.Event.WORLD), first, "a camera smashed")
+	net.send_clock()
+	assert_gt(count_of.call(NetGame.Event.CLOCK), 0)
 
 
 func test_a_client_shows_the_room_s_network() -> void:

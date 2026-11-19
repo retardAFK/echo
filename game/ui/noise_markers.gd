@@ -19,7 +19,7 @@ var _next := 0
 
 ## "11 m": distance rounded to the meter, through the HUD_DISTANCE key.
 static func distance_text(meters: float) -> String:
-	return TranslationServer.translate("HUD_DISTANCE") % roundi(meters)
+	return Text.t("HUD_DISTANCE", roundi(meters))
 
 
 ## Opacity of a marker of a given age, from 1 when heard to 0 when gone.
