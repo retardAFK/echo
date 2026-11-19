@@ -60,6 +60,8 @@ var body_action: MonsterBody.Action:
 var stagger := Stagger.new()
 ## Its run as a gauge, shown under the crosshair's left (S-020, T-309).
 var sprint: MonsterSprint
+## Deafened by a firecracker (S-020, T-312); online, the room sends it.
+var deafness := Deafness.new()
 var _pace := MonsterBrain.Pace.WALK
 var _prowling := false
 var _pitch := 0.0
@@ -160,6 +162,7 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 		velocity += get_gravity() * delta
 	if scan.active:
 		input = Vector2.ZERO  # The monster stands still while it scans.
+	deafness.update(delta)
 	if stagger.update(delta):
 		input = Vector2.ZERO  # Stopped short (T-307).
 		velocity.x = 0.0
@@ -185,6 +188,8 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 	move_and_slide()
 	var moved := Vector2(global_position.x - before.x, global_position.z - before.z).length()
 	_noise.update(delta, moved, _pace, global_position, get_ear_position(), self)
+	if not mirror_world:
+		Firecracker.burst_near(self)  # S-020, T-312: the room sets it off.
 	if not mirror_world and Decoy.crush_near(get_tree(), global_position, settings.catch_distance):
 		gesture.play(MonsterBody.Action.CRUSH, BODY_SETTINGS.crush_time)  # S-008, Q4.
 
@@ -332,6 +337,7 @@ func _level_around(point: Vector3) -> Building:
 func scan_reveals(event: NoiseEvent) -> bool:
 	return (
 		scan.is_listening()
+		and not deafness.is_deaf()  # A firecracker went off (S-020, T-312).
 		and scan_target != null
 		and event.source != self
 		and not event.masked  # Lost in a ventilation zone (S-014, Q5).

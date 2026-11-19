@@ -121,6 +121,7 @@ func test_carry_hud_shows_what_is_carried() -> void:
 	hud.player = player
 	add_child_autofree(hud)
 	var label: Label = hud.get_node("Label")
+	player.inventory.set_count(Inventory.Kind.FIRECRACKER, 0)  # Its one firecracker (T-312).
 	assert_eq(label.text, "")
 	player.inventory.take(Inventory.Kind.BOTTLE)
 	assert_eq(label.text, tr("HUD_CARRY_BOTTLE"))

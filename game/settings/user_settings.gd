@@ -49,6 +49,7 @@ const REMAPPABLE: Array[String] = [
 	"sprint",
 	"crouch",
 	"hold_breath",
+	"place_firecracker",
 	"interact",
 	"map",
 ]
@@ -58,6 +59,7 @@ const TOKENS := {
 	"{sprint}": ["sprint"],
 	"{crouch}": ["crouch"],
 	"{hold_breath}": ["hold_breath"],
+	"{place_firecracker}": ["place_firecracker"],
 	"{interact}": ["interact"],
 	"{map}": ["map"],
 }

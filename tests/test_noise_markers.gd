@@ -66,4 +66,5 @@ func test_marker_fades_out() -> void:
 func test_markers_are_reused() -> void:
 	for i in _avatar.settings.marker_count + 3:
 		_noise_at(Vector3(0, 0, 2), 14.0)
-	assert_eq(_markers.get_child_count(), _avatar.settings.marker_count)
+	var rings := _markers.get_children().filter(func(n: Node) -> bool: return n is NoiseMarker)
+	assert_eq(rings.size(), _avatar.settings.marker_count)

@@ -11,7 +11,7 @@ extends CharacterBody3D
 ## and runs for the exit, holding "interact" like the hunted (HoldInteraction).
 
 signal state_changed(state: PreyBrain.State)
-## It used a ruse (S-008): "bottle", "decoy", "hide" or "car_alarm".
+## It used a ruse (S-008): "bottle", "decoy", "hide", "car_alarm" or "firecracker".
 signal ruse_used(kind: StringName)
 
 ## Distance the target must move before the path is recomputed, in meters.
@@ -19,6 +19,7 @@ const RETARGET_DISTANCE := 0.5
 const DOOR_SETTINGS := preload("res://game/data/door_settings.tres")
 const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
+const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.tscn")
 ## Length of the gestures its body shows (S-011, T-125).
 const BODY_SETTINGS := preload("res://game/data/hunted_body_settings.tres")
 
@@ -323,6 +324,7 @@ func _use_ruses(delta: float, threat: Vector3) -> void:
 	if fleeing:
 		_set_off_car_alarms()
 		_use_hospital_decoys(threat)
+		_maybe_drop_firecracker(threat)
 		_look_for_hiding_spot(delta, threat)
 	else:
 		_car_detour = null
@@ -454,6 +456,22 @@ func place_decoy() -> Decoy:
 	_count_ruse(&"decoy")
 	_decoy = decoy
 	return decoy
+
+
+## Fleeing, the monster close behind, it drops its firecracker at its feet
+## (S-020, T-312): the monster on its trail sets it off.
+func _maybe_drop_firecracker(threat: Vector3) -> void:
+	if (
+		hiding_in != null
+		or global_position.distance_to(threat) > settings.firecracker_drop_distance
+		or not inventory.use(Inventory.Kind.FIRECRACKER)
+	):
+		return
+	var firecracker: Firecracker = FIRECRACKER_SCENE.instantiate()
+	get_parent().add_child(firecracker)
+	firecracker.global_position = global_position
+	gesture.play(HuntedBody.Gesture.PICK, BODY_SETTINGS.pick_time)
+	_count_ruse(&"firecracker")
 
 
 ## On its way to repair, between 30 and 20 m from the transformer, it places

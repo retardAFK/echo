@@ -34,6 +34,8 @@ HUD_INTERACT_PICKUP_DECOY,{interact} : ramasser le réveil
 HUD_CARRY_BOTTLE,1 bouteille
 HUD_CARRY_BOTTLES,%d bouteilles
 HUD_CARRY_DECOY,Réveil
+HUD_CARRY_FIRECRACKER,Pétard ({place_firecracker})
+HUD_DEAF,Assourdi : %d s
 HUD_INTERACT_HIDE,Maintenir {interact} : se cacher
 HUD_INTERACT_LEAVE,Maintenir {interact} : sortir
 HUD_INTERACT_OPEN,Maintenir {interact} : ouvrir
@@ -57,6 +59,7 @@ CONTROLS_HOLD_BREATH,{hold_breath} : retenir son souffle (6 s sans bruit de pas 
 CONTROLS_INTERACT,"{interact} : ramasser, interagir ; maintenir {interact} : fusible, cachette"
 CONTROLS_THROW,Clic gauche : lancer une bouteille
 CONTROLS_DECOY,Clic droit : poser un réveil
+CONTROLS_FIRECRACKER,"{place_firecracker} : poser le pétard (il éclate sous le monstre, qui n'entend plus rien 6 s)"
 CONTROLS_MAP,{map} : ouvrir ou fermer la carte
 CONTROLS_PROWL,{crouch} : rôder (silencieux)
 CONTROLS_SCAN,Maintenir clic droit en visant un bâtiment visitable proche : scanner
@@ -224,6 +227,7 @@ OPTIONS_KEY_RIGHT,Aller à droite
 OPTIONS_KEY_SPRINT,Courir
 OPTIONS_KEY_CROUCH,S'accroupir ou rôder
 OPTIONS_KEY_HOLD_BREATH,Retenir son souffle
+OPTIONS_KEY_FIRECRACKER,Poser le pétard
 OPTIONS_KEY_INTERACT,Interagir
 OPTIONS_KEY_MAP,Carte
 OPTIONS_ON,Oui

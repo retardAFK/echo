@@ -351,7 +351,7 @@ func replace_with_ai(place: int) -> void:
 		player.hiding_in.occupant = null
 		player.leave_hiding()
 	var prey := _new_ai_prey(seat, player)  # Where the player was.
-	for kind: Inventory.Kind in [Inventory.Kind.BOTTLE, Inventory.Kind.DECOY]:
+	for kind: Inventory.Kind in Inventory.Kind.values():
 		prey.inventory.set_count(kind, player.inventory.count(kind))
 	prey.monster = avatar if avatar != null else _monster
 	_net.ai_hunted[seat] = prey
@@ -368,7 +368,7 @@ func _hunted_back(place: int, seat: int) -> void:
 	var player := _new_player(_net, place, seat)
 	player.global_position = prey.global_position
 	player.rotation.y = prey.rotation.y
-	for kind: Inventory.Kind in [Inventory.Kind.BOTTLE, Inventory.Kind.DECOY]:
+	for kind: Inventory.Kind in Inventory.Kind.values():
 		player.inventory.set_count(kind, prey.inventory.count(kind))
 	_ai_preys.erase(prey)
 	_swap_hunted(prey, player)

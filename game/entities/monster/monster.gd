@@ -53,6 +53,8 @@ var body_action: MonsterBody.Action:
 var stagger := Stagger.new()
 ## Its run as a gauge (S-020, T-309).
 var sprint: MonsterSprint
+## Deafened by a firecracker (S-020, T-312).
+var deafness := Deafness.new()
 var _vision_timer := 0.0
 var _was_hidden := false
 var _noise: MonsterNoise
@@ -149,6 +151,7 @@ func hold_still(duration: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	gesture.update(delta)
+	deafness.update(delta)
 	if _still_left > 0.0:
 		_still_left -= delta
 		return
@@ -178,6 +181,7 @@ func _physics_process(delta: float) -> void:
 	_move(delta)
 	_make_noise(delta, before)
 	_silence_monitors()
+	Firecracker.burst_near(self)  # S-020, T-312.
 	if Decoy.crush_near(get_tree(), global_position, settings.catch_distance) > 0:  # S-008, Q4.
 		gesture.play(MonsterBody.Action.CRUSH, _body.settings.crush_time)
 	for hunted in get_targets():
@@ -468,6 +472,7 @@ func nearest_building(at: Vector3, radius: float) -> Building:
 func scan_reveals(event: NoiseEvent) -> bool:
 	return (
 		scan_target != null
+		and not deafness.is_deaf()  # A firecracker went off (S-020, T-312).
 		and scan.is_listening()
 		and not event.masked
 		and scan_target.contains(event.position)
@@ -493,8 +498,8 @@ func guard_exit(points: Array[Vector3]) -> void:
 func _on_noise_emitted(event: NoiseEvent) -> void:
 	if event.source == self or not is_inside_tree():
 		return  # Its own noise, or removed from the map (monster role).
-	if event.masked:
-		return  # Lost in the roar of a ventilation zone (S-014, Q5).
+	if event.masked or deafness.is_deaf():
+		return  # Lost in a ventilation zone (S-014, Q5), or deafened (S-020, T-312).
 	if event.source is Door and (event.source as Door).last_user == self:
 		return  # A door it opened itself (S-016).
 	if scan_reveals(event):

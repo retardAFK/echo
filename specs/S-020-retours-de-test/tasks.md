@@ -15,7 +15,7 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [x] T-309 — E2 : sprint du monstre en jauge
 - [x] T-310 — H1 : fouiller une cachette vide coûte
 - [x] T-311 — H2 : retenir son souffle
-- [ ] T-312 — R1 : pétard assourdissant
+- [x] T-312 — R1 : pétard assourdissant
 - [ ] T-313 — R2 : réveil réglable
 - [ ] T-314 — T5 : IA de complément, une règle dans le guide et le code (Maxime choisit)
 - [ ] T-315 — N1 : caméras accrochées aux murs
@@ -35,3 +35,4 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - T-309 (19/11/2026) : `MonsterSprint` (IA et joueur) : 6 m/s pendant `sprint_time` = 5 s de course, puis `winded_speed` = 5 m/s pendant `winded_time` = 4 s, plus lent que le sprint du chassé (5,5 m/s) ; la marche recharge 1 s par seconde (`monster_settings.gd`). Barre « Course » en bas à gauche pour le monstre joué. Tests GUT dans `test_monster_sprint`.
 - T-310 (19/11/2026) : le monstre (IA ou joueur) qui ouvre une cachette vide fait un bruit d'au moins `empty_search_range` = 4 m et reste `empty_search_stagger` = 1 s sur place (`ruse_settings.gd`). En ligne, l'instantané donne au client [arrêts, secondes] du `Stagger` de la salle : le client s'arrête aussi pour ce qu'il ne pouvait pas prédire. Tests GUT dans `test_hiding_spots` et `test_net_sync`.
 - T-311 (19/11/2026) : touche R (remappable) pour retenir son souffle `breath_hold_time` = 6 s, recharge `breath_recharge_time` = 40 s, jauge « Souffle » en bas à gauche (`BreathHold`, `BreathBar`). Souffle retenu : pas marchés silencieux et pas de halètement ; le sprint reste bruyant. Caché sans retenir son souffle, la respiration s'entend à `hidden_breath_range` = 3 m quand le monstre est à moins de `hidden_breath_reach` = 3 m. En ligne, `FLAG_BREATH` dans les commandes. Tests GUT dans `test_breath_hold`.
+- T-312 (19/11/2026) : chaque chassé part avec un pétard (`start_firecrackers` = 1, pas de ramassage), posé devant lui avec la touche F (remappable). Armé après `firecracker_arm_time` = 1,5 s, il éclate quand un monstre (IA ou joueur) passe à moins de `firecracker_trigger_distance` = 1,5 m : bruit FIRECRACKER de 25 m pour les chassés, et le monstre est assourdi `deafen_time` = 6 s (`Deafness`) : son IA et son scan n'entendent rien, son écran n'affiche aucun bruit et indique « Assourdi : n s ». L'IA chassée lâche son pétard en fuite quand le monstre est à moins de `firecracker_drop_distance` = 10 m. En ligne, seule la salle le fait éclater (événements FIRECRACKER et POP), elle n'envoie plus aucun bruit au monstre assourdi et lui donne le temps restant dans l'instantané. Son de `tools/audio/ruse_sounds.py`. Tests GUT dans `test_firecracker`.
