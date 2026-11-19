@@ -25,6 +25,8 @@ const BODY_SETTINGS := preload("res://game/data/hunted_body_settings.tres")
 
 ## What the player carries (S-008).
 var inventory: Inventory
+## Holding its breath (S-020, T-311), with its recharge.
+var breath_hold: BreathHold
 ## The hiding spot the player is in (S-008, Q6), or null.
 var hiding_in: HidingSpot
 ## What the player asks this frame (S-010, T-106): from the keyboard and
@@ -83,6 +85,7 @@ var _headroom_sphere: SphereShape3D
 var _hold := HoldInteraction.new()
 var _hide_yaw := 0.0
 var _breathless_left := 0.0
+var _hidden_breath_timer := 0.0
 var _breath_timer := 0.0
 var _controls: LocalControls
 ## Caught (S-011, T-127): time left looking at the monster, and its eyes.
@@ -99,6 +102,7 @@ func _ready() -> void:
 	_apply_view_settings("")
 	Settings.changed.connect(_apply_view_settings)
 	inventory = Inventory.new(ruse_settings)
+	breath_hold = BreathHold.new(settings)
 	# Each player owns its capsule, so resizing it never touches another instance.
 	_capsule = _collision.shape.duplicate()
 	_collision.shape = _capsule
@@ -108,6 +112,7 @@ func _ready() -> void:
 	_headroom_cast.shape = _headroom_sphere
 	_apply_height(settings.standing_height)
 	if local_controls:
+		add_child(BreathBar.new(breath_hold))
 		_controls = LocalControls.new()
 		_controls.commands = commands
 		add_child(_controls)
@@ -457,6 +462,9 @@ func is_breathless() -> bool:
 ## BREATH noise so short that only the monster's scan reveals it (D-009),
 ## hidden or not (S-008, Q6).
 func _update_breath(delta: float) -> void:
+	breath_hold.update(delta, commands.hold_breath)
+	if hiding_in != null:
+		_breathe_in_hiding(delta)
 	if _gait == PlayerMotion.Gait.SPRINT and hiding_in == null:
 		_breathless_left = settings.breathless_time
 		_breath_timer = 0.0
@@ -467,7 +475,31 @@ func _update_breath(delta: float) -> void:
 	_breath_timer -= delta
 	if _breath_timer <= 0.0:
 		_breath_timer += settings.breath_interval
-		NoiseBus.emit_noise(NoiseEvent.Type.BREATH, get_eye_position(), settings.breath_range, self)
+		if not _holds_breath():
+			NoiseBus.emit_noise(
+				NoiseEvent.Type.BREATH, get_eye_position(), settings.breath_range, self
+			)
+
+
+## Hidden with a monster within hidden_breath_reach (S-020, T-311): it
+## breathes audibly unless it holds its breath.
+func _breathe_in_hiding(delta: float) -> void:
+	_hidden_breath_timer -= delta
+	if _hidden_breath_timer > 0.0:
+		return
+	_hidden_breath_timer = settings.breath_interval
+	if _holds_breath() or not _monster_within(settings.hidden_breath_reach):
+		return
+	NoiseBus.emit_noise(
+		NoiseEvent.Type.BREATH, get_eye_position(), settings.hidden_breath_range, self
+	)
+
+
+func _monster_within(reach: float) -> bool:
+	for node in get_tree().get_nodes_in_group(Prison.MONSTERS_GROUP):
+		if (node as Node3D).global_position.distance_to(global_position) <= reach:
+			return true
+	return false
 
 
 ## Progress of what the player holds "interact" on (a fuse box, the
@@ -572,3 +604,8 @@ func _update_head_bob(speed: float, target_speed: float, delta: float) -> void:
 	var amount := clampf(speed / target_speed, 0.0, 1.0) if target_speed > 0.0 else 0.0
 	var amplitude := PlayerMotion.head_bob_amplitude(settings, _gait) * amount
 	_camera.position = PlayerMotion.head_bob_offset(_bob_phase, amplitude)
+
+
+## Whether it holds its breath now (S-020, T-311): steps and panting silent.
+func _holds_breath() -> bool:
+	return breath_hold != null and breath_hold.holding

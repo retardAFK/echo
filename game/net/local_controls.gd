@@ -48,5 +48,6 @@ func fill() -> void:
 	commands.sprint = not frozen and Input.is_action_pressed("sprint")
 	commands.interact = not frozen and Input.is_action_pressed("interact")
 	commands.scan = not frozen and Input.is_action_pressed("scan")
+	commands.hold_breath = not frozen and Input.is_action_pressed("hold_breath")
 	commands.yaw = _avatar.rotation.y
 	commands.pitch = _avatar.get_pitch()

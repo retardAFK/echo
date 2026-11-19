@@ -21,6 +21,7 @@ const PICK_COUNT := 16
 const FLAG_SPRINT := 1
 const FLAG_INTERACT := 2
 const FLAG_SCAN := 4
+const FLAG_BREATH := 8
 ## Bytes before the actions: seq (4), move (2 x 4), yaw (4), pitch (4), flags (1), count (1).
 const HEADER_SIZE := 22
 
@@ -34,6 +35,8 @@ var pitch := 0.0
 var sprint := false
 var interact := false
 var scan := false
+## Holding its breath (S-020, T-311).
+var hold_breath := false
 
 var _actions: Array[Action] = []
 
@@ -64,6 +67,7 @@ func copy_held(other: PlayerCommands) -> void:
 	sprint = other.sprint
 	interact = other.interact
 	scan = other.scan
+	hold_breath = other.hold_breath
 
 
 ## The queued one-shot actions, oldest first; the queue is emptied.
@@ -94,6 +98,8 @@ func to_bytes() -> PackedByteArray:
 		flags |= FLAG_INTERACT
 	if scan:
 		flags |= FLAG_SCAN
+	if hold_breath:
+		flags |= FLAG_BREATH
 	bytes.encode_u8(20, flags)
 	bytes.encode_u8(21, _actions.size())
 	for i in _actions.size():
@@ -122,6 +128,7 @@ static func from_bytes(bytes: PackedByteArray) -> PlayerCommands:
 	commands.sprint = flags & FLAG_SPRINT != 0
 	commands.interact = flags & FLAG_INTERACT != 0
 	commands.scan = flags & FLAG_SCAN != 0
+	commands.hold_breath = flags & FLAG_BREATH != 0
 	for i in count:
 		var action := bytes.decode_u8(HEADER_SIZE + i)
 		if action < Action.size() or picked(action) >= 0:
