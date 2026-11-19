@@ -22,6 +22,7 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [x] T-316 — N2 : clavier du transformateur en boîtier mural
 - [ ] T-317 — J2 : grille de test commune
 - [ ] T-318 — J1 : nettoyer les branches (Maxime donne son accord)
+- [x] T-348 — CI : le robot de net_match se voit bloqué à un chambranle
 
 ## Compte rendu
 - T-300 (19/11/2026) : spec et tâches écrites depuis le PDF du catalogue (33 pistes lisibles sur 52).
@@ -31,3 +32,4 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - T-305 (19/11/2026) : `gust_db` 9 → 4 dB et `whistle_db` -10 → -16 dB (`audio_settings.gd`), pour que le vent ne couvre plus les pas du monstre.
 - T-314 (19/11/2026) : règle choisie par Maxime : une partie en ligne a toujours 3 chassés ; le chef choisit 2 à 4 joueurs humains et les places sans joueur sont jouées par des IA chassées (`GameMap._setup_online_room`). L'interphone montre les 4 places (les vides en « IA »). Guide du jeu et ECHO_PROJET.md alignés. Tests GUT dans `test_fill_in_ai` et `test_online_menu`.
 - T-316 (19/11/2026) : le clavier du code (`Terminal.Kind.CODE`) est `terminal_keypad.tscn`, un boîtier métallique de 36 × 50 cm avec écran vert et pavé, sans bureau ni PC. `build_tilleuls.gd` le colle au mur du transformateur (`_snap_to_wall`), 1,5 m plus près qu'avant ; rien d'autre ne change dans la carte (comparaison `dump_scene` avant et après). Capture `clavier_transfo` mise à jour. Test GUT dans `test_objectives`.
+- T-348 (19/11/2026) : le robot de `net_match` se croyait en mouvement quand la salle tenait son corps à un chambranle (va-et-vient de 1,5 m de la prédiction, écart 2 m) : le seuil de blocage passe de 0,3 m à 2 m (`STUCK_DISTANCE`), il recule et contourne. Cause des échecs de `net_match` sur main (run 445) et sur #179, #190, #193 (place 2 bloquée en `to_box`, le monstre l'attend).
