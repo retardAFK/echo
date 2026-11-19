@@ -49,12 +49,13 @@ func _open_point(body: Node3D, distance: float) -> Vector3:
 	return body.global_position + Vector3(distance, 0, 0)
 
 
-func test_closed_seats_have_nobody() -> void:
+func test_a_game_of_two_still_has_three_hunted() -> void:
+	# Maxime's rule (S-020, T-314): AI preys play the seats past the game size.
 	var map := _room([5, 11, 0, 0], 2)
 	var net: NetGame = map.get_node("NetGame")
-	assert_eq(net.ai_hunted.size(), 0, "one against one: no AI prey")
+	assert_eq(net.ai_hunted.keys(), [2, 3], "one against one: two AI preys")
 	assert_null(net.ai_monster)
-	assert_eq(map.game_loop.team.size(), 1)
+	assert_eq(map.game_loop.team.size(), 3)
 
 
 func test_ai_preys_fill_the_empty_hunted_seats() -> void:

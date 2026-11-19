@@ -79,7 +79,7 @@ func test_intercom_tags_and_lamps() -> void:
 	assert_false(intercom.is_lamp_lit(3), "an AI has no lamp")
 
 
-func test_intercom_hides_closed_seats_and_roles_until_drawn() -> void:
+func test_intercom_shows_every_seat_and_hides_roles_until_drawn() -> void:
 	var intercom := Intercom.new()
 	add_child_autofree(intercom)
 	var state := _state()
@@ -89,7 +89,7 @@ func test_intercom_hides_closed_seats_and_roles_until_drawn() -> void:
 	assert_eq(intercom.get_role_text(1), "?", "roles drawn at launch")
 	state.game_size = 3
 	intercom.show_state(state, 2)
-	assert_false(intercom.is_seat_shown(3), "closed seat")
+	assert_true(intercom.is_seat_shown(3), "played by an AI (S-020, T-314)")
 	state.started = true
 	intercom.show_state(state, 2)
 	assert_eq(intercom.get_role_text(0), LobbyMenu.seat_name(0).to_upper())
