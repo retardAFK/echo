@@ -14,6 +14,12 @@ extends Resource
 @export_range(0.0, 50.0, 0.1, "suffix:m") var metal_walk_range: float = 6.0
 ## Running on metal, in meters (S-016, Q9). Crouched stays at crouch_range.
 @export_range(0.0, 50.0, 0.1, "suffix:m") var metal_sprint_range: float = 18.0
+## Crouching in a puddle, in meters (S-012, Q4: water doubles a noise).
+@export_range(0.0, 50.0, 0.1, "suffix:m") var puddle_crouch_range: float = 2.0
+## Walking in a puddle, in meters (S-012, Q4).
+@export_range(0.0, 50.0, 0.1, "suffix:m") var puddle_walk_range: float = 8.0
+## Running in a puddle, in meters (S-012, Q4).
+@export_range(0.0, 50.0, 0.1, "suffix:m") var puddle_sprint_range: float = 20.0
 
 @export_group("Strides")
 ## Distance between two crouched footsteps, in meters.
@@ -33,6 +39,12 @@ extends Resource
 ## In a ventilation zone, a noise of this range or less is lost in the roar:
 ## neither the monster nor its scan hears it, in meters.
 @export_range(0.0, 20.0, 0.5, "suffix:m") var ventilation_mask: float = 4.0
+
+@export_group("Wind (S-012, T-144)")
+## During a gust, outdoors, a noise of this range or less is cut down, in meters.
+@export_range(0.0, 30.0, 0.5, "suffix:m") var wind_small_range: float = 6.0
+## What a gust multiplies such a noise's range by.
+@export_range(0.0, 1.0, 0.05) var wind_factor: float = 0.5
 
 @export_group("Capture (S-010, T-107)")
 ## Range of the call for help of a captured hunted, in meters.

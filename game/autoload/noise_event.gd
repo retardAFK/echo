@@ -9,7 +9,9 @@ extends RefCounted
 ## loudspeaker set off from a terminal; SHUTTER: a metal shutter; DISK: a
 ## download's hard disk; BEEP: a wrong code; SWITCH: a relay switch (S-018).
 ## MONITOR: a hospital monitor beeping; ROLL: a gurney or a wheelchair
-## rolling, or a gurney shoved over (S-014).
+## rolling, or a gurney shoved over (S-014). GROWL: the monster breaking into a
+## run; SCREAM: the monster's cry when it catches a hunted (S-012, T-145).
+## New types go last: their numbers travel online.
 enum Type {
 	FOOTSTEP,
 	BREATH,
@@ -35,6 +37,8 @@ enum Type {
 	SWITCH,
 	MONITOR,
 	ROLL,
+	GROWL,
+	SCREAM,
 }
 
 var type: Type
@@ -47,6 +51,9 @@ var source: Node
 ## Lost in the roar of a ventilation zone (S-014, Q5): the monster and its
 ## scan do not hear it; the hunted still do.
 var masked := false
+## Made by the monster (S-012, Q6): the ears play its scrape and its breath.
+## Online, the room's message carries it, since a client's copy has no source.
+var by_monster := false
 ## Engine time of the emission, in milliseconds.
 var time_msec: int
 

@@ -103,7 +103,7 @@ func set_open(open: bool, sound := true) -> void:
 	is_open = open
 	if sound and is_inside_tree():
 		_creak.stream = SOUND_GATE
-		_creak.play()
+		SoundSpace.play(_creak)
 	if _tween != null:
 		_tween.kill()
 	var yaw := -PI / 2.0 if open else 0.0

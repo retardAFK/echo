@@ -103,7 +103,7 @@ func mirror_state(down: bool, recharge: float) -> void:
 
 ## Online client: its rattle heard from the room.
 func voice() -> void:
-	_sound.play()
+	SoundSpace.play(_sound)
 
 
 ## Down, it blocks and hides; up, only its box shows.
@@ -111,7 +111,7 @@ func _show(down: bool, animate: bool) -> void:
 	_body.collision_layer = WALLS_LAYER if down else 0
 	_shape.disabled = not down
 	if animate and is_inside_tree():
-		_sound.play()
+		SoundSpace.play(_sound)
 	if _tween != null:
 		_tween.kill()
 	var scale_y := 1.0 if down else 0.02

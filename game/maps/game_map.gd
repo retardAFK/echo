@@ -592,7 +592,9 @@ func _on_next_game(state: LobbyState) -> void:
 
 
 ## Room side: the monster opened a hiding spot with a hunted inside.
-func _on_online_hidden_found(occupant: Node3D, _by: Node3D) -> void:
+func _on_online_hidden_found(occupant: Node3D, by: Node3D) -> void:
+	if by != null:
+		MonsterNoise.scream(by)
 	_online_catch(occupant)
 
 
@@ -678,6 +680,9 @@ func _setup_game_loop() -> void:
 	game_loop.exit_opened.connect(_on_exit_opened)
 	if room:
 		return  # No screens on the server.
+	var music := TensionMusic.new()  # S-012, T-146.
+	music.game_loop = game_loop
+	add_child(music)
 	end_screen = END_SCREEN_SCENE.instantiate()
 	end_screen.online = NetSession.mode == NetSession.Mode.CLIENT
 	add_child(end_screen)
@@ -729,6 +734,7 @@ func _on_game_ended(_hunted_won: bool) -> void:
 
 func _on_prey_caught() -> void:
 	avatar.catch_count += 1
+	MonsterNoise.scream(avatar)
 	if game_loop != null:
 		game_loop.finish(false)  # The monster wins (S-007, Q7).
 		return
@@ -767,8 +773,9 @@ func get_hiding_spots() -> Array[HidingSpot]:
 ## The monster opened a hiding spot with the hunted inside (S-008, Q7): a catch.
 func _on_hidden_found(_occupant: Node3D, _by: Node3D) -> void:
 	if avatar != null:
-		_on_prey_caught()
+		_on_prey_caught()  # Its cry included (S-012, T-145).
 	elif _monster != null:
+		MonsterNoise.scream(_monster)
 		_monster.catch_count += 1
 		_on_player_caught()
 

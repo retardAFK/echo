@@ -13,19 +13,37 @@ var settings: NoiseSettings = preload("res://game/data/noise_settings.tres")
 ## the room already sends what is heard.
 var mirror := false
 var local_source: Node
+## A gust of wind blows over the cité (S-012, T-144): set by CityWind.
+var wind_gust := false
 
 
-## Announces a noise to every listener and returns it.
+## Announces a noise to every listener and returns it. by_monster is for a
+## copy of a noise the monster made somewhere else (an online client).
 func emit_noise(
-	type: NoiseEvent.Type, position: Vector3, noise_range: float, source: Node = null
+	type: NoiseEvent.Type,
+	position: Vector3,
+	noise_range: float,
+	source: Node = null,
+	by_monster := false
 ) -> NoiseEvent:
+	noise_range = wind_cut(position, noise_range)
 	var event := NoiseEvent.new(type, position, noise_range, source)
+	event.by_monster = by_monster or (source != null and Door.is_monster(source))
 	if noise_range <= settings.ventilation_mask and is_inside_tree():
 		event.masked = Ventilation.covers(get_tree(), position)
 	if mirror and source != null and source != local_source:
 		return event
 	noise_emitted.emit(event)
 	return event
+
+
+## A small noise outdoors during a gust carries less far (S-012, Q8).
+func wind_cut(position: Vector3, noise_range: float) -> float:
+	if not wind_gust or noise_range > settings.wind_small_range or not is_inside_tree():
+		return noise_range
+	if Building.any_contains(get_tree(), position):
+		return noise_range
+	return noise_range * settings.wind_factor
 
 
 ## Counts the distinct walls crossed by a straight line, up to max_walls_counted.

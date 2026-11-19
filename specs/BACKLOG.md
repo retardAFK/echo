@@ -20,7 +20,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 | 9 | S-009 | Préparer le test à plusieurs, mesurer les 60 images/s, puis **point de décision n°2** | T-073 à T-089 | S-008 |
 | 10 | S-010 | Multijoueur en ligne, précédé du **point de décision n°3** | T-090 à T-119 | Phase 9 |
 | 11 | S-011 | Personnages et animations | T-120 à T-139 | Phase 10 |
-| 12 | S-012 | Audio complet | T-140 à T-159 | Phase 11 |
+| 12 | S-012 | Audio complet, livrée le 17/11/2026 (`specs/S-012-audio/`) | T-140 à T-159 | Phase 11 |
 | 13 | S-013 | Interface, menus et options | T-160 à T-179 | Phase 12 |
 | 14 | S-014 | L'hôpital, intégré à la cité des Tilleuls (D-019), livrée le 17/11/2026 sauf la mesure des 60 images/s | T-180 à T-209 | Phase 13 |
 | 15 | S-015 | Finition et publication | T-210 à T-229 | Phase 14 |
@@ -226,31 +226,34 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 **Terminé quand** : la direction des sons est claire au casque, et chaque bruit de jeu a un son qui correspond à sa portée.
 
-- [ ] T-140 — Spec S-012
+- [x] T-140 — Spec S-012
   - Résultat vérifiable : spec validée
   - Dépend de : T-128
-- [ ] T-141 — Plan et tâches de S-012
+- [x] T-141 — Plan et tâches de S-012
   - Résultat vérifiable : `plan.md` (bus audio, atténuation, occlusion) et `tasks.md`
   - Dépend de : T-140
-- [ ] T-142 — Spatialisation et occlusion
+- [x] T-142 — Spatialisation et occlusion
   - Résultat vérifiable : sons en 3D, étouffés derrière un mur selon la même règle que le `NoiseBus` (S-002) ; tests GUT sur le calcul d'occlusion
   - Dépend de : T-141
-- [ ] T-143 — Pas selon le sol
+- [x] T-143 — Pas selon le sol
   - Résultat vérifiable : béton, gravier, métal, carrelage, flaques, pour les chassés et le monstre (raclement en marche) ; sons faits par nous, montrés à Maxime
   - Dépend de : T-142
-- [ ] T-144 — Le vent de la cité
+- [x] T-144 — Le vent de la cité
   - Résultat vérifiable : règle de zone de la section 6.4 (rafales qui réduisent la portée des petits bruits en extérieur), audible et lisible pour le monstre ; tests GUT
   - Dépend de : T-142
-- [ ] T-145 — Voix du monstre
+- [x] T-145 — Voix du monstre
   - Résultat vérifiable : souffle, grognement, cri de capture, son du scan ; montrés à Maxime
   - Dépend de : T-142
-- [ ] T-146 — Musique minimale et tension
+- [x] T-146 — Musique minimale et tension
   - Résultat vérifiable : nappes qui montent quand le monstre approche, sans trahir sa position exacte ; montrées à Maxime
   - Dépend de : T-142
-- [ ] T-147 — Mixage
+- [x] T-147 — Mixage
   - Résultat vérifiable : bus maître, effets, ambiance, musique, voix ; niveaux mesurés ; prêts pour les réglages de S-013
   - Dépend de : T-143, T-144, T-145, T-146
-- [ ] T-148 — Vérification finale de S-012
+- [x] T-149 — Sons provisoires remplacés (ajoutée par le plan de S-012)
+  - Résultat vérifiable : alarme de voiture, appel à l'aide, sauvetage faits par nous
+  - Dépend de : T-142
+- [x] T-148 — Vérification finale de S-012
   - Résultat vérifiable : critères cochés, taille du build sous 60 Mo, spec livrée
   - Dépend de : T-147
 

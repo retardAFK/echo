@@ -178,7 +178,7 @@ func _physics_process(delta: float) -> void:
 	_keyboard_left -= delta
 	if _keyboard_left <= 0.0:
 		_keyboard_left = settings.keyboard_interval
-		_keys.play()
+		SoundSpace.play(_keys)
 		NoiseBus.emit_noise(
 			NoiseEvent.Type.KEYBOARD, global_position + Vector3.UP, settings.keyboard_range, user
 		)
@@ -193,7 +193,7 @@ func mirror_state(off: bool, in_use: bool) -> void:
 
 ## Online client: the keys heard from the room.
 func voice() -> void:
-	_keys.play()
+	SoundSpace.play(_keys)
 
 
 ## The screen: dark when off, bright (and lighting the face before it) when

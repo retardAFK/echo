@@ -149,7 +149,7 @@ func is_led_lit() -> bool:
 func _play_smash() -> void:
 	if is_inside_tree() and not _sound.playing:
 		_sound.stream = SOUND_SMASH
-		_sound.play()
+		SoundSpace.play(_sound)
 
 
 ## The LED lit while watched; smashed, the body hangs askew and dark.

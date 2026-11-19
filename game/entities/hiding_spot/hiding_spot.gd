@@ -187,13 +187,13 @@ func noise_range() -> float:
 
 ## Online client (S-010, T-099): the door of the spot, opened in the room.
 func voice() -> void:
-	_creak.play()
+	SoundSpace.play(_creak)
 
 
 func _finish(user: Node) -> void:
 	if noise_range() > 0.0:
 		NoiseBus.emit_noise(NoiseEvent.Type.HIDE, global_position + Vector3.UP, noise_range(), self)
-		_creak.play()
+		SoundSpace.play(_creak)
 	if is_monster(user):
 		open(user)
 	elif occupant == user:

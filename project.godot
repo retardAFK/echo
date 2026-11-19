@@ -11,9 +11,15 @@ run/main_scene="res://game/ui/start_menu.tscn"
 run/flush_stdout_on_print.dedicated_server=true
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[audio]
+
+; S-012 (T-142): full left/right panning, for the direction of sounds on headphones.
+general/3d_panning_strength=1.0
+
 [autoload]
 
 NoiseBus="*res://game/autoload/noise_bus.gd"
+SoundSpace="*res://game/autoload/sound_space.gd"
 NetSession="*res://game/net/net_session.gd"
 Settings="*res://game/settings/user_settings.gd"
 

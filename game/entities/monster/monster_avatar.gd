@@ -86,6 +86,7 @@ func _ready() -> void:
 	_apply_view_settings("")
 	Settings.changed.connect(_apply_view_settings)
 	if local_controls:
+		add_child(ScanDrone.new(scan))  # Only the monster hears it (S-012, T-145).
 		_controls = LocalControls.new()
 		_controls.commands = commands
 		add_child(_controls)

@@ -41,7 +41,7 @@ func _ready() -> void:
 	_tick.max_distance = settings.tick_sound_distance
 	_ring.max_distance = settings.ring_sound_distance
 	_crush.max_distance = settings.ring_sound_distance
-	_tick.play()
+	SoundSpace.play(_tick)
 
 
 func is_ringing() -> bool:
@@ -53,7 +53,7 @@ func _physics_process(delta: float) -> void:
 	var noise_due := timer.update(delta)
 	if before == DecoyTimer.State.TICKING and timer.state == DecoyTimer.State.RINGING:
 		_tick.stop()
-		_ring.play()
+		SoundSpace.play(_ring)
 		ringing_started.emit()
 	elif before == DecoyTimer.State.RINGING and timer.state == DecoyTimer.State.DONE:
 		_ring.stop()
@@ -69,6 +69,6 @@ func crush() -> bool:
 		return false
 	_tick.stop()
 	_ring.stop()
-	_crush.play()
+	SoundSpace.play(_crush)
 	crushed.emit()
 	return true

@@ -6,16 +6,25 @@ extends RefCounted
 const GAUGE_MAX := 10.0
 
 
-## Range of a footstep for a gait, in meters.
+## Range of a footstep for a gait, in meters. Metal (S-016, Q9) and puddles
+## (S-012, Q4: water doubles a noise) carry farther.
 static func range_for_gait(
-	settings: NoiseSettings, gait: PlayerMotion.Gait, on_metal := false
+	settings: NoiseSettings,
+	gait: PlayerMotion.Gait,
+	surface: FloorSurface.Kind = FloorSurface.Kind.CONCRETE
 ) -> float:
+	var metal := surface == FloorSurface.Kind.METAL
+	var puddle := surface == FloorSurface.Kind.PUDDLE
 	match gait:
 		PlayerMotion.Gait.CROUCH:
-			return settings.crouch_range
+			return settings.puddle_crouch_range if puddle else settings.crouch_range
 		PlayerMotion.Gait.SPRINT:
-			return settings.metal_sprint_range if on_metal else settings.sprint_range
-	return settings.metal_walk_range if on_metal else settings.walk_range
+			if puddle:
+				return settings.puddle_sprint_range
+			return settings.metal_sprint_range if metal else settings.sprint_range
+	if puddle:
+		return settings.puddle_walk_range
+	return settings.metal_walk_range if metal else settings.walk_range
 
 
 ## Distance between two footsteps for a gait, in meters.

@@ -109,10 +109,14 @@ func test_the_monster_smashes_an_emergency_exit_from_outside() -> void:
 
 
 func test_footsteps_on_metal_carry_farther() -> void:
-	assert_eq(NoiseMath.range_for_gait(NOISE, PlayerMotion.Gait.WALK, true), 6.0)
-	assert_eq(NoiseMath.range_for_gait(NOISE, PlayerMotion.Gait.SPRINT, true), 18.0)
+	assert_eq(NoiseMath.range_for_gait(NOISE, PlayerMotion.Gait.WALK, FloorSurface.Kind.METAL), 6.0)
 	assert_eq(
-		NoiseMath.range_for_gait(NOISE, PlayerMotion.Gait.CROUCH, true), 1.0, "crouched: silent"
+		NoiseMath.range_for_gait(NOISE, PlayerMotion.Gait.SPRINT, FloorSurface.Kind.METAL), 18.0
+	)
+	assert_eq(
+		NoiseMath.range_for_gait(NOISE, PlayerMotion.Gait.CROUCH, FloorSurface.Kind.METAL),
+		1.0,
+		"crouched: silent"
 	)
 	assert_eq(NoiseMath.range_for_gait(NOISE, PlayerMotion.Gait.WALK), 4.0)
 
