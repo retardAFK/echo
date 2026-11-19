@@ -28,6 +28,10 @@ extends Resource
 ## Other players are shown this far in the past, between two snapshots (Q8);
 ## 0.2 s since S-020, T-319, to ride out bursts of snapshots.
 @export_range(0.0, 0.5, 0.01, "suffix:s") var interpolation_delay: float = 0.2
+## Client side: the room's clock (S-020, T-320) takes the quickest trip of
+## the snapshots over this window, and follows it at most this fast (s per s).
+@export_range(0.5, 10.0, 0.1, "suffix:s") var clock_window: float = 2.0
+@export_range(0.0, 0.2, 0.005) var clock_max_drift: float = 0.02
 ## When a snapshot is late, others keep moving at most this long, then stop.
 @export_range(0.0, 0.5, 0.01, "suffix:s") var max_extrapolation: float = 0.15
 ## Gap between the predicted and the room's position corrected smoothly...

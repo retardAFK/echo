@@ -6,7 +6,8 @@ extends Node
 ## own state and the others it sees (NetVisibility).
 ## Client side: the player's own avatar is predicted (Prediction) and nudged
 ## to the room's position; the others are NetPuppets moved between snapshots.
-## Snapshot: {"ack": last command applied, "you": [position, velocity, yaw,
+## Snapshot: {"time": the room's clock in ms (S-020, T-320), "ack": last
+## command applied, "you": [position, velocity, yaw,
 ## gait, hidden, hold ratio, bottles, alarm clocks, hiding spot index, held,
 ## terminal index, camera index (S-018), [stops, seconds left] of the
 ## monster stopped short (S-020)],
@@ -79,6 +80,8 @@ var ai_hunted := {}
 ## Client side: the avatar played here.
 var own: Node3D
 var prediction: Prediction
+## Client side: the room's time, from the frame of each snapshot (T-320).
+var room_clock := RoomClock.new(settings)
 ## Client side: the others, by seat.
 var puppets := {}
 ## Client side: largest gap seen between prediction and room, for tests.
@@ -203,9 +206,27 @@ func _process(delta: float) -> void:
 		world_count = _window_worlds
 		_window_worst = 0.0
 		_window_worlds = 0
-	var time := Time.get_ticks_msec() / 1000.0 - settings.interpolation_delay
+	var time := _shown_time()
 	for puppet: NetPuppet in puppets.values():
 		puppet.show_at(time, settings.max_extrapolation)
+
+
+## Client side: when a snapshot was taken, in the room's time (T-320), or
+## when it arrived for a room that sends no frame.
+func _snapshot_time(snapshot: Dictionary) -> float:
+	var local := Time.get_ticks_msec() / 1000.0
+	if not snapshot.has("time"):
+		return local
+	room_clock.observe(snapshot["time"], local)
+	return RoomClock.room_time(snapshot["time"])
+
+
+## Client side: the time the others are shown at, interpolation_delay in the
+## past, in the same clock as their snapshots.
+func _shown_time() -> float:
+	var local := Time.get_ticks_msec() / 1000.0
+	var time := room_clock.now(local) if room_clock.started else local
+	return time - settings.interpolation_delay
 
 
 func _apply_commands() -> void:
@@ -411,6 +432,7 @@ func snapshot_for(place: int) -> Dictionary:
 	var inventory: Inventory = viewer.get("inventory")
 	var spot: HidingSpot = viewer.get("hiding_in")
 	return {
+		"time": Time.get_ticks_msec(),
 		"ack": _acked.get(place, 0),
 		"you":
 		[
@@ -459,7 +481,13 @@ func _spectator_snapshot(place: int) -> Dictionary:
 	if watched == null or not is_instance_valid(watched) or is_out(watched):
 		watched = _next_watched(null)
 		_watching[place] = watched
-	var snapshot := {"ack": _acked.get(place, 0), "watch": -1, "pitch": 0.0, "others": []}
+	var snapshot := {
+		"time": Time.get_ticks_msec(),
+		"ack": _acked.get(place, 0),
+		"watch": -1,
+		"pitch": 0.0,
+		"others": [],
+	}
 	if watched == null:
 		return snapshot
 	var seat := seat_of(watched)
@@ -585,7 +613,7 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 			own.global_position += prediction.reconcile(ack, server_position)
 		if you.size() >= 9:
 			_apply_own_state(you)
-	var now := Time.get_ticks_msec() / 1000.0
+	var now := _snapshot_time(snapshot)
 	var seen := {}
 	for entry: Array in snapshot.get("others", []):
 		var seat: int = entry[0]
