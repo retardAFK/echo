@@ -22,6 +22,7 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [x] T-316 — N2 : clavier du transformateur en boîtier mural
 - [ ] T-317 — J2 : grille de test commune
 - [ ] T-318 — J1 : nettoyer les branches (Maxime donne son accord)
+- [x] T-348 — CI : le robot de net_match se voit bloqué à un chambranle
 
 ## Compte rendu
 - T-300 (19/11/2026) : spec et tâches écrites depuis le PDF du catalogue (33 pistes lisibles sur 52).
@@ -33,3 +34,4 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - T-316 (19/11/2026) : le clavier du code (`Terminal.Kind.CODE`) est `terminal_keypad.tscn`, un boîtier métallique de 36 × 50 cm avec écran vert et pavé, sans bureau ni PC. `build_tilleuls.gd` le colle au mur du transformateur (`_snap_to_wall`), 1,5 m plus près qu'avant ; rien d'autre ne change dans la carte (comparaison `dump_scene` avant et après). Capture `clavier_transfo` mise à jour. Test GUT dans `test_objectives`.
 - T-306 (19/11/2026) : `monster_fog_density` 0,073 dans `visual_settings.gd` pour le rôle de monstre (solo et en ligne), soit à 12 m ce que le chassé voit à 25 m ; le brouillard des couloirs n'est jamais plus léger. Captures comparées sous Xvfb (aire de jeux) : les barres à 30 m disparaissent pour le monstre. Test GUT dans `test_night`.
 - T-307 (19/11/2026) : `Stagger` (monstre IA et monstre joué) ; `Door.smash` arrête le monstre `smash_stagger` = 0,8 s (`door_settings.gd`). En ligne, le client prédit l'arrêt sans ouvrir la porte (la salle l'ouvre), pour ne pas être recalé de 5 m. Tests GUT dans `test_doors`.
+- T-348 (19/11/2026) : le robot de `net_match` se croyait en mouvement quand la salle tenait son corps à un chambranle (va-et-vient de 1,5 m de la prédiction, écart 2 m) : le seuil de blocage passe de 0,3 m à 2 m (`STUCK_DISTANCE`), il recule et contourne. Cause des échecs de `net_match` sur main (run 445) et sur #179, #190, #193 (place 2 bloquée en `to_box`, le monstre l'attend).
