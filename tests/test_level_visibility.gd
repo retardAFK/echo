@@ -91,3 +91,14 @@ func test_hidden_models_keep_their_collisions_and_nodes() -> void:
 	assert_gt(_visibility.hidden_count(), 20)
 	for door: Door in get_tree().get_nodes_in_group(Door.GROUP):
 		assert_true(door.visible, str(door.name))
+
+
+func test_a_freed_model_is_skipped() -> void:
+	# S-020, T-347: a model freed during the game (a fuse taken) made every
+	# change of level fail on a typed assign, in net_match's logs.
+	await _look_from(LANDING_2)
+	var door: Door = get_tree().get_nodes_in_group(Door.GROUP)[0]
+	for node in door.find_children("*", "GeometryInstance3D", true, false):
+		node.free()
+	await _look_from(STREET)
+	assert_eq(_tower_doors(0).y, 0, "the others drawn again")
