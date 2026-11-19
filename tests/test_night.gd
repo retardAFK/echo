@@ -50,3 +50,19 @@ func test_hospital_sign_is_green_not_orange() -> void:
 	var glow: OmniLight3D = _map.get_node("HospitalSign/Glow")
 	assert_gt(glow.light_color.g, glow.light_color.r)
 	assert_false(glow.shadow_enabled)
+
+
+func test_the_monster_sees_about_12_m_in_the_night() -> void:
+	# S-020, T-306 (piste E4): the night hides the hunted from the monster.
+	var night := NightEnvironment.new()
+	night.environment = Environment.new()
+	night.monster_view = true
+	add_child_autofree(night)
+	assert_almost_eq(night.environment.fog_density, SETTINGS.monster_fog_density, 0.0001)
+	var left_at := func(distance: float) -> float:
+		return exp(-SETTINGS.monster_fog_density * distance)
+	var hunted_at_25 := exp(-SETTINGS.fog_density * 25.0)
+	assert_almost_eq(left_at.call(12.0), hunted_at_25, 0.02, "12 m for him, 25 m for the hunted")
+	night.indoor = 1.0
+	night.set_scan_amount(0.0)
+	assert_gte(night.environment.fog_density, SETTINGS.monster_fog_density, "never thinner inside")
