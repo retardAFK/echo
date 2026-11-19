@@ -28,6 +28,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 | — | S-017 | Carte des chassés (demande du 15/11/2026, hors ordre des phases) | T-250 à T-259 | S-006, S-010 |
 | — | S-018 | Prison et réseau de la cité : terminaux, caméras, leurres à distance, quêtes tirées au sort (demande du 15/11/2026, hors ordre des phases) | T-260 à T-289 | S-010, S-016 |
 | — | S-019 | Ambiance des intérieurs : HLM abandonnés avec l'ambiance de l'hôpital (demande du 15/11/2026, hors ordre des phases, `specs/S-019-ambiance-interieurs/`) | T-290 à T-299 | S-016 |
+| — | S-022 | Modularité et reprise du code par tout agent : `AGENTS.md`, carte de l'architecture, guide pour ajouter ou retirer un module, lint des outils, découpage de `game_map.gd` (demande du 19/11/2026, hors ordre des phases, `specs/S-022-modularite/`) | T-430 à T-449 | — |
 
 L'ordre suit D-013 (12/11/2026) : le multijoueur passe juste après le test à plusieurs, avant les personnages, l'audio et les menus. Tout ce qui est ajouté avant le réseau (animations, sons d'autres joueurs, menus) devrait sinon être repris pour être synchronisé.
 
@@ -486,6 +487,18 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
   - Dépend de : T-267, T-268, T-269
   - Fait le 16/11/2026 : critères vérifiés et 297 appels de dessin au pire point ; validée par Maxime (« T-270 ok pour moi ») ; 60 images/s confirmées par Maxime avec T-128
 
+
+---
+
+## Modularité et reprise du code par tout agent (S-022)
+
+**But** : un code le plus modulaire possible, que n'importe quel agent peut reprendre, avec une doc pour ajouter ou retirer un module (demande de Maxime, 19/11/2026). Spec : [`S-022-modularite/spec.md`](S-022-modularite/spec.md), tâches : [`tasks.md`](S-022-modularite/tasks.md).
+
+- [x] T-430 — `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/MODULES.md`, `docs/PIEGES.md`, règles de travail dans la constitution (D-022)
+- [ ] T-431 — Corriger les documents périmés
+- [ ] T-432 — Lint et format sur `tools/`, générateur de la cité sous 1 000 lignes par fichier
+- [ ] T-433 — Découper `game_map.gd` (après S-020 et T-450)
+- [ ] T-434 — Sortir `NetSession` du joueur et du monstre jouable
 ---
 
 ## Après la sortie (non planifié)

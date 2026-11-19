@@ -1,6 +1,6 @@
 # ÉCHO — Document de pilotage du projet
 
-> Document de référence du projet. Tout le travail, humain ou IA, part d'ici.
+> Document de référence du projet. Tout le travail, humain ou IA, part d'ici. Un agent IA commence par [`AGENTS.md`](AGENTS.md).
 > Si une décision n'est pas écrite ici ou dans une spec, elle n'est pas prise.
 > À placer à la racine du dépôt Git. Version 0.1, 29 octobre 2026.
 
@@ -115,6 +115,11 @@ Toute fonctionnalité qui dépasse un budget doit être simplifiée ou faire l'o
 5. Chaque tâche livrée contient : le code, les tests si applicable, et une ligne de compte rendu dans la tâche.
 6. Les assets générés par Claude passent par des scripts Blender rangés dans `tools/blender/`, jamais par des fichiers modifiés à la main sans trace.
 7. Claude met à jour la section « Questions ouvertes » quand il découvre un point non décidé.
+8. Claude relit et fusionne lui-même ses propres pull requests, une fois **tous** les contrôles de la CI verts ; jamais avec un contrôle rouge (D-022).
+9. Claude ne demande pas à Maxime de tester : il vérifie lui-même (tests GUT, simulations, captures, build web) et passe à la suite. Seuls les choix de style et les décisions de jeu sont montrés à Maxime (D-022).
+10. Une PR qui change un module, une règle ou une commande met à jour la documentation dans la même PR : `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/MODULES.md`, `docs/PIEGES.md` (D-022).
+
+Ces règles valent pour tout agent IA, pas seulement Claude. Leur résumé pratique, avec les commandes, est dans [`AGENTS.md`](AGENTS.md).
 
 ### 2.7 Droits et licences
 
@@ -520,6 +525,7 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-019 | 15/11/2026 | L'hôpital n'est plus une map séparée : c'est un grand bâtiment visitable **intégré à la cité des Tilleuls**, sur plusieurs niveaux, qui doit avoir l'air **vraiment effrayant**. Remplace la phrase « l'hôpital sera une map séparée » de D-010 ; D-012 (une map par partie) reste vrai pour les maps futures (gare, piscine) | Choix de Maxime : une seule grande map plus riche plutôt que deux maps moyennes, et un lieu fort au cœur de la cité |
 | D-020 | 15/11/2026 | Les chassés attrapés vont dans une **prison** (cages du parking) d'où un coéquipier les libère sur place ou à distance depuis un terminal ; un **réseau de terminaux** (caméras, haut-parleurs, rideaux métalliques) sert de ruse à distance, et la sortie s'ouvre après **3 objectifs tirés au sort** à chaque partie, dont au moins un fusible (spec S-018). Remplace la règle de Q-003 (relevé sur place une fois) | Demande de Maxime : le monstre n'avait qu'à rester à côté du prisonnier, le chassé attrapé n'avait plus rien à faire, et les quêtes étaient toujours les mêmes |
 | D-021 | 15/11/2026 | Les intérieurs de la cité prennent l'ambiance de l'hôpital : des HLM qui ont été habités puis abandonnés (revêtement par pièce, tubes et hublots presque tous morts, traces de vie), sans changer leur disposition (spec S-019) | Retour de Maxime : la tour ressemblait à un parking à étages ; planche d'ambiance validée (« magnifique ») |
+| D-022 | 19/11/2026 | Modularité et reprise par tout agent (spec S-022) : `AGENTS.md` est le point d'entrée de tout agent, avec `docs/ARCHITECTURE.md`, `docs/MODULES.md` (ajouter ou retirer un module) et `docs/PIEGES.md`. Les règles de travail données par Maxime entrent dans la constitution (2.6, règles 8 à 10) : l'agent fusionne lui-même ses PR quand toute la CI est verte (règle du 30/10/2026), et il ne demande pas à Maxime de tester (règle du 10/11/2026) | Demande de Maxime : le code doit être le plus modulaire possible et compréhensible par n'importe quel LLM ; ces règles n'existaient que dans la mémoire de Claude |
 
 ### 10.2 Questions ouvertes
 
