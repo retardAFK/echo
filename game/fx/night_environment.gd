@@ -1,6 +1,7 @@
 class_name NightEnvironment
 extends WorldEnvironment
 ## Night sky, depth fog and moonlight from the visual settings (spec S-005, T-030).
+## The monster's role gets a denser fog (S-020, T-306): about 12 m of sight.
 ## The sky and the fog share one color, so the fog swallows the far end of the map.
 
 @export var settings: VisualSettings = preload("res://game/data/visual_settings.tres")
@@ -9,6 +10,8 @@ extends WorldEnvironment
 
 ## How deep the camera is in an indoor fog zone, 0 to 1, eased (S-014, T-190).
 var indoor := 0.0
+## Played as the monster (S-020, T-306): the night fog is denser.
+var monster_view := GameSession.role == GameSession.Role.MONSTER
 var _scan := 0.0
 
 
@@ -66,4 +69,14 @@ func _update_fog() -> void:
 	environment.fog_light_color = (
 		settings.fog_color.lerp(settings.indoor_fog_color, eased).darkened(dim)
 	)
-	environment.fog_density = lerpf(settings.fog_density, settings.indoor_fog_density, eased)
+	environment.fog_density = lerpf(night_density(), indoor_density(), eased)
+
+
+## Density of the night fog outside, denser for the monster (T-306).
+func night_density() -> float:
+	return settings.monster_fog_density if monster_view else settings.fog_density
+
+
+## Density of the indoor fog, never thinner than the night's.
+func indoor_density() -> float:
+	return maxf(settings.indoor_fog_density, night_density())
