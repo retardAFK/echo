@@ -9,7 +9,7 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [x] T-303 — T3 : mesures réseau dans l'écran F3
 - [x] T-304 — T4 : écran du terminal qui reste affiché
 - [x] T-305 — S1 : rafales de vent moins fortes
-- [ ] T-306 — E4 : vue du monstre réduite à 12 m
+- [x] T-306 — E4 : vue du monstre réduite à 12 m
 - [ ] T-307 — E1 : les portes freinent le monstre
 - [ ] T-308 — E3 : brancard bousculé = arrêt
 - [ ] T-309 — E2 : sprint du monstre en jauge
@@ -29,3 +29,4 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - T-303 (19/11/2026) : écran F3 en ligne : écart de prédiction (dernier, pire sur 5 s), taille et nombre des messages de carte sur 5 s, images par seconde de la salle. Mesure avec `net_walk` (6 s de course) : 25 messages de carte de 3 Ko avant la seconde partie de T-301 (chaque pas changeait `noise_count`), 3 après.
 - T-304 (19/11/2026) : un client se lève du terminal dès qu'il bouge, sans attendre la salle ; un instantané parti avant que la salle le sache ne le rassoit pas (1,5 s). Test GUT dans `test_network`.
 - T-305 (19/11/2026) : `gust_db` 9 → 4 dB et `whistle_db` -10 → -16 dB (`audio_settings.gd`), pour que le vent ne couvre plus les pas du monstre.
+- T-306 (19/11/2026) : `monster_fog_density` 0,073 dans `visual_settings.gd` pour le rôle de monstre (solo et en ligne), soit à 12 m ce que le chassé voit à 25 m ; le brouillard des couloirs n'est jamais plus léger. Captures comparées sous Xvfb (aire de jeux) : les barres à 30 m disparaissent pour le monstre. Test GUT dans `test_night`.
