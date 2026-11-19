@@ -41,7 +41,7 @@ Il n'y a **qu'une map jouable**, la cité des Tilleuls (avec l'hôpital intégr�
 | `data/` | **Réglages de gameplay** : un script `Resource` (`*_settings.gd`) et sa valeur (`*_settings.tres`) par domaine. Aucun chiffre magique ailleurs (constitution 2.4) | `noise_settings`, `player_settings`, `monster_settings`, `net_settings`… (19 paires) |
 | `entities/` | **Une entité par dossier** : scène `.tscn` + script du même nom (constitution 2.4) | voir §3 |
 | `session/` | Règles d'**une partie** : boucle (fusibles, sortie, fin), objectifs tirés au sort, inventaire, choix du menu | `game_loop.gd`, `loop_rules.gd` (pur), `quests.gd`, `game_session.gd` (statique : rôle, graine, siège) |
-| `maps/` | Ce qui **assemble** une map jouable, et les aides de rendu par map | `game_map.gd` (racine de toute map), `level_visibility.gd`, `draw_range.gd`, `map_plan.gd`, `surface_map.gd`, `tilleuls/` (scène générée, LFS) |
+| `maps/` | Ce qui **assemble** une map jouable, et les aides de rendu par map | `game_map.gd` (racine de toute map : l'état partagé et la boucle), une partie par façon de jouer (`map_hunted_role.gd`, `map_monster_role.gd`, `map_online_room.gd`, `map_online_client.gd`), les HUD du chassé (`hunted_huds.gd`), `level_visibility.gd`, `draw_range.gd`, `map_plan.gd`, `surface_map.gd`, `tilleuls/` (scène générée, LFS) |
 | `net/` | **Multijoueur** : accueil, salles, liaison, prédiction, snapshots | `net_session.gd` (autoload `NetSession`), `room_link.gd`, `net_game.gd`, `net_world.gd`, `prediction.gd`, `player_commands.gd` |
 | `ui/` | HUD, écrans et menus. `ui/menu/` : briques des menus (style A, S-013). `ui/theme/` : le thème | `start_menu.gd`, `lobby_menu.gd`, `pause_menu.gd`, `end_screen.gd`, `noise_markers.gd`, `scan_reticle.gd` |
 | `audio/` | Sons qui ne sont pas des entités : vent, musique, pas selon le sol, calcul pur du son | `sound_math.gd` (pur), `footstep_sounds.gd`, `tension_music.gd`, `city_wind.gd` |
@@ -98,8 +98,8 @@ Chaque dossier de `game/entities/` contient une scène et son script, avec une `
 start_menu ──(GameSession.role, graine)──► loading_screen ──► tilleuls.scn
                                                                └─ racine = GameMap (game_map.gd)
 GameMap._ready()
-  ├─ rôle chassé : Player + Monster IA, HUD (carry, hide mask, highlights, carte)
-  ├─ rôle monstre : MonsterAvatar + Prey IA, marques de bruit, réticule de scan
+  ├─ rôle chassé : MapHuntedRole (Player + Monster IA, captures) et HuntedHuds (carry, hide mask, highlights, carte, réseau)
+  ├─ rôle monstre : MapMonsterRole (MonsterAvatar + Prey IA, marques de bruit, réticule de scan, captures)
   ├─ _setup_game_loop() : GameLoop + Quests (fusibles, objectifs, sortie)
   └─ pause, précompilation des shaders
 ```
@@ -117,7 +117,7 @@ NetWorld.apply()                ◄─────── état des objets de la 
 ```
 
 - `NetSession` (autoload) garde le mode : `SOLO`, `CLIENT` ou `ROOM`.
-- `GameMap._setup_online()` ajoute `NetGame`, qui pose les avatars, remplace les absents par des IA et relaie l'état.
+- `GameMap._setup_online()` ajoute `NetGame`, qui relaie l'état, et une partie : `MapOnlineRoom` sur la salle (pose les avatars et les IA des places vides, applique la règle de capture et la prison, remplace les absents par des IA) ou `MapOnlineClient` chez un joueur (son avatar, ses HUD, les captures annoncées, la reconnexion).
 - `NetWorld` liste **dans le même ordre des deux côtés** les objets de la map qui changent (fusibles, ramassables, alarmes, cachettes, portes, moniteurs, brancards, fauteuils, transformateur, prison, réseau, vent). **Une entité qui change pendant la partie doit y être ajoutée**, sinon les clients ne la voient pas changer (voir [`MODULES.md`](MODULES.md)).
 - Règle de secret : un client ne reçoit jamais ce qu'il ne pourrait pas savoir (qui se cache où, position d'un coéquipier hors de vue).
 
@@ -175,7 +175,7 @@ entities/*     ← parlent par signaux et groupes, lisent data/, font du bruit p
         ▲
 session/, net/, ui/   ← observent les entités
         ▲
-maps/game_map.gd     ← assemble le tout (le seul à tout connaître)
+maps/game_map.gd + maps/map_*.gd   ← assemblent le tout (les seuls à tout connaître)
 ```
 
 1. Une entité **ne cherche pas** un nœud par chemin (`get_node("/root/...")` : 0 occurrence aujourd'hui, garde ça). Elle trouve les autres par **groupe** ou reçoit une référence de celui qui l'assemble.
@@ -185,17 +185,16 @@ maps/game_map.gd     ← assemble le tout (le seul à tout connaître)
 
 ### Où le code s'en écarte aujourd'hui (dette connue)
 
-Mesuré le 19/11/2026 avec `tools/dev/module_map.py`. Ces écarts sont la cible des tâches T-433 et T-434 de S-022.
+Mesuré le 19/11/2026 avec `tools/dev/module_map.py`. Ces écarts sont la cible de la tâche T-434 de S-022. `GameMap` (918 lignes, qui faisait tout) a été découpé par T-433 : `game_map.gd` ne garde que l'état partagé, la boucle et la pause, et chaque façon de jouer a sa partie dans `game/maps/map_*.gd`, aucune au-dessus de 400 lignes.
 
 | Écart | Où | Effet |
 |---|---|---|
-| `GameMap` fait tout : rôles, partie en ligne, boucle, captures, 15 écrans | `game/maps/game_map.gd` (918 lignes) | presque toute nouvelle fonctionnalité le modifie (T-433) |
 | Le joueur et le monstre jouable lisent `NetSession` | `player.gd`, `monster_avatar.gd` | le réseau déborde dans les entités (T-434) |
 | Les IA connaissent chaque entité par son nom | `monster.gd` (19 modules), `prey.gd` (20 modules) | ajouter ou retirer une entité utilisable demande de toucher l'IA |
 | `NetWorld` liste chaque type d'entité synchronisée | `net/net_world.gd`, `net/net_game.gd` | idem pour le réseau |
 | `NoiseBus` connaît `Door` et `Ventilation` | `autoload/noise_bus.gd` | un service central dépend d'entités |
 
-Fichiers de plus de 500 lignes dans `game/` : `game_map.gd` (918), `prey.gd` (858), `net_game.gd` (654), `monster.gd` (591), `player.gd` (562). Avant d'y ajouter du code, demande-toi s'il ne mérite pas sa propre classe.
+Fichiers de plus de 500 lignes dans `game/` : `prey.gd` (876), `net_game.gd` (812), `player.gd` (648), `monster.gd` (605). Avant d'y ajouter du code, demande-toi s'il ne mérite pas sa propre classe.
 
 ---
 

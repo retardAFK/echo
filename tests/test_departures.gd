@@ -145,15 +145,15 @@ func test_an_ai_plays_for_a_hunted_who_left_then_gives_its_place_back() -> void:
 	player.global_position += Vector3(1, 0, 0)
 	player.inventory.take(Inventory.Kind.BOTTLE)
 	map.game_loop._on_fuse_taken(player)
-	map._online_catch(player)
-	map._online_catch(net.avatars[12])
+	map.room.catch_hunted(player)
+	map.room.catch_hunted(net.avatars[12])
 	player.capture._set_state(CaptureState.State.FREE)  # Freed by a teammate.
 	map.game_loop.set_captured(player, false)
 	var was := player.global_position
-	map._on_player_left(11)
-	map._process(NetSession.settings.seat_keep_time - 0.5)
+	map.room._on_player_left(11)
+	map.room._process(NetSession.settings.seat_keep_time - 0.5)
 	assert_true(net.avatars.has(11), "kept a while")
-	map._process(1.0)
+	map.room._process(1.0)
 	assert_false(net.avatars.has(11))
 	var prey: Prey = net.ai_hunted[1]
 	assert_almost_eq(prey.global_position.distance_to(was), 0.0, 0.01)
@@ -171,7 +171,7 @@ func test_an_ai_plays_for_a_hunted_who_left_then_gives_its_place_back() -> void:
 	# Back before the end: its place again, where the AI got to.
 	prey.global_position += Vector3(2, 0, 0)
 	was = prey.global_position
-	map._on_player_returned(11)
+	map.room._on_player_returned(11)
 	var again: Player = net.avatars[11]
 	assert_eq(net.seats[11], 1)
 	assert_false(net.ai_hunted.has(1))
@@ -180,10 +180,10 @@ func test_an_ai_plays_for_a_hunted_who_left_then_gives_its_place_back() -> void:
 	assert_true(map.game_loop.is_hunted(again))
 	assert_has(monster.get_targets(), again)
 	# Caught again: its second stay in prison, then out the third time (S-018).
-	map._online_catch(again)
+	map.room.catch_hunted(again)
 	assert_eq(again.capture.state, CaptureState.State.CAPTURED)
 	again.capture.set_free()
-	map._online_catch(again)
+	map.room.catch_hunted(again)
 	assert_eq(again.capture.state, CaptureState.State.OUT)
 
 
@@ -191,8 +191,8 @@ func test_a_captured_hunted_who_left_stays_captured_under_the_ai() -> void:
 	var map := _map([0, 11, 12, 0])
 	var net: NetGame = map.get_node("NetGame")
 	var player: Player = net.avatars[11]
-	map._online_catch(player)
-	map.replace_with_ai(11)
+	map.room.catch_hunted(player)
+	map.room.replace_with_ai(11)
 	var prey: Prey = net.ai_hunted[1]
 	assert_true(prey.held)
 	assert_true(map.game_loop.is_captured(prey))
@@ -207,7 +207,7 @@ func test_the_ai_monster_plays_for_a_monster_who_left() -> void:
 	human.catch_count = 2
 	human.global_position += Vector3(3, 0, 0)
 	var was := human.global_position
-	map.replace_with_ai(5)
+	map.room.replace_with_ai(5)
 	var monster: Monster = net.ai_monster
 	assert_not_null(monster)
 	assert_null(map.avatar)
@@ -216,7 +216,7 @@ func test_the_ai_monster_plays_for_a_monster_who_left() -> void:
 	assert_eq(monster.get_targets().size(), 3, "every hunted")
 	for prey: Prey in net.ai_hunted.values():
 		assert_eq(prey.monster, monster)
-	map._on_player_returned(5)
+	map.room._on_player_returned(5)
 	assert_not_null(map.avatar)
 	assert_eq(net.avatars[5], map.avatar)
 	assert_null(net.ai_monster)

@@ -8,7 +8,7 @@ extends CanvasLayer
 ## the dark. Reading the code marks its post-it as read (CodeSpot.was_read),
 ## so the map screen and the keypad remind it.
 ##
-## Added by GameMap for the hunted when the map has post-its. Remove it and
+## Added by HuntedHuds for the hunted when the map has post-its. Remove it and
 ## the post-its still show their digits; nothing else depends on it.
 
 const SETTINGS := preload("res://game/data/loop_settings.tres")

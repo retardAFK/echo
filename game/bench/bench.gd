@@ -75,7 +75,7 @@ func _ready() -> void:
 	add_child(_map)
 	_map.end_screen.change_scene = false
 	_map.game_loop.ended.connect(_on_game_ended)
-	_map.play_ai_against_ai()
+	_map.monster_role.play_ai_against_ai()
 	_camera = Camera3D.new()
 	_camera.far = VISUAL_SETTINGS.view_distance
 	add_child(_camera)

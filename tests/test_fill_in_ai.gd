@@ -103,8 +103,8 @@ func test_an_ai_prey_frees_a_captured_teammate_when_it_is_safe() -> void:
 	var prey: Prey = net.ai_hunted[2]
 	_freeze(net.ai_hunted[3])
 	await wait_physics_frames(3)  # The navigation map is ready.
-	map._online_catch(captured)
-	map._jail(captured)  # Without waiting for the black screen (S-018).
+	map.room.catch_hunted(captured)
+	map.room.jail(captured)  # Without waiting for the black screen (S-018).
 	var cage := captured.capture.get_cage()
 	assert_not_null(cage, "in a cage of the prison")
 	prey.global_position = cage.outside_point() + Vector3(6, 0, 0)  # Along the corridor.
@@ -124,8 +124,8 @@ func test_an_ai_prey_stays_away_when_the_monster_is_near() -> void:
 	var prey: Prey = net.ai_hunted[2]
 	_freeze(net.ai_hunted[3])
 	await wait_physics_frames(3)
-	map._online_catch(captured)
-	map._jail(captured)
+	map.room.catch_hunted(captured)
+	map.room.jail(captured)
 	var cage := captured.capture.get_cage()
 	prey.global_position = cage.outside_point() + Vector3(10, 0, 0)
 	monster.global_position = cage.outside_point() + Vector3(-2, 0, 0)

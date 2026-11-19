@@ -23,7 +23,7 @@ Rien ne change pour le joueur. Ce que vit **la personne ou l'agent qui reprend l
 - [x] `docs/PIEGES.md` reprend les pièges connus (export web, LFS, audio web, CI arm64, robots de `net_match`).
 - [x] La section 4 d'ECHO_PROJET.md, le README et `project.godot` ne contredisent plus le code ni les décisions.
 - [x] `gdformat --check` et `gdlint` passent sur `tools/` en CI, sans changer la map générée.
-- [ ] `game_map.gd` est découpé en morceaux de moins de 400 lignes, chacun avec un rôle clair, sans changer le jeu (tests GUT et parties en ligne de la CI verts).
+- [x] `game_map.gd` est découpé en morceaux de moins de 400 lignes, chacun avec un rôle clair, sans changer le jeu (tests GUT et parties en ligne de la CI verts).
 - [ ] Le joueur et le monstre jouable ne lisent plus `NetSession` eux-mêmes.
 
 ## Hors périmètre

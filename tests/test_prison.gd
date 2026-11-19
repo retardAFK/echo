@@ -97,7 +97,7 @@ func test_caught_it_goes_to_a_cage_and_a_teammate_frees_it_there() -> void:
 	var teammate: Player = net.avatars[12]
 	var caught_at := hunted.global_position
 	map.game_loop._on_fuse_taken(hunted)
-	map._online_catch(hunted)
+	map.room.catch_hunted(hunted)
 	assert_null(hunted.capture.get_cage(), "black screen first, where it was caught")
 	await wait_seconds(SETTINGS.jail_delay + 0.2)
 	var cage := hunted.capture.get_cage()
@@ -133,8 +133,8 @@ func test_a_stay_runs_out_unless_the_monster_is_near() -> void:
 	monster.process_mode = Node.PROCESS_MODE_DISABLED
 	var hunted: Player = net.avatars[11]
 	var prison := Prison.of(map)
-	map._online_catch(hunted)
-	map._jail(hunted)
+	map.room.catch_hunted(hunted)
+	map.room.jail(hunted)
 	var cage := hunted.capture.get_cage()
 	monster.global_position = cage.outside_point() + Vector3(5, 0, 0)
 	prison._physics_process(10.0)
@@ -153,11 +153,11 @@ func test_second_stay_is_shorter() -> void:
 	var map := _room([0, 11, 12, 0])
 	var net: NetGame = map.get_node("NetGame")
 	var hunted: Player = net.avatars[11]
-	map._online_catch(hunted)
-	map._jail(hunted)
+	map.room.catch_hunted(hunted)
+	map.room.jail(hunted)
 	hunted.capture.set_free()
-	map._online_catch(hunted)
-	map._jail(hunted)
+	map.room.catch_hunted(hunted)
+	map.room.jail(hunted)
 	assert_eq(hunted.capture.get_cage().time_left, SETTINGS.second_stay)
 
 
@@ -165,8 +165,8 @@ func test_the_monster_wins_when_all_are_in_prison() -> void:
 	var map := _room([0, 11, 12, 0])
 	var net: NetGame = map.get_node("NetGame")
 	for one: Node3D in [net.avatars[11], net.avatars[12], net.ai_hunted[3]]:
-		map._online_catch(one)
-		map._jail(one)
+		map.room.catch_hunted(one)
+		map.room.jail(one)
 	assert_true(map.game_loop.is_over)
 	assert_false(map.game_loop.hunted_won)
 	var prison := Prison.of(map)
@@ -180,8 +180,8 @@ func test_the_guard_frees_everyone_with_the_bell() -> void:
 	var a: Player = net.avatars[11]
 	var b: Player = net.avatars[12]
 	for one: Player in [a, b]:
-		map._online_catch(one)
-		map._jail(one)
+		map.room.catch_hunted(one)
+		map.room.jail(one)
 	var freed := prison.open_all()
 	assert_eq(freed.size(), 2)
 	var bells := _of(NoiseEvent.Type.BELL)
@@ -193,8 +193,8 @@ func test_a_client_sees_the_cages_and_its_time_left() -> void:
 	var map := _room([0, 11, 12, 0])
 	var net: NetGame = map.get_node("NetGame")
 	var hunted: Player = net.avatars[11]
-	map._online_catch(hunted)
-	map._jail(hunted)
+	map.room.catch_hunted(hunted)
+	map.room.jail(hunted)
 	var state := net.world.state()
 	assert_eq(state.size(), 12)  # The wind goes with the clock (S-020, T-301).
 	assert_eq(state[6][0], [1, false, ceili(SETTINGS.first_stay)])
@@ -224,5 +224,5 @@ func test_a_client_sees_the_cages_and_its_time_left() -> void:
 func test_solo_has_no_prison_rule() -> void:
 	var map: GameMap = MAP_SCENE.instantiate()
 	add_child_autofree(map)
-	assert_null(map._prison)
+	assert_null(map.prison)
 	assert_null(map.get_node("Player").get("capture"))
