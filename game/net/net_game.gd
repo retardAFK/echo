@@ -45,6 +45,9 @@ enum Event { NOISE, SCAN, CAUGHT, WORLD, BOTTLE, DECOY, CRUSH, CLOCK }
 
 ## Seconds between two CLOCK events (T-300).
 const CLOCK_INTERVAL := 1.0
+## A client up from a terminal ignores the room still sitting it there for
+## this long, the time for the room to hear it moved (S-020, T-304).
+const STAND_UP_GRACE_MSEC := 1500
 ## Window of the network measures of the F3 overlay, in seconds (T-303).
 const NET_STATS_WINDOW := 5.0
 
@@ -658,6 +661,13 @@ func _apply_network_state(player: Player, terminal_at: int, camera_at: int) -> v
 		if terminal_at >= 0 and terminal_at < network.terminals.size()
 		else null
 	)
+	if terminal == null:
+		player.left_terminal = null  # The room knows it got up.
+	elif (
+		terminal == player.left_terminal
+		and Time.get_ticks_msec() - player.left_terminal_msec < STAND_UP_GRACE_MSEC
+	):
+		terminal = null  # Sent before the room knew it got up (T-304).
 	if terminal != player.terminal:
 		player.terminal = terminal
 		prediction.restart(player.commands.seq)  # Moved by the room, not by its steps.

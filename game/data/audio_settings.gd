@@ -36,11 +36,11 @@ extends Resource
 ## Seconds the wind takes to rise before a gust, and to fall after.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var gust_rise: float = 2.0
 ## Volume the wind gains at the height of a gust, in decibels.
-@export_range(0.0, 24.0, 0.5, "suffix:dB") var gust_db: float = 9.0
+@export_range(0.0, 24.0, 0.5, "suffix:dB") var gust_db: float = 4.0
 ## Volume the wind loses indoors, in decibels.
 @export_range(-40.0, 0.0, 0.5, "suffix:dB") var indoor_wind_db: float = -12.0
 ## Volume of the gust's whistle at its height, in decibels.
-@export_range(-40.0, 0.0, 0.5, "suffix:dB") var whistle_db: float = -10.0
+@export_range(-40.0, 0.0, 0.5, "suffix:dB") var whistle_db: float = -16.0
 
 @export_group("Monster voice (T-145)")
 ## Volume of the scan's drone once the monster listens, in decibels.
