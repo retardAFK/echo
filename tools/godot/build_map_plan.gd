@@ -6,7 +6,7 @@ extends Node
 ## It shows the place only (S-017, Q2): the transformer and the exit tunnel
 ## are drawn without a name, and nothing says where the fuses are.
 
-const Tilleuls := preload("res://tools/godot/build_tilleuls.gd")
+const Tilleuls := preload("res://tools/godot/tilleuls_layout.gd")
 const PLAN_PATH := "res://game/maps/tilleuls/tilleuls_plan.tres"
 
 ## Out-of-reach bands around the cité, as on the paper plan (plan meters).
