@@ -60,6 +60,14 @@ const MONSTER := preload("res://game/entities/monster/monster.tscn")
 
 ## How far a fuse box looks for a wall around its slot, in meters.
 const FUSE_BOX_WALL_SEARCH := 3.5
+## A camera hangs on the nearest wall within this distance of its plan point,
+## its back this far from the wall (S-020, T-315, piste N1); farther from any
+## wall, it sits on a mast of its own.
+const CAMERA_WALL_SEARCH := 7.0
+const CAMERA_WALL_GAP := 0.18
+const CAMERA_MAST_RADIUS := 0.06
+## Closer than this to a wall, a camera already hangs on it and stays.
+const CAMERA_ON_WALL := 0.5
 
 const BUILDING := preload("res://game/entities/building/building.tscn")
 
