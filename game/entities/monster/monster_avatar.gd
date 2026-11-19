@@ -56,6 +56,8 @@ var gesture := BodyGesture.new()
 var body_action: MonsterBody.Action:
 	get = _get_action
 
+## Stopped short (S-020, T-307): a door smashed open on the run.
+var stagger := Stagger.new()
 var _pace := MonsterBrain.Pace.WALK
 var _prowling := false
 var _pitch := 0.0
@@ -154,6 +156,10 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 		velocity += get_gravity() * delta
 	if scan.active:
 		input = Vector2.ZERO  # The monster stands still while it scans.
+	if stagger.update(delta):
+		input = Vector2.ZERO  # Stopped short (T-307).
+		velocity.x = 0.0
+		velocity.z = 0.0
 	_pace = resolve_pace(_prowling, sprinting, not input.is_zero_approx())
 	var target := PlayerMotion.wish_direction(input, rotation.y) * get_speed()
 	var horizontal := PlayerMotion.approach_velocity(
@@ -161,8 +167,9 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 	)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
-	if _pace == MonsterBrain.Pace.RUN and not mirror_world:
+	if _pace == MonsterBrain.Pace.RUN:
 		_smash_door(horizontal)
+	if _pace == MonsterBrain.Pace.RUN and not mirror_world:
 		var gurney := Gurney.ahead(get_tree(), global_position, horizontal, _gurney_reach())
 		if gurney != null:
 			gurney.shove(self)  # Running, it shoves the gurney over (S-014, Q7).
@@ -188,10 +195,16 @@ func _gurney_reach() -> float:
 	return HOSPITAL_SETTINGS.gurney_run_reach
 
 
-## Running, a closed door just ahead bursts open (S-016, Q2).
+## Running, a closed door just ahead bursts open (S-016, Q2), and stops it
+## short (S-020, T-307). An online client only predicts the stop: the room
+## opens the door.
 func _smash_door(heading: Vector3) -> void:
 	var door := Door.closed_ahead(get_tree(), global_position, heading, DOOR_SETTINGS.smash_reach)
-	if door != null:
+	if door == null:
+		return
+	if mirror_world:
+		stagger.hit(DOOR_SETTINGS.smash_stagger)
+	else:
 		door.smash(self)
 
 
