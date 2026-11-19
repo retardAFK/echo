@@ -279,3 +279,27 @@ func test_client_plays_the_room_events() -> void:
 	net.apply_event([NetGame.Event.CAUGHT, 2, CaptureState.State.OUT])
 	assert_signal_emitted_with_parameters(net, "caught_reported", [2, CaptureState.State.OUT])
 	net.apply_event([])
+
+
+func test_a_client_monster_stops_when_the_room_stopped_it() -> void:
+	# S-020, T-310: the room stops it at an empty hiding spot, which the client
+	# cannot predict; a stop it predicted itself (a door) is not counted twice.
+	var avatar: MonsterAvatar = AVATAR_SCENE.instantiate()
+	avatar.local_controls = false
+	add_child_autofree(avatar)
+	var net := NetGame.new()
+	autofree(net)
+	net.own = avatar
+	net.prediction = Prediction.new(net.settings)
+	var you := [Vector3.ZERO, Vector3.ZERO, 0.0, 0, false, 0.0, 0, 0, -1, false, -1, -1]
+	net.apply_snapshot({"ack": 0, "you": you + [[1, 0.9]], "others": []})
+	assert_eq(avatar.stagger.left, 0.9, "stopped by the room")
+	assert_eq(avatar.stagger.count, 1)
+	avatar.stagger.update(1.0)
+	net.apply_snapshot({"ack": 0, "you": you + [[1, 0.2]], "others": []})
+	assert_eq(avatar.stagger.left, 0.0, "the same stop: not again")
+	avatar.stagger.hit(0.8)  # Predicted here: a door.
+	avatar.stagger.update(1.0)
+	net.apply_snapshot({"ack": 0, "you": you + [[2, 0.5]], "others": []})
+	assert_eq(avatar.stagger.left, 0.0, "already counted")
+	assert_eq(NetGame._stagger_of(Node3D.new()), [0, 0.0], "a hunted")

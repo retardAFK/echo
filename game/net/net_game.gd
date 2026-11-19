@@ -8,7 +8,8 @@ extends Node
 ## to the room's position; the others are NetPuppets moved between snapshots.
 ## Snapshot: {"ack": last command applied, "you": [position, velocity, yaw,
 ## gait, hidden, hold ratio, bottles, alarm clocks, hiding spot index, held,
-## terminal index, camera index (S-018)],
+## terminal index, camera index (S-018), [stops, seconds left] of the
+## monster stopped short (S-020)],
 ## "others": [[seat, position, yaw, gait, down, gesture], ...]}: those it
 ## sees with its own eyes or through the camera it watches (S-018); gesture is
 ## what its body shows (S-011): a HuntedBody.Gesture, or for the monster a
@@ -411,9 +412,18 @@ func snapshot_for(place: int) -> Dictionary:
 			viewer.get("held") == true,
 			world.network.terminal_index(viewer.get("terminal")) if _has_network() else -1,
 			world.network.camera_index(viewer) if _has_network() else -1,
+			_stagger_of(viewer),
 		],
 		"others": _seen_by(viewer),
 	}
+
+
+## [stops so far, seconds left] of a monster's Stagger, [0, 0.0] for a hunted.
+static func _stagger_of(viewer: Node) -> Array:
+	var stagger: Variant = viewer.get("stagger")
+	if stagger is Stagger:
+		return [(stagger as Stagger).count, (stagger as Stagger).left]
+	return [0, 0.0]
 
 
 func _has_network() -> bool:
@@ -628,6 +638,15 @@ func _watch(seat: int, pitch: float) -> void:
 ## is captured.
 func _apply_own_state(you: Array) -> void:
 	own.remote_hold_ratio = you[5]
+	# The monster stopped short by the room for something the client could not
+	# predict (an empty hiding spot, S-020): it stops here too. Those it
+	# predicted (a door, a gurney) are already counted.
+	var stagger: Variant = own.get("stagger")
+	if you.size() >= 13 and stagger is Stagger and you[12].size() == 2:
+		var mine := stagger as Stagger
+		if you[12][0] > mine.count:
+			mine.hit(you[12][1])
+			mine.count = you[12][0]
 	if own is Player and you.size() >= 10:
 		(own as Player).held = you[9]
 	var inventory: Inventory = own.get("inventory")

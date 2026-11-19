@@ -52,6 +52,11 @@ extends Resource
 @export_range(0.1, 10.0, 0.1, "suffix:s") var hide_time: float = 1.0
 ## Range of the door or lid noise, in meters (Q5, Q7).
 @export_range(0.5, 50.0, 0.5, "suffix:m") var hide_noise_range: float = 3.0
+## The monster opening an empty hiding spot: a noise of at least this range,
+## and it stands there this long (S-020, T-310, piste H1): searching at random
+## costs something.
+@export_range(0.0, 50.0, 0.5, "suffix:m") var empty_search_range: float = 4.0
+@export_range(0.0, 5.0, 0.05, "suffix:s") var empty_search_stagger: float = 1.0
 ## Farthest distance from the front of a hiding spot to use it, in meters.
 @export_range(0.5, 5.0, 0.1, "suffix:m") var hide_reach: float = 1.6
 ## How far the hidden one can turn their head from straight out, in degrees (Q6).

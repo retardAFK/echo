@@ -193,6 +193,32 @@ func test_the_monster_opens_an_empty_one_for_nothing() -> void:
 	assert_signal_not_emitted(closet, "found")
 
 
+func test_searching_an_empty_one_costs_the_monster() -> void:
+	# S-020, T-310 (piste H1): a 4 m noise and a second standing there.
+	var setup: Array = await _setup()
+	var closet: HidingSpot = setup[0]
+	var avatar: MonsterAvatar = AVATAR_SCENE.instantiate()
+	add_child_autofree(avatar)
+	closet.hold(avatar, 1.1)
+	var opened := _noises.filter(func(e: NoiseEvent) -> bool: return e.source == closet)
+	assert_eq(opened.size(), 1)
+	assert_eq(opened[0].noise_range, SETTINGS.empty_search_range, "louder than the 3 m creak")
+	assert_eq(avatar.stagger.left, SETTINGS.empty_search_stagger, "it stands there")
+	assert_eq(avatar.stagger.count, 1)
+
+
+func test_finding_someone_costs_the_monster_nothing() -> void:
+	var setup: Array = await _setup()
+	var closet: HidingSpot = setup[0]
+	_hide(closet, setup[1])
+	_noises.clear()
+	var avatar: MonsterAvatar = AVATAR_SCENE.instantiate()
+	add_child_autofree(avatar)
+	closet.hold(avatar, 1.1)
+	assert_eq(_noises[0].noise_range, SETTINGS.hide_noise_range)
+	assert_eq(avatar.stagger.left, 0.0)
+
+
 func test_the_mask_shows_only_when_hidden() -> void:
 	var setup: Array = await _setup()
 	var closet: HidingSpot = setup[0]
