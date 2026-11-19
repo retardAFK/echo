@@ -10,7 +10,7 @@ script = ExtResource("1_spot")
 
 [node name="Digits" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.01)
-pixel_size = 0.0016
-modulate = Color(0.1, 0.1, 0.25, 1)
+pixel_size = 0.0013
+modulate = Color(0.04, 0.04, 0.12, 1)
 outline_size = 0
-font_size = 48
+font_size = 64
