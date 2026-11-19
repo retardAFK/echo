@@ -72,6 +72,7 @@ func test_the_world_state_holds_still_while_nothing_happens() -> void:
 	var before := room_world.state()
 	var clock_before := room_world.clock()
 	await wait_physics_frames(30)
+	room_world.game_loop.noise_count += 3  # Footsteps.
 	assert_eq(room_world.state(), before)
 	assert_gt(room_world.clock()[0], clock_before[0], "the game time goes on")
 	assert_gt(room_world.clock()[2], clock_before[2], "the wind too")
@@ -84,9 +85,11 @@ func test_the_clock_sets_the_game_time_and_the_wind() -> void:
 	var client_world: NetWorld = made[1]
 	client.game_loop.mirror = true
 	room_world.game_loop.elapsed = 42.0
+	room_world.game_loop.noise_count = 17
 	room_world.wind.time = 100.0
 	client_world.apply_clock(room_world.clock())
 	assert_eq(client.game_loop.get_duration(), 42.0)
+	assert_eq(client.game_loop.noise_count, 17, "the end screen's counts")
 	assert_eq(client_world.wind.seed_used, room_world.wind.seed_used, "the same gusts")
 	assert_eq(client_world.wind.time, 100.0)
 	assert_eq(client_world.wind.strength, room_world.wind.gusts.strength(100.0))

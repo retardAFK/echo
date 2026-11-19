@@ -362,24 +362,17 @@ func place_fuse(user: Node = null) -> void:
 
 
 ## Room side: what a client's mirror loop needs, see apply_values(). The game
-## time is not in it: it changes every frame, and goes on its own clock
-## (NetWorld.clock, S-020, T-300).
+## time and the counts of the end screen are not in it: they change with
+## every frame or every footstep, and go with NetWorld.clock once a second
+## (S-020, T-301).
 func mirror_values() -> Array:
-	return [
-		rules.carried,
-		rules.placed,
-		is_over,
-		hunted_won,
-		noise_count,
-		scan_count,
-		ruse_count,
-	]
+	return [rules.carried, rules.placed, is_over, hunted_won]
 
 
 ## Client side: shows the room's loop: fuses, transformer, siren and exit,
 ## the numbers of the end screen, and the end itself.
 func apply_values(values: Array) -> void:
-	if values.size() < 7:
+	if values.size() < 4:
 		return
 	var was_repaired := rules.is_repaired()
 	if values[0] != rules.carried or values[1] != rules.placed:
@@ -390,9 +383,6 @@ func apply_values(values: Array) -> void:
 			transformer.update_label()
 	if rules.is_repaired() and not was_repaired:
 		_open_exit()
-	noise_count = values[4]
-	scan_count = values[5]
-	ruse_count = values[6]
 	if values[2] and not is_over:
 		finish(values[3])
 
