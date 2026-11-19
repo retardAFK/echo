@@ -46,12 +46,13 @@ func test_prediction_ignores_tiny_gaps() -> void:
 
 
 func test_prediction_settles_small_gaps_slowly() -> void:
-	# S-020, T-346: a gap under correction_threshold is no longer kept for
-	# good. A player standing 0.45 m from where the room has it would aim at
-	# a dropped fuse the room does not see it aim at (net_match stuck).
+	# S-020, T-346 (0.9 m since T-319 raised correction_threshold): a gap
+	# under correction_threshold is no longer kept for good. A player standing
+	# 0.9 m from where the room has it would aim at a fuse box the room does
+	# not see it aim at (net_match stuck in to_box).
 	var prediction := Prediction.new(_settings)
 	var here := Vector3.ZERO
-	var room := Vector3(0.45, 0, 0)
+	var room := Vector3(0.9, 0, 0)
 	var seq := 0
 	for frame in 180:  # 3 s standing still, a snapshot every 3 frames.
 		seq += 1
@@ -59,7 +60,7 @@ func test_prediction_settles_small_gaps_slowly() -> void:
 		if frame % 3 == 0:
 			here += prediction.reconcile(seq, room)
 		here += prediction.step(1.0 / 60.0)
-	assert_lt(here.distance_to(room), 0.05, "settled on the room's position")
+	assert_lt(here.distance_to(room), 0.1, "settled on the room's position")
 	var first := Prediction.new(_settings)
 	first.record(1, Vector3.ZERO)
 	first.reconcile(1, room)

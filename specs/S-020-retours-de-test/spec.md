@@ -36,9 +36,22 @@ Les testeurs ont vu des saccades et des retours en arrière en ligne, et des pou
 | T-317 | J2 | Grille de test commune : les mêmes questions après chaque partie, dans un tableau |
 | T-318 | J1 | Nettoyer les branches fusionnées du dépôt (avec l'accord de Maxime, une suppression ne se défait pas) |
 
+## Saccades en ligne (demande de Maxime du 19/11/2026), avant le reste
+En ligne, le déplacement saccade pour son propre personnage et pour les autres ; en solo, tout est fluide. Deux défauts changent le moindre à-coup du WebSocket (TCP : paquets parfois groupés) en saccade :
+- son propre personnage : la salle rejoue la dernière commande reçue à chaque image et annonce le dernier numéro reçu, qui ne correspond pas à l'image simulée ; au sprint, 100 ms d'à-coup donnent environ 0,55 m d'écart et le client se recale à tort ;
+- les autres joueurs : chaque instantané est daté à son arrivée ; deux instantanés reçus à 5 ms d'écart font jouer 50 ms de trajet en 5 ms.
+
+| Tâche | Quoi |
+|---|---|
+| T-319 | Réglages d'atténuation (`net_settings.gd`) : `correction_threshold` 0,5 → 1,0 m, `correction_time` 0,2 → 0,4 s, `interpolation_delay` 0,1 → 0,2 s |
+| T-320 | Instantanés datés à l'heure de la salle : numéro d'image physique dans chaque instantané, décalage d'horloge lissé côté client (plus petit décalage sur une fenêtre glissante, ajusté sans saut), tampon et interpolation dans ce repère |
+| T-321 | File de commandes côté salle : chaque paquet porte les 4 dernières commandes numérotées ; la salle les range, ignore celles déjà jouées, en joue une par image avec 2 à 3 d'avance, rejoue la dernière sans avancer le numéro si la file est vide, et annonce le numéro réellement joué ; les actions ponctuelles sont rattachées au numéro de leur commande |
+
+Critères : tests dans `test_net_sync.gd` (commandes en rafale, paquet perdu, instantanés groupés) ; `worst_error` sous 0,3 m au sprint en ligne droite avec `debug_latency_ms` à 150, valeur avant et après ; solo inchangé ; gameplay inchangé ; pas de WebRTC.
+
 L3 (README : « monstre aveugle » → vision normale, D-008) est faite par le fil « Évaluer la modularité du code », qui réécrit le README.
 
-Les P2 lisibles du catalogue (E5, R3 à R6, H3, S2, S3, N3 à N5, A1, U1, U2) suivront, avec leurs propres tâches à partir de T-319.
+Les P2 lisibles du catalogue (E5, R3 à R6, H3, S2, S3, N3 à N5, A1, U1, U2) suivront, avec leurs propres tâches à partir de T-322 (T-319 à T-321 : saccades en ligne).
 
 ## Critères d'acceptation
 - [ ] En ligne, l'état de la carte n'est envoyé que quand il change (test GUT) ; le chrono et le vent restent à l'heure de la salle.

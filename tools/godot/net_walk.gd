@@ -3,7 +3,7 @@ extends Node
 ## the exported server: creates a game, launches it as the only player (a
 ## hunted, the AI monster on the room), sprints forward for 4 s with
 ## 150 ms added to every message, and checks that the predicted position
-## never drifted from the room's beyond correction_threshold. It also checks
+## never drifted from the room's beyond MAX_GAP. It also checks
 ## that the map mirrors the room's (T-099): its fuse boxes hold the fuses the
 ## room drew.
 ## Prints ECHO_NET_WALK and quits with 0 on success, 1 otherwise.
@@ -13,6 +13,9 @@ const TIMEOUT := 40.0
 const LATENCY_MS := 150
 const WALK_TIME := 4.0
 const MIN_DISTANCE := 3.0
+## Gap between prediction and room that fails the test: the correction
+## threshold before S-020, T-319 raised it to 1 m.
+const MAX_GAP := 0.5
 
 var _settings := NetSettings.new()
 var _lobby := LobbyClient.new()
@@ -24,6 +27,10 @@ var _start := Vector3.ZERO
 
 func _ready() -> void:
 	_settings.debug_latency_ms = LATENCY_MS
+	var args := OS.get_cmdline_user_args()
+	var at := args.find("--jitter")  # S-020, T-319: bursts, as on a real WebSocket.
+	if at >= 0 and at + 1 < args.size():
+		_settings.debug_jitter_ms = int(args[at + 1])
 	NetSession.settings = _settings
 	_lobby.settings = _settings
 	add_child(_lobby)
@@ -95,7 +102,7 @@ func _physics_process(delta: float) -> void:
 	)
 	if (
 		distance < MIN_DISTANCE
-		or net.worst_error >= _settings.correction_threshold
+		or net.worst_error >= MAX_GAP
 		or fuses.size() != _map.game_loop.rules.fuse_count
 	):
 		_fail(result)

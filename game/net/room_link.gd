@@ -74,6 +74,9 @@ var _idle := 0.0
 var _ping_left := 0.0
 var _connect_left := 0.0
 var _retry_left := 0.0
+## When the last delayed message goes out, and comes in (debug jitter, T-319).
+var _out_due_msec := 0
+var _in_due_msec := 0
 
 
 func _init() -> void:
@@ -454,21 +457,41 @@ func _peer_of(place: int) -> int:
 
 ## Calls send now, or after debug_latency_ms to test a bad connection.
 func _later(send: Callable) -> void:
-	if settings.debug_latency_ms <= 0:
+	var jitter := 0 if is_room else settings.debug_jitter_ms
+	if settings.debug_latency_ms <= 0 and jitter <= 0:
 		send.call()
 		return
-	get_tree().create_timer(settings.debug_latency_ms / 1000.0).timeout.connect(
+	var due := Time.get_ticks_msec() + settings.debug_latency_ms + randi_range(0, jitter)
+	_out_due_msec = maxi(due, _out_due_msec)  # In order, as on a WebSocket.
+	_after(_out_due_msec, send)
+
+
+## Client side: hands a received message on now, or after a random delay up
+## to debug_jitter_ms, in order (S-020, T-319): a late one holds back those
+## behind it, which then come in a burst, as TCP does.
+func _received(hand_on: Callable) -> void:
+	if is_room or settings.debug_jitter_ms <= 0:
+		hand_on.call()
+		return
+	var due := Time.get_ticks_msec() + randi_range(0, settings.debug_jitter_ms)
+	_in_due_msec = maxi(due, _in_due_msec)
+	_after(_in_due_msec, hand_on)
+
+
+func _after(due_msec: int, call: Callable) -> void:
+	var wait := maxf((due_msec - Time.get_ticks_msec()) / 1000.0, 0.0)
+	get_tree().create_timer(wait).timeout.connect(
 		func() -> void:
 			if _peer != null and _api.multiplayer_peer != null:
-				send.call()
+				call.call()
 	)
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")
 func _snapshot(snapshot: Dictionary) -> void:
-	snapshot_received.emit(snapshot)
+	_received(func() -> void: snapshot_received.emit(snapshot))
 
 
 @rpc("authority", "call_remote", "reliable")
 func _event(event: Array) -> void:
-	event_received.emit(event)
+	_received(func() -> void: event_received.emit(event))

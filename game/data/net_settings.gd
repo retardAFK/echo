@@ -25,14 +25,17 @@ extends Resource
 @export_range(5, 60) var commands_rate: int = 30
 ## Snapshots sent by the room to each client per second (S-010, Q5).
 @export_range(5, 60) var snapshot_rate: int = 20
-## Other players are shown this far in the past, between two snapshots (Q8).
-@export_range(0.0, 0.5, 0.01, "suffix:s") var interpolation_delay: float = 0.1
+## Other players are shown this far in the past, between two snapshots (Q8);
+## 0.2 s since S-020, T-319, to ride out bursts of snapshots.
+@export_range(0.0, 0.5, 0.01, "suffix:s") var interpolation_delay: float = 0.2
 ## When a snapshot is late, others keep moving at most this long, then stop.
 @export_range(0.0, 0.5, 0.01, "suffix:s") var max_extrapolation: float = 0.15
 ## Gap between the predicted and the room's position corrected smoothly...
-@export_range(0.0, 2.0, 0.05, "suffix:m") var correction_threshold: float = 0.5
+## (1 m and 0.4 s since S-020, T-319: a network hiccup at a sprint, about
+## 0.55 m, no longer makes the player snap back and forth)
+@export_range(0.0, 2.0, 0.05, "suffix:m") var correction_threshold: float = 1.0
 ## ...over this time, and above this gap the player jumps to the room's position.
-@export_range(0.01, 1.0, 0.01, "suffix:s") var correction_time: float = 0.2
+@export_range(0.01, 1.0, 0.01, "suffix:s") var correction_time: float = 0.4
 @export_range(0.5, 10.0, 0.1, "suffix:m") var snap_threshold: float = 2.0
 ## A gap under correction_threshold but above this is settled slowly, over
 ## settle_time, so that a player standing still ends where the room has it
@@ -46,6 +49,11 @@ extends Resource
 @export_range(30.0, 180.0, 1.0, "suffix:°") var sight_half_angle: float = 110.0
 ## Added delay on every message, both ways, to test a bad connection (tests only).
 @export_range(0, 500, 1, "suffix:ms") var debug_latency_ms: int = 0
+## Random extra delay up to this, on top of debug_latency_ms, on what a client
+## sends and receives (tests only, S-020, T-319). Messages keep their order,
+## as on a WebSocket: a late one holds back those behind it, which then
+## arrive in a burst.
+@export_range(0, 500, 1, "suffix:ms") var debug_jitter_ms: int = 0
 ## Time between two pings sent by a client.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var ping_interval: float = 1.0
 ## How long a client waits for the lobby to answer.
