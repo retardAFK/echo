@@ -22,6 +22,7 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [x] T-316 — N2 : clavier du transformateur en boîtier mural
 - [ ] T-317 — J2 : grille de test commune
 - [ ] T-318 — J1 : nettoyer les branches (Maxime donne son accord)
+- [x] T-347 — CI : chemins des robots stables, journal du sauvetage
 - [x] T-348 — CI : le robot de net_match se voit bloqué à un chambranle
 
 ## Compte rendu
@@ -39,3 +40,4 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - T-309 (19/11/2026) : `MonsterSprint` (IA et joueur) : 6 m/s pendant `sprint_time` = 5 s de course, puis `winded_speed` = 5 m/s pendant `winded_time` = 4 s, plus lent que le sprint du chassé (5,5 m/s) ; la marche recharge 1 s par seconde (`monster_settings.gd`). Barre « Course » en bas à gauche pour le monstre joué. Tests GUT dans `test_monster_sprint`.
 - T-310 (19/11/2026) : le monstre (IA ou joueur) qui ouvre une cachette vide fait un bruit d'au moins `empty_search_range` = 4 m et reste `empty_search_stagger` = 1 s sur place (`ruse_settings.gd`). En ligne, l'instantané donne au client [arrêts, secondes] du `Stagger` de la salle : le client s'arrête aussi pour ce qu'il ne pouvait pas prédire. Tests GUT dans `test_hiding_spots` et `test_net_sync`.
 - T-311 (19/11/2026) : touche R (remappable) pour retenir son souffle `breath_hold_time` = 6 s, recharge `breath_recharge_time` = 40 s, jauge « Souffle » en bas à gauche (`BreathHold`, `BreathBar`). Souffle retenu : pas marchés silencieux et pas de halètement ; le sprint reste bruyant. Caché sans retenir son souffle, la respiration s'entend à `hidden_breath_range` = 3 m quand le monstre est à moins de `hidden_breath_reach` = 3 m. En ligne, `FLAG_BREATH` dans les commandes. Tests GUT dans `test_breath_hold`.
+- T-347 (19/11/2026) : le robot de `net_match` et `net_spectate` garde son chemin tant que sa cible ne bouge pas. Recalculé chaque seconde, il passait d'une route à l'autre, de même longueur de chaque côté de la barre G, et le monstre de `net_spectate` faisait des allers-retours le long de son mur (échecs de #185, #186, #193). Les lignes d'état disent, pour chaque chassé capturé, qui va le libérer, sa cage vue par ce client et la distance du monstre ; la CI montre toute l'histoire de chaque joueur. `LevelVisibility` ne plante plus sur un modèle libéré pendant la partie (test `test_a_freed_model_is_skipped`).

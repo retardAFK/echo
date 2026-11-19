@@ -108,8 +108,9 @@ func _process(delta: float) -> void:
 		var parts := cell.split(":")
 		var shown := shows(inside, level, int(parts[0]), int(parts[1]))
 		for entry: Array in _cells[cell]:
-			var geometry: GeometryInstance3D = entry[0]
-			if is_instance_valid(geometry):
+			# Checked first: a freed mesh (a fuse taken) fails a typed assign.
+			if is_instance_valid(entry[0]):
+				var geometry: GeometryInstance3D = entry[0]
 				geometry.layers = entry[1] if shown else 0
 
 
