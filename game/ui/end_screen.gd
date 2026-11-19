@@ -34,7 +34,7 @@ func _ready() -> void:
 	_menu.pressed.connect(go_to_menu)
 	_copy.pressed.connect(copy_summary)
 	if online:
-		_replay.text = "END_BACK_TO_LOBBY"
+		_replay.text = Text.t("END_BACK_TO_LOBBY")
 
 
 ## Title key for the end of a game, seen from the role the player played.
@@ -57,16 +57,16 @@ func show_result(role: GameSession.Role, game_loop: GameLoop) -> void:
 		"\n"
 		. join(
 			[
-				tr("END_DURATION") % format_duration(game_loop.get_duration()),
-				tr("END_FUSES") % [game_loop.rules.placed, game_loop.rules.fuse_count],
-				tr("END_NOISES") % game_loop.noise_count,
-				tr("END_SCANS") % game_loop.scan_count,
-				tr("END_RUSES") % game_loop.ruse_count,
+				Text.t("END_DURATION", format_duration(game_loop.get_duration())),
+				Text.t("END_FUSES", [game_loop.rules.placed, game_loop.rules.fuse_count]),
+				Text.t("END_NOISES", game_loop.noise_count),
+				Text.t("END_SCANS", game_loop.scan_count),
+				Text.t("END_RUSES", game_loop.ruse_count),
 			]
 		)
 	)
 	summary = RunSummary.format(role, game_loop, game_loop.get_average_fps())
-	_copy.text = tr("END_COPY")
+	_copy.text = Text.t("END_COPY")
 	visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = true
@@ -76,7 +76,7 @@ func show_result(role: GameSession.Role, game_loop: GameLoop) -> void:
 ## Copies the summary of the game, for the questionnaire (S-009, Q7).
 func copy_summary() -> void:
 	DisplayServer.clipboard_set(summary)
-	_copy.text = tr("END_COPIED")
+	_copy.text = Text.t("END_COPIED")
 
 
 func replay() -> void:

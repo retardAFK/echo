@@ -57,15 +57,15 @@ func _process(_delta: float) -> void:
 	_entries = network.entries_for(terminal) if network != null else []
 	_selected = clampi(_selected, 0, maxi(_entries.size() - 1, 0))
 	_show_lines(network)
-	_help.text = Settings.fill(tr("HUD_TERMINAL_HELP"))
-	_title.text = tr("HUD_TERMINAL_TITLE")
+	_help.text = Text.with_keys("HUD_TERMINAL_HELP")
+	_title.text = Text.t("HUD_TERMINAL_TITLE")
 	if terminal.kind == Terminal.Kind.CODE:
-		_title.text = tr("HUD_KEYPAD_TITLE")
+		_title.text = Text.t("HUD_KEYPAD_TITLE")
 		var quests := Quests.of(player)
 		if quests == null or not quests.wants_code():
-			_help.text = tr("HUD_KEYPAD_IDLE")
+			_help.text = Text.t("HUD_KEYPAD_IDLE")
 		else:
-			_help.text = tr("HUD_KEYPAD_TYPED") % quests.typed_on(terminal).rpad(4, "_")
+			_help.text = Text.t("HUD_KEYPAD_TYPED", quests.typed_on(terminal).rpad(4, "_"))
 
 
 func _input(event: InputEvent) -> void:
@@ -120,30 +120,30 @@ func _show_lines(network: CityNetwork) -> void:
 
 func _line_text(network: CityNetwork, i: int) -> String:
 	var entry: Array = _entries[i]
-	var text := "%d  %s" % [i + 1, tr("HUD_TERMINAL_CAMERA") % tr(entry[2])]
+	var text := "%d  %s" % [i + 1, Text.t("HUD_TERMINAL_CAMERA", Text.t(entry[2]))]
 	match entry[0]:
 		CityNetwork.Entry.SPEAKER:
-			text = "%d  %s" % [i + 1, tr("HUD_TERMINAL_SPEAKER") % tr(entry[2])]
+			text = "%d  %s" % [i + 1, Text.t("HUD_TERMINAL_SPEAKER", Text.t(entry[2]))]
 			if network.speakers[entry[1]].used:
-				text += "  " + tr("HUD_TERMINAL_USED")
+				text += "  " + Text.t("HUD_TERMINAL_USED")
 		CityNetwork.Entry.SHUTTER:
-			text = "%d  %s" % [i + 1, tr("HUD_TERMINAL_SHUTTER") % tr(entry[2])]
+			text = "%d  %s" % [i + 1, Text.t("HUD_TERMINAL_SHUTTER", Text.t(entry[2]))]
 			var shutter := network.shutters[entry[1]]
 			if shutter.is_down():
-				text += "  " + tr("HUD_TERMINAL_DOWN")
+				text += "  " + Text.t("HUD_TERMINAL_DOWN")
 			elif not shutter.is_ready():
-				text += "  " + tr("HUD_TERMINAL_RECHARGE") % ceili(shutter.recharge_left)
+				text += "  " + Text.t("HUD_TERMINAL_RECHARGE", ceili(shutter.recharge_left))
 		CityNetwork.Entry.OPEN_CAGES:
-			text = "%d  %s" % [i + 1, tr(entry[2])]
+			text = "%d  %s" % [i + 1, Text.t(entry[2])]
 			var progress := player.terminal.progress
 			if progress > 0.0:
 				text += "  %d %%" % roundi(progress * 100.0)
 			elif not network.has_prisoners():
-				text += "  " + tr("HUD_TERMINAL_NOBODY")
+				text += "  " + Text.t("HUD_TERMINAL_NOBODY")
 		CityNetwork.Entry.CAMERA:
 			var camera := network.cameras[entry[1]]
 			if camera.broken:
-				text += "  " + tr("HUD_TERMINAL_BROKEN")
+				text += "  " + Text.t("HUD_TERMINAL_BROKEN")
 			elif player.watching == camera:
 				text = "> " + text
 	return text

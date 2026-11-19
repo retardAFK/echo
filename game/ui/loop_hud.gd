@@ -17,8 +17,10 @@ func _ready() -> void:
 
 func _on_fuses_changed(found: int, _placed: int) -> void:
 	var rules := game_loop.rules
-	_label.text = tr("HUD_FUSES") % [found, rules.fuse_count] if rules.fuse_count > 0 else ""
+	_label.text = Text.t("HUD_FUSES", [found, rules.fuse_count]) if rules.fuse_count > 0 else ""
 	var others := rules.objectives.size() - rules.fuse_count
 	if others > 0:
 		var done := others - rules.pending.size()
-		_label.text += ("   " if _label.text != "" else "") + tr("HUD_OBJECTIVES") % [done, others]
+		_label.text += (
+			("   " if _label.text != "" else "") + Text.t("HUD_OBJECTIVES", [done, others])
+		)

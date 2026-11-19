@@ -78,7 +78,7 @@ func _draw() -> void:
 	draw_rect(area, FRAME, false, 1.0)
 	for i in plan.rects.size():
 		if not plan.labels[i].is_empty():
-			_draw_label(plan.rects[i], plan.kinds[i], tr(plan.labels[i]))
+			_draw_label(plan.rects[i], plan.kinds[i], Text.t(plan.labels[i]))
 	_draw_north(area)
 	_draw_player()
 

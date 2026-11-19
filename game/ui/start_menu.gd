@@ -57,7 +57,7 @@ func _ready() -> void:
 	for key: String in ROLES:
 		_role_list.item(key).focus_entered.connect(preview.bind(ROLES[key]))
 	var version := str(ProjectSettings.get_setting("application/config/version", ""))
-	_version.text = tr("MENU_VERSION") % (version if version != "" else "dev")
+	_version.text = Text.t("MENU_VERSION", version if version != "" else "dev")
 	show_home()
 
 
@@ -99,7 +99,7 @@ func show_credits() -> void:
 
 ## Shows the goal and the controls of a role.
 func preview(role: GameSession.Role) -> void:
-	_goal.text = tr(ControlsText.goal_key(role))
+	_goal.text = Text.t(ControlsText.goal_key(role))
 	_controls.text = ControlsText.controls(role)
 
 
