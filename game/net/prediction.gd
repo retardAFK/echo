@@ -4,8 +4,9 @@ extends RefCounted
 ## The player moves at once with its own commands; each physics frame its
 ## position is recorded with the commands' number. When a snapshot says where
 ## the room had the player after a given command, the gap with what was
-## predicted then is the error. Small errors are ignored, medium ones are
-## corrected smoothly over correction_time, large ones make the player jump.
+## predicted then is the error. Tiny errors are ignored, small ones are
+## settled slowly over settle_time, medium ones are corrected smoothly over
+## correction_time, large ones make the player jump.
 
 ## Frames kept, about 2 s at 60 frames per second.
 const HISTORY := 120
@@ -19,6 +20,8 @@ var started := false
 var floor_seq := -1
 
 var _rate := Vector3.ZERO
+## A medium correction is still on its way (settling waits for its end).
+var _correcting := false
 var _seqs: Array[int] = []
 var _positions: Array[Vector3] = []
 
@@ -42,6 +45,7 @@ func restart(last_seq: int) -> void:
 	_seqs.clear()
 	_positions.clear()
 	pending = Vector3.ZERO
+	_correcting = false
 	floor_seq = last_seq
 	started = true
 
@@ -60,31 +64,40 @@ func error_at(seq: int, server_position: Vector3) -> Vector3:
 	return server_position - _positions[index]
 
 
-## Reads a snapshot. Returns the jump to make now (zero if none); medium gaps
-## go into pending, applied by step().
+## Reads a snapshot. Returns the jump to make now (zero if none); small and
+## medium gaps go into pending, applied by step().
 func reconcile(seq: int, server_position: Vector3) -> Vector3:
 	var error := error_at(seq, server_position)
 	var gap := error.length()
 	if gap >= settings.snap_threshold:
 		_shift(error)
 		pending = Vector3.ZERO
+		_correcting = false
 		return error
 	if gap >= settings.correction_threshold:
 		pending = error
 		_rate = error / settings.correction_time
+		_correcting = true
+	elif gap >= settings.settle_threshold and not _correcting:
+		# Small: settled slowly, so it is not kept for good (S-020, T-346),
+		# unless a medium correction is still on its way.
+		pending = error
+		_rate = error / settings.settle_time
 	return Vector3.ZERO
 
 
 ## Part of the pending correction to apply this frame: the whole correction
-## spread evenly over correction_time.
+## spread evenly over correction_time (settle_time for a small one).
 func step(delta: float) -> Vector3:
 	if pending.is_zero_approx():
 		pending = Vector3.ZERO
+		_correcting = false
 		return Vector3.ZERO
 	var part := _rate * delta
 	if part.length() >= pending.length():
 		part = pending
 		pending = Vector3.ZERO
+		_correcting = false
 	else:
 		pending -= part
 	_shift(part)
