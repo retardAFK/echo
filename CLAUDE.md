@@ -1,1 +1,1 @@
-Lis ECHO_PROJET.md avant toute action.
+Lis AGENTS.md, puis ECHO_PROJET.md, avant toute action.
