@@ -201,7 +201,12 @@ jobs:
               grep ECHO_NET_MATCH build/server/match/client$index.log | tee -a build/server/smoke.log
             done
             if [ "$code" -ne 0 ]; then
-              tail -n 20 build/server/match/client*.log
+              # The whole story of each player, a line per change (T-347).
+              for log in build/server/match/client*.log; do
+                echo "==> $log <=="
+                grep -E "^seat [0-3] " "$log" | uniq | tail -n 60
+                tail -n 5 "$log"
+              done
             fi
           fi
           if [ "$code" -eq 0 ]; then

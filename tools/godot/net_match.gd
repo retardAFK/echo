@@ -26,10 +26,9 @@ const PLAYERS := 4
 const MAP := "res://game/maps/tilleuls/tilleuls.scn"
 ## Close enough to a point of the path to aim at the next one, in meters.
 const WAYPOINT_REACH := 0.6
-## Seconds between two paths, and without progress before trying around.
-const REPATH_TIME := 1.0
 ## A closed door this close ahead on the path: the player opens it (S-016).
 const DOOR_REACH := 1.2
+## Seconds without progress before trying around.
 const STUCK_TIME := 1.5
 ## Less than this far from where it was STUCK_TIME ago: stuck. Wider than
 ## the back and forth of a body the room holds at a jamb while the client
@@ -72,7 +71,6 @@ var _path := PackedVector3Array()
 var _path_target := Vector3.INF
 ## The path point walked to now: those before it are behind.
 var _path_index := 0
-var _repath_left := 0.0
 var _stuck_left := STUCK_TIME
 ## Freed: seconds before it walks out of the prison.
 var _freed_wait := 0.0
@@ -225,9 +223,35 @@ func _aim_status() -> String:
 	if _box != null:
 		box = ", box %s fuse %s" % [_box.global_position.snapped(Vector3.ONE * 0.1), _box.has_fuse]
 	return (
-		", aims %s, hold %.2f%s"
-		% [target.name if target != null else "nothing", player.get_hold_ratio(), box]
+		", aims %s, hold %.2f%s%s"
+		% [
+			target.name if target != null else "nothing",
+			player.get_hold_ratio(),
+			box,
+			_rescue_status(),
+		]
 	)
+
+
+## For the status lines (S-020, T-347): each captured teammate as this client
+## sees it, its rescuer, its cage here (-1: none known) and how far the
+## monster is from that cage. A rescue that never comes shows why.
+func _rescue_status() -> String:
+	var prison := Prison.of(_map)
+	var monster := _unvec(_read(LobbyState.MONSTER_SEAT).get("at", []))
+	var parts := []
+	for seat in [1, 2, 3]:
+		if seat == _seat or _read(seat).get("phase") != "captured":
+			continue
+		var cage := prison.cage_of_seat(seat) if prison != null else null
+		var away := monster.distance_to(cage.outside_point()) if cage != null else -1.0
+		parts.append(
+			(
+				"%d by %d in cage %d, monster %.0f m"
+				% [seat, _rescuer_of(seat), prison.cages.find(cage) if cage != null else -1, away]
+			)
+		)
+	return ", captured [%s]" % "; ".join(parts) if not parts.is_empty() else ""
 
 
 func _join_when_created() -> void:
@@ -492,13 +516,15 @@ func _go_to(target: Vector3, delta: float, reach := 0.8) -> bool:
 	var here := _own_position()
 	if Vector2(target.x - here.x, target.z - here.z).length() <= maxf(reach, 0.3):
 		return true
-	_repath_left -= delta
-	if _path.is_empty() or _repath_left <= 0.0 or target.distance_to(_path_target) > 0.5:
+	# A path is kept while its target stays put (S-020, T-347): planned again
+	# every second, it switched between two routes of the same length on
+	# each side of a building and the player went back and forth along its
+	# wall (net_spectate's monster at BarreG). Stuck, it is planned again.
+	if _path.is_empty() or target.distance_to(_path_target) > 0.5:
 		var nav := _map.get_world_3d().navigation_map
 		_path = NavigationServer3D.map_get_path(nav, here, target, true)
 		_path_target = target
 		_path_index = 0
-		_repath_left = REPATH_TIME
 	while (
 		_path_index < _path.size()
 		and (
