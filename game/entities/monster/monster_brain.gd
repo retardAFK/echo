@@ -62,12 +62,15 @@ static func spot_time(distance: float, crouched: bool, p_settings: MonsterSettin
 
 
 ## Movement speed for a pace, in meters per second.
-static func speed_for(pace: Pace, p_settings: MonsterSettings) -> float:
+## A run goes at the sprint gauge's speed when one is given (S-020, T-309).
+static func speed_for(
+	pace: Pace, p_settings: MonsterSettings, sprint: MonsterSprint = null
+) -> float:
 	match pace:
 		Pace.WALK:
 			return p_settings.walk_speed
 		Pace.RUN:
-			return p_settings.run_speed
+			return sprint.run_speed() if sprint != null else p_settings.run_speed
 	return p_settings.prowl_speed
 
 
