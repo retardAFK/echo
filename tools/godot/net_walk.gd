@@ -80,8 +80,18 @@ func _physics_process(delta: float) -> void:
 	var distance := net.own.global_position.distance_to(_start)
 	var fuses := _map.get_fuse_boxes().filter(func(box: FuseBox) -> bool: return box.has_fuse)
 	var result := (
-		"moved %.1f m, worst gap %.2f m, ping %d ms, %d fuses mirrored"
-		% [distance, net.worst_error, NetSession.get_ping_ms(), fuses.size()]
+		(
+			"moved %.1f m, worst gap %.2f m, ping %d ms, %d fuses mirrored,"
+			+ " %d map messages of %d B (S-020, T-303)"
+		)
+		% [
+			distance,
+			net.worst_error,
+			NetSession.get_ping_ms(),
+			fuses.size(),
+			net.world_total,
+			net.world_bytes,
+		]
 	)
 	if (
 		distance < MIN_DISTANCE

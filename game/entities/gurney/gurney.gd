@@ -24,6 +24,8 @@ var tipped := false
 var mirror := false
 
 var _shove: HoldProgress
+## Pose last sent online, resent once it moved (T-302).
+var _shared := SharedPose.new()
 var _next_roll := 0.0
 
 @onready var _model: Node3D = $Model
@@ -179,16 +181,10 @@ static func ahead(tree: SceneTree, from: Vector3, direction: Vector3, reach: flo
 	return best
 
 
-## Online: [x, y, z, yaw, tipped].
+## Online: [x, y, z, yaw, tipped], the pose as last sent: resent once it
+## moved (S-020, T-302).
 func state() -> Array:
-	var at := global_position
-	return [
-		snappedf(at.x, 0.01),
-		snappedf(at.y, 0.01),
-		snappedf(at.z, 0.01),
-		snappedf(rotation.y, 0.01),
-		tipped
-	]
+	return _shared.of(self) + [tipped]
 
 
 ## Online client: where the room says it is.

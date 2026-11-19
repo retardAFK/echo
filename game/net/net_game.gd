@@ -30,7 +30,7 @@ extends Node
 ## - [BOTTLE, position, velocity] and [DECOY, position]: to everyone, a bottle
 ##   thrown or an alarm clock placed; the client plays its own copy.
 ## - [CRUSH, position]: to everyone, the monster crushed a ringing alarm clock.
-## - [CLOCK, NetWorld.clock()]: to everyone, once a second (S-020, T-300):
+## - [CLOCK, NetWorld.clock() + [room fps]]: to everyone, once a second (S-020, T-300):
 ##   the game time and the wind, which change every frame and so are not in
 ##   WORLD (which would then go out with every snapshot).
 
@@ -45,6 +45,8 @@ enum Event { NOISE, SCAN, CAUGHT, WORLD, BOTTLE, DECOY, CRUSH, CLOCK }
 
 ## Seconds between two CLOCK events (T-300).
 const CLOCK_INTERVAL := 1.0
+## Window of the network measures of the F3 overlay, in seconds (T-303).
+const NET_STATS_WINDOW := 5.0
 
 ## Layers that block sight between players: the ground and props, and walls.
 const SIGHT_MASK := 1 | NoiseBus.WALLS_COLLISION_MASK
@@ -73,6 +75,17 @@ var prediction: Prediction
 var puppets := {}
 ## Client side: largest gap seen between prediction and room, for tests.
 var worst_error := 0.0
+## Client side, for the F3 overlay (S-020, T-303): the gap at the last
+## snapshot, the largest over the last NET_STATS_WINDOW seconds, the size in
+## bytes of the last WORLD message and how many came in that window, and the
+## room's frames per second (sent with CLOCK).
+var last_error := 0.0
+var recent_worst_error := 0.0
+var world_bytes := 0
+var world_count := 0
+## Client side: WORLD messages received since the start (tests, T-303).
+var world_total := 0
+var room_fps := 0.0
 ## Client side, spectator (T-107): the seat watched (-1 if none) and where
 ## its head looks up or down.
 var watched_seat := -1
@@ -81,6 +94,9 @@ var is_spectator := false
 
 var _send_left := 0.0
 var _clock_left := 0.0
+var _stats_left := NET_STATS_WINDOW
+var _window_worst := 0.0
+var _window_worlds := 0
 var _acked := {}
 var _sent_world := []
 ## Room side: the teammate each spectator's place watches.
@@ -166,9 +182,16 @@ func _physics_process(delta: float) -> void:
 		own.global_position += prediction.step(delta)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if is_room:
 		return
+	_stats_left -= delta
+	if _stats_left <= 0.0:
+		_stats_left = NET_STATS_WINDOW
+		recent_worst_error = _window_worst
+		world_count = _window_worlds
+		_window_worst = 0.0
+		_window_worlds = 0
 	var time := Time.get_ticks_msec() / 1000.0 - settings.interpolation_delay
 	for puppet: NetPuppet in puppets.values():
 		puppet.show_at(time, settings.max_extrapolation)
@@ -321,7 +344,7 @@ func send_world() -> void:
 ## Room side: the game time and the wind to everyone (T-300).
 func send_clock() -> void:
 	if world != null:
-		_send_to_all([Event.CLOCK, world.clock()])
+		_send_to_all([Event.CLOCK, world.clock() + [Engine.get_frames_per_second()]])
 
 
 ## Room side: a player's map is ready (at the start, or back after a cut,
@@ -329,7 +352,7 @@ func send_clock() -> void:
 func _on_place_ready(place: int) -> void:
 	if world != null and avatars.has(place):
 		_send_event(place, [Event.WORLD, world.state()])
-		_send_event(place, [Event.CLOCK, world.clock()])
+		_send_event(place, [Event.CLOCK, world.clock() + [Engine.get_frames_per_second()]])
 
 
 func _send_to_all(event: Array) -> void:
@@ -487,6 +510,24 @@ func _gait(node: Node3D) -> int:
 	return 0
 
 
+## Client side: the network measures for the F3 overlay (T-303), "" on the room.
+func describe() -> String:
+	if is_room:
+		return ""
+	return (
+		"NET gap %.2f m, worst %.2f m (%d s)\nNET map %d B, %d in %d s, room %.0f fps"
+		% [
+			last_error,
+			maxf(recent_worst_error, _window_worst),
+			NET_STATS_WINDOW,
+			world_bytes,
+			world_count,
+			NET_STATS_WINDOW,
+			room_fps,
+		]
+	)
+
+
 ## Client side: reads a snapshot from the room.
 func apply_snapshot(snapshot: Dictionary) -> void:
 	if own == null:
@@ -502,7 +543,9 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 			own.global_position = server_position
 			prediction.restart(own.commands.seq)
 		elif ack > prediction.floor_seq:
-			worst_error = maxf(worst_error, prediction.error_at(ack, server_position).length())
+			last_error = prediction.error_at(ack, server_position).length()
+			worst_error = maxf(worst_error, last_error)
+			_window_worst = maxf(_window_worst, last_error)
 			own.global_position += prediction.reconcile(ack, server_position)
 		if you.size() >= 9:
 			_apply_own_state(you)
@@ -543,9 +586,15 @@ func apply_event(event: Array) -> void:
 		Event.CAUGHT when event.size() == 3:
 			caught_reported.emit(event[1], event[2])
 		Event.WORLD when event.size() == 2 and world != null:
+			world_bytes = var_to_bytes(event).size()
+			_window_worlds += 1
+			world_total += 1
 			world.apply(event[1])
 		Event.CLOCK when event.size() == 2 and world != null:
 			world.apply_clock(event[1])
+			var clock: Array = event[1]
+			if clock.size() >= 7:
+				room_fps = clock[6]
 		Event.BOTTLE when event.size() == 3:
 			var bottle: ThrownBottle = _spawn_copy(BOTTLE_SCENE, event[1])
 			bottle.linear_velocity = event[2]

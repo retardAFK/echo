@@ -98,7 +98,9 @@ func world(x: float, y: float, h := 0.0) -> Vector3:
 ## alone). The first zone added wins where two overlap.
 func zone(rect: Rect2, h0: float, h1: float, wall: int, floor_tile: int, ceiling: int) -> void:
 	var z := Zone.new()
-	z.box = AABB(world(rect.position.x, rect.position.y, h0), Vector3(rect.size.x, h1 - h0, rect.size.y))
+	z.box = AABB(
+		world(rect.position.x, rect.position.y, h0), Vector3(rect.size.x, h1 - h0, rect.size.y)
+	)
 	z.wall = wall
 	z.floor = floor_tile
 	z.ceiling = ceiling
@@ -107,8 +109,15 @@ func zone(rect: Rect2, h0: float, h1: float, wall: int, floor_tile: int, ceiling
 
 ## An axis-aligned box spanning a plan rectangle, from height h0 to h1.
 func box(
-	s: Structure, x0: float, y0: float, x1: float, y1: float, h0: float, h1: float,
-	material: Material, kind := Kind.WALL
+	s: Structure,
+	x0: float,
+	y0: float,
+	x1: float,
+	y1: float,
+	h0: float,
+	h1: float,
+	material: Material,
+	kind := Kind.WALL
 ) -> void:
 	var size := Vector3(absf(x1 - x0), absf(h1 - h0), absf(y1 - y0))
 	if size.x < 0.001 or size.y < 0.001 or size.z < 0.001:
@@ -120,8 +129,16 @@ func box(
 ## A sloped slab whose top goes from h_start on the x0 (or y0) side of the
 ## rectangle to h_end on the other side. along_x picks the slope direction.
 func ramp(
-	s: Structure, x0: float, y0: float, x1: float, y1: float, h_start: float, h_end: float,
-	along_x: bool, material: Material, thickness := 0.3
+	s: Structure,
+	x0: float,
+	y0: float,
+	x1: float,
+	y1: float,
+	h_start: float,
+	h_end: float,
+	along_x: bool,
+	material: Material,
+	thickness := 0.3
 ) -> void:
 	var run := absf(x1 - x0) if along_x else absf(y1 - y0)
 	var width := absf(y1 - y0) if along_x else absf(x1 - x0)
@@ -147,8 +164,15 @@ func ramp(
 ## Each gap is [from_x, to_x, top] (a door: open from the floor h0 up to top,
 ## wall above) or [from_x, to_x, top, sill] (a window: wall below sill too).
 func wall_x(
-	s: Structure, x0: float, x1: float, y: float, h0: float, h1: float, thickness: float,
-	material: Material, gaps: Array = []
+	s: Structure,
+	x0: float,
+	x1: float,
+	y: float,
+	h0: float,
+	h1: float,
+	thickness: float,
+	material: Material,
+	gaps: Array = []
 ) -> void:
 	var a := minf(x0, x1)
 	var b := maxf(x0, x1)
@@ -164,8 +188,15 @@ func wall_x(
 
 ## A wall along y at plan x, from y0 to y1, with openings [from_y, to_y, top(, sill)].
 func wall_y(
-	s: Structure, y0: float, y1: float, x: float, h0: float, h1: float, thickness: float,
-	material: Material, gaps: Array = []
+	s: Structure,
+	y0: float,
+	y1: float,
+	x: float,
+	h0: float,
+	h1: float,
+	thickness: float,
+	material: Material,
+	gaps: Array = []
 ) -> void:
 	var a := minf(y0, y1)
 	var b := maxf(y0, y1)
@@ -182,8 +213,14 @@ func wall_y(
 ## A horizontal slab covering a rectangle minus holes (plan rectangles),
 ## cut in square tiles of tile meters, one structure per tile.
 func slab_tiles(
-	prefix: String, rect: Rect2, holes: Array[Rect2], h0: float, h1: float,
-	material: Material, tile: float, parent_path := "Ground"
+	prefix: String,
+	rect: Rect2,
+	holes: Array[Rect2],
+	h0: float,
+	h1: float,
+	material: Material,
+	tile: float,
+	parent_path := "Ground"
 ) -> void:
 	var pieces: Array[Rect2] = [rect]
 	for hole in holes:
@@ -206,8 +243,15 @@ func slab_tiles(
 				if not tiles.has(key):
 					tiles[key] = structure(key, parent_path)
 				box(
-					tiles[key], cell.position.x, cell.position.y, cell.end.x, cell.end.y,
-					h0, h1, material, Kind.FLOOR
+					tiles[key],
+					cell.position.x,
+					cell.position.y,
+					cell.end.x,
+					cell.end.y,
+					h0,
+					h1,
+					material,
+					Kind.FLOOR
 				)
 
 
@@ -221,9 +265,7 @@ static func subtract(rect: Rect2, hole: Rect2) -> Array[Rect2]:
 	if cut.position.y > rect.position.y:
 		parts.append(Rect2(rect.position, Vector2(rect.size.x, cut.position.y - rect.position.y)))
 	if cut.end.y < rect.end.y:
-		parts.append(
-			Rect2(rect.position.x, cut.end.y, rect.size.x, rect.end.y - cut.end.y)
-		)
+		parts.append(Rect2(rect.position.x, cut.end.y, rect.size.x, rect.end.y - cut.end.y))
 	# West and east bands, beside the hole.
 	if cut.position.x > rect.position.x:
 		parts.append(
@@ -260,7 +302,9 @@ func _build_meshes(s: Structure, node: Node3D, root: Node) -> void:
 			tools[block.material].append_from(cube, 0, block.transform)
 			continue
 		for part in _faces(block):
-			_emit_face(_tool(tools, part.material, false), part, [0.0, part.u_len], [0.0, part.v_len], [])
+			_emit_face(
+				_tool(tools, part.material, false), part, [0.0, part.u_len], [0.0, part.v_len], []
+			)
 	var mesh := ArrayMesh.new()
 	for material: Material in tools:
 		var tool: SurfaceTool = tools[material]
@@ -315,8 +359,10 @@ func _faces(block: Block) -> Array[FacePart]:
 			face.u_len = block.size[(axis + 1) % 3]
 			face.v_len = block.size[(axis + 2) % 3]
 			face.corner = (
-				block.transform.origin + face.normal * block.size[axis] / 2.0
-				- face.u_axis * face.u_len / 2.0 - face.v_axis * face.v_len / 2.0
+				block.transform.origin
+				+ face.normal * block.size[axis] / 2.0
+				- face.u_axis * face.u_len / 2.0
+				- face.v_axis * face.v_len / 2.0
 			)
 			face.material = block.material
 			if not lined:
@@ -326,7 +372,9 @@ func _faces(block: Block) -> Array[FacePart]:
 			var vs := PackedFloat32Array([0.0, face.v_len])
 			if straight:
 				for z in zones:
-					var slab := AABB(face.corner, face.u_axis * face.u_len + face.v_axis * face.v_len)
+					var slab := AABB(
+						face.corner, face.u_axis * face.u_len + face.v_axis * face.v_len
+					)
 					slab = slab.abs().grow(0.1)
 					if not z.box.intersects(slab):
 						continue
@@ -346,7 +394,9 @@ func _faces(block: Block) -> Array[FacePart]:
 					part.corner = face.corner + face.u_axis * us[i] + face.v_axis * vs[j]
 					part.material = block.material
 					var probe := (
-						part.corner + part.u_axis * part.u_len / 2.0 + part.v_axis * part.v_len / 2.0
+						part.corner
+						+ part.u_axis * part.u_len / 2.0
+						+ part.v_axis * part.v_len / 2.0
 						+ part.normal * 0.05
 					)
 					var tile := _tile_at(probe, part.normal)
@@ -384,7 +434,9 @@ func _emit_face(tool: SurfaceTool, part: FacePart, us: Array, vs: Array, colors:
 	tool.set_normal(part.normal)
 	for j in vs.size() - 1:
 		for i in us.size() - 1:
-			var quad := [Vector2i(i, j), Vector2i(i + 1, j), Vector2i(i + 1, j + 1), Vector2i(i, j + 1)]
+			var quad := [
+				Vector2i(i, j), Vector2i(i + 1, j), Vector2i(i + 1, j + 1), Vector2i(i, j + 1)
+			]
 			if flip:
 				quad.reverse()
 			for k: int in [0, 1, 2, 0, 2, 3]:
@@ -487,8 +539,11 @@ func bake_light(lights: Array[OmniLight3D], space: PhysicsDirectSpaceState3D, ma
 
 ## One face part, cut along the cells of the lights in front of it.
 func _bake_face(
-	tool: SurfaceTool, part: FacePart, lights: Array[OmniLight3D],
-	space: PhysicsDirectSpaceState3D, mask: int
+	tool: SurfaceTool,
+	part: FacePart,
+	lights: Array[OmniLight3D],
+	space: PhysicsDirectSpaceState3D,
+	mask: int
 ) -> int:
 	var normal := part.normal
 	var u_axis := part.u_axis
@@ -546,7 +601,10 @@ static func _has_cut(cuts: PackedFloat32Array, x: float) -> bool:
 ## Light received at a point of a face, as the renderer's omni lights would
 ## give it (same falloff), with hard shadows from the collision shapes.
 static func _light_at(
-	p: Vector3, normal: Vector3, lights: Array[OmniLight3D], space: PhysicsDirectSpaceState3D,
+	p: Vector3,
+	normal: Vector3,
+	lights: Array[OmniLight3D],
+	space: PhysicsDirectSpaceState3D,
 	mask: int
 ) -> Color:
 	var sum := Color(0, 0, 0, 1)
@@ -556,11 +614,15 @@ static func _light_at(
 		var facing := normal.dot(to_light / maxf(distance, 0.0001))
 		if distance >= light.omni_range or facing <= 0.0:
 			continue
-		var ray := PhysicsRayQueryParameters3D.create(p + normal * BAKE_OFFSET, light.global_position, mask)
+		var ray := PhysicsRayQueryParameters3D.create(
+			p + normal * BAKE_OFFSET, light.global_position, mask
+		)
 		if not space.intersect_ray(ray).is_empty():
 			continue
 		var nd := pow(distance / light.omni_range, 4.0)
-		var falloff := pow(maxf(1.0 - nd, 0.0), 2.0) * pow(maxf(distance, 0.0001), -light.omni_attenuation)
+		var falloff := (
+			pow(maxf(1.0 - nd, 0.0), 2.0) * pow(maxf(distance, 0.0001), -light.omni_attenuation)
+		)
 		var strength := pow(falloff * facing * light.light_energy, BAKE_GAMMA) * BAKE_SCALE
 		sum.r += light.light_color.r * strength
 		sum.g += light.light_color.g * strength

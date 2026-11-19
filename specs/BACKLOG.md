@@ -500,8 +500,8 @@ Spec : [`S-014-hopital/spec.md`](S-014-hopital/spec.md), plan sur papier [`plan-
 **But** : un code le plus modulaire possible, que n'importe quel agent peut reprendre, avec une doc pour ajouter ou retirer un module (demande de Maxime, 19/11/2026). Spec : [`S-022-modularite/spec.md`](S-022-modularite/spec.md), tâches : [`tasks.md`](S-022-modularite/tasks.md).
 
 - [x] T-430 — `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/MODULES.md`, `docs/PIEGES.md`, règles de travail dans la constitution (D-022)
-- [ ] T-431 — Corriger les documents périmés
-- [ ] T-432 — Lint et format sur `tools/`, générateur de la cité sous 1 000 lignes par fichier
+- [x] T-431 — Corriger les documents périmés
+- [x] T-432 — Lint et format sur `tools/`, générateur de la cité sous 1 000 lignes par fichier
 - [ ] T-433 — Découper `game_map.gd` (après S-020 et T-450)
 - [ ] T-434 — Sortir `NetSession` du joueur et du monstre jouable
 ---

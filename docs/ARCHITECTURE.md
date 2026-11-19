@@ -2,7 +2,7 @@
 
 > Carte du code pour toute personne ou tout agent qui reprend le projet (spec S-022, T-430).
 > Le **quoi** et le **pourquoi** sont dans [`ECHO_PROJET.md`](../ECHO_PROJET.md) et `specs/` ; ce document dit **où** et **comment**.
-> Mis à jour le 19/11/2026. Si le code et ce document ne disent pas la même chose, le code a raison : corrige ce document dans la même PR.
+> Mis à jour le 19/11/2026 (T-431). Si le code et ce document ne disent pas la même chose, le code a raison : corrige ce document dans la même PR.
 
 Pour regénérer les chiffres de cette page :
 
@@ -47,7 +47,7 @@ Il n'y a **qu'une map jouable**, la cité des Tilleuls (avec l'hôpital intégr�
 | `audio/` | Sons qui ne sont pas des entités : vent, musique, pas selon le sol, calcul pur du son | `sound_math.gd` (pur), `footstep_sounds.gd`, `tension_music.gd`, `city_wind.gd` |
 | `fx/` | Rendu : nuit et brouillard, filtre rétro, look du scan, précompilation des shaders | `night_environment.gd`, `retro_surface.gd`, `shader_warmup.gd` |
 | `bench/` | Bancs d'essai : performance (`?bench`) et mixage (`?mix`) | `bench.gd`, `mix_bench.gd` |
-| `i18n/` | Textes affichés, en CSV (`strings.csv`). La façon de traduire est en cours de refonte (T-450) : voir `game/i18n/README.md` quand il existera | `strings.csv` |
+| `i18n/` | Textes affichés : `strings.csv` (clé, texte français) et la classe `Text`, seule porte d'entrée (`Text.t`, `Text.count`, `Text.with_keys`). Les entités renvoient des clés, l'interface les traduit. Guide : [`game/i18n/README.md`](../game/i18n/README.md) | `text.gd`, `strings.csv` |
 | `shaders/`, `assets/` | Vides (`.gitkeep`) : les shaders sont dans `fx/`, les assets à la racine dans `assets/` | — |
 
 ### Hors de `game/`
@@ -58,10 +58,10 @@ Il n'y a **qu'une map jouable**, la cité des Tilleuls (avec l'hôpital intégr�
 | `art_src/` | Packs CC0 d'origine (Quaternius) |
 | `tools/blender/` | Un script Python par famille d'assets (`bpy`), la seule façon de créer un modèle (constitution 2.6.6) |
 | `tools/audio/` | Scripts Python qui fabriquent les sons (et leur copie étouffée `_muffled.wav`) |
-| `tools/godot/` | Scripts Godot lancés à la main ou par la CI : **générateur de la cité** (`build_tilleuls.gd` et ses aides `map_kit.gd`, `interior_lining.gd`, `hospital.gd`, `floor_builder.gd`), textures, captures d'écran, robots de parties en ligne (`net_match`, `net_spectate`, `net_smoke`…), simulations (`simulate_games`) |
+| `tools/godot/` | Scripts Godot lancés à la main ou par la CI : **générateur de la cité** (voir §5), textures, captures d'écran, robots de parties en ligne (`net_match`, `net_spectate`, `net_smoke`…), simulations (`simulate_games`) |
 | `tools/server/` | Installation et déploiement du serveur (IONOS, Caddy, systemd) |
 | `tools/web/` | Mesure du mixage dans Chromium (Playwright) |
-| `tools/dev/` | Outils pour les développeurs et les agents (`module_map.py`) |
+| `tools/dev/` | Outils pour les développeurs et les agents : `module_map.py` (carte des modules), `dump_scene.tscn` (vidage comparable d'une scène, pour vérifier qu'une map regénérée n'a pas changé) |
 | `tests/` | Tests GUT, un fichier `test_<sujet>.gd` par sujet (105 fichiers, environ 800 tests) |
 | `specs/` | Une spec par fonctionnalité (`spec.md`, `plan.md`, `tasks.md`), et `BACKLOG.md` |
 | `docs/` | Ce document, [`MODULES.md`](MODULES.md) (ajouter ou retirer un module) et [`PIEGES.md`](PIEGES.md) |
@@ -145,7 +145,14 @@ Les calculs (atténuation, murs, portée) sont dans `noise_math.gd` et `sound_ma
 ```
 specs/S-006-cite-des-tilleuls/plan-map.svg   (plan papier validé)
         │
-tools/godot/build_tilleuls.gd  (+ map_kit, interior_lining, hospital, floor_builder)
+tools/godot/build_tilleuls.gd   ← le lancer ; il hérite d'une chaîne de fichiers :
+   tilleuls_layout.gd  (toutes les positions, tailles et scènes : c'est là qu'on place un objet)
+ → tilleuls_base.gd    (état partagé, petites aides : portes, fenêtres, matériaux, groupes)
+ → tilleuls_tower.gd   (sol, limites, barres, tour, caves)
+ → tilleuls_places.gd  (centre social, galerie, parking, garages, repères)
+ → build_tilleuls.gd   (ordre de construction, gameplay, habillage, lumière, navigation)
+   aides : map_kit.gd, hospital.gd, floor_builder.gd,
+           interior_lining_kit.gd → interior_lining_rooms.gd → interior_lining.gd
         │   godot --headless tools/godot/build_tilleuls.tscn
         ▼
 game/maps/tilleuls/tilleuls.scn          (binaire, LFS : ne jamais éditer à la main)
@@ -178,18 +185,17 @@ maps/game_map.gd     ← assemble le tout (le seul à tout connaître)
 
 ### Où le code s'en écarte aujourd'hui (dette connue)
 
-Mesuré le 19/11/2026 avec `tools/dev/module_map.py`. Ces écarts sont la cible des tâches T-432 à T-434 de S-022.
+Mesuré le 19/11/2026 avec `tools/dev/module_map.py`. Ces écarts sont la cible des tâches T-433 et T-434 de S-022.
 
 | Écart | Où | Effet |
 |---|---|---|
-| `GameMap` fait tout : rôles, partie en ligne, boucle, captures, 15 écrans | `game/maps/game_map.gd` (917 lignes) | presque toute nouvelle fonctionnalité le modifie (T-433) |
+| `GameMap` fait tout : rôles, partie en ligne, boucle, captures, 15 écrans | `game/maps/game_map.gd` (918 lignes) | presque toute nouvelle fonctionnalité le modifie (T-433) |
 | Le joueur et le monstre jouable lisent `NetSession` | `player.gd`, `monster_avatar.gd` | le réseau déborde dans les entités (T-434) |
 | Les IA connaissent chaque entité par son nom | `monster.gd` (19 modules), `prey.gd` (20 modules) | ajouter ou retirer une entité utilisable demande de toucher l'IA |
 | `NetWorld` liste chaque type d'entité synchronisée | `net/net_world.gd`, `net/net_game.gd` | idem pour le réseau |
 | `NoiseBus` connaît `Door` et `Ventilation` | `autoload/noise_bus.gd` | un service central dépend d'entités |
-| Le générateur de la map dépasse 1 000 lignes et n'est pas contrôlé par `gdlint` | `tools/godot/build_tilleuls.gd` (2 233), `interior_lining.gd` (1 342) | T-432 |
 
-Fichiers de plus de 500 lignes dans `game/` : `game_map.gd` (917), `prey.gd` (858), `net_game.gd` (634), `monster.gd` (591), `player.gd` (562). Avant d'y ajouter du code, demande-toi s'il ne mérite pas sa propre classe.
+Fichiers de plus de 500 lignes dans `game/` : `game_map.gd` (918), `prey.gd` (858), `net_game.gd` (654), `monster.gd` (591), `player.gd` (562). Avant d'y ajouter du code, demande-toi s'il ne mérite pas sa propre classe.
 
 ---
 
@@ -197,6 +203,6 @@ Fichiers de plus de 500 lignes dans `game/` : `game_map.gd` (917), `prey.gd` (85
 
 - **GUT 9.7.1** (`.gutconfig.json`, `tests/pre_run_hook.gd` impose 3 fusibles). Un fichier `test_<sujet>.gd` par sujet. Les classes pures se testent sans scène ; les tests de scène chargent la vraie scène (`tilleuls.scn` dans 44 fichiers).
 - **CI** (`.github/workflows/ci.yml`), sur chaque PR :
-  1. `lint` : `gdformat --check` et `gdlint` sur `game/` et `tests/` (règles par défaut de gdtoolkit 4.5.0 : 100 caractères par ligne, 1 000 lignes par fichier).
+  1. `lint` : `gdformat --check` et `gdlint` sur `game/`, `tests/` et `tools/` (règles par défaut de gdtoolkit 4.5.0 : 100 caractères par ligne, 1 000 lignes par fichier).
   2. `godot` : import headless, tests GUT, export web et contrôle du budget de 60 Mo (D-007), export du serveur, **4 robots qui jouent une vraie partie en ligne** (`tools/godot/net_match.tscn`) et un spectateur (`net_spectate.tscn`), puis sur `main` : déploiement du serveur et publication itch.io.
 - Commandes locales : voir [`AGENTS.md`](../AGENTS.md#commandes).

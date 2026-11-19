@@ -221,3 +221,19 @@ func test_gurneys_and_wheelchairs_are_mirrored_online() -> void:
 	gurney.global_position += Vector3(2, 0, 0)
 	world.apply(state)
 	assert_almost_eq(gurney.global_position.x, was.x, 0.02)
+
+
+func test_a_gurney_is_sent_again_only_once_it_moved_5_cm() -> void:
+	# S-020, T-302: a prop settling by a few millimetres resent the whole map.
+	var gurney := _gurneys()[0]
+	var first := gurney.state()
+	gurney.global_position += Vector3(0.03, 0, 0)
+	gurney.rotation.y += 0.02
+	assert_eq(gurney.state(), first, "3 cm and a small turn: the same")
+	gurney.global_position += Vector3(0.03, 0, 0)
+	assert_ne(gurney.state(), first, "6 cm in all: sent again")
+	assert_almost_eq(gurney.state()[0], snappedf(gurney.global_position.x, 0.01), 0.001)
+	var chair: Wheelchair = get_tree().get_nodes_in_group(Wheelchair.GROUP)[0]
+	var still := chair.state()
+	chair.rotation.y += 0.2
+	assert_ne(chair.state(), still, "turned: sent again")

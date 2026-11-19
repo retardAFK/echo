@@ -14,6 +14,8 @@ const GROUP := &"wheelchairs"
 var mirror := false
 
 var _next_roll := 0.0
+## Pose last sent online, resent once it moved (S-020, T-302).
+var _shared := SharedPose.new()
 
 
 func _ready() -> void:
@@ -93,12 +95,9 @@ func _physics_process(delta: float) -> void:
 			)
 
 
-## Online: [x, y, z, yaw].
+## Online: [x, y, z, yaw], as last sent: resent once it moved (S-020, T-302).
 func state() -> Array:
-	var at := global_position
-	return [
-		snappedf(at.x, 0.01), snappedf(at.y, 0.01), snappedf(at.z, 0.01), snappedf(rotation.y, 0.01)
-	]
+	return _shared.of(self)
 
 
 ## Online client: where the room says it is.

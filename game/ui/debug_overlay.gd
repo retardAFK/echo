@@ -13,6 +13,8 @@ const REFRESH_INTERVAL := 0.25
 ## Monster role (S-004): the playable monster and its AI prey.
 @export var avatar: MonsterAvatar
 @export var prey: Prey
+## Online game (S-020, T-303): its network measures.
+var net: NetGame
 
 var _elapsed := 0.0
 
@@ -55,9 +57,13 @@ func refresh() -> void:
 		var breath := " breathless" if prey.brain.is_breathless() else ""
 		var warned := " warned" if prey.is_warned() else ""
 		_label.text += "\nPREY %s%s%s" % [prey_state, breath, warned]
-	var net := NetSession.describe()
-	if net != "":
-		_label.text += "\n" + net  # Ping of an online game (S-010, T-095).
+	var session := NetSession.describe()
+	if session != "":
+		_label.text += "\n" + session  # Ping of an online game (S-010, T-095).
+	if net != null and is_instance_valid(net):
+		var measures := net.describe()
+		if measures != "":
+			_label.text += "\n" + measures
 
 
 func get_text() -> String:

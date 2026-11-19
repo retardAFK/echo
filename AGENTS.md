@@ -25,11 +25,11 @@ pip install gdtoolkit==4.5.0
 git clone --depth 1 --branch v9.7.1 https://github.com/bitwes/Gut.git /tmp/gut \
   && mkdir -p addons && cp -r /tmp/gut/addons/gut addons/gut    # GUT n'est pas versionné
 
-gdformat --check game tests        # format (gdformat game tests pour corriger)
-gdlint game tests                  # lint
+gdformat --check game tests tools  # format (gdformat game tests tools pour corriger)
+gdlint game tests tools            # lint
 godot --headless --import          # import, obligatoire après une nouvelle class_name
 godot --headless -s addons/gut/gut_cmdln.gd                       # tous les tests
-godot --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_car_alarm.gd   # un fichier
+godot --headless -s addons/gut/gut_cmdln.gd -gselect=test_car_alarm   # un fichier (-gtest ajoute, ne filtre pas)
 
 godot --headless tools/godot/build_tilleuls.tscn     # regénère la cité (puis commiter .scn et navmesh)
 godot --headless res://tools/godot/simulate_games.tscn   # parties IA contre IA en accéléré
@@ -45,7 +45,7 @@ La CI (`.github/workflows/ci.yml`) fait tout cela, plus l'export web (budget de 
 - Les entités communiquent par **signaux** et **groupes**, jamais par chemin de nœud absolu.
 - Tout bruit passe par l'autoload **`NoiseBus`**. Un nouveau type de bruit va **à la fin** de `NoiseEvent.Type`.
 - La logique testable sans affichage vit dans une classe `RefCounted` pure (`*_brain`, `*_rules`, `*_math`) et a des **tests GUT**.
-- Code, noms et commentaires **en anglais** ; textes affichés **en français**, par des clés de traduction (`game/i18n/`).
+- Code, noms et commentaires **en anglais** ; textes affichés **en français**, par des clés de `game/i18n/strings.csv` lues avec la classe `Text` (jamais `tr()` directement ; guide : `game/i18n/README.md`).
 - Chaque script commence par un commentaire `##` qui dit ce qu'il fait et cite sa spec et sa tâche (`spec S-018, Q11`, `T-263`). Garde cette habitude : c'est ce qui relie le code aux décisions.
 - La cité (`game/maps/tilleuls/tilleuls.scn`) est **générée** par `tools/godot/build_tilleuls.gd` : ne l'édite jamais à la main.
 - Budgets (constitution 2.2) : 60 images/s, 300 appels de dessin (la cité est déjà près de la limite), 60 Mo de build web.
