@@ -80,7 +80,7 @@ extends Resource
 - Tests : `tests/test_net_world.gd` et `tests/test_net_sync.gd` ; la CI joue ensuite une vraie partie à 4 robots (`tools/godot/net_match.gd`).
 
 ### 1.10 Les textes
-- Tout texte affiché passe par une clé de `game/i18n/strings.csv` (`HUD_INTERACT_...`). La façon de traduire change avec T-450 : suis `game/i18n/README.md` dès qu'il existe.
+- Tout texte affiché est une clé de `game/i18n/strings.csv` (`HUD_INTERACT_...`). L'entité renvoie la clé (`get_prompt()`), l'interface la traduit avec `Text.t(...)` ; jamais de phrase dans le code, jamais `tr()` directement. `tests/test_i18n_keys.gd` vérifie que chaque clé utilisée existe. Guide complet : [`game/i18n/README.md`](../game/i18n/README.md).
 
 ### 1.11 La doc
 - Ajoute l'entité au tableau de [`ARCHITECTURE.md`](ARCHITECTURE.md) §3 et, si elle change une règle du jeu, à ECHO_PROJET.md §6 ou à sa spec. Coche la tâche et écris une ligne de compte rendu (constitution 2.6.5).
@@ -118,7 +118,7 @@ Dans cet ordre, pour que chaque étape reste vérifiable :
 6. **Supprimer le dossier de l'entité** (scène, script et leur fichier `.uid`), ses réglages dans `game/data/` (`.gd`, `.uid`, `.tres`), ses tests (`.gd` et `.uid`).
 7. **Ne pas renuméroter** `NoiseEvent.Type` : laisse le type (commenté « plus utilisé ») plutôt que de décaler les numéros qui voyagent en ligne.
 8. **Les assets** : ses `.glb`, textures, sons et leurs `.import` dans `assets/`, son script dans `tools/blender/` ou `tools/audio/` s'il ne sert qu'à lui, sa ligne dans `CREDITS.md`.
-9. **Les textes** : ses clés dans `game/i18n/strings.csv` (voir le guide de l'I18N).
+9. **Les textes** : ses clés dans `game/i18n/strings.csv` (voir [`game/i18n/README.md`](../game/i18n/README.md), section « Renommer ou retirer un texte »).
 10. **La doc** : ARCHITECTURE.md, la spec (une ligne « retiré le … » plutôt que d'effacer l'historique), le journal des décisions si c'était une décision.
 11. **Vérifier** : relance `--refs`, il ne doit rester que la doc d'historique ; puis les commandes de [`AGENTS.md`](../AGENTS.md#commandes).
 

@@ -2,7 +2,7 @@
 
 > Document de référence du projet. Tout le travail, humain ou IA, part d'ici. Un agent IA commence par [`AGENTS.md`](AGENTS.md).
 > Si une décision n'est pas écrite ici ou dans une spec, elle n'est pas prise.
-> À placer à la racine du dépôt Git. Version 0.1, 29 octobre 2026.
+> À placer à la racine du dépôt Git. Version 0.1 du 29 octobre 2026, tenue à jour par le journal des décisions (dernière : D-022, 19 novembre 2026).
 
 ---
 
@@ -178,37 +178,43 @@ Conseil : commence à la main avec ce document sur les 2 premières phases, pour
 
 ## 4. Organisation du dépôt
 
+La carte détaillée du code, avec le rôle de chaque dossier et les règles de dépendance, est dans [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). En bref :
+
 ```
 echo/
 ├── ECHO_PROJET.md          ← ce document, la référence
-├── CLAUDE.md               ← une ligne : « Lis ECHO_PROJET.md avant toute action »
+├── AGENTS.md               ← point d'entrée de tout agent IA : quoi lire, commandes, règles
+├── CLAUDE.md               ← une ligne : « Lis AGENTS.md, puis ECHO_PROJET.md »
 ├── CREDITS.md              ← licences des assets externes
 ├── README.md               ← comment lancer le projet
 ├── project.godot
 │
-├── specs/                  ← une dossier par fonctionnalité
-│   ├── S-001-deplacement-joueur/
-│   │   ├── spec.md
-│   │   ├── plan.md
-│   │   └── tasks.md
-│   └── ...
+├── docs/                   ← ARCHITECTURE.md, MODULES.md (ajouter ou retirer un module), PIEGES.md
+├── specs/                  ← un dossier par fonctionnalité (spec.md, plan.md, tasks.md), BACKLOG.md
 │
 ├── game/                   ← tout ce que Godot charge
-│   ├── autoload/           ← services globaux (NoiseBus, GameState)
-│   ├── entities/           ← player/, monster/, door/, fuse/ … (scène + script)
-│   ├── maps/               ← une scène par map
-│   ├── shaders/            ← ps1, post-process
-│   ├── ui/                 ← menus, HUD
-│   ├── data/               ← fichiers de réglage (.tres)
-│   └── assets/
-│       ├── models/         ← .glb exportés depuis Blender
-│       ├── textures/
-│       └── audio/
+│   ├── autoload/           ← services globaux : NoiseBus (bruit), SoundSpace (son 3D)
+│   ├── settings/           ← réglages du joueur (autoload Settings)
+│   ├── data/               ← réglages de gameplay (.gd + .tres)
+│   ├── entities/           ← une entité par dossier : player/, monster/, door/, fuse_box/ … (scène + script)
+│   ├── session/            ← règles d'une partie : boucle, objectifs, inventaire
+│   ├── maps/               ← GameMap (assemble une map), cité des Tilleuls générée (tilleuls/)
+│   ├── net/                ← multijoueur : accueil, salles, synchronisation (autoload NetSession)
+│   ├── ui/                 ← menus, HUD, écrans
+│   ├── audio/              ← vent, musique, pas, calcul du son
+│   ├── fx/                 ← nuit, brouillard, filtre rétro, shaders
+│   ├── bench/              ← bancs d'essai (performance, mixage)
+│   └── i18n/               ← textes affichés (strings.csv)
 │
-├── art_src/                ← fichiers .blend sources (Git LFS)
+├── assets/                 ← modèles .glb, textures, sons, polices, sources .blend (Git LFS)
+├── art_src/                ← packs CC0 d'origine
 ├── tools/
-│   └── blender/            ← scripts Python de génération d'assets
-└── tests/                  ← tests GUT
+│   ├── blender/            ← scripts Python de génération d'assets
+│   ├── audio/              ← scripts de fabrication des sons
+│   ├── godot/              ← générateur de la cité, captures, robots de parties en ligne
+│   ├── server/             ← installation et déploiement du serveur
+│   └── dev/                ← outils pour les agents (module_map.py)
+└── tests/                  ← tests GUT, un fichier test_<sujet>.gd par sujet
 ```
 
 ---
@@ -219,7 +225,7 @@ echo/
 
 ```
 Script Python (tools/blender/)  ─┐
-                                 ├→ Fichier .blend (art_src/) → Export .glb (game/assets/models/) → Import Godot → Scène
+                                 ├→ Fichier .blend (assets/blender/) → Export .glb (assets/models/) → Import Godot → Scène
 Modélisation à la main ─────────┘
 ```
 
@@ -255,9 +261,9 @@ Cette section décrit le jeu cible. Chaque point deviendra une ou plusieurs spec
 
 | | Chassé | Monstre |
 |---|---|---|
-| Nombre | 3 (prototype : 1, plus des IA alliées éventuelles) | 1 |
+| Nombre | 1 à 3 en ligne (le chef de la partie choisit 2 à 4 joueurs, les rôles sont tirés au sort), les places vides sont tenues par des IA ; 1 en solo contre le monstre IA | 1, toujours un joueur humain en ligne |
 | Vue | Vision normale, nuit et brouillard | Vision normale, nuit et brouillard, plus les bruits affichés à leur position avec leur distance |
-| Objectif | Trouver 3 fusibles, réparer le transformateur, atteindre la sortie | Attraper tous les chassés avant qu'ils ne sortent |
+| Objectif | Réussir 3 objectifs tirés au sort (dont au moins un fusible, D-020), puis atteindre la sortie | Attraper tous les chassés avant qu'ils ne sortent |
 | Force | Ruse, cachettes, objets de diversion et leurres, connaissance du terrain | Rapide, entend à travers les murs, scan de bâtiment, tue au contact |
 | Faiblesse | Lent, fragile, chaque action fait du bruit | Un chassé immobile et silencieux lui échappe s'il ne le voit pas ; le scan l'immobilise et prévient les chassés |
 
@@ -301,10 +307,11 @@ Modificateurs : un **mur** divise l'intensité par deux, l'**eau** la double, la
 ### 6.5 Boucle de partie
 
 1. Les chassés apparaissent à des points aléatoires, le monstre dans une zone éloignée.
-2. Les chassés cherchent les fusibles (positions variables).
-3. Une fois les 3 fusibles posés, la sortie s'ouvre et une alarme retentit dans toute la map.
-4. Victoire du chassé : au moins un chassé sort. Victoire du monstre : tous les chassés sont attrapés.
-5. Durée visée : 8 à 12 minutes.
+2. Chaque partie tire **3 objectifs** parmi le fusible à poser au transformateur, le code à retrouver, le téléchargement sur un terminal et les deux relais à basculer, avec toujours au moins un fusible (D-020, S-018). Les positions varient.
+3. Une fois les 3 objectifs faits, la sortie s'ouvre et une alarme retentit dans toute la map.
+4. Un chassé attrapé va en **prison** (cages des caves), d'où un coéquipier le libère sur place ou depuis le terminal du gardien ; sans libération à temps, ou attrapé une troisième fois, il est éliminé et devient spectateur (S-018).
+5. Victoire du chassé : au moins un chassé sort. Victoire du monstre : tous les chassés sont attrapés ou éliminés.
+6. Durée visée : 8 à 12 minutes.
 
 ---
 
