@@ -1,6 +1,6 @@
 # S-022 — Modularité et reprise du code par un autre LLM
 
-**Statut** : validée (19/11/2026)
+**Statut** : livrée (19/11/2026)
 **Piliers servis** : aucun directement. Cette spec sert la constitution (sections 2.4 et 2.6) : garder le jeu maintenable pendant les 30 à 40 semaines du projet.
 **Phase** : hors feuille de route, demandée par Maxime le 19/11/2026 (« j'aimerais que tu sois le plus modulaire possible, que le code soit le plus compréhensible pour un autre LLM, que tout soit documenté, et surtout la doc de comment retirer et rajouter un module »).
 
@@ -24,7 +24,7 @@ Rien ne change pour le joueur. Ce que vit **la personne ou l'agent qui reprend l
 - [x] La section 4 d'ECHO_PROJET.md, le README et `project.godot` ne contredisent plus le code ni les décisions.
 - [x] `gdformat --check` et `gdlint` passent sur `tools/` en CI, sans changer la map générée.
 - [x] `game_map.gd` est découpé en morceaux de moins de 400 lignes, chacun avec un rôle clair, sans changer le jeu (tests GUT et parties en ligne de la CI verts).
-- [ ] Le joueur et le monstre jouable ne lisent plus `NetSession` eux-mêmes.
+- [x] Le joueur et le monstre jouable ne lisent plus `NetSession` eux-mêmes.
 
 ## Hors périmètre
 - L'I18N : traitée par sa propre tâche (T-450, `game/i18n/README.md`), à laquelle `docs/MODULES.md` renvoie.

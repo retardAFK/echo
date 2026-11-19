@@ -23,6 +23,7 @@
 - `-gtest=` de GUT **ajoute** un fichier aux dossiers de `.gutconfig.json` au lieu de filtrer : pour un seul fichier, utilise `-gselect=test_car_alarm`.
 - `Script.get_script_constant_map()` ne renvoie que les constantes du script lui-même, pas celles des scripts qu'il étend : `interior_lining_kit.gd` remonte la chaîne avec `get_base_script()`. Pense-y si tu découpes un script en plusieurs fichiers par héritage.
 - Le binaire `tilleuls.scn` change à chaque génération même sans changement réel (identifiants internes) : pour vérifier qu'un changement du générateur ne change pas la map, compare un vidage des nœuds et de leurs propriétés, pas les octets : `godot --headless tools/dev/dump_scene.tscn -- res://game/maps/tilleuls/tilleuls.scn avant.txt`, puis la même chose après, et `diff`.
+- Les `*_atlas_*.png.import` des personnages sont commités avec `valid=false` : le premier `godot --import` les modifie, et c'est ce qui rend les `.glb` chargeables. Si tu remets ces fichiers comme dans le dépôt (`git checkout -- assets/`) après un import, `test_hunted_body` et `test_monster_body` échouent en local (« Can't load dependency ») alors que la CI est verte. Pour réparer : retire la ligne `valid=false` de ces fichiers, efface `.godot/imported/*atlas_*`, relance l'import ; ne commite pas ces `.import`.
 - Le générateur de la cité se lance comme une **scène** (`godot --headless tools/godot/build_tilleuls.tscn`), pas avec `-s` : les autoloads doivent être chargés.
 
 ## CI et parties en ligne

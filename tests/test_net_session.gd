@@ -132,9 +132,19 @@ func test_session_as_room_receives_players() -> void:
 	assert_eq(NetSession.describe(), "NET room 1 players")
 
 
+## The client's map sends its own avatar's commands; the entity alone does
+## not know the network (S-022, T-434).
 func test_local_player_commands_are_sent_when_online() -> void:
 	_room(PORT + 7)
 	await _join(PORT + 7)
 	var player: Player = preload("res://game/entities/player/player.tscn").instantiate()
 	add_child_autofree(player)
-	assert_eq(NetSession.local_commands, player.commands)
+	assert_null(NetSession.local_commands, "a player alone sends nothing")
+	for seat in [1, LobbyState.MONSTER_SEAT]:
+		GameSession.online_seat = seat
+		var map: GameMap = preload("res://game/maps/greybox_test.tscn").instantiate()
+		add_child_autofree(map)
+		var own: Node3D = map.player if seat != LobbyState.MONSTER_SEAT else map.avatar
+		assert_eq(NetSession.local_commands, own.get("commands"), "seat %d" % seat)
+		map.free()
+	GameSession.online_seat = -1
