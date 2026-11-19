@@ -195,6 +195,7 @@ func _setup_online() -> void:
 	net.is_room = NetSession.mode == NetSession.Mode.ROOM
 	net.buildings = get_buildings()
 	_net = net
+	_overlay.net = net
 	var network := CityNetwork.of(self)
 	if network != null:
 		network.mirror = not net.is_room
