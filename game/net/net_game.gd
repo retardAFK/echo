@@ -6,7 +6,7 @@ extends Node
 ## own state and the others it sees (NetVisibility).
 ## Client side: the player's own avatar is predicted (Prediction) and nudged
 ## to the room's position; the others are NetPuppets moved between snapshots.
-## Snapshot: {"frame": the room's physics frame (S-020, T-320), "ack": last
+## Snapshot: {"time": the room's clock in ms (S-020, T-320), "ack": last
 ## command applied, "you": [position, velocity, yaw,
 ## gait, hidden, hold ratio, bottles, alarm clocks, hiding spot index, held,
 ## terminal index, camera index (S-018), [stops, seconds left] of the
@@ -212,10 +212,10 @@ func _process(delta: float) -> void:
 ## when it arrived for a room that sends no frame.
 func _snapshot_time(snapshot: Dictionary) -> float:
 	var local := Time.get_ticks_msec() / 1000.0
-	if not snapshot.has("frame"):
+	if not snapshot.has("time"):
 		return local
-	room_clock.observe(snapshot["frame"], local)
-	return room_clock.room_time(snapshot["frame"])
+	room_clock.observe(snapshot["time"], local)
+	return RoomClock.room_time(snapshot["time"])
 
 
 ## Client side: the time the others are shown at, interpolation_delay in the
@@ -429,7 +429,7 @@ func snapshot_for(place: int) -> Dictionary:
 	var inventory: Inventory = viewer.get("inventory")
 	var spot: HidingSpot = viewer.get("hiding_in")
 	return {
-		"frame": Engine.get_physics_frames(),
+		"time": Time.get_ticks_msec(),
 		"ack": _acked.get(place, 0),
 		"you":
 		[
@@ -479,7 +479,7 @@ func _spectator_snapshot(place: int) -> Dictionary:
 		watched = _next_watched(null)
 		_watching[place] = watched
 	var snapshot := {
-		"frame": Engine.get_physics_frames(),
+		"time": Time.get_ticks_msec(),
 		"ack": _acked.get(place, 0),
 		"watch": -1,
 		"pitch": 0.0,
