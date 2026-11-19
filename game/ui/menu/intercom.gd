@@ -43,7 +43,6 @@ func show_state(state: LobbyState, me: int) -> void:
 		)
 		var lamp: IntercomLamp = row["lamp"]
 		lamp.lit = player != 0 and state.is_ready(player)
-		(row["button"] as Button).visible = _shown_seat(seat, state.game_size)
 		# The roles are only known once drawn.
 		(row["role"] as Label).text = (
 			LobbyMenu.seat_name(seat).to_upper() if state.started else "?"
@@ -59,13 +58,9 @@ func get_role_text(seat: int) -> String:
 	return (_rows[seat]["role"] as Label).text
 
 
+## Every seat is shown: those nobody takes are played by an AI (T-314).
 func is_seat_shown(seat: int) -> bool:
 	return (_rows[seat]["button"] as Button).visible
-
-
-## A seat past the game size is closed.
-static func _shown_seat(seat: int, game_size: int) -> bool:
-	return seat < game_size
 
 
 func _caption(key: String, left: bool) -> Label:

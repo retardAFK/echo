@@ -252,3 +252,22 @@ func test_a_client_shows_the_room_s_objectives() -> void:
 	assert_false(mirror.wants_code())
 	assert_signal_emitted(client.game_loop, "fuses_changed")
 	assert_false(client.game_loop.is_exit_open(), "the fuse and the disk are missing")
+
+
+func test_the_keypad_is_a_box_on_the_transformer_wall() -> void:
+	# S-020, T-316 (N2): no PC on a desk outdoors.
+	var map := _map("fuse,code")
+	var network: CityNetwork = map.get_node("Network")
+	var is_keypad := func(terminal: Terminal) -> bool: return terminal.kind == Terminal.Kind.CODE
+	var keypad: Terminal = network.terminals.filter(is_keypad)[0]
+	assert_false(keypad.has_node("Desk"), "no desk")
+	assert_true(keypad.has_node("Case"), "a wall box")
+	var from := keypad.to_global(Vector3(0.0, 1.25, 0.5))
+	var to := keypad.to_global(Vector3(0.0, 1.25, -0.3))
+	var query := PhysicsRayQueryParameters3D.create(from, to, NoiseBus.WALLS_COLLISION_MASK)
+	var hit := map.get_world_3d().direct_space_state.intersect_ray(query)
+	assert_false(hit.is_empty(), "a wall right behind it")
+	if not hit.is_empty():
+		assert_lt(to.distance_to(hit.position), 0.35, "flat on the wall")
+	var seat := keypad.seat_point()
+	assert_true(keypad.can_interact(seat + Vector3.UP * 0.9), "reached from its seat")

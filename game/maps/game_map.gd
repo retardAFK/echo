@@ -155,8 +155,8 @@ func _setup_monster_role() -> void:
 	_monster = null
 
 
-## The hunted's view of a security camera and its terminal menu (S-018), if
-## the map has a network. Returns them.
+## The hunted's view of a security camera and its terminal menu (S-018), and
+## what a post-it says (T-271), if the map has a network. Returns them.
 func _add_network_huds() -> Array[Node]:
 	var huds: Array[Node] = []
 	if CityNetwork.of(self) == null:
@@ -169,6 +169,11 @@ func _add_network_huds() -> Array[Node]:
 	menu.player = _player
 	add_child(menu)
 	huds.assign([feed, menu])
+	if get_tree().get_first_node_in_group(CodeSpot.GROUP) != null:
+		var reader := PostItReader.new()  # What a post-it says (T-271).
+		reader.player = _player
+		add_child(reader)
+		huds.append(reader)
 	return huds
 
 
@@ -230,18 +235,18 @@ func _setup_online() -> void:
 func _setup_online_room(net: NetGame) -> void:
 	var lobby := GameSession.online_lobby
 	_player_path = _player.scene_file_path
-	# Hunted seats from the game size on are closed: nobody plays them.
-	var game_size := lobby.game_size if lobby != null else LobbyState.SEATS
+	# Always 3 hunted: the seats nobody took, the game size included, are
+	# played by AI preys (S-020, T-314, Maxime's rule of 19/11/2026).
 	var spawns: Array = []
 	if has_node("PlayerSpawns"):
 		spawns = far_apart(
 			get_node("PlayerSpawns").get_children(),
-			game_size - 1,
+			LobbyState.SEATS - 1,
 			LOOP_SETTINGS.spawn_spacing,
 			_rng
 		)
 	var hunted: Array[Node3D] = []
-	for seat in range(1, game_size):
+	for seat in range(1, LobbyState.SEATS):
 		var place: int = lobby.seats[seat] if lobby != null else 0
 		var marker: Node3D = (
 			spawns[hunted.size() % spawns.size()] if not spawns.is_empty() else null
