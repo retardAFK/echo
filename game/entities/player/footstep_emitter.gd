@@ -32,6 +32,9 @@ func _physics_process(_delta: float) -> void:
 		return  # Hidden (S-008), or moved in or out of a hiding spot at once.
 	_distance += moved
 	var gait: PlayerMotion.Gait = _player.call("get_gait")
+	if gait != PlayerMotion.Gait.SPRINT and _holds_breath():
+		_distance = 0.0
+		return  # Holding its breath, it walks without a sound (S-020, T-311).
 	var stride := NoiseMath.stride_for_gait(settings, gait)
 	if _distance < stride:
 		return
@@ -43,3 +46,8 @@ func _physics_process(_delta: float) -> void:
 		NoiseMath.range_for_gait(settings, gait, surface),
 		_player
 	)
+
+
+func _holds_breath() -> bool:
+	var hold: Variant = _player.get("breath_hold")
+	return hold is BreathHold and hold.holding

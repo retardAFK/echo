@@ -24,11 +24,11 @@ func _ready() -> void:
 	label.theme = preload("res://game/ui/theme/echo_theme.tres")
 	label.theme_type_variation = &"HudLabel"
 	label.text = "HUD_SPRINT"
-	_place(label, Rect2(8, -22, 44, 14))
+	place(label, Rect2(8, -22, 44, 14))
 	add_child(label)
 	var bar := ColorRect.new()
 	bar.color = Color(0.15, 0.15, 0.15, 0.8)
-	_place(bar, Rect2(56, -18, WIDTH, 6))
+	place(bar, Rect2(56, -18, WIDTH, 6))
 	add_child(bar)
 	_fill = ColorRect.new()
 	_fill.size = Vector2(WIDTH, 6)
@@ -45,7 +45,7 @@ func _process(_delta: float) -> void:
 
 
 ## Anchored to the bottom left corner, offsets as in noise_gauge.tscn.
-func _place(control: Control, rect: Rect2) -> void:
+static func place(control: Control, rect: Rect2) -> void:
 	control.anchor_top = 1.0
 	control.anchor_bottom = 1.0
 	control.offset_left = rect.position.x

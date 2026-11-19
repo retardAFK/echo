@@ -45,6 +45,16 @@ extends Resource
 ## Time between two pants, in seconds.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var breath_interval: float = 1.0
 
+@export_group("Holding one's breath (S-020, T-311)")
+## Seconds the hunted can hold its breath: walking steps and panting silent.
+@export_range(0.5, 30.0, 0.5, "suffix:s") var breath_hold_time: float = 6.0
+## Seconds before it can hold it again, from when it let go.
+@export_range(0.0, 300.0, 1.0, "suffix:s") var breath_recharge_time: float = 40.0
+## Hidden, with a monster this close, it breathes audibly unless it holds it...
+@export_range(0.0, 10.0, 0.1, "suffix:m") var hidden_breath_reach: float = 3.0
+## ...a breath of this range, every breath_interval.
+@export_range(0.0, 10.0, 0.1, "suffix:m") var hidden_breath_range: float = 3.0
+
 @export_group("Rescue (S-010, T-107)")
 ## Seconds a teammate holds "interact" to free a captured hunted.
 @export_range(0.1, 20.0, 0.1, "suffix:s") var rescue_time: float = 4.0
