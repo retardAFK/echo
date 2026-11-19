@@ -6,7 +6,8 @@ extends CharacterBody3D
 ## Emitted when the player switches between crouching, walking and sprinting.
 ## The noise system (S-002) listens to it.
 signal gait_changed(gait: PlayerMotion.Gait)
-## The player used a ruse (S-008): "bottle", "decoy", "hide" or "car_alarm".
+## The player used a ruse (S-008): "bottle", "decoy", "hide", "car_alarm" or
+## "firecracker" (S-020).
 signal ruse_used(kind: StringName)
 
 ## Something in reach is used only if it lies within this angle of the
@@ -14,6 +15,7 @@ signal ruse_used(kind: StringName)
 const AIM_ANGLE := deg_to_rad(35.0)
 const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
+const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.tscn")
 ## How far down an alarm clock looks for the ground in front of the player, in meters.
 const DECOY_GROUND_SEARCH := 2.5
 ## Length of the gestures the others see (S-011, T-125).
@@ -190,7 +192,14 @@ func apply_actions() -> void:
 			continue
 		if (
 			terminal != null
-			and action in [PlayerCommands.Action.THROW, PlayerCommands.Action.DECOY]
+			and (
+				action
+				in [
+					PlayerCommands.Action.THROW,
+					PlayerCommands.Action.DECOY,
+					PlayerCommands.Action.FIRECRACKER,
+				]
+			)
 		):
 			continue  # Its hands are on the keyboard.
 		var line := PlayerCommands.picked(action)
@@ -211,6 +220,8 @@ func apply_actions() -> void:
 				throw_bottle()
 			PlayerCommands.Action.DECOY:
 				place_decoy()
+			PlayerCommands.Action.FIRECRACKER:
+				_place_firecracker()
 
 
 func _in_cage() -> bool:
@@ -373,6 +384,25 @@ func throw_bottle() -> ThrownBottle:
 func place_decoy() -> Decoy:
 	if hiding_in != null or not inventory.use(Inventory.Kind.DECOY):
 		return null
+	var decoy: Decoy = _place_on_ground(DECOY_SCENE)
+	ruse_used.emit(&"decoy")
+	return decoy
+
+
+## Places the firecracker on the ground in front of the player (S-020, T-312,
+## piste R1), the same way as an alarm clock.
+func _place_firecracker() -> Firecracker:
+	if hiding_in != null or not inventory.use(Inventory.Kind.FIRECRACKER):
+		return null
+	var firecracker: Firecracker = _place_on_ground(FIRECRACKER_SCENE)
+	ruse_used.emit(&"firecracker")
+	return firecracker
+
+
+## Puts a new scene on the ground in front of the player, or at their feet
+## when a wall is in front or there is no ground there; the gesture makes a
+## faint noise.
+func _place_on_ground(scene: PackedScene) -> Node3D:
 	var offset := -global_basis.z * ruse_settings.decoy_place_distance
 	var spot := global_position
 	if not test_move(global_transform, offset):  # A wall in front: at the feet.
@@ -384,13 +414,12 @@ func place_decoy() -> Decoy:
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty():
 			spot = hit.position
-	var decoy: Decoy = DECOY_SCENE.instantiate()
-	get_parent().add_child(decoy)
-	decoy.global_position = spot
+	var placed: Node3D = scene.instantiate()
+	get_parent().add_child(placed)
+	placed.global_position = spot
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
 	gesture.play(HuntedBody.Gesture.PICK, BODY_SETTINGS.pick_time)
-	ruse_used.emit(&"decoy")
-	return decoy
+	return placed
 
 
 ## Gets into a hiding spot (S-008, Q6): the body stops and stops colliding,

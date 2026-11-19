@@ -31,6 +31,8 @@ extends Node
 ## - [BOTTLE, position, velocity] and [DECOY, position]: to everyone, a bottle
 ##   thrown or an alarm clock placed; the client plays its own copy.
 ## - [CRUSH, position]: to everyone, the monster crushed a ringing alarm clock.
+## - [FIRECRACKER, position] and [POP, position]: to everyone, a firecracker
+##   placed, and one set off by the monster (S-020, T-312).
 ## - [CLOCK, NetWorld.clock() + [room fps]]: to everyone, once a second (S-020, T-300):
 ##   the game time and the wind, which change every frame and so are not in
 ##   WORLD (which would then go out with every snapshot).
@@ -42,7 +44,7 @@ signal caught_reported(seat: int, state: CaptureState.State)
 ## Client side: this player is out of the game and watches a teammate.
 signal spectating
 
-enum Event { NOISE, SCAN, CAUGHT, WORLD, BOTTLE, DECOY, CRUSH, CLOCK }
+enum Event { NOISE, SCAN, CAUGHT, WORLD, BOTTLE, DECOY, CRUSH, CLOCK, FIRECRACKER, POP }
 
 ## Seconds between two CLOCK events (T-300).
 const CLOCK_INTERVAL := 1.0
@@ -56,6 +58,7 @@ const NET_STATS_WINDOW := 5.0
 const SIGHT_MASK := 1 | NoiseBus.WALLS_COLLISION_MASK
 const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
+const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.tscn")
 
 var settings: NetSettings = preload("res://game/data/net_settings.tres")
 var is_room := false
@@ -303,6 +306,8 @@ static func noise_message(event: NoiseEvent, viewer: Node3D, viewer_is_monster: 
 		return []
 	if viewer_is_monster and event.masked:
 		return []  # Lost in a ventilation zone (S-014, Q5).
+	if viewer_is_monster and Deafness.of(viewer):
+		return []  # A firecracker went off at its feet (S-020, T-312).
 	if not viewer_is_monster and not NoiseBus.can_hear(event, viewer.get_eye_position()):
 		return []
 	return [Event.NOISE, event.type, event.position, event.noise_range, event.by_monster]
@@ -367,7 +372,7 @@ func _send_to_all(event: Array) -> void:
 ## Room side: a bottle thrown or an alarm clock placed on the map, sent once
 ## the thrower has set where it starts (the same frame).
 func _on_map_child_added(node: Node) -> void:
-	if node is ThrownBottle or node is Decoy:
+	if node is ThrownBottle or node is Decoy or node is Firecracker:
 		_announce.call_deferred(node)
 
 
@@ -380,6 +385,11 @@ func _announce(node: Node3D) -> void:
 		_send_to_all([Event.DECOY, node.global_position])
 		(node as Decoy).crushed.connect(
 			func() -> void: _send_to_all([Event.CRUSH, node.global_position])
+		)
+	elif node is Firecracker:
+		_send_to_all([Event.FIRECRACKER, node.global_position])
+		(node as Firecracker).burst.connect(
+			func() -> void: _send_to_all([Event.POP, node.global_position])
 		)
 
 
@@ -413,6 +423,8 @@ func snapshot_for(place: int) -> Dictionary:
 			world.network.terminal_index(viewer.get("terminal")) if _has_network() else -1,
 			world.network.camera_index(viewer) if _has_network() else -1,
 			_stagger_of(viewer),
+			_deafness_of(viewer),
+			inventory.count(Inventory.Kind.FIRECRACKER) if inventory != null else 0,
 		],
 		"others": _seen_by(viewer),
 	}
@@ -424,6 +436,12 @@ static func _stagger_of(viewer: Node) -> Array:
 	if stagger is Stagger:
 		return [(stagger as Stagger).count, (stagger as Stagger).left]
 	return [0, 0.0]
+
+
+## Seconds a monster still hears nothing (S-020, T-312), 0 for a hunted.
+static func _deafness_of(viewer: Node) -> float:
+	var deafness: Variant = viewer.get("deafness")
+	return (deafness as Deafness).left if deafness is Deafness else 0.0
 
 
 func _has_network() -> bool:
@@ -615,6 +633,10 @@ func apply_event(event: Array) -> void:
 			_spawn_copy(DECOY_SCENE, event[1])
 		Event.CRUSH when event.size() == 2:
 			_crush_near(event[1])
+		Event.FIRECRACKER when event.size() == 2:
+			_spawn_copy(FIRECRACKER_SCENE, event[1])
+		Event.POP when event.size() == 2:
+			_pop_near(event[1])
 
 
 ## Client side, spectator (T-107): the room sends what a teammate sees. The
@@ -647,12 +669,17 @@ func _apply_own_state(you: Array) -> void:
 		if you[12][0] > mine.count:
 			mine.hit(you[12][1])
 			mine.count = you[12][0]
+	var deafness: Variant = own.get("deafness")
+	if you.size() >= 14 and deafness is Deafness:
+		(deafness as Deafness).left = you[13]  # Set off in the room (T-312).
 	if own is Player and you.size() >= 10:
 		(own as Player).held = you[9]
 	var inventory: Inventory = own.get("inventory")
 	if inventory != null:
 		inventory.set_count(Inventory.Kind.BOTTLE, you[6])
 		inventory.set_count(Inventory.Kind.DECOY, you[7])
+		if you.size() >= 15:
+			inventory.set_count(Inventory.Kind.FIRECRACKER, you[14])
 	if not own is Player or world == null:
 		return
 	var player := own as Player
@@ -730,3 +757,15 @@ func _puppet(seat: int) -> NetPuppet:
 		get_parent().add_child(puppet)
 		puppets[seat] = puppet
 	return puppets[seat]
+
+
+func _pop_near(at: Vector3) -> void:
+	var nearest: Firecracker = null
+	var best := NetWorld.VOICE_REACH
+	for node in get_tree().get_nodes_in_group(Firecracker.GROUP):
+		var firecracker := node as Firecracker
+		if firecracker != null and firecracker.global_position.distance_to(at) <= best:
+			nearest = firecracker
+			best = firecracker.global_position.distance_to(at)
+	if nearest != null:
+		nearest.go_off()

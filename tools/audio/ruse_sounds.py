@@ -6,7 +6,8 @@ Made by us from noise and oscillators: no sample from anyone else.
 - clock_ring.wav: its two bells hammered fast, one second (loop),
 - clock_crush.wav: the alarm clock crushed under a foot, a last bell hit,
 - locker_door.wav: the dented door of a metal locker, creak and latch,
-- bin_lid.wav: the heavy plastic lid of a dumpster, creak and thud.
+- bin_lid.wav: the heavy plastic lid of a dumpster, creak and thud,
+- firecracker.wav: a firecracker going off, a sharp crack and its echo (S-020, T-312).
 The loops are seamless: they hold whole cycles and end on silence.
     python tools/audio/ruse_sounds.py <out_dir>   (needs numpy)
 """
@@ -91,6 +92,18 @@ def bin_lid(seconds=1.0):
     return out
 
 
+def firecracker(seconds=1.4):
+    out = np.zeros(int(seconds * RATE))
+    place(out, burst(0.02, 40, 200, 0.001) * 0.4, 0.0)  # The fuse's last fizz.
+    place(out, burst(0.25, 150, 9000, 0.04), 0.03, 1.6)  # The crack.
+    place(out, burst(0.4, 40, 300, 0.09), 0.03)  # Its thump.
+    for at, level in ((0.18, 0.35), (0.42, 0.18), (0.75, 0.08)):  # Echoes off the towers.
+        place(out, burst(0.3, 100, 2500, 0.08), at, level)
+    for at in rng.uniform(0.05, 0.4, 6):  # Paper and cardboard scraps falling.
+        place(out, burst(0.02, 1500, 6000, 0.005), at, 0.1)
+    return out
+
+
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "assets/audio/ruses"
     os.makedirs(out, exist_ok=True)
@@ -100,3 +113,4 @@ if __name__ == "__main__":
     save(os.path.join(out, "clock_crush.wav"), clock_crush(), 0.8)
     save(os.path.join(out, "locker_door.wav"), locker_door(), 0.8)
     save(os.path.join(out, "bin_lid.wav"), bin_lid(), 0.8)
+    save(os.path.join(out, "firecracker.wav"), firecracker(), 0.9)

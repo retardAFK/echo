@@ -45,6 +45,9 @@ extends Resource
 ## transformer, and only if still this far from it, in meters (Q9).
 @export_range(1.0, 100.0, 1.0, "suffix:m") var decoy_trigger_distance: float = 30.0
 @export_range(0.0, 100.0, 1.0, "suffix:m") var decoy_min_distance: float = 20.0
+## Fleeing with the monster this close behind, it drops its firecracker at
+## its feet, on the monster's way (S-020, T-312), in meters.
+@export_range(0.0, 50.0, 0.5, "suffix:m") var firecracker_drop_distance: float = 10.0
 ## When it flees, a free hiding spot this close and out of the monster's sight
 ## is where it runs to, in meters (Q9).
 @export_range(0.0, 50.0, 0.5, "suffix:m") var hide_search_radius: float = 10.0

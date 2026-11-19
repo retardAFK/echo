@@ -1,20 +1,22 @@
 class_name Inventory
 extends RefCounted
 ## What a hunted carries (spec S-008): bottles to throw (Q1) and alarm clocks
-## to place (Q3), each up to a cap from RuseSettings. The player and the AI
+## to place (Q3), a firecracker (S-020, T-312), each up to a cap from
+## RuseSettings. The player and the AI
 ## prey each have one.
 
 signal changed
 
-enum Kind { BOTTLE, DECOY }
+enum Kind { BOTTLE, DECOY, FIRECRACKER }
 
 var settings: RuseSettings
 
-var _counts := {Kind.BOTTLE: 0, Kind.DECOY: 0}
+var _counts := {Kind.BOTTLE: 0, Kind.DECOY: 0, Kind.FIRECRACKER: 0}
 
 
 func _init(p_settings: RuseSettings) -> void:
 	settings = p_settings
+	_counts[Kind.FIRECRACKER] = settings.start_firecrackers  # One per game.
 
 
 func count(kind: Kind) -> int:
@@ -22,7 +24,12 @@ func count(kind: Kind) -> int:
 
 
 func capacity(kind: Kind) -> int:
-	return settings.max_bottles if kind == Kind.BOTTLE else settings.max_decoys
+	match kind:
+		Kind.BOTTLE:
+			return settings.max_bottles
+		Kind.DECOY:
+			return settings.max_decoys
+	return settings.max_firecrackers
 
 
 func can_take(kind: Kind) -> bool:

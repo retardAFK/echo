@@ -47,6 +47,22 @@ extends Resource
 @export_range(0.1, 10.0, 0.1, "suffix:m") var tick_sound_distance: float = 1.5
 @export_range(1.0, 100.0, 1.0, "suffix:m") var ring_sound_distance: float = 40.0
 
+@export_group("Firecracker")
+## Firecrackers each hunted carries at the start, and at most (S-020, T-312,
+## piste R1): no pickup in the cité, one per game.
+@export_range(0, 5) var start_firecrackers: int = 1
+@export_range(0, 5) var max_firecrackers: int = 1
+## Seconds after placing before it can go off, to step away from it.
+@export_range(0.0, 10.0, 0.1, "suffix:s") var firecracker_arm_time: float = 1.5
+## A monster this close (flat distance to its feet) sets it off, in meters.
+@export_range(0.1, 5.0, 0.1, "suffix:m") var firecracker_trigger_distance: float = 1.5
+## How long the monster hears nothing after it went off, in seconds (piste R1).
+@export_range(0.0, 30.0, 0.5, "suffix:s") var deafen_time: float = 6.0
+## Range of the crack's noise for the hunted, in meters, and how far it is
+## played for the ears.
+@export_range(0.5, 100.0, 0.5, "suffix:m") var firecracker_range: float = 25.0
+@export_range(1.0, 100.0, 1.0, "suffix:m") var firecracker_sound_distance: float = 50.0
+
 @export_group("Hiding spots")
 ## Seconds to hold "interact" to get in, get out, or open a hiding spot (Q5, Q7).
 @export_range(0.1, 10.0, 0.1, "suffix:s") var hide_time: float = 1.0

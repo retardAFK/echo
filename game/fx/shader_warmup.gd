@@ -13,6 +13,7 @@ extends Node
 const SPAWNED_SCENES: Array[PackedScene] = [
 	preload("res://game/entities/bottle/thrown_bottle.tscn"),
 	preload("res://game/entities/decoy/decoy.tscn"),
+	preload("res://game/entities/firecracker/firecracker.tscn"),
 ]
 ## Frames drawn without the lamp, then with it.
 const FRAMES_UNLIT := 2
