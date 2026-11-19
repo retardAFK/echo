@@ -46,34 +46,34 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 **Terminé quand** : le lien de test est envoyé à Maxime, les 60 images/s sont mesurées sur la machine de référence, et une partie simulée dure 8 à 12 minutes en moyenne.
 
-- [ ] T-073 — Spec S-009
+- [x] T-073 — Spec S-009
   - Résultat vérifiable : spec validée par Maxime
   - Dépend de : —
-- [ ] T-074 — Plan et tâches de S-009
+- [x] T-074 — Plan et tâches de S-009
   - Résultat vérifiable : `plan.md` et `tasks.md`, avec le choix de l'hébergement du build de test (Q-012)
   - Dépend de : T-073
-- [ ] T-075 — Mode banc d'essai
+- [x] T-075 — Mode banc d'essai
   - Résultat vérifiable : l'adresse du build web avec `?bench` lance un parcours de caméra fixe dans la cité des Tilleuls, avec le monstre IA et la proie IA en jeu, puis affiche et écrit dans la console les images/s (moyenne, minimum, 1 % les plus lentes), les appels de dessin et le temps de chargement ; tests GUT sur le calcul des statistiques
   - Dépend de : T-074
-- [ ] T-076 — Build de test en ligne
+- [x] T-076 — Build de test en ligne
   - Résultat vérifiable : la CI publie le build web de `main` à une adresse fixe (GitHub Pages si le dépôt le permet, sinon une page itch.io non listée) ; le lien s'ouvre dans Chrome sans installation
   - Dépend de : T-074
-- [ ] T-077 — Mesure des 60 images/s sur la machine de référence
+- [x] T-077 — Mesure des 60 images/s sur la machine de référence
   - Résultat vérifiable : banc d'essai lancé par Claude dans le navigateur intégré de l'app Claude, sur le PC de Maxime, sans lui demander de jouer ; résultats notés dans S-006, S-007, S-008 et S-009 ; s'il manque des images, tâches d'optimisation ajoutées dans le bloc de la phase
   - Dépend de : T-075, T-076
-- [ ] T-078 — Le monstre IA utilise le scan
+- [x] T-078 — Le monstre IA utilise le scan
   - Résultat vérifiable : quand il perd une trace près d'un bâtiment visitable, ou entend un bruit qui en vient, le monstre IA s'arrête et scanne en respectant la jauge (D-009) ; les lumières vacillent pour le chassé ; tests GUT ; la simulation compte les scans
   - Dépend de : T-074
-- [ ] T-079 — Équilibre de la proie IA et du monstre IA
+- [x] T-079 — Équilibre de la proie IA et du monstre IA
   - Résultat vérifiable : les deux endroits de capture répétée sont corrigés (map ou IA) ; sur 3 séries de 20 parties simulées, la proie IA sort 40 à 60 % du temps et la partie dure 8 à 12 min en moyenne, sans blocage
   - Dépend de : T-078
-- [ ] T-080 — Commandes et pause
+- [x] T-080 — Commandes et pause
   - Résultat vérifiable : le menu de départ montre les commandes du rôle choisi ; Échap met en pause (reprendre, revenir au menu) ; textes dans `strings.csv`
   - Dépend de : T-074
-- [ ] T-081 — Recueil des retours
+- [x] T-081 — Recueil des retours
   - Résultat vérifiable : l'écran de fin propose « Copier le résumé » (rôle, durée, fusibles, bruits, scans, ruses, images/s moyennes) ; un questionnaire court dans `specs/S-009-test-a-plusieurs/questionnaire.md`
   - Dépend de : T-080
-- [ ] T-082 — Vérification finale de S-009
+- [x] T-082 — Vérification finale de S-009
   - Résultat vérifiable : chaque critère d'acceptation coché, lien de test et questionnaire envoyés à Maxime
   - Dépend de : T-077, T-079, T-081
 - [ ] T-083 — Tests à 3 à 5 personnes **(Maxime)**
@@ -184,10 +184,10 @@ S-008 ──► 9 Test à plusieurs ──► DP2 ──► DP3 ──► 10 Mul
 
 **Terminé quand** : plus aucune forme provisoire n'est visible, dans les deux rôles et en multijoueur, sous le budget de performance.
 
-- [ ] T-120 — Spec S-011
+- [x] T-120 — Spec S-011
   - Résultat vérifiable : spec validée (monstre retenu, nombre et allure des chassés, bras visibles ou non en vue subjective)
   - Dépend de : T-105
-- [ ] T-121 — Plan et tâches de S-011
+- [x] T-121 — Plan et tâches de S-011
   - Résultat vérifiable : `plan.md` (squelettes, sources d'animations CC0, budget de triangles) et `tasks.md`
   - Dépend de : T-120
 - [x] T-122 — Modèle du monstre
