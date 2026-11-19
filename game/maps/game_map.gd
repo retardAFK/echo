@@ -235,18 +235,18 @@ func _setup_online() -> void:
 func _setup_online_room(net: NetGame) -> void:
 	var lobby := GameSession.online_lobby
 	_player_path = _player.scene_file_path
-	# Hunted seats from the game size on are closed: nobody plays them.
-	var game_size := lobby.game_size if lobby != null else LobbyState.SEATS
+	# Always 3 hunted: the seats nobody took, the game size included, are
+	# played by AI preys (S-020, T-314, Maxime's rule of 19/11/2026).
 	var spawns: Array = []
 	if has_node("PlayerSpawns"):
 		spawns = far_apart(
 			get_node("PlayerSpawns").get_children(),
-			game_size - 1,
+			LobbyState.SEATS - 1,
 			LOOP_SETTINGS.spawn_spacing,
 			_rng
 		)
 	var hunted: Array[Node3D] = []
-	for seat in range(1, game_size):
+	for seat in range(1, LobbyState.SEATS):
 		var place: int = lobby.seats[seat] if lobby != null else 0
 		var marker: Node3D = (
 			spawns[hunted.size() % spawns.size()] if not spawns.is_empty() else null
