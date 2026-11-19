@@ -191,8 +191,11 @@ func voice() -> void:
 
 
 func _finish(user: Node) -> void:
-	if noise_range() > 0.0:
-		NoiseBus.emit_noise(NoiseEvent.Type.HIDE, global_position + Vector3.UP, noise_range(), self)
+	var loud := noise_range()
+	if is_monster(user) and is_free():
+		loud = maxf(loud, settings.empty_search_range)  # Searched for nothing (T-310).
+	if loud > 0.0:
+		NoiseBus.emit_noise(NoiseEvent.Type.HIDE, global_position + Vector3.UP, loud, self)
 		SoundSpace.play(_creak)
 	if is_monster(user):
 		open(user)
@@ -205,9 +208,11 @@ func _finish(user: Node) -> void:
 
 
 ## The monster opens it (Q7): whoever is inside comes out, caught.
+## Empty, the monster stands there empty_search_stagger (S-020, T-310).
 func open(by: Node3D) -> void:
 	opened.emit(by)
 	if occupant == null:
+		Stagger.hit_on(by, settings.empty_search_stagger)
 		return
 	var caught := occupant
 	occupant = null
