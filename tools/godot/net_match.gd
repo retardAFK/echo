@@ -31,6 +31,10 @@ const REPATH_TIME := 1.0
 ## A closed door this close ahead on the path: the player opens it (S-016).
 const DOOR_REACH := 1.2
 const STUCK_TIME := 1.5
+## Less than this far from where it was STUCK_TIME ago: stuck. Wider than
+## the back and forth of a body the room holds at a jamb while the client
+## predicts it on (about 1.5 m), which a 0.3 m test took for progress.
+const STUCK_DISTANCE := 2.0
 ## The monster walks at least that far from the hunted it caught.
 const AWAY_DISTANCE := 30.0
 ## A teammate goes to free a captured hunted once the monster is that far.
@@ -525,7 +529,7 @@ func _unstick(delta: float, here: Vector3) -> void:
 		_wanted["move_back"] = true
 		_wanted["move_right" if _sidesteps % 2 == 0 else "move_left"] = true
 		return
-	if here.distance_to(_last_position) > 0.3:
+	if here.distance_to(_last_position) > STUCK_DISTANCE:
 		_last_position = here
 		_stuck_left = STUCK_TIME
 		return
