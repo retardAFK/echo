@@ -155,8 +155,8 @@ func _setup_monster_role() -> void:
 	_monster = null
 
 
-## The hunted's view of a security camera and its terminal menu (S-018), if
-## the map has a network. Returns them.
+## The hunted's view of a security camera and its terminal menu (S-018), and
+## what a post-it says (T-271), if the map has a network. Returns them.
 func _add_network_huds() -> Array[Node]:
 	var huds: Array[Node] = []
 	if CityNetwork.of(self) == null:
@@ -169,6 +169,11 @@ func _add_network_huds() -> Array[Node]:
 	menu.player = _player
 	add_child(menu)
 	huds.assign([feed, menu])
+	if get_tree().get_first_node_in_group(CodeSpot.GROUP) != null:
+		var reader := PostItReader.new()  # What a post-it says (T-271).
+		reader.player = _player
+		add_child(reader)
+		huds.append(reader)
 	return huds
 
 

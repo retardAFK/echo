@@ -96,7 +96,7 @@ extends Resource
 | Un écran ou un HUD | `game/ui/<nom>.tscn` + `.gd` (`CanvasLayer` pour un HUD), ajouté par `GameMap` pour le bon rôle | `game/ui/carry_hud.gd` |
 | Un menu | les briques de `game/ui/menu/` (`MenuList`, `MenuItem`, `OptionRow`) et le thème `game/ui/theme/` | `game/ui/pause_menu.gd` |
 | Une option du joueur | `game/settings/user_settings.gd` (clé, valeur par défaut, `_apply`) et une ligne de `options_menu.gd` | l'option de sensibilité |
-| Un objectif de partie | `game/session/quests.gd` (tirage et état), `loop_rules.gd`, `loop_settings.gd`, la proie IA (`prey_tasks.gd`), `net_world.gd`, la liste de la carte (`ui/map_screen.gd`) | l'objectif RELAY |
+| Un objectif de partie | `game/session/quests.gd` (tirage et état), `loop_rules.gd`, `loop_settings.gd`, la proie IA (`prey_tasks.gd`), `net_world.gd`, la liste de la carte (`ui/map_screen.gd`) ; un indice lu sur place se montre par un petit HUD (`ui/post_it_reader.gd`, que `GameMap` n'ajoute que si la map a des post-it : le retirer ne casse rien) | l'objectif RELAY |
 | Un son d'ambiance | `game/audio/` (un nœud qui joue en boucle) et son script de fabrication dans `tools/audio/` | `game/audio/ambient_train.gd` |
 | Un service global | à éviter. Seulement s'il n'a pas d'autre maître que tout le jeu : autoload dans `project.godot`, documenté dans ARCHITECTURE.md | `NoiseBus` |
 
