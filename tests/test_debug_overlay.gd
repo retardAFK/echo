@@ -30,3 +30,17 @@ func test_toggles_with_f3() -> void:
 	Input.parse_input_event(press)
 	await wait_process_frames(2)
 	assert_ne(_overlay.visible, was_visible)
+
+
+func test_shows_the_network_measures_online() -> void:
+	# S-020, T-303: prediction gap, size of the map message, room frame rate.
+	var net := NetGame.new()
+	autofree(net)
+	net.last_error = 0.12
+	net.world_bytes = 1234
+	net.room_fps = 60.0
+	_overlay.net = net
+	_overlay.refresh()
+	assert_string_contains(_overlay.get_text(), "NET gap 0.12 m")
+	assert_string_contains(_overlay.get_text(), "map 1234 B")
+	assert_string_contains(_overlay.get_text(), "room 60 fps")
