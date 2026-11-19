@@ -10,6 +10,9 @@ extends Resource
 @export_range(0.0, 20.0, 0.5, "suffix:m") var quiet_range: float = 2.0
 ## The monster smashing it open on the run, in meters (Q2).
 @export_range(0.5, 50.0, 0.5, "suffix:m") var smash_range: float = 12.0
+## The monster stops short for this long after smashing a door open
+## (S-020, T-307, piste E1).
+@export_range(0.0, 5.0, 0.05, "suffix:s") var smash_stagger: float = 0.8
 
 ## A fire door slamming shut on its own, in meters (Q3).
 @export_range(0.5, 50.0, 0.5, "suffix:m") var slam_range: float = 5.0

@@ -166,6 +166,57 @@ func test_the_running_monster_smashes_it_with_a_noise_of_12_m() -> void:
 	assert_eq(door.last_user, avatar)
 
 
+func test_a_smashed_door_stops_the_monster_short() -> void:
+	# S-020, T-307 (piste E1): smashing a door open costs it 0.8 s.
+	_add_floor()
+	var door: Door = await _door()
+	var avatar: MonsterAvatar = AVATAR_SCENE.instantiate()
+	add_child_autofree(avatar)
+	avatar.set_physics_process(false)
+	avatar.global_position = Vector3(0, 0, 3)
+	await wait_physics_frames(3)
+	while not door.is_open:
+		avatar.move(Vector2(0, -1), true, 1.0 / 60.0)
+		await wait_physics_frames(1)
+	var stopped_at := avatar.global_position
+	for i in int(SETTINGS.smash_stagger * 60.0) - 2:
+		avatar.move(Vector2(0, -1), true, 1.0 / 60.0)
+		await wait_physics_frames(1)
+	assert_almost_eq(avatar.global_position.z, stopped_at.z, 0.05, "still stopped")
+	for i in 30:
+		avatar.move(Vector2(0, -1), true, 1.0 / 60.0)
+		await wait_physics_frames(1)
+	assert_lt(avatar.global_position.z, stopped_at.z - 0.5, "then on its way again")
+
+
+func test_a_client_predicts_the_stop_without_opening_the_door() -> void:
+	_add_floor()
+	var door: Door = await _door()
+	var avatar: MonsterAvatar = AVATAR_SCENE.instantiate()
+	avatar.mirror_world = true  # An online client's own monster.
+	add_child_autofree(avatar)
+	avatar.set_physics_process(false)
+	avatar.global_position = Vector3(0, 0, 3)
+	await wait_physics_frames(3)
+	for i in 40:
+		avatar.move(Vector2(0, -1), true, 1.0 / 60.0)
+		await wait_physics_frames(1)
+	assert_false(door.is_open, "the room opens it")
+	assert_gt(avatar.stagger.left, 0.0, "stopped short as in the room")
+
+
+func test_the_ai_monster_stops_short_too() -> void:
+	var monster := Monster.new()
+	Stagger.hit_on(monster, SETTINGS.smash_stagger)  # What Door.smash does.
+	assert_eq(monster.stagger.left, SETTINGS.smash_stagger)
+	monster.stagger.hit(0.3)
+	assert_eq(monster.stagger.left, SETTINGS.smash_stagger, "never shortens a longer stop")
+	assert_true(monster.stagger.update(1.0))
+	assert_false(monster.stagger.update(1.0), "then on its way")
+	Stagger.hit_on(Node3D.new(), 1.0)  # Anything else: nothing happens.
+	monster.free()
+
+
 func test_the_walking_monster_does_not_smash_it() -> void:
 	_add_floor()
 	var door: Door = await _door()

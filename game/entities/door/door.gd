@@ -8,7 +8,8 @@ extends Node3D
 ## through the doorway, stays true.
 ## Hold "interact" in reach: standing, it opens or closes at once with a noise
 ## of 6 m; crouched (or prowling, for the monster) it takes 1 s for 2 m. The
-## monster running into a closed door smashes it open: 12 m.
+## monster running into a closed door smashes it open: 12 m, and it stops
+## short for 0.8 s (S-020, T-307).
 ## Two special kinds (Q3): a FIRE door closes on its own fire_close_delay after
 ## it was opened, with a slam; an EMERGENCY exit opens only from inside (its
 ## -Z side) with a loud crash bar, and stays open. A closed emergency exit is
@@ -249,10 +250,13 @@ func _loud_range() -> float:
 	return settings.open_range
 
 
-## The running monster bursts it open without stopping (Q2).
+## The running monster bursts it open (Q2), and stops short for
+## smash_stagger (S-020, T-307, piste E1): fleeing through doors pays off.
 func smash(user: Node) -> void:
-	if not is_open:
-		toggle(user, settings.smash_range)
+	if is_open:
+		return
+	toggle(user, settings.smash_range)
+	Stagger.hit_on(user, settings.smash_stagger)
 
 
 ## Online client (S-010): shows the room's state, with the sound.
