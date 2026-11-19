@@ -36,7 +36,10 @@ const VIEWS := [
 	["terminal_gardien", Vector3(50.5, 1.5, 144.4), Vector3(51.5, 0.9, 146.4)],
 	["cam_caves", Vector3(137.5, -0.8, 96.3), Vector3(121.0, -2.5, 95.5)],
 	["cam_parking", Vector3(179.5, -0.8, 116.5), Vector3(155.0, -3.0, 103.0)],
-	["cam_rampe", Vector3(127.0, 2.4, 99.6), Vector3(138.0, -2.0, 102.0)],
+	["cam_rampe", Vector3(121.2, 2.4, 99.6), Vector3(138.0, -2.0, 102.0)],
+	# The ramp's camera on its wall and the transformer's on its mast (S-020, T-315).
+	["mur_cam_rampe", Vector3(128.0, 1.0, 101.5), Vector3(121.0, 2.6, 99.6)],
+	["mat_transfo", Vector3(104.5, 1.6, 157.5), Vector3(108.0, 2.4, 160.0)],
 	["cam_hall", Vector3(115.5, 2.4, 111.5), Vector3(104.0, 1.0, 96.0)],
 	# The hospital (S-014).
 	["hopital_couloir_rdc", Vector3(21, 1.6, 64), Vector3(21, 1.3, 120)],

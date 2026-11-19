@@ -41,6 +41,14 @@ const PLAYER := preload("res://game/entities/player/player.tscn")
 const MONSTER := preload("res://game/entities/monster/monster.tscn")
 ## How far a fuse box looks for a wall around its slot, in meters.
 const FUSE_BOX_WALL_SEARCH := 3.5
+## A camera hangs on the nearest wall within this distance of its plan point,
+## its back this far from the wall (S-020, T-315, piste N1); farther from any
+## wall, it sits on a mast of its own.
+const CAMERA_WALL_SEARCH := 7.0
+const CAMERA_WALL_GAP := 0.18
+const CAMERA_MAST_RADIUS := 0.06
+## Closer than this to a wall, a camera already hangs on it and stays.
+const CAMERA_ON_WALL := 0.5
 const BUILDING := preload("res://game/entities/building/building.tscn")
 const FUSE_BOX := preload("res://game/entities/fuse_box/fuse_box.tscn")
 const TRANSFORMER_NODE := preload("res://game/entities/transformer/transformer.tscn")
@@ -532,6 +540,7 @@ func _ready() -> void:
 	_bake_light()
 	_place_fuse_boxes()
 	_place_objectives()
+	_hang_cameras()
 	_place_ruses()
 	var region: NavigationRegion3D = _root.get_node("NavigationRegion3D")
 	var started := Time.get_ticks_msec()
@@ -1540,6 +1549,85 @@ func _snap_to_wall(node: Node3D, at: Vector3) -> void:
 		push_warning("No wall near %s" % node.name)
 	node.global_position = Vector3(best.x, at.y, best.z) + facing * 0.01
 	node.global_rotation.y = atan2(facing.x, facing.z)
+
+
+## Each camera on the nearest wall around its plan point, at the same height,
+## still looking at what it watches (S-020, T-315, piste N1): none hangs in
+## mid air any more. Prints how far each one moved.
+func _hang_cameras() -> void:
+	var space := _root.get_world_3d().direct_space_state
+	for camera: SecurityCamera in _root.get_node("Network/Cameras").get_children():
+		var from := camera.global_position
+		var target := from + -camera.global_basis.z * 15.0
+		var best_distance := CAMERA_WALL_SEARCH
+		var best: Dictionary = {}
+		for i in 16:
+			var direction := Vector3.FORWARD.rotated(Vector3.UP, TAU * i / 16.0)
+			var hit := space.intersect_ray(
+				PhysicsRayQueryParameters3D.create(
+					from, from + direction * CAMERA_WALL_SEARCH, MapKit.WALLS_LAYER
+				)
+			)
+			if hit and from.distance_to(hit.position) < best_distance:
+				best_distance = from.distance_to(hit.position)
+				best = hit
+		if best.is_empty():
+			_add_camera_mast(camera, target)
+			continue
+		if best_distance < CAMERA_ON_WALL:
+			continue  # Already against its wall.
+		var normal: Vector3 = best.normal
+		normal.y = 0.0
+		normal = normal.normalized()
+		var spot: Vector3 = best.position + normal * CAMERA_WALL_GAP
+		spot.y = from.y
+		if (target - spot).normalized().dot(normal) < -0.1:
+			target = spot + normal * 10.0 + Vector3.DOWN * 3.0  # Not into the wall.
+		camera.global_transform = Transform3D(Basis.looking_at(target - spot, Vector3.UP), spot)
+		print("%s: %.1f m to its wall" % [camera.name, best_distance])
+
+
+## A grey mast from the ground up to a camera far from any wall, the camera
+## on its side toward what it watches.
+func _add_camera_mast(camera: SecurityCamera, target: Vector3) -> void:
+	var at := camera.global_position
+	var ahead := Vector3(target.x - at.x, 0.0, target.z - at.z).normalized()
+	var foot := Vector3(at.x, 0.0, at.z) - ahead * CAMERA_WALL_GAP
+	var hit := _root.get_world_3d().direct_space_state.intersect_ray(
+		PhysicsRayQueryParameters3D.create(foot + Vector3.UP * at.y, foot + Vector3.DOWN * 10.0, 1)
+	)
+	if hit:
+		foot.y = hit.position.y
+	var height := at.y - foot.y + 0.15
+	var mast := StaticBody3D.new()
+	mast.name = camera.name + "Mast"
+	camera.get_parent().add_child(mast)
+	mast.owner = _root
+	mast.global_position = foot + Vector3.UP * height / 2.0
+	var mesh := MeshInstance3D.new()
+	mesh.name = "Mesh"
+	var cylinder := CylinderMesh.new()
+	cylinder.top_radius = CAMERA_MAST_RADIUS
+	cylinder.bottom_radius = CAMERA_MAST_RADIUS
+	cylinder.height = height
+	cylinder.radial_segments = 6
+	cylinder.rings = 1
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.32, 0.33, 0.33)
+	material.roughness = 0.9
+	cylinder.material = material
+	mesh.mesh = cylinder
+	mast.add_child(mesh)
+	mesh.owner = _root
+	var shape := CollisionShape3D.new()
+	shape.name = "Shape"
+	var body := CylinderShape3D.new()
+	body.radius = CAMERA_MAST_RADIUS
+	body.height = height
+	shape.shape = body
+	mast.add_child(shape)
+	shape.owner = _root
+	print("%s: on a mast of %.1f m" % [camera.name, height])
 
 
 ## The hiding spots, obstacles for the navigation mesh, and the pickups (S-008).
