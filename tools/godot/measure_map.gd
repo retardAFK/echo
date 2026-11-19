@@ -98,7 +98,12 @@ func _ready() -> void:
 		var near := _visible_lights(camera, eye, lights)
 		var image := get_viewport().get_texture().get_image()
 		image.save_png(out_dir.path_join("%s.png" % view[0]))
-		print("%-20s draw calls %4d  primitives %6d  visible lights %d" % [view[0], draws, prims, near])
+		print(
+			(
+				"%-20s draw calls %4d  primitives %6d  visible lights %d"
+				% [view[0], draws, prims, near]
+			)
+		)
 	if not OS.get_cmdline_user_args().has("--no-sweep"):
 		await _sweep(camera, lights)
 	get_tree().quit()
@@ -147,12 +152,19 @@ func _sweep(camera: Camera3D, lights: Array) -> void:
 				camera.look_at_from_position(eye, target)
 				await get_tree().process_frame
 				await get_tree().process_frame
-				var draws := int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+				var draws := int(
+					Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+				)
 				total += draws
 				count += 1
 				most_lights = maxi(most_lights, _visible_lights(camera, eye, lights))
 				if draws > worst:
 					worst = draws
 					worst_at = "(%d, %d) heading %d" % [gx, gy, heading * 90]
-	print("Sweep: %d views, mean %d draw calls, worst %d at %s" % [count, total / count, worst, worst_at])
+	print(
+		(
+			"Sweep: %d views, mean %d draw calls, worst %d at %s"
+			% [count, total / count, worst, worst_at]
+		)
+	)
 	print("Sweep: at most %d visible lights" % most_lights)

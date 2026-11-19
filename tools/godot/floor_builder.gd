@@ -63,8 +63,14 @@ func add_puddles(parent: Node3D, owner: Node) -> void:
 		var b: Vector2 = seg[1]
 		var along := (b - a).normalized()
 		var side := Vector2(-along.y, along.x)
-		var at := a.lerp(b, rng.randf_range(0.1, 0.9)) + side * rng.randf_range(-PUDDLE_SIDE, PUDDLE_SIDE)
-		var half := Vector2(PUDDLE_RADII.x, PUDDLE_RADII.y) if absf(along.x) > 0.5 else Vector2(PUDDLE_RADII.y, PUDDLE_RADII.x)
+		var at := (
+			a.lerp(b, rng.randf_range(0.1, 0.9)) + side * rng.randf_range(-PUDDLE_SIDE, PUDDLE_SIDE)
+		)
+		var half := (
+			Vector2(PUDDLE_RADII.x, PUDDLE_RADII.y)
+			if absf(along.x) > 0.5
+			else Vector2(PUDDLE_RADII.y, PUDDLE_RADII.x)
+		)
 		var rect := Rect2(at - half, half * 2.0)
 		if _blocked(rect.grow(1.0)) or _near_puddle(rect.grow(4.0)):
 			continue
@@ -109,7 +115,9 @@ func save_surfaces(car_park_puddles: Array[AABB]) -> SurfaceMap:
 	for rect in puddles:
 		map.add(_flat(rect, 0.0, h), FloorSurface.Kind.PUDDLE)
 	for box in car_park_puddles:
-		var tall := AABB(box.position - Vector3(0, BELOW, 0), box.size + Vector3(0, BELOW + ABOVE, 0))
+		var tall := AABB(
+			box.position - Vector3(0, BELOW, 0), box.size + Vector3(0, BELOW + ABOVE, 0)
+		)
 		map.add(tall, FloorSurface.Kind.PUDDLE)
 	map.sort()
 	var error := ResourceSaver.save(map, SURFACES_PATH)
@@ -161,7 +169,9 @@ func _puddle_mesh(rng: RandomNumberGenerator) -> ArrayMesh:
 		for i in PUDDLE_SEGMENTS:
 			var angle := TAU * i / PUDDLE_SEGMENTS
 			var wobble := rng.randf_range(0.75, 1.0)
-			ring.append(_kit.world(c.x + cos(angle) * r.x * wobble, c.y + sin(angle) * r.y * wobble, y))
+			ring.append(
+				_kit.world(c.x + cos(angle) * r.x * wobble, c.y + sin(angle) * r.y * wobble, y)
+			)
 		var center: Vector3 = _kit.world(c.x, c.y, y)
 		for i in PUDDLE_SEGMENTS:
 			st.add_vertex(center)

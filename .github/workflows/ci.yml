@@ -36,10 +36,10 @@ jobs:
         run: pip install "gdtoolkit==${GDTOOLKIT_VERSION}"
 
       - name: gdformat
-        run: gdformat --check game tests
+        run: gdformat --check game tests tools
 
       - name: gdlint
-        run: gdlint game tests
+        run: gdlint game tests tools
 
   godot:
     name: Import, tests and web export

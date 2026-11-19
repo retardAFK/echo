@@ -233,7 +233,7 @@ HUD_KEYPAD_TITLE,CLAVIER DU TRANSFORMATEUR
 HUD_KEYPAD_IDLE,Aucun code attendu.
 HUD_KEYPAD_TYPED,Code : %s
 MAP_OBJECTIVE_FUSES,Fusibles posés : %d/%d
-MAP_OBJECTIVE_CODE,Taper le code sur le clavier du transformateur
+MAP_OBJECTIVE_CODE,"Trouver le code sur un post-it, au mur près d'un ordinateur, et le taper sur le clavier du transformateur"
 MAP_OBJECTIVE_DOWNLOAD,Télécharger la disquette et l'insérer au transformateur
 MAP_OBJECTIVE_RELAY,Abaisser deux leviers de relais en même temps
 MAP_OBJECTIVE_DONE,(fait)
@@ -273,3 +273,8 @@ KEY_UP,Haut
 KEY_DOWN,Bas
 KEY_LEFT,Gauche
 KEY_RIGHT,Droite
+HUD_POST_IT_CODE,Post-it : %s
+HUD_POST_IT_BLANK,Post-it vierge
+HUD_POST_IT_ELSEWHERE,"Post-it vierge, le code est sur un autre"
+MAP_CODE_READ,Taper le code %s sur le clavier du transformateur
+HUD_KEYPAD_READ,Code lu sur le post-it : %s
