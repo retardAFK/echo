@@ -130,7 +130,8 @@ func _add_network() -> void:
 	var terminals_list: Array = TERMINALS + Hospital.TERMINALS  # S-014.
 	for i in terminals_list.size():
 		var entry: Array = terminals_list[i]
-		var terminal: Terminal = TERMINAL.instantiate()
+		var scene: PackedScene = TERMINAL_KEYPAD if entry[2] == Terminal.Kind.CODE else TERMINAL
+		var terminal: Terminal = scene.instantiate()
 		terminal.name = "Terminal%d" % (i + 1)
 		var at: Vector3 = entry[0]
 		terminal.position = kit.world(at.x, at.z, at.y)
@@ -354,6 +355,7 @@ func _place_objectives() -> void:
 	var count := 0
 	for terminal: Terminal in _root.get_node("Network/Terminals").get_children():
 		if terminal.kind == Terminal.Kind.CODE:
+			_snap_to_wall(terminal, terminal.global_position)  # The keypad's box (T-316).
 			continue
 		count += 1
 		var spot: Node3D = CODE_SPOT.instantiate()

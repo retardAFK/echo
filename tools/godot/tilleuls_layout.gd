@@ -405,6 +405,8 @@ const LOUDSPEAKER := preload("res://game/entities/network/loudspeaker.tscn")
 const REMOTE_SHUTTER := preload("res://game/entities/network/remote_shutter.tscn")
 
 const TERMINAL := preload("res://game/entities/network/terminal.tscn")
+## The transformer's keypad: a box on its wall, not a PC on a desk (S-020, T-316).
+const TERMINAL_KEYPAD := preload("res://game/entities/network/terminal_keypad.tscn")
 
 const SECURITY_CAMERA := preload("res://game/entities/network/security_camera.tscn")
 
