@@ -19,7 +19,7 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [ ] T-313 — R2 : réveil réglable
 - [x] T-314 — T5 : IA de complément, une règle dans le guide et le code (Maxime choisit)
 - [ ] T-315 — N1 : caméras accrochées aux murs
-- [ ] T-316 — N2 : clavier du transformateur en boîtier mural
+- [x] T-316 — N2 : clavier du transformateur en boîtier mural
 - [ ] T-317 — J2 : grille de test commune
 - [ ] T-318 — J1 : nettoyer les branches (Maxime donne son accord)
 
@@ -30,3 +30,4 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - T-304 (19/11/2026) : un client se lève du terminal dès qu'il bouge, sans attendre la salle ; un instantané parti avant que la salle le sache ne le rassoit pas (1,5 s). Test GUT dans `test_network`.
 - T-305 (19/11/2026) : `gust_db` 9 → 4 dB et `whistle_db` -10 → -16 dB (`audio_settings.gd`), pour que le vent ne couvre plus les pas du monstre.
 - T-314 (19/11/2026) : règle choisie par Maxime : une partie en ligne a toujours 3 chassés ; le chef choisit 2 à 4 joueurs humains et les places sans joueur sont jouées par des IA chassées (`GameMap._setup_online_room`). L'interphone montre les 4 places (les vides en « IA »). Guide du jeu et ECHO_PROJET.md alignés. Tests GUT dans `test_fill_in_ai` et `test_online_menu`.
+- T-316 (19/11/2026) : le clavier du code (`Terminal.Kind.CODE`) est `terminal_keypad.tscn`, un boîtier métallique de 36 × 50 cm avec écran vert et pavé, sans bureau ni PC. `build_tilleuls.gd` le colle au mur du transformateur (`_snap_to_wall`), 1,5 m plus près qu'avant ; rien d'autre ne change dans la carte (comparaison `dump_scene` avant et après). Capture `clavier_transfo` mise à jour. Test GUT dans `test_objectives`.
