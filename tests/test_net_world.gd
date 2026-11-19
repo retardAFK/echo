@@ -158,7 +158,8 @@ func test_the_room_announces_a_thrown_bottle_and_a_placed_alarm_clock() -> void:
 	await wait_physics_frames(1)
 	var events: Array = net.sent_events.map(func(sent: Array) -> Array: return sent[1])
 	assert_has(events, [NetGame.Event.BOTTLE, Vector3(1, 2, 3), Vector3(0, 0, -5)])
-	assert_has(events, [NetGame.Event.DECOY, Vector3(4, 0, 4)])
+	var delay := decoy.settings.decoy_delay  # Sent with it (T-313).
+	assert_has(events, [NetGame.Event.DECOY, Vector3(4, 0, 4), delay])
 	decoy.timer.state = DecoyTimer.State.RINGING
 	decoy.crush()
 	assert_eq(net.sent_events.back()[1], [NetGame.Event.CRUSH, Vector3(4, 0, 4)])

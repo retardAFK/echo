@@ -28,7 +28,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("throw") and captured:
 		commands.push(PlayerCommands.Action.THROW)
 	elif event.is_action_pressed("place_decoy") and captured:
-		commands.push(PlayerCommands.Action.DECOY)
+		var short: bool = _avatar.get("decoy_short") == true
+		commands.push(PlayerCommands.Action.DECOY_SHORT if short else PlayerCommands.Action.DECOY)
+	elif event.is_action_pressed("decoy_delay") and "decoy_short" in _avatar:
+		_avatar.set("decoy_short", not _avatar.get("decoy_short"))  # T-313.
 	elif event.is_action_pressed("place_firecracker") and captured:
 		commands.push(PlayerCommands.Action.FIRECRACKER)
 	elif event is InputEventMouseButton and event.pressed:

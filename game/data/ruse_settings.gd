@@ -34,6 +34,9 @@ extends Resource
 @export_group("Decoy")
 ## Time between placing an alarm clock and its ringing, in seconds (Q3).
 @export_range(0.0, 120.0, 0.5, "suffix:s") var decoy_delay: float = 15.0
+## The other delay the hunted can choose with the mouse wheel, for a chase
+## (S-020, T-313, piste R2), in seconds.
+@export_range(0.0, 120.0, 0.5, "suffix:s") var decoy_short_delay: float = 5.0
 ## How long an alarm clock rings, in seconds (Q3).
 @export_range(0.5, 120.0, 0.5, "suffix:s") var decoy_ring_time: float = 10.0
 ## Range of the ringing in open space, in meters (Q3).
