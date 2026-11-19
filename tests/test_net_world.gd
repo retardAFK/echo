@@ -172,4 +172,4 @@ func test_online_end_screen_goes_back_to_the_waiting_room() -> void:
 	screen.online = true
 	screen.change_scene = false
 	add_child_autofree(screen)
-	assert_eq((screen.get_node("%ReplayButton") as Button).text, "END_BACK_TO_LOBBY")
+	assert_eq((screen.get_node("%ReplayButton") as Button).text, Text.t("END_BACK_TO_LOBBY"))

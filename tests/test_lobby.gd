@@ -225,10 +225,8 @@ func test_menu_joins_and_shows_the_room() -> void:
 	await _wait_until(func() -> bool: return menu.lobby != null)
 	assert_not_null(menu.lobby, menu.get_status())
 	assert_eq(menu.lobby.seat_of(NetSession.get_place()), 1)
-	assert_eq(
-		LobbyMenu.occupant_text(menu.lobby, 1, NetSession.get_place()).begins_with("Toi"), true
-	)
-	assert_eq(LobbyMenu.occupant_text(menu.lobby, 0, NetSession.get_place()), "IA")
+	assert_eq(LobbyMenu.player_name(menu.lobby, 1, NetSession.get_place()), "Toi")
+	assert_eq(LobbyMenu.player_name(menu.lobby, 0, NetSession.get_place()), "IA")
 	menu.leave()
 	assert_null(menu.lobby)
 	assert_eq(NetSession.mode, NetSession.Mode.SOLO)

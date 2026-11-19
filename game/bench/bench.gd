@@ -103,7 +103,7 @@ func _process(_delta: float) -> void:
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))
 	)
-	_label.text = tr("BENCH_RUNNING") % ceili(SETTINGS.duration - tour_time)
+	_label.text = Text.t("BENCH_RUNNING", ceili(SETTINGS.duration - tour_time))
 	if tour_time >= SETTINGS.duration:
 		_finish()
 
@@ -136,10 +136,10 @@ func _finish() -> void:
 		"\n"
 		. join(
 			[
-				tr("BENCH_DONE"),
-				tr("BENCH_FPS") % [results.fps_avg, results.fps_min, results.fps_1pc_low],
-				tr("BENCH_DRAWS") % [results.draw_calls_max, results.triangles_max],
-				tr("BENCH_LOAD") % (_load_msec / 1000.0),
+				Text.t("BENCH_DONE"),
+				Text.t("BENCH_FPS", [results.fps_avg, results.fps_min, results.fps_1pc_low]),
+				Text.t("BENCH_DRAWS", [results.draw_calls_max, results.triangles_max]),
+				Text.t("BENCH_LOAD", _load_msec / 1000.0),
 				str(results.renderer),
 			]
 		)
@@ -162,5 +162,5 @@ func _add_label() -> void:
 	_label = Label.new()
 	_label.position = Vector2(14, 12)
 	_label.add_theme_font_size_override("font_size", 10)
-	_label.text = tr("BENCH_LOADING")
+	_label.text = Text.t("BENCH_LOADING")
 	layer.add_child(_label)

@@ -12,16 +12,10 @@ var _rows: Array[Dictionary] = []
 
 ## The name on the tag of a seat, seen from player me.
 static func tag_text(state: LobbyState, seat: int, me: int) -> String:
+	var text := LobbyMenu.player_name(state, seat, me)
 	var player := state.seats[seat]
-	if player == 0:
-		return TranslationServer.translate("LOBBY_AI")
-	var text: String = (
-		TranslationServer.translate("LOBBY_YOU")
-		if player == me
-		else TranslationServer.translate("LOBBY_PLAYER") % player
-	)
-	if player == state.leader:
-		text += " · " + TranslationServer.translate("LOBBY_LEADER_TAG")
+	if player != 0 and player == state.leader:
+		text += " · " + Text.t("LOBBY_LEADER_TAG")
 	return text
 
 

@@ -78,11 +78,6 @@ func get_base_energy(index: int) -> float:
 	return _energies[index]
 
 
-## The building's name, as the scan reticle shows it.
-func get_display_name() -> String:
-	return tr(display_key)
-
-
 ## The building this volume belongs to: its complex, or its own name.
 func get_complex() -> String:
 	return complex if complex != "" else String(name)

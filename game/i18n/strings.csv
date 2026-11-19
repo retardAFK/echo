@@ -13,7 +13,7 @@ HUD_INTERACT_WHEELCHAIR,{interact} : lancer le fauteuil
 HUD_FUSES,Fusibles %d/%d
 HUD_INTERACT_FUSE_BOX,Maintenir {interact} : prendre le fusible
 HUD_INTERACT_TRANSFORMER,Maintenir {interact} : poser un fusible
-HUD_TRANSFORMER_WAITS,Le transformateur attend %d fusibles
+HUD_TRANSFORMER_WAITS_MANY,Le transformateur attend %d fusibles
 HUD_TRANSFORMER_WAITS_ONE,Le transformateur attend %d fusible
 END_ESCAPED,Vous êtes sorti
 END_CAUGHT,Attrapé
@@ -29,8 +29,8 @@ END_MENU,Menu
 END_BACK_TO_LOBBY,Retour au salon
 HUD_INTERACT_PICKUP_BOTTLE,{interact} : ramasser la bouteille
 HUD_INTERACT_PICKUP_DECOY,{interact} : ramasser le réveil
-HUD_CARRY_BOTTLE,1 bouteille
-HUD_CARRY_BOTTLES,%d bouteilles
+HUD_CARRY_BOTTLES_ONE,%d bouteille
+HUD_CARRY_BOTTLES_MANY,%d bouteilles
 HUD_CARRY_DECOY,Réveil
 HUD_INTERACT_HIDE,Maintenir {interact} : se cacher
 HUD_INTERACT_LEAVE,Maintenir {interact} : sortir
@@ -45,7 +45,6 @@ BENCH_DONE,Banc d'essai terminé
 BENCH_FPS,"Images/s : %.1f en moyenne, %.1f au pire, %.1f sur les 1 %% les plus lentes"
 BENCH_DRAWS,"Appels de dessin : %d au pire, triangles : %d au pire"
 BENCH_LOAD,Chargement : %.1f s
-MENU_PLAY,Jouer
 MENU_BACK,Retour
 CONTROLS_MOVE,{move} ou flèches : se déplacer
 CONTROLS_LOOK,Souris : regarder (cliquer pour capturer la souris)
@@ -59,7 +58,7 @@ CONTROLS_PROWL,{crouch} : rôder (silencieux)
 CONTROLS_SCAN,Maintenir clic droit en visant un bâtiment visitable proche : scanner
 CONTROLS_OPEN,Maintenir {interact} : ouvrir une cachette
 CONTROLS_PAUSE,Échap : pause · F11 : plein écran
-GOAL_HUNTED,"Trouvez 3 fusibles, posez-les dans le transformateur, puis fuyez par le tunnel. Chaque bruit trahit votre position au monstre."
+GOAL_HUNTED,"Remplissez les 3 objectifs de la partie (au moins un fusible à poser dans le transformateur, la carte les liste), puis fuyez par le tunnel. Chaque bruit trahit votre position au monstre."
 GOAL_MONSTER,"Les bruits de la proie s'affichent en orange, avec leur distance. Attrapez-la avant qu'elle ne s'enfuie."
 PAUSE_TITLE,Pause
 PAUSE_RESUME,Reprendre
@@ -91,7 +90,6 @@ MAP_PLAYGROUND,Aire de jeux
 MAP_STADIUM,City stade
 MAP_BLOCK_A,Barre A
 MAP_BLOCK_B,Barre B
-MAP_BLOCK_C,Barre C
 MAP_BLOCK_D,Barre D
 MAP_BLOCK_E,Barre E
 MAP_BLOCK_F,Barre F
@@ -105,15 +103,11 @@ MENU_ONLINE,Jouer en ligne
 LOBBY_CREATE,Créer une partie
 LOBBY_JOIN,Rejoindre
 LOBBY_CODE_HINT,Code de la partie
-LOBBY_CODE,Code : %s
-LOBBY_SHARE,Envoie ce code à tes amis pour qu'ils te rejoignent.
 LOBBY_SEAT_MONSTER,Monstre
 LOBBY_SEAT_HUNTED,Chassé %d
 LOBBY_AI,IA
 LOBBY_YOU,Toi
 LOBBY_PLAYER,Joueur %d
-LOBBY_LEADER,(chef)
-LOBBY_IS_READY,prêt
 LOBBY_READY,Je suis prêt
 LOBBY_NOT_READY,Pas prêt
 LOBBY_START,Lancer la partie
@@ -265,3 +259,16 @@ TIP_MONSTER_3,Une caméra allumée filme pour les prisonniers. Casse-la pour les
 TIP_MONSTER_4,"Passe de temps en temps près de la prison : tant que tu es proche, la peine des prisonniers ne baisse pas."
 MENU_CREDITS,Crédits
 CREDITS_HELP,Flèches ou molette : faire défiler · Échap : retour
+FORMAT_DECIMAL_POINT,","
+KEY_SHIFT,Maj
+KEY_CTRL,Ctrl
+KEY_ALT,Alt
+KEY_SPACE,Espace
+KEY_TAB,Tab
+KEY_ENTER,Entrée
+KEY_BACKSPACE,Retour arrière
+KEY_CAPSLOCK,Verr. maj
+KEY_UP,Haut
+KEY_DOWN,Bas
+KEY_LEFT,Gauche
+KEY_RIGHT,Droite

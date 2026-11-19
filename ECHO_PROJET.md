@@ -97,7 +97,7 @@ Toute fonctionnalité qui dépasse un budget doit être simplifiée ou faire l'o
 - Les entités communiquent par **signaux**, pas en s'appelant directement de loin.
 - Le **système de bruit** est un service central unique (autoload `NoiseBus`) : toute source de bruit passe par lui.
 - Toute logique testable sans affichage (calcul de bruit, atténuation, décisions de l'IA) a des tests GUT.
-- Le code est écrit en anglais (noms, commentaires). Les textes affichés au joueur sont en français et passent par des clés de traduction.
+- Le code est écrit en anglais (noms, commentaires). Les textes affichés au joueur sont en français et passent par des clés de traduction, lues uniquement via la classe `Text` (mode d'emploi : `game/i18n/README.md`).
 
 ### 2.5 Règles Git
 

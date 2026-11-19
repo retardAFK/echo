@@ -21,10 +21,8 @@ func _refresh() -> void:
 static func describe(inventory: Inventory) -> String:
 	var lines: PackedStringArray = []
 	var bottles := inventory.count(Inventory.Kind.BOTTLE)
-	if bottles == 1:
-		lines.append(TranslationServer.translate("HUD_CARRY_BOTTLE"))
-	elif bottles > 1:
-		lines.append(TranslationServer.translate("HUD_CARRY_BOTTLES") % bottles)
+	if bottles > 0:
+		lines.append(Text.count("HUD_CARRY_BOTTLES", bottles))
 	if inventory.count(Inventory.Kind.DECOY) > 0:
-		lines.append(TranslationServer.translate("HUD_CARRY_DECOY"))
+		lines.append(Text.t("HUD_CARRY_DECOY"))
 	return "\n".join(lines)

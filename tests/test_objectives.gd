@@ -188,7 +188,7 @@ func test_both_relay_switches_within_the_window() -> void:
 	quests.relays[1].thrown.emit(player)
 	assert_true(loop.rules.is_done(LoopRules.Objective.RELAY))
 	assert_false(loop.is_exit_open(), "the fuse is still missing")
-	assert_eq(loop.transformer.get_node("WaitLabel").text, tr("HUD_TRANSFORMER_WAITS_ONE") % 1)
+	assert_eq(loop.transformer.get_node("WaitLabel").text, Text.count("HUD_TRANSFORMER_WAITS", 1))
 
 
 func test_relay_switches_hang_on_a_wall() -> void:

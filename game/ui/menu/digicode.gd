@@ -20,7 +20,7 @@ func _ready() -> void:
 	add_child(column)
 	var caption := Label.new()
 	caption.theme_type_variation = &"FootLabel"
-	caption.text = "LOBBY_CODE_HINT"
+	caption.text = Text.t("LOBBY_CODE_HINT")
 	caption.uppercase = true
 	column.add_child(caption)
 	var screen := PanelContainer.new()

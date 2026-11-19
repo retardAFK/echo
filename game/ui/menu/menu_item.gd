@@ -72,4 +72,4 @@ func set_text_color(color: Variant) -> void:
 
 
 func _refresh_text() -> void:
-	text = tr(key).to_upper()
+	text = Text.t(key).to_upper()

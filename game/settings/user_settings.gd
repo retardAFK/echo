@@ -70,20 +70,21 @@ const AZERTY := {
 	KEY_COMMA: ";",
 	KEY_PERIOD: ":",
 }
-## Names of the keys that are not a letter.
+## Text keys (game/i18n/strings.csv) of the names of the keys that are not
+## a letter.
 const KEY_NAMES := {
-	KEY_SHIFT: "Maj",
-	KEY_CTRL: "Ctrl",
-	KEY_ALT: "Alt",
-	KEY_SPACE: "Espace",
-	KEY_TAB: "Tab",
-	KEY_ENTER: "Entrée",
-	KEY_BACKSPACE: "Retour arrière",
-	KEY_CAPSLOCK: "Verr. maj",
-	KEY_UP: "Haut",
-	KEY_DOWN: "Bas",
-	KEY_LEFT: "Gauche",
-	KEY_RIGHT: "Droite",
+	KEY_SHIFT: "KEY_SHIFT",
+	KEY_CTRL: "KEY_CTRL",
+	KEY_ALT: "KEY_ALT",
+	KEY_SPACE: "KEY_SPACE",
+	KEY_TAB: "KEY_TAB",
+	KEY_ENTER: "KEY_ENTER",
+	KEY_BACKSPACE: "KEY_BACKSPACE",
+	KEY_CAPSLOCK: "KEY_CAPSLOCK",
+	KEY_UP: "KEY_UP",
+	KEY_DOWN: "KEY_DOWN",
+	KEY_LEFT: "KEY_LEFT",
+	KEY_RIGHT: "KEY_RIGHT",
 }
 
 ## Tests use another file so the player's own settings stay untouched.
@@ -249,7 +250,7 @@ func key_label(action: String) -> String:
 
 static func label_for(physical: Key, keyboard: String) -> String:
 	if KEY_NAMES.has(physical):
-		return KEY_NAMES[physical]
+		return Text.t(KEY_NAMES[physical])
 	if keyboard == "azerty" and AZERTY.has(physical):
 		return AZERTY[physical]
 	return OS.get_keycode_string(physical)
