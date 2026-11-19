@@ -66,7 +66,7 @@ func open() -> void:
 
 
 ## The objectives of the game and how far along they are (S-018, T-266):
-## their names only, never where.
+## their names only, never where. The code once read on its post-it (T-271).
 func objective_lines() -> PackedStringArray:
 	var lines := PackedStringArray()
 	var game_loop: GameLoop = get_parent().get("game_loop") if get_parent() != null else null
@@ -78,8 +78,12 @@ func objective_lines() -> PackedStringArray:
 	for kind in [LoopRules.Objective.CODE, LoopRules.Objective.DOWNLOAD, LoopRules.Objective.RELAY]:
 		if kind in rules.objectives:
 			var key: String = "MAP_OBJECTIVE_" + LoopRules.Objective.keys()[kind]
+			var line := Text.t(key)
+			var read := CodeSpot.read_code_spot(get_tree())
+			if kind == LoopRules.Objective.CODE and read != null:
+				line = Text.t("MAP_CODE_READ", read.get_code())  # T-271.
 			var done := "  " + Text.t("MAP_OBJECTIVE_DONE") if rules.is_done(kind) else ""
-			lines.append(Text.t(key) + done)
+			lines.append(line + done)
 	return lines
 
 
