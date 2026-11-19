@@ -13,6 +13,9 @@ const GROUP := &"decoys"
 
 @export var settings: RuseSettings
 
+## Seconds before it rings, set before it enters the tree; below 0, the
+## usual decoy_delay (S-020, T-313).
+var delay := -1.0
 var timer: DecoyTimer
 
 @onready var _tick: AudioStreamPlayer3D = $Tick
@@ -37,7 +40,7 @@ static func crush_near(tree: SceneTree, at: Vector3, distance: float) -> int:
 func _ready() -> void:
 	add_to_group(GROUP)
 	RetroSurface.apply_to(self, RetroSurface.DEFAULT_SETTINGS)
-	timer = DecoyTimer.new(settings)
+	timer = DecoyTimer.new(settings, delay)
 	_tick.max_distance = settings.tick_sound_distance
 	_ring.max_distance = settings.ring_sound_distance
 	_crush.max_distance = settings.ring_sound_distance

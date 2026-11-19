@@ -158,3 +158,38 @@ func test_the_alarm_clock_sounds_are_ours_and_loop() -> void:
 	var ring: AudioStreamWAV = decoy.get_node("Ring").stream
 	assert_eq(tick.loop_mode, AudioStreamWAV.LOOP_FORWARD)
 	assert_eq(ring.loop_mode, AudioStreamWAV.LOOP_FORWARD)
+
+
+func test_the_hunted_chooses_a_short_delay_for_a_chase() -> void:
+	# S-020, T-313 (piste R2): 15 s, or 5 s chosen with the mouse wheel.
+	assert_eq(SETTINGS.decoy_delay, 15.0)
+	assert_eq(SETTINGS.decoy_short_delay, 5.0)
+	assert_eq(DecoyTimer.new(SETTINGS).delay, 15.0)
+	var timer := DecoyTimer.new(SETTINGS, SETTINGS.decoy_short_delay)
+	timer.update(4.9)
+	assert_eq(timer.state, DecoyTimer.State.TICKING)
+	assert_true(timer.update(0.2), "rings after 5 s")
+	assert_eq(timer.state, DecoyTimer.State.RINGING)
+	_add_floor()
+	var player: Player = PLAYER_SCENE.instantiate()
+	add_child_autofree(player)
+	await wait_physics_frames(2)
+	player.inventory.take(Inventory.Kind.DECOY)
+	assert_string_contains(CarryHud.describe(player.inventory), "15 s")
+	assert_string_contains(CarryHud.describe(player.inventory, true), "5 s")
+	player.commands.push(PlayerCommands.Action.DECOY_SHORT)
+	player.apply_actions()
+	var decoys := get_tree().get_nodes_in_group(Decoy.GROUP)
+	assert_eq(decoys.size(), 1)
+	assert_eq((decoys[0] as Decoy).timer.delay, 5.0)
+	for node in decoys:
+		node.free()
+
+
+func test_the_short_action_travels_online() -> void:
+	var commands := PlayerCommands.new()
+	commands.push(PlayerCommands.Action.DECOY_SHORT)
+	var copy := PlayerCommands.from_bytes(commands.to_bytes())
+	assert_eq(
+		copy.take_actions(), [PlayerCommands.Action.DECOY_SHORT] as Array[PlayerCommands.Action]
+	)

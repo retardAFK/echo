@@ -76,6 +76,9 @@ var left_terminal_msec := 0
 ## goes to the camera's lens. Set by the CityNetwork, or on a client by what
 ## the room says.
 var watching: SecurityCamera
+## The next alarm clock rings after decoy_short_delay (S-020, T-313): the
+## player's choice with the mouse wheel, on this machine only.
+var decoy_short := false
 
 var _gait := PlayerMotion.Gait.WALK
 var _wants_crouch := false
@@ -198,6 +201,7 @@ func apply_actions() -> void:
 					PlayerCommands.Action.THROW,
 					PlayerCommands.Action.DECOY,
 					PlayerCommands.Action.FIRECRACKER,
+					PlayerCommands.Action.DECOY_SHORT,
 				]
 			)
 		):
@@ -220,6 +224,8 @@ func apply_actions() -> void:
 				throw_bottle()
 			PlayerCommands.Action.DECOY:
 				place_decoy()
+			PlayerCommands.Action.DECOY_SHORT:
+				place_decoy(true)
 			PlayerCommands.Action.FIRECRACKER:
 				_place_firecracker()
 
@@ -381,10 +387,13 @@ func throw_bottle() -> ThrownBottle:
 ## Places an alarm clock on the ground in front of the player (S-008, Q3), if
 ## the player carries one, or at their feet when there is no ground there.
 ## The gesture makes a faint noise.
-func place_decoy() -> Decoy:
+## Short, it rings after decoy_short_delay instead (S-020, T-313).
+func place_decoy(short := false) -> Decoy:
 	if hiding_in != null or not inventory.use(Inventory.Kind.DECOY):
 		return null
-	var decoy: Decoy = _place_on_ground(DECOY_SCENE)
+	var decoy: Decoy = DECOY_SCENE.instantiate()
+	decoy.delay = ruse_settings.decoy_short_delay if short else ruse_settings.decoy_delay
+	_place_on_ground(decoy)
 	ruse_used.emit(&"decoy")
 	return decoy
 
@@ -394,15 +403,16 @@ func place_decoy() -> Decoy:
 func _place_firecracker() -> Firecracker:
 	if hiding_in != null or not inventory.use(Inventory.Kind.FIRECRACKER):
 		return null
-	var firecracker: Firecracker = _place_on_ground(FIRECRACKER_SCENE)
+	var firecracker: Firecracker = FIRECRACKER_SCENE.instantiate()
+	_place_on_ground(firecracker)
 	ruse_used.emit(&"firecracker")
 	return firecracker
 
 
-## Puts a new scene on the ground in front of the player, or at their feet
+## Puts a new node on the ground in front of the player, or at their feet
 ## when a wall is in front or there is no ground there; the gesture makes a
 ## faint noise.
-func _place_on_ground(scene: PackedScene) -> Node3D:
+func _place_on_ground(placed: Node3D) -> void:
 	var offset := -global_basis.z * ruse_settings.decoy_place_distance
 	var spot := global_position
 	if not test_move(global_transform, offset):  # A wall in front: at the feet.
@@ -414,12 +424,10 @@ func _place_on_ground(scene: PackedScene) -> Node3D:
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty():
 			spot = hit.position
-	var placed: Node3D = scene.instantiate()
 	get_parent().add_child(placed)
 	placed.global_position = spot
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
 	gesture.play(HuntedBody.Gesture.PICK, BODY_SETTINGS.pick_time)
-	return placed
 
 
 ## Gets into a hiding spot (S-008, Q6): the body stops and stops colliding,

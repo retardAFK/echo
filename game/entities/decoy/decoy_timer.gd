@@ -1,7 +1,8 @@
 class_name DecoyTimer
 extends RefCounted
 ## The clockwork of an alarm clock decoy (spec S-008, Q3), pure logic: it
-## ticks for decoy_delay, then rings for decoy_ring_time with a noise every
+## ticks for its delay (decoy_delay, or decoy_short_delay when the hunted
+## chose it, S-020, T-313), then rings for decoy_ring_time with a noise every
 ## decoy_noise_interval, then it is done. Crushed by the monster (Q4), it is
 ## done at once.
 
@@ -9,14 +10,17 @@ enum State { TICKING, RINGING, DONE }
 
 var settings: RuseSettings
 var state := State.TICKING
+## Seconds it ticks before ringing.
+var delay: float
 
 var _left := 0.0
 var _noise_left := 0.0
 
 
-func _init(p_settings: RuseSettings) -> void:
+func _init(p_settings: RuseSettings, p_delay := -1.0) -> void:
 	settings = p_settings
-	_left = settings.decoy_delay
+	delay = p_delay if p_delay >= 0.0 else settings.decoy_delay
+	_left = delay
 
 
 ## One step of time. Returns whether a ringing noise is due now.

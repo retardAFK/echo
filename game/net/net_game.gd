@@ -28,8 +28,9 @@ extends Node
 ##   it (T-107).
 ## - [WORLD, NetWorld.state()]: to everyone, when the map or the loop changes
 ##   (T-099); the client's map and loop only mirror the room's.
-## - [BOTTLE, position, velocity] and [DECOY, position]: to everyone, a bottle
-##   thrown or an alarm clock placed; the client plays its own copy.
+## - [BOTTLE, position, velocity] and [DECOY, position, delay]: to everyone, a
+##   bottle thrown or an alarm clock placed (its delay chosen, S-020, T-313);
+##   the client plays its own copy.
 ## - [CRUSH, position]: to everyone, the monster crushed a ringing alarm clock.
 ## - [FIRECRACKER, position] and [POP, position]: to everyone, a firecracker
 ##   placed, and one set off by the monster (S-020, T-312).
@@ -382,7 +383,7 @@ func _announce(node: Node3D) -> void:
 	if node is ThrownBottle:
 		_send_to_all([Event.BOTTLE, node.global_position, (node as ThrownBottle).linear_velocity])
 	elif node is Decoy:
-		_send_to_all([Event.DECOY, node.global_position])
+		_send_to_all([Event.DECOY, node.global_position, (node as Decoy).timer.delay])
 		(node as Decoy).crushed.connect(
 			func() -> void: _send_to_all([Event.CRUSH, node.global_position])
 		)
@@ -629,8 +630,11 @@ func apply_event(event: Array) -> void:
 		Event.BOTTLE when event.size() == 3:
 			var bottle: ThrownBottle = _spawn_copy(BOTTLE_SCENE, event[1])
 			bottle.linear_velocity = event[2]
-		Event.DECOY when event.size() == 2:
-			_spawn_copy(DECOY_SCENE, event[1])
+		Event.DECOY when event.size() >= 2:
+			var decoy: Decoy = DECOY_SCENE.instantiate()
+			if event.size() >= 3:
+				decoy.delay = event[2]
+			_add_copy(decoy, event[1])
 		Event.CRUSH when event.size() == 2:
 			_crush_near(event[1])
 		Event.FIRECRACKER when event.size() == 2:
@@ -727,7 +731,10 @@ func _apply_network_state(player: Player, terminal_at: int, camera_at: int) -> v
 
 
 func _spawn_copy(scene: PackedScene, at: Vector3) -> Node3D:
-	var copy: Node3D = scene.instantiate()
+	return _add_copy(scene.instantiate(), at)
+
+
+func _add_copy(copy: Node3D, at: Vector3) -> Node3D:
 	get_parent().add_child(copy)
 	copy.global_position = at
 	return copy

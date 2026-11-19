@@ -33,7 +33,7 @@ HUD_INTERACT_PICKUP_BOTTLE,{interact} : ramasser la bouteille
 HUD_INTERACT_PICKUP_DECOY,{interact} : ramasser le réveil
 HUD_CARRY_BOTTLES_ONE,%d bouteille
 HUD_CARRY_BOTTLES_MANY,%d bouteilles
-HUD_CARRY_DECOY,Réveil
+HUD_CARRY_DECOY,Réveil : %d s (molette)
 HUD_CARRY_FIRECRACKER,Pétard ({place_firecracker})
 HUD_DEAF,Assourdi : %d s
 HUD_INTERACT_HIDE,Maintenir {interact} : se cacher
@@ -57,7 +57,7 @@ CONTROLS_CROUCH,{crouch} : s'accroupir (presque silencieux)
 CONTROLS_HOLD_BREATH,{hold_breath} : retenir son souffle (6 s sans bruit de pas ni souffle)
 CONTROLS_INTERACT,"{interact} : ramasser, interagir ; maintenir {interact} : fusible, cachette"
 CONTROLS_THROW,Clic gauche : lancer une bouteille
-CONTROLS_DECOY,Clic droit : poser un réveil
+CONTROLS_DECOY,"Clic droit : poser un réveil ; molette : il sonne après 15 ou 5 s"
 CONTROLS_FIRECRACKER,"{place_firecracker} : poser le pétard (il éclate sous le monstre, qui n'entend plus rien 6 s)"
 CONTROLS_MAP,{map} : ouvrir ou fermer la carte
 CONTROLS_PROWL,{crouch} : rôder (silencieux)
