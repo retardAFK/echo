@@ -8,6 +8,9 @@ extends Resource
 @export var fog_color := Color(0.10, 0.11, 0.13)
 ## Depth fog density. 0.035 lets the player see about 25 m.
 @export_range(0.0, 0.2, 0.001) var fog_density: float = 0.035
+## Depth fog density in the monster's role (S-020, T-306, piste E4): it sees
+## normally (D-008) but the night hides the hunted beyond about 12 m.
+@export_range(0.0, 0.3, 0.001) var monster_fog_density: float = 0.073
 ## Farthest distance the cameras draw, in meters (S-006): the fog has already
 ## swallowed everything beyond, so nothing farther costs a draw call.
 @export_range(10.0, 500.0, 1.0, "suffix:m") var view_distance: float = 90.0
