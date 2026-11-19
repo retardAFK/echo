@@ -11,7 +11,7 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [x] T-305 — S1 : rafales de vent moins fortes
 - [x] T-306 — E4 : vue du monstre réduite à 12 m
 - [x] T-307 — E1 : les portes freinent le monstre
-- [ ] T-308 — E3 : brancard bousculé = arrêt
+- [x] T-308 — E3 : brancard bousculé = arrêt
 - [ ] T-309 — E2 : sprint du monstre en jauge
 - [ ] T-310 — H1 : fouiller une cachette vide coûte
 - [ ] T-311 — H2 : retenir son souffle
@@ -35,3 +35,4 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - T-306 (19/11/2026) : `monster_fog_density` 0,073 dans `visual_settings.gd` pour le rôle de monstre (solo et en ligne), soit à 12 m ce que le chassé voit à 25 m ; le brouillard des couloirs n'est jamais plus léger. Captures comparées sous Xvfb (aire de jeux) : les barres à 30 m disparaissent pour le monstre. Test GUT dans `test_night`.
 - T-307 (19/11/2026) : `Stagger` (monstre IA et monstre joué) ; `Door.smash` arrête le monstre `smash_stagger` = 0,8 s (`door_settings.gd`). En ligne, le client prédit l'arrêt sans ouvrir la porte (la salle l'ouvre), pour ne pas être recalé de 5 m. Tests GUT dans `test_doors`.
 - T-348 (19/11/2026) : le robot de `net_match` se croyait en mouvement quand la salle tenait son corps à un chambranle (va-et-vient de 1,5 m de la prédiction, écart 2 m) : le seuil de blocage passe de 0,3 m à 2 m (`STUCK_DISTANCE`), il recule et contourne. Cause des échecs de `net_match` sur main (run 445) et sur #179, #190, #193 (place 2 bloquée en `to_box`, le monstre l'attend).
+- T-308 (19/11/2026) : renverser un brancard en courant arrête le monstre `gurney_run_stagger` = 0,8 s (`hospital_settings.gd`), IA comme joueur ; prédit par le client en ligne. Test GUT dans `test_hospital_devices`.

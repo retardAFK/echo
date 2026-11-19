@@ -562,6 +562,7 @@ func _clear_gurney(direction: Vector3, delta: float) -> bool:
 		return false
 	if brain.get_pace() == MonsterBrain.Pace.RUN:
 		gurney.shove(self)
+		stagger.hit(HOSPITAL_SETTINGS.gurney_run_stagger)  # S-020, T-308.
 		return false
 	_shoving += delta
 	if _shoving >= HOSPITAL_SETTINGS.gurney_shove_hold:

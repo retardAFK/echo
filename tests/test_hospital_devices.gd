@@ -4,6 +4,7 @@ extends GutTest
 
 const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const SETTINGS := preload("res://game/data/hospital_settings.tres")
+const AVATAR_SCENE := preload("res://game/entities/monster/monster_avatar.tscn")
 const ORIGIN := Vector3(110, 0, 110)
 ## In the boiler room of the basement, and in the corridor next to it.
 const BOILER_ROOM := Vector3(15, -2.7, 110)
@@ -237,3 +238,21 @@ func test_a_gurney_is_sent_again_only_once_it_moved_5_cm() -> void:
 	var still := chair.state()
 	chair.rotation.y += 0.2
 	assert_ne(chair.state(), still, "turned: sent again")
+
+
+func test_a_gurney_knocked_over_on_the_run_stops_the_monster() -> void:
+	# S-020, T-308 (piste E3): the gurney slows a chase, not only a corridor.
+	var gurney: Gurney = _map.get_node("Rolling/Gurney1")
+	var avatar: MonsterAvatar = AVATAR_SCENE.instantiate()
+	add_child_autofree(avatar)
+	avatar.set_physics_process(false)  # Driven by hand.
+	avatar.global_position = gurney.global_position + Vector3(0, 0.1, -1.2)
+	avatar.rotation.y = PI  # Facing +Z, the gurney.
+	await wait_physics_frames(2)
+	for i in 20:
+		avatar.move(Vector2(0, -1), true, 1.0 / 60.0)
+		if gurney.tipped:
+			break
+		await wait_physics_frames(1)
+	assert_true(gurney.tipped, "knocked over on the run")
+	assert_gt(avatar.stagger.left, SETTINGS.gurney_run_stagger - 0.05, "and stopped short")

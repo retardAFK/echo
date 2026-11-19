@@ -34,6 +34,9 @@ extends Resource
 @export_range(0.0, 30.0, 0.5, "suffix:m") var gurney_shove_range: float = 10.0
 ## Reach of a monster running into a gurney, which shoves it, in meters.
 @export_range(0.5, 3.0, 0.05, "suffix:m") var gurney_run_reach: float = 1.4
+## Shoving a gurney over on the run stops the monster short for this long
+## (S-020, T-308, piste E3): the gurney slows a chase too.
+@export_range(0.0, 5.0, 0.05, "suffix:s") var gurney_run_stagger: float = 0.8
 
 @export_group("Wheelchairs (Q7)")
 ## How far a launched wheelchair rolls, in meters.

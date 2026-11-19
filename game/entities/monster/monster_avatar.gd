@@ -169,10 +169,13 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 	velocity.z = horizontal.z
 	if _pace == MonsterBrain.Pace.RUN:
 		_smash_door(horizontal)
-	if _pace == MonsterBrain.Pace.RUN and not mirror_world:
 		var gurney := Gurney.ahead(get_tree(), global_position, horizontal, _gurney_reach())
 		if gurney != null:
-			gurney.shove(self)  # Running, it shoves the gurney over (S-014, Q7).
+			# Running, it shoves the gurney over (S-014, Q7) and stops short
+			# (S-020, T-308); an online client only predicts the stop.
+			if not mirror_world:
+				gurney.shove(self)
+			stagger.hit(HOSPITAL_SETTINGS.gurney_run_stagger)
 	var before := global_position
 	move_and_slide()
 	var moved := Vector2(global_position.x - before.x, global_position.z - before.z).length()
