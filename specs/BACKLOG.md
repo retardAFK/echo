@@ -28,6 +28,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 | — | S-017 | Carte des chassés (demande du 15/11/2026, hors ordre des phases) | T-250 à T-259 | S-006, S-010 |
 | — | S-018 | Prison et réseau de la cité : terminaux, caméras, leurres à distance, quêtes tirées au sort (demande du 15/11/2026, hors ordre des phases) | T-260 à T-289 | S-010, S-016 |
 | — | S-019 | Ambiance des intérieurs : HLM abandonnés avec l'ambiance de l'hôpital (demande du 15/11/2026, hors ordre des phases, `specs/S-019-ambiance-interieurs/`) | T-290 à T-299 | S-016 |
+| — | S-020 | Retours de test : réseau d'abord, puis la dynamique de poursuite (catalogue de Maxime du 19/11/2026, `specs/S-020-retours-de-test/`) | T-300 à T-349 | S-010, S-018 |
 
 L'ordre suit D-013 (12/11/2026) : le multijoueur passe juste après le test à plusieurs, avant les personnages, l'audio et les menus. Tout ce qui est ajouté avant le réseau (animations, sons d'autres joueurs, menus) devrait sinon être repris pour être synchronisé.
 

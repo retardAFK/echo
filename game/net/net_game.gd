@@ -30,6 +30,9 @@ extends Node
 ## - [BOTTLE, position, velocity] and [DECOY, position]: to everyone, a bottle
 ##   thrown or an alarm clock placed; the client plays its own copy.
 ## - [CRUSH, position]: to everyone, the monster crushed a ringing alarm clock.
+## - [CLOCK, NetWorld.clock()]: to everyone, once a second (S-020, T-300):
+##   the game time and the wind, which change every frame and so are not in
+##   WORLD (which would then go out with every snapshot).
 
 ## Room side: a human monster touched a hunted; GameMap captures it.
 signal hunted_caught(hunted: Node3D)
@@ -38,7 +41,10 @@ signal caught_reported(seat: int, state: CaptureState.State)
 ## Client side: this player is out of the game and watches a teammate.
 signal spectating
 
-enum Event { NOISE, SCAN, CAUGHT, WORLD, BOTTLE, DECOY, CRUSH }
+enum Event { NOISE, SCAN, CAUGHT, WORLD, BOTTLE, DECOY, CRUSH, CLOCK }
+
+## Seconds between two CLOCK events (T-300).
+const CLOCK_INTERVAL := 1.0
 
 ## Layers that block sight between players: the ground and props, and walls.
 const SIGHT_MASK := 1 | NoiseBus.WALLS_COLLISION_MASK
@@ -74,6 +80,7 @@ var watched_pitch := 0.0
 var is_spectator := false
 
 var _send_left := 0.0
+var _clock_left := 0.0
 var _acked := {}
 var _sent_world := []
 ## Room side: the teammate each spectator's place watches.
@@ -150,6 +157,10 @@ func _physics_process(delta: float) -> void:
 			_send_left = maxf(_send_left + 1.0 / settings.snapshot_rate, 0.0)
 			send_world()
 			_send_snapshots()
+		_clock_left -= delta
+		if _clock_left <= 0.0:
+			_clock_left = CLOCK_INTERVAL
+			send_clock()
 	elif own != null and not is_spectator:
 		prediction.record(own.commands.seq, own.global_position)
 		own.global_position += prediction.step(delta)
@@ -307,11 +318,18 @@ func send_world() -> void:
 	_send_to_all([Event.WORLD, state])
 
 
+## Room side: the game time and the wind to everyone (T-300).
+func send_clock() -> void:
+	if world != null:
+		_send_to_all([Event.CLOCK, world.clock()])
+
+
 ## Room side: a player's map is ready (at the start, or back after a cut,
 ## T-102): it gets the map and the loop as they are now.
 func _on_place_ready(place: int) -> void:
 	if world != null and avatars.has(place):
 		_send_event(place, [Event.WORLD, world.state()])
+		_send_event(place, [Event.CLOCK, world.clock()])
 
 
 func _send_to_all(event: Array) -> void:
@@ -526,6 +544,8 @@ func apply_event(event: Array) -> void:
 			caught_reported.emit(event[1], event[2])
 		Event.WORLD when event.size() == 2 and world != null:
 			world.apply(event[1])
+		Event.CLOCK when event.size() == 2 and world != null:
+			world.apply_clock(event[1])
 		Event.BOTTLE when event.size() == 3:
 			var bottle: ThrownBottle = _spawn_copy(BOTTLE_SCENE, event[1])
 			bottle.linear_velocity = event[2]

@@ -53,7 +53,9 @@ var forced: Array = []
 ## The objectives other than fuses (S-018), null on a client.
 var quests: Quests
 
-var _elapsed := 0.0
+## Game seconds since the start (see get_duration). An online client gets the
+## room's once a second (S-020, T-300) and counts on its own in between.
+var elapsed := 0.0
 ## Frames drawn and their time during the game, for the average frames per
 ## second of the summary (S-009, Q7).
 var _frames := 0
@@ -338,7 +340,7 @@ func _wire(map: Node) -> void:
 ## Game seconds since the start, frozen when it ends. Counted from the
 ## physics frames, so a pause (S-009, Q6) does not count.
 func get_duration() -> float:
-	return _elapsed
+	return elapsed
 
 
 func is_exit_open() -> bool:
@@ -359,14 +361,15 @@ func place_fuse(user: Node = null) -> void:
 		_open_exit()
 
 
-## Room side: what a client's mirror loop needs, see apply_values().
+## Room side: what a client's mirror loop needs, see apply_values(). The game
+## time is not in it: it changes every frame, and goes on its own clock
+## (NetWorld.clock, S-020, T-300).
 func mirror_values() -> Array:
 	return [
 		rules.carried,
 		rules.placed,
 		is_over,
 		hunted_won,
-		_elapsed,
 		noise_count,
 		scan_count,
 		ruse_count,
@@ -376,7 +379,7 @@ func mirror_values() -> Array:
 ## Client side: shows the room's loop: fuses, transformer, siren and exit,
 ## the numbers of the end screen, and the end itself.
 func apply_values(values: Array) -> void:
-	if values.size() < 8:
+	if values.size() < 7:
 		return
 	var was_repaired := rules.is_repaired()
 	if values[0] != rules.carried or values[1] != rules.placed:
@@ -387,10 +390,9 @@ func apply_values(values: Array) -> void:
 			transformer.update_label()
 	if rules.is_repaired() and not was_repaired:
 		_open_exit()
-	_elapsed = values[4]
-	noise_count = values[5]
-	scan_count = values[6]
-	ruse_count = values[7]
+	noise_count = values[4]
+	scan_count = values[5]
+	ruse_count = values[6]
 	if values[2] and not is_over:
 		finish(values[3])
 
@@ -417,7 +419,7 @@ func get_average_fps() -> float:
 
 func _physics_process(delta: float) -> void:
 	if not is_over:
-		_elapsed += delta
+		elapsed += delta
 	if siren_left <= 0.0:
 		return
 	siren_left -= delta

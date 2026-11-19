@@ -77,14 +77,17 @@ func test_the_wind_follows_its_gusts_and_stops_when_gone() -> void:
 	assert_false(NoiseBus.wind_gust, "no gust left behind")
 
 
-func test_online_the_room_sends_its_wind() -> void:
+func test_online_the_client_blows_the_room_s_gusts() -> void:
 	var wind := CityWind.new()
 	add_child_autofree(wind)
-	wind.strength = 0.73
-	assert_eq(wind.shared_strength(), 0.75)
 	var other := CityWind.new()
 	add_child_autofree(other)
-	other.mirror_strength(1.0)
-	other._process(5.0)
-	assert_eq(other.strength, 1.0, "the client keeps the room's value")
+	wind.gusts.strength(60.0)  # Draws the first gusts.
+	var gust: Vector2 = wind.gusts.gusts[0]
+	var middle := (gust.x + gust.y) / 2.0
+	other.sync(wind.seed_used, middle)
+	assert_eq(other.seed_used, wind.seed_used)
+	assert_eq(other.strength, 1.0, "in the room's gust")
+	other._process(0.01)
 	assert_true(NoiseBus.wind_gust)
+	assert_almost_eq(other.time, middle + 0.01, 0.0001, "then on its own clock")

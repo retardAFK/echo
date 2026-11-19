@@ -3,8 +3,10 @@ extends AudioStreamPlayer
 ## The wind of the cité (spec S-012, T-144, section 6.4): a loop that swells
 ## and whistles during the gusts (WindGusts), duller indoors. While a gust
 ## blows at full strength, NoiseBus cuts the small noises outdoors.
-## Online, the room's wind is sent to every client (NetWorld), so the gusts
-## blow at the same time for everyone. Plain ambience: it betrays nobody.
+## Online, the room sends its seed and time to every client once a second
+## (NetWorld.clock, S-020, T-300): the client draws the same gusts and blows
+## them on its own clock, so the gusts blow at the same time for everyone.
+## Plain ambience: it betrays nobody.
 
 const WHISTLE := preload("res://assets/audio/ambience/gust.wav")
 
@@ -12,19 +14,20 @@ const WHISTLE := preload("res://assets/audio/ambience/gust.wav")
 @export var gust_seed := 0
 
 var audio: AudioSettings = preload("res://game/data/audio_settings.tres")
-## Online client: the strength comes from the room.
-var mirror := false
 ## 0 calm, 1 a full gust.
 var strength := 0.0
 var time := 0.0
 
 var gusts: WindGusts
+## The seed the gusts were drawn from.
+var seed_used := 0
 var _base_db := 0.0
 var _whistle: AudioStreamPlayer
 
 
 func _ready() -> void:
-	gusts = WindGusts.new(gust_seed if gust_seed != 0 else randi(), audio)
+	seed_used = gust_seed if gust_seed != 0 else randi()
+	gusts = WindGusts.new(seed_used, audio)
 	_base_db = volume_db
 	_whistle = AudioStreamPlayer.new()
 	_whistle.name = "Whistle"
@@ -39,9 +42,8 @@ func _exit_tree() -> void:
 
 
 func _process(delta: float) -> void:
-	if not mirror:
-		time += delta
-		strength = gusts.strength(time)
+	time += delta
+	strength = gusts.strength(time)
 	NoiseBus.wind_gust = strength >= 1.0
 	var camera := get_viewport().get_camera_3d()
 	var indoors := camera != null and Building.any_contains(get_tree(), camera.global_position)
@@ -55,12 +57,10 @@ func _process(delta: float) -> void:
 		_whistle.stop()
 
 
-## Online client: the room's wind.
-func mirror_strength(value: float) -> void:
-	mirror = true
-	strength = value
-
-
-## Room side: the strength to send, in steps of a twentieth.
-func shared_strength() -> float:
-	return snappedf(strength, 0.05)
+## Online client: the room's gusts, from their seed, at the room's time.
+func sync(room_seed: int, room_time: float) -> void:
+	if room_seed != seed_used:
+		seed_used = room_seed
+		gusts = WindGusts.new(room_seed, audio)
+	time = room_time
+	strength = gusts.strength(time)
