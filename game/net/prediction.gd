@@ -79,7 +79,7 @@ func reconcile(seq: int, server_position: Vector3) -> Vector3:
 		_rate = error / settings.correction_time
 		_correcting = true
 	elif gap >= settings.settle_threshold and not _correcting:
-		# Small: settled slowly, so it is not kept for good (S-020, T-319),
+		# Small: settled slowly, so it is not kept for good (S-020, T-346),
 		# unless a medium correction is still on its way.
 		pending = error
 		_rate = error / settings.settle_time

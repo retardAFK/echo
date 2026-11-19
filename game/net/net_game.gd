@@ -91,6 +91,9 @@ var worst_error := 0.0
 ## bytes of the last WORLD message and how many came in that window, and the
 ## room's frames per second (sent with CLOCK).
 var last_error := 0.0
+## Client side: where the last snapshot put the player in the room (tests,
+## S-020, T-347: a bot held by the room shows here, not where it predicts).
+var room_position := Vector3.ZERO
 var recent_worst_error := 0.0
 var world_bytes := 0
 var world_count := 0
@@ -597,6 +600,7 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 	var you: Array = snapshot.get("you", [])
 	if you.size() >= 1:
 		var server_position: Vector3 = you[0]
+		room_position = server_position
 		var ack: int = snapshot.get("ack", 0)
 		if not prediction.started or (ack > prediction.floor_seq and not prediction.knows(ack)):
 			# First snapshot, or a frame too old to compare: go where the room has us.
