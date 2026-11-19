@@ -23,6 +23,14 @@ extends Resource
 @export_range(5.0, 600.0, 1.0, "suffix:s") var room_idle_timeout: float = 60.0
 ## Commands sent by a client per second (S-010, Q5).
 @export_range(5, 60) var commands_rate: int = 30
+## Frames of held commands in each packet a client sends (S-020, T-321): the
+## new ones and the last ones again, so a lost packet costs nothing.
+@export_range(1, 16) var frames_per_packet: int = 4
+## Room side: frames of a player queued before playing them, again after the
+## queue ran dry (T-321), to ride out the bursts of the WebSocket.
+@export_range(0, 10) var command_lead: int = 3
+## Room side: beyond this many frames queued, the oldest are dropped.
+@export_range(1, 60) var command_max_backlog: int = 8
 ## Snapshots sent by the room to each client per second (S-010, Q5).
 @export_range(5, 60) var snapshot_rate: int = 20
 ## Other players are shown this far in the past, between two snapshots (Q8);

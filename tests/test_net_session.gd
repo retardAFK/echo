@@ -73,10 +73,11 @@ func test_actions_reach_the_room_once() -> void:
 	local.push(PlayerCommands.Action.THROW)
 	local.push(PlayerCommands.Action.CROUCH)
 	await wait_seconds(0.3)
-	assert_eq(
-		room.commands_for(1).take_actions(),
-		[PlayerCommands.Action.THROW, PlayerCommands.Action.CROUCH] as Array
-	)
+	var queue := room.queue_for(1)  # S-020, T-321: played with their frame.
+	var got: Array = []
+	for i in queue.action_wait + 2:
+		got.append_array(queue.next().take_actions())
+	assert_eq(got, [PlayerCommands.Action.THROW, PlayerCommands.Action.CROUCH] as Array)
 
 
 func test_ping_shown_on_debug_text() -> void:

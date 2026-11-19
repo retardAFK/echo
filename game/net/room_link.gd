@@ -52,8 +52,10 @@ var is_room := false
 var version := NetAddress.build_version()
 ## Room side: place of each connected player, by peer id.
 var players := {}
-## Room side: latest commands of each place, by place (T-095).
+## Room side: newest commands received from each place, by place (T-095).
 var commands := {}
+## Room side: the CommandQueue of each place, by place (S-020, T-321).
+var queues := {}
 ## Room side: the waiting room (T-096).
 var lobby := LobbyState.new()
 ## Client side: the last waiting room received.
@@ -180,6 +182,7 @@ func _on_peer_disconnected(id: int) -> void:
 		return
 	var gone: int = players[id]
 	commands.erase(gone)
+	queues.erase(gone)
 	players.erase(id)
 	if lobby.started:
 		# Its seat waits for it (T-102); the leader's role goes on.
@@ -207,20 +210,27 @@ func commands_for(given_place: int) -> PlayerCommands:
 	return commands[given_place]
 
 
-## Client side: sends what is held and where the player looks. Frames may be
-## lost or late; the room keeps only the newest.
-func send_held(held: PlayerCommands) -> void:
-	if place > 0:
-		var copy := PlayerCommands.new()
-		copy.copy_held(held)
-		var bytes := copy.to_bytes()
+## Room side: the CommandQueue of a place, created empty (T-321).
+func queue_for(given_place: int) -> CommandQueue:
+	if not queues.has(given_place):
+		queues[given_place] = CommandQueue.new(settings)
+	return queues[given_place]
+
+
+## Client side: sends the last frames of what is held and where the player
+## looks, oldest first (S-020, T-321). Packets may be lost or late: each one
+## repeats the frames of the ones before.
+func send_held(recent: Array[PlayerCommands]) -> void:
+	if place > 0 and not recent.is_empty():
+		var bytes := PlayerCommands.frames_to_bytes(recent)
 		_later(func() -> void: _receive_held.rpc_id(1, bytes))
 
 
-## Client side: sends a one-shot action, which must not be lost.
-func send_action(action: PlayerCommands.Action) -> void:
+## Client side: sends a one-shot action of the frame seq, which must not be
+## lost (T-321: the room plays it with that frame).
+func send_action(seq: int, action: PlayerCommands.Action) -> void:
 	if place > 0:
-		_later(func() -> void: _receive_action.rpc_id(1, action))
+		_later(func() -> void: _receive_action.rpc_id(1, seq, action))
 
 
 func _drop(peer_id: int) -> void:
@@ -300,20 +310,22 @@ func _receive_held(bytes: PackedByteArray) -> void:
 	var sender_place: int = players.get(_api.get_remote_sender_id(), 0) if is_room else 0
 	if sender_place == 0:
 		return
-	var received := PlayerCommands.from_bytes(bytes)
+	var frames := PlayerCommands.frames_from_bytes(bytes)
 	var held := commands_for(sender_place)
-	if received != null and received.seq > held.seq:
-		held.copy_held(received)
+	for received in frames:
+		if received.seq > held.seq:
+			held.copy_held(received)
+	queue_for(sender_place).receive(frames)
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _receive_action(action: int) -> void:
+func _receive_action(seq: int, action: int) -> void:
 	var sender_place: int = players.get(_api.get_remote_sender_id(), 0) if is_room else 0
 	if sender_place == 0 or action < 0:
 		return
 	# An action, or the pick of a line of a terminal's menu (S-018).
 	if action < PlayerCommands.Action.size() or PlayerCommands.picked(action) >= 0:
-		commands_for(sender_place).push(action as PlayerCommands.Action)
+		queue_for(sender_place).add_action(seq, action)
 
 
 @rpc("authority", "call_remote", "reliable")
