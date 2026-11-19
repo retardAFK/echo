@@ -10,18 +10,31 @@ extends SceneTree
 ## so a tile row is a height above the storey floor: row 0 is the floor line.
 ## Dull colors only, never orange (constitution 2.3).
 
+## Tile indices, kept in step with InteriorLining.Tile.
+enum Tile {
+	HALL,
+	STAIRS,
+	CORRIDOR,
+	LIVING,
+	BEDROOM,
+	KITCHEN,
+	CELLAR,
+	CEILING,
+	TERRAZZO,
+	LINO,
+	PARQUET,
+	CONCRETE,
+	WARD_CORRIDOR,
+	FAIENCE,
+	WARD,
+	WARD_LINO,
+}
+
 const OUT := "res://assets/textures/interior_atlas.png"
 const TILE := Vector2i(256, 192)
 const GRID := Vector2i(4, 4)
 const PPM := 64.0
 const SEED := 19
-
-## Tile indices, kept in step with InteriorLining.Tile.
-enum Tile {
-	HALL, STAIRS, CORRIDOR, LIVING, BEDROOM, KITCHEN, CELLAR, CEILING,
-	TERRAZZO, LINO, PARQUET, CONCRETE,
-	WARD_CORRIDOR, FAIENCE, WARD, WARD_LINO,
-}
 
 var _rng := RandomNumberGenerator.new()
 var _img: Image
@@ -121,7 +134,13 @@ func _grime(top_streaks: int, floor_band: int) -> void:
 
 ## Scribbled tags between heights y0 and y1, in dull colors.
 func _tags(count: int, y0: int, y1: int) -> void:
-	var inks := [Color(0.05, 0.05, 0.06), Color(0.05, 0.05, 0.06), Color(0.12, 0.16, 0.34), Color(0.36, 0.07, 0.08), Color(0.62, 0.62, 0.58)]
+	var inks := [
+		Color(0.05, 0.05, 0.06),
+		Color(0.05, 0.05, 0.06),
+		Color(0.12, 0.16, 0.34),
+		Color(0.36, 0.07, 0.08),
+		Color(0.62, 0.62, 0.58)
+	]
 	for i in count:
 		var ink: Color = inks[_rng.randi_range(0, inks.size() - 1)]
 		var p := Vector2(_rng.randf_range(0, TILE.x), _rng.randf_range(y0, y1))

@@ -9,7 +9,8 @@ extends Node3D
 ## The monster holds "interact" on it to switch it off for off_time: whoever
 ## sits there is thrown off, and nobody uses it until it comes back on.
 ## A GUARD terminal also opens the cages (T-264); a CODE one, the transformer's
-## keypad, only takes a code (T-266).
+## keypad, only takes a code (T-266): terminal_keypad.tscn, a box on the
+## transformer's wall instead of a PC on a desk (S-020, T-316).
 
 ## Someone sat down at it, or left it.
 signal sat(user: Node3D)
