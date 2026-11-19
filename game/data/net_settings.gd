@@ -49,6 +49,11 @@ extends Resource
 ## ...over this time, and above this gap the player jumps to the room's position.
 @export_range(0.01, 1.0, 0.01, "suffix:s") var correction_time: float = 0.4
 @export_range(0.5, 10.0, 0.1, "suffix:m") var snap_threshold: float = 2.0
+## A gap under correction_threshold but above this is settled slowly, over
+## settle_time, so that a player standing still ends where the room has it
+## (S-020, T-319): kept for good, it made the room's player aim elsewhere.
+@export_range(0.0, 0.5, 0.01, "suffix:m") var settle_threshold: float = 0.05
+@export_range(0.1, 5.0, 0.1, "suffix:s") var settle_time: float = 1.0
 ## Players further than this are never sent to a hunted (night sight, plan S-010).
 @export_range(5.0, 200.0, 1.0, "suffix:m") var sight_range: float = 40.0
 ## Half-angle of the view cone used to filter what a client receives; wider
