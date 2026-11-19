@@ -261,7 +261,7 @@ Cette section décrit le jeu cible. Chaque point deviendra une ou plusieurs spec
 
 | | Chassé | Monstre |
 |---|---|---|
-| Nombre | 1 à 3 en ligne (le chef de la partie choisit 2 à 4 joueurs, les rôles sont tirés au sort), les places vides sont tenues par des IA ; 1 en solo contre le monstre IA | 1, toujours un joueur humain en ligne |
+| Nombre | toujours 3 en ligne (le chef de la partie choisit 2 à 4 joueurs humains, les rôles sont tirés au sort), les places sans joueur sont tenues par des IA (S-020, T-314) ; 1 en solo contre le monstre IA | 1, toujours un joueur humain en ligne |
 | Vue | Vision normale, nuit et brouillard | Vision normale, nuit et brouillard, plus les bruits affichés à leur position avec leur distance |
 | Objectif | Réussir 3 objectifs tirés au sort (dont au moins un fusible, D-020), puis atteindre la sortie | Attraper tous les chassés avant qu'ils ne sortent |
 | Force | Ruse, cachettes, objets de diversion et leurres, connaissance du terrain | Rapide, entend à travers les murs, scan de bâtiment, tue au contact |
