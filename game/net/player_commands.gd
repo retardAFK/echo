@@ -10,7 +10,7 @@ extends RefCounted
 signal action_pushed(action: Action)
 
 ## One-shot actions, applied once by the avatar.
-enum Action { CROUCH, INTERACT, THROW, DECOY }
+enum Action { CROUCH, INTERACT, THROW, DECOY, FIRECRACKER }
 
 ## A line picked in a terminal's menu (S-018): PICK_BASE + its number, from
 ## 0, so a tampered client picks only lines the menu has, and nothing else.

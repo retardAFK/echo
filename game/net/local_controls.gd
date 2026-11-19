@@ -29,6 +29,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		commands.push(PlayerCommands.Action.THROW)
 	elif event.is_action_pressed("place_decoy") and captured:
 		commands.push(PlayerCommands.Action.DECOY)
+	elif event.is_action_pressed("place_firecracker") and captured:
+		commands.push(PlayerCommands.Action.FIRECRACKER)
 	elif event is InputEventMouseButton and event.pressed:
 		# Browsers only allow pointer capture right after a user gesture.
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

@@ -15,6 +15,8 @@ var _markers: Array[NoiseMarker] = []
 var _positions: Array[Vector3] = []
 var _ages: Array[float] = []
 var _next := 0
+## "Deafened" while a firecracker's crack rings in its ears (S-020, T-312).
+var _deaf_label: Label
 
 
 ## "11 m": distance rounded to the meter, through the HUD_DISTANCE key.
@@ -39,9 +41,19 @@ func _ready() -> void:
 		_positions.append(Vector3.ZERO)
 		_ages.append(settings.marker_fade_time)
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
+	_deaf_label = Label.new()
+	_deaf_label.name = "Deaf"
+	_deaf_label.visible = false
+	_deaf_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_deaf_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	_deaf_label.offset_top = 64.0
+	_deaf_label.add_theme_color_override("font_color", NoiseBus.settings.noise_color)
+	_deaf_label.add_theme_font_size_override("font_size", 28)
+	add_child(_deaf_label)
 
 
 func _process(delta: float) -> void:
+	_show_deafness()
 	var camera: Camera3D = monster.get_camera()
 	var fade_time := _settings().marker_fade_time
 	for i in _markers.size():
@@ -72,6 +84,14 @@ func get_active_count() -> int:
 	return _ages.filter(func(age: float) -> bool: return age < fade_time).size()
 
 
+func _show_deafness() -> void:
+	var deaf := Deafness.of(monster)
+	_deaf_label.visible = deaf
+	if deaf:
+		var left: float = (monster.get("deafness") as Deafness).left
+		_deaf_label.text = Text.t("HUD_DEAF", ceili(left))
+
+
 func _settings() -> MonsterSettings:
 	return monster.settings
 
@@ -79,6 +99,8 @@ func _settings() -> MonsterSettings:
 func _on_noise_emitted(event: NoiseEvent) -> void:
 	if monster == null or event.source == monster or event.masked:
 		return
+	if Deafness.of(monster):
+		return  # A firecracker went off at its feet (S-020, T-312).
 	if monster.has_method("scan_reveals") and monster.scan_reveals(event):
 		show_noise(event)  # The scan hears it, however faint (S-004, Q3).
 	elif event.noise_range > 0.0 and NoiseBus.can_hear(event, monster.get_ear_position()):

@@ -39,7 +39,8 @@ func _walk(noise: MonsterNoise, pace: MonsterBrain.Pace, metres: float, delta :=
 func test_the_new_noises_come_last_so_online_numbers_stay() -> void:
 	assert_eq(NoiseEvent.Type.GROWL, NoiseEvent.Type.ROLL + 1)
 	assert_eq(NoiseEvent.Type.SCREAM, NoiseEvent.Type.ROLL + 2)
-	assert_eq(NoiseEvent.Type.size(), NoiseEvent.Type.SCREAM + 1)
+	assert_eq(NoiseEvent.Type.FIRECRACKER, NoiseEvent.Type.SCREAM + 1)  # S-020, T-312.
+	assert_eq(NoiseEvent.Type.size(), NoiseEvent.Type.FIRECRACKER + 1)
 
 
 func test_it_growls_when_it_breaks_into_a_run_after_a_rest() -> void:

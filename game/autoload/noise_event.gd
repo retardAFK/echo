@@ -11,6 +11,7 @@ extends RefCounted
 ## MONITOR: a hospital monitor beeping; ROLL: a gurney or a wheelchair
 ## rolling, or a gurney shoved over (S-014). GROWL: the monster breaking into a
 ## run; SCREAM: the monster's cry when it catches a hunted (S-012, T-145).
+## FIRECRACKER: a firecracker going off under the monster (S-020, T-312).
 ## New types go last: their numbers travel online.
 enum Type {
 	FOOTSTEP,
@@ -39,6 +40,7 @@ enum Type {
 	ROLL,
 	GROWL,
 	SCREAM,
+	FIRECRACKER,
 }
 
 var type: Type
