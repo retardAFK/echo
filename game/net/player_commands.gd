@@ -25,6 +25,10 @@ const FLAG_SCAN := 4
 const FLAG_BREATH := 8
 ## Bytes before the actions: seq (4), move (2 x 4), yaw (4), pitch (4), flags (1), count (1).
 const HEADER_SIZE := 22
+## Bytes of one frame in a packet of frames: the header without the count.
+const FRAME_SIZE := 21
+## Frames in one packet at most.
+const MAX_FRAMES := 16
 
 ## Increases with every frame sent, so the receiver can drop old ones.
 var seq := 0
@@ -87,21 +91,7 @@ func peek_actions() -> Array[Action]:
 func to_bytes() -> PackedByteArray:
 	var bytes := PackedByteArray()
 	bytes.resize(HEADER_SIZE + _actions.size())
-	bytes.encode_u32(0, seq)
-	bytes.encode_float(4, move.x)
-	bytes.encode_float(8, move.y)
-	bytes.encode_float(12, yaw)
-	bytes.encode_float(16, pitch)
-	var flags := 0
-	if sprint:
-		flags |= FLAG_SPRINT
-	if interact:
-		flags |= FLAG_INTERACT
-	if scan:
-		flags |= FLAG_SCAN
-	if hold_breath:
-		flags |= FLAG_BREATH
-	bytes.encode_u8(20, flags)
+	_encode_held(bytes, 0)
 	bytes.encode_u8(21, _actions.size())
 	for i in _actions.size():
 		bytes.encode_u8(HEADER_SIZE + i, _actions[i])
@@ -117,21 +107,73 @@ static func from_bytes(bytes: PackedByteArray) -> PlayerCommands:
 	var count := bytes.decode_u8(21)
 	if bytes.size() != HEADER_SIZE + count:
 		return null
-	var commands := PlayerCommands.new()
-	commands.seq = bytes.decode_u32(0)
-	var move := Vector2(bytes.decode_float(4), bytes.decode_float(8))
-	commands.move = move.limit_length(1.0) if move.is_finite() else Vector2.ZERO
-	var yaw := bytes.decode_float(12)
-	var pitch := bytes.decode_float(16)
-	commands.yaw = yaw if is_finite(yaw) else 0.0
-	commands.pitch = pitch if is_finite(pitch) else 0.0
-	var flags := bytes.decode_u8(20)
-	commands.sprint = flags & FLAG_SPRINT != 0
-	commands.interact = flags & FLAG_INTERACT != 0
-	commands.scan = flags & FLAG_SCAN != 0
-	commands.hold_breath = flags & FLAG_BREATH != 0
+	var commands := _decode_held(bytes, 0)
 	for i in count:
 		var action := bytes.decode_u8(HEADER_SIZE + i)
 		if action < Action.size() or picked(action) >= 0:
 			commands.push(action as Action)
+	return commands
+
+
+## Several frames of held commands in one packet (S-020, T-321): a count,
+## then FRAME_SIZE bytes per frame, oldest first. Queued actions are not in
+## it: they go reliably on their own, with the number of their frame.
+static func frames_to_bytes(frames: Array[PlayerCommands]) -> PackedByteArray:
+	var count := mini(frames.size(), MAX_FRAMES)
+	var first := frames.size() - count
+	var bytes := PackedByteArray()
+	bytes.resize(1 + FRAME_SIZE * count)
+	bytes.encode_u8(0, count)
+	for i in count:
+		frames[first + i]._encode_held(bytes, 1 + FRAME_SIZE * i)
+	return bytes
+
+
+## Reads what frames_to_bytes() wrote; empty if the bytes are malformed.
+static func frames_from_bytes(bytes: PackedByteArray) -> Array[PlayerCommands]:
+	var frames: Array[PlayerCommands] = []
+	if bytes.is_empty():
+		return frames
+	var count := bytes.decode_u8(0)
+	if count > MAX_FRAMES or bytes.size() != 1 + FRAME_SIZE * count:
+		return frames
+	for i in count:
+		frames.append(_decode_held(bytes, 1 + FRAME_SIZE * i))
+	return frames
+
+
+## Writes seq, move, yaw, pitch and the held flags at offset (FRAME_SIZE bytes).
+func _encode_held(bytes: PackedByteArray, offset: int) -> void:
+	bytes.encode_u32(offset, seq)
+	bytes.encode_float(offset + 4, move.x)
+	bytes.encode_float(offset + 8, move.y)
+	bytes.encode_float(offset + 12, yaw)
+	bytes.encode_float(offset + 16, pitch)
+	var flags := 0
+	if sprint:
+		flags |= FLAG_SPRINT
+	if interact:
+		flags |= FLAG_INTERACT
+	if scan:
+		flags |= FLAG_SCAN
+	if hold_breath:
+		flags |= FLAG_BREATH
+	bytes.encode_u8(offset + 20, flags)
+
+
+## Reads what _encode_held() wrote, with movement clamped to length 1.
+static func _decode_held(bytes: PackedByteArray, offset: int) -> PlayerCommands:
+	var commands := PlayerCommands.new()
+	commands.seq = bytes.decode_u32(offset)
+	var move := Vector2(bytes.decode_float(offset + 4), bytes.decode_float(offset + 8))
+	commands.move = move.limit_length(1.0) if move.is_finite() else Vector2.ZERO
+	var yaw := bytes.decode_float(offset + 12)
+	var pitch := bytes.decode_float(offset + 16)
+	commands.yaw = yaw if is_finite(yaw) else 0.0
+	commands.pitch = pitch if is_finite(pitch) else 0.0
+	var flags := bytes.decode_u8(offset + 20)
+	commands.sprint = flags & FLAG_SPRINT != 0
+	commands.interact = flags & FLAG_INTERACT != 0
+	commands.scan = flags & FLAG_SCAN != 0
+	commands.hold_breath = flags & FLAG_BREATH != 0
 	return commands

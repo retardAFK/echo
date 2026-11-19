@@ -2,7 +2,9 @@ extends Node
 ## The online session of this process (S-010, T-095), autoload "NetSession".
 ## SOLO: no network, the game runs here as before ("Jouer seul", Q9).
 ## CLIENT: connected to a room; the commands of the local avatar are sent to
-## it, held keys commands_rate times per second and one-shot actions at once.
+## it: every physics frame of held keys, in packets sent commands_rate times
+## per second that repeat the last frames_per_packet frames (S-020, T-321),
+## and one-shot actions at once, with the number of their frame.
 ## ROOM: this process is a room; it receives the commands of every place.
 ## The connection itself is a RoomLink child named "Room".
 
@@ -34,6 +36,8 @@ var local_commands: PlayerCommands:
 	set = set_local_commands
 
 var _send_left := 0.0
+## Client side: the last frames of local_commands, oldest first (T-321).
+var _frames: Array[PlayerCommands] = []
 ## Client side: the room joined last, to come back to it (T-102).
 var _last_url := ""
 
@@ -93,6 +97,7 @@ func _on_joined(place: int, token: String) -> void:
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS  # Keeps the link alive behind a paused end screen.
+	process_physics_priority = 100  # After the avatar has filled this frame's commands.
 
 
 ## Room side: the game is over, back to the waiting room (T-099).
@@ -109,6 +114,7 @@ func leave() -> void:
 		link = null
 	mode = Mode.SOLO
 	_send_left = 0.0
+	_frames.clear()
 
 
 ## Client side: own place in the room (1 to room_size), or 0.
@@ -156,6 +162,7 @@ func set_local_commands(commands: PlayerCommands) -> void:
 	if local_commands != null and local_commands.action_pushed.is_connected(_on_action_pushed):
 		local_commands.action_pushed.disconnect(_on_action_pushed)
 	local_commands = commands
+	_frames.clear()
 	if commands != null:
 		commands.action_pushed.connect(_on_action_pushed)
 
@@ -172,14 +179,20 @@ func describe() -> String:
 	return ""
 
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if mode != Mode.CLIENT or local_commands == null or get_place() == 0:
 		return
+	if _frames.is_empty() or local_commands.seq > _frames[-1].seq:
+		var frame := PlayerCommands.new()
+		frame.copy_held(local_commands)
+		_frames.append(frame)
+		while _frames.size() > settings.frames_per_packet:
+			_frames.pop_front()
 	_send_left -= delta
 	if _send_left <= 0.0:
 		_send_left += 1.0 / settings.commands_rate
 		_send_left = maxf(_send_left, 0.0)
-		link.send_held(local_commands)
+		link.send_held(_frames)
 
 
 func _on_lobby_changed(state: Dictionary) -> void:
@@ -190,9 +203,11 @@ func _on_game_started(state: Dictionary) -> void:
 	game_started.emit(LobbyState.from_dict(state))
 
 
+## The action is played by the avatar in its next frame, the one after the
+## frame of the commands' number now.
 func _on_action_pushed(action: PlayerCommands.Action) -> void:
 	if mode == Mode.CLIENT:
-		link.send_action(action)
+		link.send_action(local_commands.seq + 1, action)
 
 
 func _new_link() -> RoomLink:

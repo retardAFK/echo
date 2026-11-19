@@ -233,7 +233,9 @@ func _apply_commands() -> void:
 	var link := NetSession.link
 	for place in avatars:
 		var avatar: Node3D = avatars[place]
-		var received := link.commands_for(place)
+		# Exactly one frame of the player's commands per physics frame, from its
+		# queue (S-020, T-321): the number sent back is the frame played.
+		var received := link.queue_for(place).next()
 		if _watching.has(place):
 			for action in received.take_actions():
 				if action == PlayerCommands.Action.INTERACT:
