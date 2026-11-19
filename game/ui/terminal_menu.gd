@@ -66,6 +66,9 @@ func _process(_delta: float) -> void:
 			_help.text = Text.t("HUD_KEYPAD_IDLE")
 		else:
 			_help.text = Text.t("HUD_KEYPAD_TYPED", quests.typed_on(terminal).rpad(4, "_"))
+			var read := CodeSpot.read_code_spot(get_tree())
+			if read != null:  # The code read on its post-it (T-271).
+				_help.text += "\n" + Text.t("HUD_KEYPAD_READ", read.get_code())
 
 
 func _input(event: InputEvent) -> void:

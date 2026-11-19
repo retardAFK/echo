@@ -17,9 +17,9 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [ ] T-311 — H2 : retenir son souffle
 - [ ] T-312 — R1 : pétard assourdissant
 - [ ] T-313 — R2 : réveil réglable
-- [ ] T-314 — T5 : IA de complément, une règle dans le guide et le code (Maxime choisit)
+- [x] T-314 — T5 : IA de complément, une règle dans le guide et le code (Maxime choisit)
 - [ ] T-315 — N1 : caméras accrochées aux murs
-- [ ] T-316 — N2 : clavier du transformateur en boîtier mural
+- [x] T-316 — N2 : clavier du transformateur en boîtier mural
 - [ ] T-317 — J2 : grille de test commune
 - [ ] T-318 — J1 : nettoyer les branches (Maxime donne son accord)
 
@@ -29,5 +29,7 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - T-303 (19/11/2026) : écran F3 en ligne : écart de prédiction (dernier, pire sur 5 s), taille et nombre des messages de carte sur 5 s, images par seconde de la salle. Mesure avec `net_walk` (6 s de course) : 25 messages de carte de 3 Ko avant la seconde partie de T-301 (chaque pas changeait `noise_count`), 3 après.
 - T-304 (19/11/2026) : un client se lève du terminal dès qu'il bouge, sans attendre la salle ; un instantané parti avant que la salle le sache ne le rassoit pas (1,5 s). Test GUT dans `test_network`.
 - T-305 (19/11/2026) : `gust_db` 9 → 4 dB et `whistle_db` -10 → -16 dB (`audio_settings.gd`), pour que le vent ne couvre plus les pas du monstre.
+- T-314 (19/11/2026) : règle choisie par Maxime : une partie en ligne a toujours 3 chassés ; le chef choisit 2 à 4 joueurs humains et les places sans joueur sont jouées par des IA chassées (`GameMap._setup_online_room`). L'interphone montre les 4 places (les vides en « IA »). Guide du jeu et ECHO_PROJET.md alignés. Tests GUT dans `test_fill_in_ai` et `test_online_menu`.
+- T-316 (19/11/2026) : le clavier du code (`Terminal.Kind.CODE`) est `terminal_keypad.tscn`, un boîtier métallique de 36 × 50 cm avec écran vert et pavé, sans bureau ni PC. `build_tilleuls.gd` le colle au mur du transformateur (`_snap_to_wall`), 1,5 m plus près qu'avant ; rien d'autre ne change dans la carte (comparaison `dump_scene` avant et après). Capture `clavier_transfo` mise à jour. Test GUT dans `test_objectives`.
 - T-306 (19/11/2026) : `monster_fog_density` 0,073 dans `visual_settings.gd` pour le rôle de monstre (solo et en ligne), soit à 12 m ce que le chassé voit à 25 m ; le brouillard des couloirs n'est jamais plus léger. Captures comparées sous Xvfb (aire de jeux) : les barres à 30 m disparaissent pour le monstre. Test GUT dans `test_night`.
 - T-307 (19/11/2026) : `Stagger` (monstre IA et monstre joué) ; `Door.smash` arrête le monstre `smash_stagger` = 0,8 s (`door_settings.gd`). En ligne, le client prédit l'arrêt sans ouvrir la porte (la salle l'ouvre), pour ne pas être recalé de 5 m. Tests GUT dans `test_doors`.
