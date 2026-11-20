@@ -257,6 +257,33 @@ class Model:
                 loop[self.uv].uv = (u, v)
         return faces
 
+    def cylinder(self, center, radius, length, axis, mat, segments=12, meters=1.0):
+        """A prism of `segments` sides along axis "x", "y" or "z", its faces
+        mapped by world projection like box() (wheels, S-020, T-324)."""
+        before = set(self.bm.faces)
+        made = bmesh.ops.create_cone(
+            self.bm, cap_ends=True, segments=segments, radius1=radius, radius2=radius, depth=length
+        )
+        for v in made["verts"]:
+            x, y, z = v.co
+            if axis == "x":
+                x, y, z = z, y, x
+            elif axis == "y":
+                x, y, z = x, z, y
+            v.co = (x + center[0], y + center[1], z + center[2])
+        faces = set(self.bm.faces) - before
+        bmesh.ops.recalc_face_normals(self.bm, faces=list(faces))  # The swap mirrors them.
+        self.bm.normal_update()
+        slot = self._slot(mat)
+        for f in faces:
+            f.material_index = slot
+            axis_index = max(range(3), key=lambda i: abs(f.normal[i]))
+            a, b = [(1, 2), (0, 2), (0, 1)][axis_index]
+            for loop in f.loops:
+                co = loop.vert.co
+                loop[self.uv].uv = (co[a] / meters, co[b] / meters)
+        return faces
+
     def build(self, offset_x=0.0):
         mesh = bpy.data.meshes.new(self.name)
         self.bm.to_mesh(mesh)
