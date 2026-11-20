@@ -2,6 +2,7 @@ keys,fr
 HUD_NOISE,Bruit
 HUD_SPRINT,Course
 HUD_BREATH,Souffle
+HUD_SECOND_WIND,Élan
 HUD_CAUGHT,Attrapé
 MENU_PLAY_HUNTED,Chassé
 MENU_PLAY_MONSTER,Monstre
@@ -67,6 +68,7 @@ CONTROLS_FIRECRACKER,"{place_firecracker} : poser le pétard (il éclate sous le
 CONTROLS_CAN_WIRE,"{place_can_wire} : tendre le fil à canettes en travers du passage (il tinte quand le monstre passe)"
 CONTROLS_WALKMAN,"{place_walkman} : poser le walkman (3 s plus tard, des pas de course s'éloignent tout droit devant)"
 CONTROLS_SMOKE,"{smoke_bomb} : lâcher le fumigène à ses pieds (un nuage de 10 s où personne ne voit à travers)"
+CONTROLS_SECOND_WIND,"{second_wind} : second souffle, 2 s plus vite qu'un sprint, une fois par minute (très bruyant)"
 CONTROLS_MAP,{map} : ouvrir ou fermer la carte
 CONTROLS_PING,"{ping} ou clic molette : signaler aux autres chassés (le monstre visé, sinon l'endroit)"
 CONTROLS_PROWL,{crouch} : rôder (silencieux)
@@ -234,6 +236,7 @@ OPTIONS_KEY_FIRECRACKER,Poser le pétard
 OPTIONS_KEY_CAN_WIRE,Tendre le fil à canettes
 OPTIONS_KEY_WALKMAN,Poser le walkman
 OPTIONS_KEY_SMOKE,Lâcher le fumigène
+OPTIONS_KEY_SECOND_WIND,Second souffle
 OPTIONS_KEY_INTERACT,Interagir
 OPTIONS_KEY_MAP,Carte
 OPTIONS_KEY_PING,Signaler

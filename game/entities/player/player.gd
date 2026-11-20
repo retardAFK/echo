@@ -34,6 +34,8 @@ const PING_SCENE := preload("res://game/entities/ping/ping.tscn")
 var inventory: Inventory
 ## Holding its breath (S-020, T-311), with its recharge.
 var breath_hold: BreathHold
+## Its burst once a minute (S-020, T-338), with its recharge.
+var second_wind: SecondWind
 ## The hiding spot the player is in (S-008, Q6), or null.
 var hiding_in: HidingSpot
 ## What the player asks this frame (S-010, T-106): from the keyboard and
@@ -115,6 +117,7 @@ func _ready() -> void:
 	Settings.changed.connect(_apply_view_settings)
 	inventory = Inventory.new(ruse_settings)
 	breath_hold = BreathHold.new(settings)
+	second_wind = SecondWind.new(settings)
 	# Each player owns its capsule, so resizing it never touches another instance.
 	_capsule = _collision.shape.duplicate()
 	_collision.shape = _capsule
@@ -125,6 +128,7 @@ func _ready() -> void:
 	_apply_height(settings.standing_height)
 	if local_controls:
 		add_child(BreathBar.new(breath_hold))
+		add_child(SecondWindBar.new(second_wind))
 		_controls = LocalControls.new()
 		_controls.commands = commands
 		add_child(_controls)
@@ -140,6 +144,7 @@ func _physics_process(delta: float) -> void:
 		_watch_catcher(delta)
 		return
 	apply_actions()
+	second_wind.update(delta)
 	_update_breath(delta)
 	if held:
 		if pushing != null:
@@ -167,7 +172,12 @@ func _physics_process(delta: float) -> void:
 			_has_headroom()
 		)
 	)
+	var bursting := second_wind.is_active() and _gait != PlayerMotion.Gait.CROUCH
+	if bursting and not input.is_zero_approx():
+		_set_gait(PlayerMotion.Gait.SPRINT)  # Its second wind (S-020, T-338).
 	var target_speed := PlayerMotion.speed_for_gait(settings, _gait)
+	if bursting:
+		target_speed = settings.second_wind_speed
 	var target := PlayerMotion.wish_direction(input, rotation.y) * target_speed
 	var horizontal := PlayerMotion.approach_velocity(
 		Vector3(velocity.x, 0.0, velocity.z), target, settings, delta
@@ -189,8 +199,12 @@ func _physics_process(delta: float) -> void:
 ## Applies the one-shot actions queued in the commands (S-010, T-106).
 func apply_actions() -> void:
 	for action in commands.take_actions():
-		if mirror_world and action != PlayerCommands.Action.CROUCH:
-			continue  # The room does it and says so.
+		if (
+			mirror_world
+			and action != PlayerCommands.Action.CROUCH
+			and action != PlayerCommands.Action.SECOND_WIND
+		):
+			continue  # The room does it and says so; moving is predicted.
 		if held:
 			# Captured (T-107); in a cage, "interact" goes through the cameras (S-018, Q8).
 			if action == PlayerCommands.Action.INTERACT and _in_cage():
@@ -241,6 +255,8 @@ func apply_actions() -> void:
 				_place_walkman()
 			PlayerCommands.Action.SMOKE:
 				_set_off_smoke()
+			PlayerCommands.Action.SECOND_WIND:
+				_start_second_wind()
 
 
 func _in_cage() -> bool:
@@ -469,6 +485,18 @@ func _set_off_smoke() -> SmokeCloud:
 	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
 	ruse_used.emit(&"smoke")
 	return cloud
+
+
+## Bursts away once a minute (S-020, T-338, piste E5): two seconds faster
+## than a sprint, with a gasp and steps heard far. Returns whether it started.
+func _start_second_wind() -> bool:
+	if hiding_in != null or terminal != null or not second_wind.start():
+		return false
+	if not mirror_world:
+		NoiseBus.emit_noise(
+			NoiseEvent.Type.BREATH, get_eye_position(), settings.second_wind_range, self
+		)
+	return true
 
 
 ## Marks for its team what it aims at (S-020, T-328, piste A1): the monster,

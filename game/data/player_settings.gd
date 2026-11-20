@@ -55,6 +55,16 @@ extends Resource
 ## ...a breath of this range, every breath_interval.
 @export_range(0.0, 10.0, 0.1, "suffix:m") var hidden_breath_range: float = 3.0
 
+@export_group("Second wind (S-020, T-338)")
+## Once per recharge, the hunted bursts away: this many seconds at this
+## speed (above sprint_speed), each step and the gasp that starts it heard
+## this far.
+@export_range(0.5, 10.0, 0.5, "suffix:s") var second_wind_time: float = 2.0
+@export_range(1.0, 15.0, 0.1, "suffix:m/s") var second_wind_speed: float = 6.5
+@export_range(1.0, 60.0, 0.5, "suffix:m") var second_wind_range: float = 25.0
+## Seconds before the next one, from when the last one started.
+@export_range(0.0, 600.0, 1.0, "suffix:s") var second_wind_recharge: float = 60.0
+
 @export_group("Rescue (S-010, T-107)")
 ## Seconds a teammate holds "interact" to free a captured hunted.
 @export_range(0.1, 20.0, 0.1, "suffix:s") var rescue_time: float = 4.0
