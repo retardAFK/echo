@@ -166,6 +166,18 @@ func _build_social_centre() -> void:
 		MAT_OBSTACLE,
 		MapKit.Kind.FLOOR
 	)
+	# The chair store, to run around (S-020, T-341, C2).
+	var store := CENTRE_CHAIR_STORE
+	kit.box(
+		s,
+		store.position.x,
+		store.position.y,
+		store.end.x,
+		store.end.y,
+		0,
+		CENTRE_CHAIR_STORE_HEIGHT,
+		MAT_CONCRETE
+	)
 	# Tables in the hall, desks in the offices (the stacked chairs: FURNITURE).
 	for t: Vector2 in [Vector2(149, 66), Vector2(155, 66), Vector2(149, 77), Vector2(155, 77)]:
 		kit.box(s, t.x - 1.0, t.y - 0.5, t.x + 1.0, t.y + 0.5, 0, 0.75, null, MapKit.Kind.FLOOR)
@@ -478,9 +490,19 @@ func _build_car_park() -> void:
 	# The technical room, east, with its door.
 	var room := CAR_PARK_TECHNICAL
 	var room_door := [[104.0, 105.2, floor_h + DOOR_TOP]]
+	var north_door := CAR_PARK_TECHNICAL_NORTH_DOOR  # A loop through the room (T-341).
 	kit.wall_x(
-		s, room.position.x, room.end.x, room.position.y, floor_h, ceiling, WALL, MAT_CONCRETE
+		s,
+		room.position.x,
+		room.end.x,
+		room.position.y,
+		floor_h,
+		ceiling,
+		WALL,
+		MAT_CONCRETE,
+		[[north_door.x, north_door.y, floor_h + DOOR_TOP]]
 	)
+	_door(Vector3((north_door.x + north_door.y) / 2.0, floor_h, room.position.y), 0.0, 1.2)
 	kit.wall_x(s, room.position.x, room.end.x, room.end.y, floor_h, ceiling, WALL, MAT_CONCRETE)
 	kit.wall_y(
 		s,

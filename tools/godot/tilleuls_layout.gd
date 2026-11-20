@@ -211,7 +211,15 @@ const STADIUM_GOAL := preload("res://assets/models/stadium_goal.glb")
 
 const STADIUM_BOARD_WIDTH := 2.0
 
-const CAR_PARK_WRECKS := [Vector2(154, 98.5), Vector2(160, 113.5), Vector2(166, 101)]
+## The last two stand on either side of a pillar: an island to run around
+## (S-020, T-341, P1).
+const CAR_PARK_WRECKS := [
+	Vector2(154, 98.5),
+	Vector2(160, 113.5),
+	Vector2(166, 101),
+	Vector2(146.75, 109.67),
+	Vector2(149.25, 109.67),
+]
 
 ## Facade modules of S-005 (3 x 3 m, front toward +Z), in FacadeDressing order.
 const FACADE_MODELS := [
@@ -380,7 +388,7 @@ const TERMINALS := [
 ## car park.
 const RELAYS := [
 	[Vector3(95.0, -3.0, 96.1), "tower"],
-	[Vector3(156.0, 0.0, 81.0), "centre"],
+	[Vector3(156.0, 0.0, 83.5), "centre"],  # South of the kitchen island (T-341).
 	[Vector3(60.0, 0.0, 148.0), "gallery"],
 	[Vector3(177.6, -3.0, 101.85), "car_park"],
 ]
@@ -449,6 +457,12 @@ const CENTRE_KITCHEN := Rect2(152, 78, 8, 6)
 ## The stage: the curtain runs along its west edge, the wings behind it.
 const CENTRE_STAGE := Rect2(141.4, 64, 2.6, 12)
 
+## The chair store in the middle of the great hall, to run around (S-020,
+## T-341, C2): a block of folded tables, chairs stacked against it.
+const CENTRE_CHAIR_STORE := Rect2(151, 69.5, 2, 4)
+
+const CENTRE_CHAIR_STORE_HEIGHT := 1.8
+
 const GALLERY := Rect2(45, 135, 42, 14)
 
 const GALLERY_HEIGHT := 3.5
@@ -499,6 +513,10 @@ const CAR_PARK_NORTH_STAIRS := Rect2(170, 95.4, 6, 2.5)
 
 ## The technical room on the east wall, its door to the west.
 const CAR_PARK_TECHNICAL := Rect2(174, 102, 6, 6)
+
+## The technical room's second door, in its north wall (S-020, T-341, P2):
+## in by one door, out by the other.
+const CAR_PARK_TECHNICAL_NORTH_DOOR := Vector2(178.4, 179.6)
 
 const CAR_PARK_PILLAR_STEP := 8.0
 
@@ -707,6 +725,11 @@ const FURNITURE := [
 	["stage_curtain", Vector3(141.45, 0.6, 74.7), Vector2.RIGHT],
 	["chairs_stacked", Vector3(157.7, 0, 61.1), Vector2.DOWN],
 	["chairs_stacked", Vector3(158.9, 0, 61.1), Vector2.DOWN],
+	# The kitchen island, two counters back to back (S-020, T-341, C1), the
+	# chairs against the chair store (C2).
+	["counter", Vector3(156, 0, 80.6), Vector2.UP, 3.0 / 2.1],
+	["counter", Vector3(156, 0, 81.4), Vector2.DOWN, 3.0 / 2.1],
+	["chairs_stacked", Vector3(153.3, 0, 70.5), Vector2.RIGHT],
 	["oven", Vector3(159.45, 0, 82.9), Vector2.LEFT],
 	["shelves", Vector3(168, 0, 67.6), Vector2.UP],
 	["boxes", Vector3(166, 0, 75.2), Vector2.UP],
@@ -717,10 +740,71 @@ const FURNITURE := [
 	["shelves", Vector3(62.9, 0, 145), Vector2.RIGHT],
 	["shelves", Vector3(66.4, 0, 143), Vector2.LEFT],
 	["shelves", Vector3(66.4, 0, 145), Vector2.LEFT],
-	["counter", Vector3(74, 0, 143.4), Vector2.UP, 6.0 / 2.1],
+	# The grocer (S-020, T-341, G1): no more counter, two gondolas of shelves
+	# back to back, three aisles from the shutter to the back door.
+	["shelves", Vector3(73.05, 0, 142.0), Vector2.LEFT],
+	["shelves", Vector3(73.05, 0, 144.08), Vector2.LEFT],
+	["shelves", Vector3(73.55, 0, 142.0), Vector2.RIGHT],
+	["shelves", Vector3(73.55, 0, 144.08), Vector2.RIGHT],
+	["shelves", Vector3(75.95, 0, 142.0), Vector2.LEFT],
+	["shelves", Vector3(75.95, 0, 144.08), Vector2.LEFT],
+	["shelves", Vector3(76.45, 0, 142.0), Vector2.RIGHT],
+	["shelves", Vector3(76.45, 0, 144.08), Vector2.RIGHT],
 	["counter", Vector3(82, 0, 142.4), Vector2.UP, 5.0 / 2.1],
 	# Car park: the technical room.
 	["shelves", Vector3(177, -3, 107.6), Vector2.UP],
+]
+
+## Chase loops (S-020, T-341, piste E7, validated by Maxime on 20/11/2026:
+## specs/S-020-retours-de-test/plan-T-341-boucles.md): [name, floor height,
+## four plan points in the aisles around the obstacle, north, east, south,
+## west]. tests/test_tilleuls_loops.gd walks each loop both ways.
+const LOOPS := [
+	[
+		"C1 kitchen island",
+		0.0,
+		[Vector2(156, 79.5), Vector2(158.7, 81), Vector2(156, 82.75), Vector2(153.3, 81)]
+	],
+	[
+		"C2 chair store",
+		0.0,
+		[Vector2(152, 68), Vector2(154.5, 71.5), Vector2(152, 75), Vector2(149.8, 71.5)]
+	],
+	[
+		"G1 grocer, west gondola",
+		0.0,
+		[Vector2(73.3, 140), Vector2(74.75, 143), Vector2(73.3, 146), Vector2(71.95, 143)]
+	],
+	[
+		"G1 grocer, east gondola",
+		0.0,
+		[Vector2(76.2, 140), Vector2(77.6, 143), Vector2(76.2, 146), Vector2(74.75, 143)]
+	],
+	[
+		"P1 wrecks and pillar",
+		-3.0,
+		[Vector2(148, 106), Vector2(151.7, 109.67), Vector2(148, 113.3), Vector2(144.3, 109.67)]
+	],
+	[
+		"P2 technical room",
+		-3.0,
+		[Vector2(179, 100.6), Vector2(177.5, 104.6), Vector2(172.8, 104.6), Vector2(172.8, 100.6)]
+	],
+	[
+		"H1 nurses' station",
+		3.0,
+		[Vector2(27.5, 92.2), Vector2(30.4, 93.5), Vector2(27.5, 94.9), Vector2(24.6, 93.5)]
+	],
+	[
+		"H2 rooms 101 and 103",
+		3.0,
+		[Vector2(18.5, 66), Vector2(18.5, 70), Vector2(21, 74), Vector2(21, 62)]
+	],
+	[
+		"H2 rooms 107 and 109",
+		3.0,
+		[Vector2(18.5, 112.5), Vector2(18.5, 116.5), Vector2(21, 120), Vector2(21, 109)]
+	],
 ]
 
 ## A piece of furniture keeps this far, on the ground plan, from a hiding
