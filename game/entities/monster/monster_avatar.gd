@@ -87,6 +87,7 @@ static func resolve_pace(prowling: bool, sprinting: bool, moving: bool) -> Monst
 
 func _ready() -> void:
 	add_to_group(Prison.MONSTERS_GROUP)  # The prison's clock stops near it (S-018).
+	settings = settings.duplicate()  # Its own: the stages of its rise change it (S-023).
 	_noise = MonsterNoise.new(settings)
 	scan = ScanGauge.new(settings)
 	sprint = MonsterSprint.new(settings)
@@ -349,7 +350,7 @@ func scan_reveals(event: NoiseEvent) -> bool:
 		and scan_target != null
 		and event.source != self
 		and not event.masked  # Lost in a ventilation zone (S-014, Q5).
-		and scan_target.contains(event.position)
+		and ScanGauge.holds(scan_target, event.position, settings)
 	)
 
 

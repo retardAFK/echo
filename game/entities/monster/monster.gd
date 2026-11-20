@@ -78,6 +78,7 @@ var _heard_in := {}
 
 func _ready() -> void:
 	add_to_group(Prison.MONSTERS_GROUP)  # The prison's clock stops near it (S-018).
+	settings = settings.duplicate()  # Its own: the stages of its rise change it (S-023).
 	brain = MonsterBrain.new(settings)
 	_noise = MonsterNoise.new(settings)
 	brain.state_changed.connect(state_changed.emit)
@@ -484,7 +485,7 @@ func scan_reveals(event: NoiseEvent) -> bool:
 		and not deafness.is_deaf()  # A firecracker went off (S-020, T-312).
 		and scan.is_listening()
 		and not event.masked
-		and scan_target.contains(event.position)
+		and ScanGauge.holds(scan_target, event.position, settings)
 	)
 
 

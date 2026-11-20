@@ -14,6 +14,7 @@ HUD_INTERACT_MONITOR,{interact} : allumer le moniteur
 HUD_INTERACT_GURNEY,{interact} : pousser le brancard
 HUD_INTERACT_WHEELCHAIR,{interact} : lancer le fauteuil
 HUD_FUSES,Fusibles %d/%d
+HUD_MONSTER_RISES,Le monstre s'énerve
 HUD_INTERACT_FUSE_BOX,Maintenir {interact} : prendre le fusible
 HUD_INTERACT_TRANSFORMER,Maintenir {interact} : poser un fusible
 HUD_TRANSFORMER_WAITS_MANY,Le transformateur attend %d fusibles
@@ -48,6 +49,9 @@ GADGET_HELP_FIRECRACKER,"Pétard : posé au sol, il éclate sous le monstre, qui
 GADGET_HELP_CAN_WIRE,Fil à canettes : tendu en travers d'un passage, il tinte quand le monstre passe
 GADGET_HELP_WALKMAN,"Walkman : posé au sol, 3 s plus tard, des pas de course s'éloignent tout droit devant"
 GADGET_HELP_SMOKE,Fumigène : lâché à ses pieds, un nuage de 10 s où personne ne voit à travers
+ESCALATION_SCAN,"Palier 1 : jauge de scan rechargée en 35 s"
+ESCALATION_SPRINT,"Palier 2 : course de 6,5 s"
+ESCALATION_SIREN,"Palier 3 : le scan entend tous les étages"
 MENU_GADGET_1,Gadget 1 : %s
 MENU_GADGET_2,Gadget 2 : %s
 HUD_DEAF,Assourdi : %d s
@@ -66,6 +70,14 @@ BENCH_FPS,"Images/s : %.1f en moyenne, %.1f au pire, %.1f sur les 1 %% les plus 
 BENCH_DRAWS,"Appels de dessin : %d au pire, triangles : %d au pire"
 BENCH_LOAD,Chargement : %.1f s
 MENU_BACK,Retour
+MENU_TEST_ROOM,Salle d'essai
+TEST_ROOM_GOAL,"Pour essayer sans risque : gadgets, bouteilles et réveil à volonté, un monstre mannequin qui ne t'attrape jamais, F6 pour jouer le monstre et scanner un chassé mannequin."
+TEST_ROOM_HINT,Salle d'essai · F6 : changer de rôle · F4 : cercles de bruit · Échap : quitter
+TEST_STATION_DOOR,Porte
+TEST_STATION_VAULT,Muret à enjamber
+TEST_STATION_SPOT,Cachette
+TEST_STATION_GURNEY,Brancard
+TEST_STATION_CAR_ALARM,Alarme de voiture
 CONTROLS_MOVE,{move} ou flèches : se déplacer
 CONTROLS_LOOK,Souris : regarder (cliquer pour capturer la souris)
 CONTROLS_SPRINT,{sprint} : courir (bruyant)

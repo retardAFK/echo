@@ -1,0 +1,52 @@
+[gd_resource type="Resource" script_class="TestStationList" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://game/maps/test_room/test_station_list.gd" id="1_list"]
+[ext_resource type="Script" path="res://game/maps/test_room/test_station.gd" id="2_station"]
+[ext_resource type="PackedScene" path="res://game/entities/door/door.tscn" id="s0"]
+[ext_resource type="PackedScene" path="res://game/entities/vault/vault.tscn" id="s1"]
+[ext_resource type="PackedScene" path="res://game/entities/hiding_spot/low_spot.tscn" id="s2"]
+[ext_resource type="PackedScene" path="res://game/entities/gurney/gurney.tscn" id="s3"]
+[ext_resource type="PackedScene" path="res://game/entities/car_alarm/car_alarm.tscn" id="s4"]
+
+[sub_resource type="Resource" id="st0"]
+script = ExtResource("2_station")
+name_key = "TEST_STATION_DOOR"
+scene = ExtResource("s0")
+position = Vector3(17, 0, -6)
+yaw_degrees = 90.0
+
+[sub_resource type="Resource" id="st1"]
+script = ExtResource("2_station")
+name_key = "TEST_STATION_VAULT"
+scene = ExtResource("s1")
+position = Vector3(-8, 0, 0)
+yaw_degrees = 0.0
+properties = {
+"top": 0.6,
+"width": 3.0
+}
+
+[sub_resource type="Resource" id="st2"]
+script = ExtResource("2_station")
+name_key = "TEST_STATION_SPOT"
+scene = ExtResource("s2")
+position = Vector3(11, 0, -8)
+yaw_degrees = 180.0
+
+[sub_resource type="Resource" id="st3"]
+script = ExtResource("2_station")
+name_key = "TEST_STATION_GURNEY"
+scene = ExtResource("s3")
+position = Vector3(17, 0, 1)
+yaw_degrees = 0.0
+
+[sub_resource type="Resource" id="st4"]
+script = ExtResource("2_station")
+name_key = "TEST_STATION_CAR_ALARM"
+scene = ExtResource("s4")
+position = Vector3(16, 0, -12)
+yaw_degrees = 90.0
+
+[resource]
+script = ExtResource("1_list")
+stations = Array[ExtResource("2_station")]([SubResource("st0"), SubResource("st1"), SubResource("st2"), SubResource("st3"), SubResource("st4")])

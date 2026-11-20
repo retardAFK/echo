@@ -67,3 +67,18 @@ func update(delta: float) -> void:
 	level = maxf(level - delta, 0.0)
 	if level <= 0.0:
 		stop()
+
+
+## True if a scan of target hears a noise at point: inside it, or, when
+## settings.scan_whole_complex (the monster's last stage, S-023), inside any
+## level of the same building of several levels (S-014).
+static func holds(target: Building, point: Vector3, settings: MonsterSettings) -> bool:
+	if target.contains(point):
+		return true
+	if not settings.scan_whole_complex or target.complex == "" or not target.is_inside_tree():
+		return false
+	for node in target.get_tree().get_nodes_in_group(Building.GROUP):
+		var level := node as Building
+		if level != null and level.complex == target.complex and level.contains(point):
+			return true
+	return false

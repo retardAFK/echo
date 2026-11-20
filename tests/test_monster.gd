@@ -18,9 +18,12 @@ func before_each() -> void:
 	_monster = _map.get_node("Monster")
 
 
-func test_monster_settings_are_shared_resource() -> void:
+func test_monster_settings_come_from_the_shared_resource() -> void:
+	var shared: MonsterSettings = load("res://game/data/monster_settings.tres")
 	assert_not_null(_monster.settings)
-	assert_eq(_monster.settings.resource_path, "res://game/data/monster_settings.tres")
+	assert_ne(_monster.settings, shared, "its own copy: its rise changes it only (S-023)")
+	for property in ["scan_recharge_time", "sprint_time", "catch_distance"]:
+		assert_eq(_monster.settings.get(property), shared.get(property), property)
 
 
 func test_monster_is_on_its_own_layer() -> void:

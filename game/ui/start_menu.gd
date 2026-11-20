@@ -59,6 +59,7 @@ func _ready() -> void:
 	for key in LoadoutItems.KEYS:  # The hunted's gadgets (S-023, T-352).
 		_role_list.item(key).focus_entered.connect(_preview_gadget.bind(key))
 	LoadoutItems.refresh(_role_list)
+	_role_list.item("MENU_TEST_ROOM").focus_entered.connect(_preview_test_room)
 	var version := str(ProjectSettings.get_setting("application/config/version", ""))
 	_version.text = Text.t("MENU_VERSION", version if version != "" else "dev")
 	show_home()
@@ -143,9 +144,18 @@ func _preview_gadget(key: String) -> void:
 	_goal.text = LoadoutItems.help(key)
 
 
+## What the test room is for (S-023, Q8).
+func _preview_test_room() -> void:
+	_goal.text = Text.t("TEST_ROOM_GOAL")
+	_controls.text = ""
+
+
 func _on_role_chosen(key: String) -> void:
 	if LoadoutItems.choose(_role_list, key):
 		_preview_gadget(key)
+	elif key == "MENU_TEST_ROOM":
+		if change_scene:
+			TestRoom.open(get_tree(), GameSession.Role.HUNTED)  # S-023, T-356.
 	elif ROLES.has(key):
 		choose(ROLES[key])
 	else:

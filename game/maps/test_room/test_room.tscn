@@ -1,0 +1,11 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://game/maps/greybox_test.tscn" id="1_greybox"]
+[ext_resource type="Script" path="res://game/maps/test_room/test_room.gd" id="2_room"]
+[ext_resource type="Resource" path="res://game/maps/test_room/stations.tres" id="3_stations"]
+
+[node name="TestRoom" instance=ExtResource("1_greybox")]
+
+[node name="TestRoomRules" type="Node" parent="."]
+script = ExtResource("2_room")
+stations = ExtResource("3_stations")
