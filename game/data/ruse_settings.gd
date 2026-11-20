@@ -85,6 +85,23 @@ extends Resource
 ## How far the rattle is played for the ears, in meters.
 @export_range(1.0, 100.0, 1.0, "suffix:m") var can_wire_sound_distance: float = 40.0
 
+@export_group("Walkman")
+## Walkmen each hunted carries at the start, and at most (S-020, T-334,
+## piste R3): no pickup in the cité, one per game.
+@export_range(0, 5) var start_walkmen: int = 1
+@export_range(0, 5) var max_walkmen: int = 1
+## Seconds between placing it and the first step, to get away from it.
+@export_range(0.0, 30.0, 0.5, "suffix:s") var walkman_delay: float = 3.0
+## How far the footsteps go, straight ahead of where the hunted faced, in
+## meters; a wall on the way stops them before it.
+@export_range(1.0, 50.0, 0.5, "suffix:m") var walkman_path_length: float = 15.0
+## Speed, distance between two steps and range of each step: by default a
+## hunted running (PlayerSettings.sprint_speed, NoiseSettings sprint_stride
+## and sprint_range), so the monster cannot tell them apart.
+@export_range(0.5, 10.0, 0.1, "suffix:m/s") var walkman_speed: float = 5.5
+@export_range(0.1, 3.0, 0.05, "suffix:m") var walkman_stride: float = 0.9
+@export_range(0.5, 50.0, 0.5, "suffix:m") var walkman_step_range: float = 14.0
+
 @export_group("Hiding spots")
 ## Seconds to hold "interact" to get in, get out, or open a hiding spot (Q5, Q7).
 @export_range(0.1, 10.0, 0.1, "suffix:s") var hide_time: float = 1.0

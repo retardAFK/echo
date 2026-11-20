@@ -80,7 +80,7 @@ Chaque dossier de `game/entities/` contient une scène et son script, avec une `
 |---|---|
 | Personnages | `player/` (chassé jouable, oreilles, pas, capture en ligne), `monster/` (monstre IA `monster.gd` + cerveau pur `monster_brain.gd`, monstre jouable `monster_avatar.gd`, jauge de scan, vision, bruits), `prey/` (chassé IA : corps `prey.gd`, cerveau `prey_brain.gd`, objectifs `prey_tasks.gd`), `hunted_body/` et `monster_body/` (modèles animés) |
 | Objectifs | `fuse_box/`, `transformer/`, `exit/`, `objectives/` (code, disquette, relais) |
-| Ruses | `bottle/`, `decoy/`, `pickup/`, `car_alarm/`, `hiding_spot/`, `firecracker/`, `can_wire/` |
+| Ruses | `bottle/`, `decoy/`, `pickup/`, `car_alarm/`, `hiding_spot/`, `firecracker/`, `can_wire/`, `walkman/` |
 | Équipe (S-020) | `ping/` (marque « Monstre » / « Ici » pour les coéquipiers, T-328 ; affichée par `ui/ping_markers.gd`, jamais envoyée au monstre) |
 | Lieux | `building/` (volume scannable), `door/`, `jamb/` (décoince une IA d'un chambranle), `metal_floor/`, `indoor_fog/`, `ventilation/`, `neon/` |
 | Hôpital | `gurney/`, `wheelchair/`, `monitor/` |
