@@ -34,14 +34,14 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [x] T-328 — A1 : signaler sans parler
 - [x] T-329 — U1 : conseils de première partie
 - [x] T-330 — T7 : test automatique sous mauvaise connexion
-- [ ] T-331 — R6 : piège dans une cachette (lot B, après le verdict du test du lot P1)
-- [ ] T-332 — S3 : le train couvre les bruits
-- [ ] T-333 — R5 : fil à canettes
-- [ ] T-334 — R3 : walkman, un leurre qui marche
-- [ ] T-335 — R4 : fumigène
-- [ ] T-336 — N3 : caméras qui balaient
-- [ ] T-337 — N5 : marquer le monstre
-- [ ] T-338 — E5 : second souffle du chassé
+- [x] T-331 — R6 : piège dans une cachette (lot B, après le verdict du test du lot P1)
+- [x] T-332 — S3 : le train couvre les bruits
+- [x] T-333 — R5 : fil à canettes
+- [x] T-334 — R3 : walkman, un leurre qui marche
+- [x] T-335 — R4 : fumigène
+- [x] T-336 — N3 : caméras qui balaient
+- [x] T-337 — N5 : marquer le monstre
+- [x] T-338 — E5 : second souffle du chassé
 - [ ] T-339 — U2 : trajets rejoués en fin de partie (lot C, après le lot B)
 - [ ] T-340 — E6 : fenêtres et murets à enjamber
 - [ ] T-341 — E7 : boucles de poursuite par bâtiment
@@ -84,3 +84,14 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - T-329 (20/11/2026, #209) : la première fois que le chassé voit une cachette, un terminal ou un boîtier (à 8 m, dans le champ, sans mur), une bulle dit à quoi il sert pendant 7 s ; vu une fois, enregistré avec les réglages ; « Réinitialiser » les remontre (`FirstTips`, `tip_settings.gd`).
 - T-330 (20/11/2026, #211) : `net_walk --bad-link` dans la CI (150 ms et rafales jusqu'à 100 ms) échoue au-delà de 0,75 m d'écart (mesuré 0,08 à 0,40 m) ; `net_match` échoue si un joueur, avant toute capture, s'écarte de plus de 4 m de la salle (`net_test_settings.gd`).
 - Test du lot P1 (20/11/2026) : 20 parties IA contre IA à ×4. 1 chassé : le monstre gagne 3 sur 10 (1 bloquée à 30 min) ; 3 chassés : 4 sur 10, 6,6 min en moyenne, 18 poursuites dont 3 fuites réussies. Avant la P1 (10/11) : 10 sur 20. Verdict proposé : part raisonnable, lot B à lancer en remesurant après chaque ruse ; Maxime tranche.
+- Verdict du lot P1 (20/11/2026) : Maxime lance le lot B.
+- T-331 (20/11/2026, #214) : en visant une cachette vide à portée, la touche du pétard l'y cache (`Firecracker.in_spot`). Il n'éclate pas quand on passe à côté, seulement quand le monstre (IA ou joueur) ouvre la cachette : sourd `deafen_time` = 6 s, éclat de 25 m.
+- T-332 (20/11/2026, #215) : pendant `cover_time` = 8 s au milieu du passage d'un train, les bruits à moins de `cover_distance` = 25 m de la voie sont masqués pour le monstre, comme la ventilation (`train_settings.gd`, `AmbientTrain.covers`). En ligne, la salle lance les trains et envoie chaque passage (événement TRAIN).
+- T-333 (20/11/2026, #216) : fil à canettes, touche T, un par chassé (`CanWire`). Tendu en travers devant soi (`can_wire_length` = 2,5 m), armé en 1,5 s ; le monstre qui le croise à moins de 0,5 m le fait tinter une fois, 20 m (bruit CANS). La salle seule le déclenche.
+- T-334 (20/11/2026, #217) : walkman, touche V, un par chassé (`Walkman`). Après `walkman_delay` = 3 s, il joue des pas de course (FOOTSTEP, 14 m) qui s'éloignent tout droit à 5,5 m/s sur 15 m, arrêtés 0,5 m avant un mur. `test_monster_guard` choisit désormais une boîte hors ventilation (échec d'un tirage sur trente).
+- T-335 (20/11/2026, #218) : fumigène, touche B, un par chassé (`SmokeCloud`). Nuage de `smoke_radius` = 4 m, qui grandit en 1 s et coupe la vue dans les deux sens pendant 10 s : `MonsterVision`, `NetGame.sees` (donc `NetVisibility`) et `ChaseWatch`. Il ne coupe pas le bruit.
+- T-336 (20/11/2026, #219) : la tête des caméras balaie ±`camera_sweep_angle` = 35° en `camera_sweep_period` = 8 s, phase tirée de la position (`network_settings.gd`) ; `sees()` suit la tête. Le temps de balayage de la salle part avec l'horloge (`NetWorld.clock()`, index 7).
+- T-337 (20/11/2026, #220) : une caméra regardée (terminal ou cage) qui voit le monstre pose pour l'équipe une marque « Monstre » de `camera_mark_time` = 5 s, renouvelée tant qu'elle le voit (`CityNetwork`). L'événement PING porte maintenant la durée.
+- T-338 (20/11/2026, #221) : élan, touche X (`SecondWind`) : `second_wind_time` = 2 s à 6,5 m/s, un halètement de 25 m au départ et des pas de course à 25 m pendant l'élan, recharge 60 s (`player_settings.gd`). Barre « Élan » en bas à gauche.
+- Test du lot B (20/11/2026, sur `cdcf3fc`, jusqu'à T-336) : 20 parties IA contre IA à ×4. 1 chassé : le monstre gagne 3 sur 10, 7,8 min en moyenne (P1 : 3 sur 10) ; 3 chassés : 6 sur 10 (1 bloquée à 30 min), 7,3 min, 24 poursuites dont 8 fuites réussies (P1 : 4 sur 10, 18 et 3). Les IA chassées n'utilisent ni fil, ni walkman, ni fumigène, ni élan : la mesure voit surtout le train et les caméras. Pas de réglage proposé ; à remesurer avec des testeurs.
+- Guide du jeu (20/11/2026) : commandes R, X, F, T, V, B ; pétard, fil, walkman, fumigène, élan, souffle retenu, train, caméras qui balaient et qui marquent, et parades du monstre.
