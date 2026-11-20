@@ -2,20 +2,20 @@ extends Node
 ## Online walk test (S-010, Q8, T-097), run by the CI after net_smoke against
 ## the exported server: creates a game, launches it as the only player (a
 ## hunted, the AI monster on the room), sprints forward for 4 s with
-## 150 ms added to every message, and checks that the predicted position
-## never drifted from the room's beyond MAX_GAP. It also checks
-## that the map mirrors the room's (T-099): its fuse boxes hold the fuses the
-## room drew.
+## walk_latency_ms (150 ms) added to every message, and checks that the
+## predicted position never drifted from the room's beyond walk_max_gap. It
+## also checks that the map mirrors the room's (T-099): its fuse boxes hold
+## the fuses the room drew.
+## With --bad-link (S-020, T-330, piste T7), the client also gets bursts of
+## up to bad_jitter_ms, and the gap must stay under bad_max_gap. The values
+## are in game/data/net_test_settings.tres. --jitter N sets the bursts by hand.
 ## Prints ECHO_NET_WALK and quits with 0 on success, 1 otherwise.
-## Run: godot --headless res://tools/godot/net_walk.tscn
+## Run: godot --headless res://tools/godot/net_walk.tscn [-- --bad-link]
 
 const TIMEOUT := 40.0
-const LATENCY_MS := 150
 const WALK_TIME := 4.0
 const MIN_DISTANCE := 3.0
-## Gap between prediction and room that fails the test: the correction
-## threshold before S-020, T-319 raised it to 1 m.
-const MAX_GAP := 0.5
+const TEST_SETTINGS := preload("res://game/data/net_test_settings.tres")
 
 var _settings := NetSettings.new()
 var _lobby := LobbyClient.new()
@@ -23,11 +23,16 @@ var _map: GameMap
 var _elapsed := 0.0
 var _walked := -1.0
 var _start := Vector3.ZERO
+## Gap between prediction and room that fails the test.
+var _max_gap: float = TEST_SETTINGS.walk_max_gap
 
 
 func _ready() -> void:
-	_settings.debug_latency_ms = LATENCY_MS
+	_settings.debug_latency_ms = TEST_SETTINGS.walk_latency_ms
 	var args := OS.get_cmdline_user_args()
+	if args.has("--bad-link"):  # S-020, T-330.
+		_settings.debug_jitter_ms = TEST_SETTINGS.bad_jitter_ms
+		_max_gap = TEST_SETTINGS.bad_max_gap
 	var at := args.find("--jitter")  # S-020, T-319: bursts, as on a real WebSocket.
 	if at >= 0 and at + 1 < args.size():
 		_settings.debug_jitter_ms = int(args[at + 1])
@@ -88,12 +93,15 @@ func _physics_process(delta: float) -> void:
 	var fuses := _map.get_fuse_boxes().filter(func(box: FuseBox) -> bool: return box.has_fuse)
 	var result := (
 		(
-			"moved %.1f m, worst gap %.2f m, ping %d ms, %d fuses mirrored,"
-			+ " %d map messages of %d B (S-020, T-303)"
+			"moved %.1f m, worst gap %.2f m (max %.2f), link %d+0..%d ms, ping %d ms,"
+			+ " %d fuses mirrored, %d map messages of %d B (S-020, T-303)"
 		)
 		% [
 			distance,
 			net.worst_error,
+			_max_gap,
+			_settings.debug_latency_ms,
+			_settings.debug_jitter_ms,
 			NetSession.get_ping_ms(),
 			fuses.size(),
 			net.world_total,
@@ -102,7 +110,7 @@ func _physics_process(delta: float) -> void:
 	)
 	if (
 		distance < MIN_DISTANCE
-		or net.worst_error >= MAX_GAP
+		or net.worst_error >= _max_gap
 		or fuses.size() != _map.game_loop.rules.fuse_count
 	):
 		_fail(result)
