@@ -33,8 +33,9 @@ extends Node
 ##   bottle thrown or an alarm clock placed (its delay chosen, S-020, T-313);
 ##   the client plays its own copy.
 ## - [CRUSH, position]: to everyone, the monster crushed a ringing alarm clock.
-## - [FIRECRACKER, position] and [POP, position]: to everyone, a firecracker
-##   placed, and one set off by the monster (S-020, T-312).
+## - [FIRECRACKER, position, in a spot] and [POP, position]: to everyone, a
+##   firecracker placed (or set as a trap in a hiding spot, T-331), and one set
+##   off by the monster (S-020, T-312).
 ## - [PING, position, Ping.Kind]: to the hunted only, never the monster, a
 ##   team mark (S-020, T-328); the client shows its own copy.
 ## - [CLOCK, NetWorld.clock() + [room fps]]: to everyone, once a second (S-020, T-300):
@@ -424,7 +425,7 @@ func _announce(node: Node3D) -> void:
 	elif node is Ping:
 		_send_to_hunted([Event.PING, node.global_position, (node as Ping).kind])
 	elif node is Firecracker:
-		_send_to_all([Event.FIRECRACKER, node.global_position])
+		_send_to_all([Event.FIRECRACKER, node.global_position, (node as Firecracker).in_spot])
 		(node as Firecracker).burst.connect(
 			func() -> void: _send_to_all([Event.POP, node.global_position])
 		)
@@ -681,8 +682,10 @@ func apply_event(event: Array) -> void:
 			_add_copy(decoy, event[1])
 		Event.CRUSH when event.size() == 2:
 			_crush_near(event[1])
-		Event.FIRECRACKER when event.size() == 2:
-			_spawn_copy(FIRECRACKER_SCENE, event[1])
+		Event.FIRECRACKER when event.size() >= 2:
+			var firecracker: Firecracker = FIRECRACKER_SCENE.instantiate()
+			firecracker.in_spot = event.size() >= 3 and event[2] == true  # A trap (T-331).
+			_add_copy(firecracker, event[1])
 		Event.POP when event.size() == 2:
 			_pop_near(event[1])
 		Event.PING when event.size() == 3:

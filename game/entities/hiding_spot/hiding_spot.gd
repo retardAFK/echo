@@ -26,6 +26,9 @@ const GROUP := &"hiding_spots"
 
 ## The hunted inside, or null.
 var occupant: Node3D
+## A firecracker a hunted set in it, empty, as a trap (S-020, T-331, piste
+## R6): it goes off when a monster opens the spot. Null when none.
+var trap: Firecracker
 
 var _progress := 0.0
 var _holder: Node
@@ -185,6 +188,11 @@ func noise_range() -> float:
 	return settings.hide_noise_range
 
 
+## Whether a hunted can set a trap in it now: empty and not trapped yet (T-331).
+func can_trap() -> bool:
+	return is_free() and trap == null
+
+
 ## Online client (S-010, T-099): the door of the spot, opened in the room.
 func voice() -> void:
 	SoundSpace.play(_creak)
@@ -211,6 +219,10 @@ func _finish(user: Node) -> void:
 ## Empty, the monster stands there empty_search_stagger (S-020, T-310).
 func open(by: Node3D) -> void:
 	opened.emit(by)
+	if trap != null:  # T-331: the trap goes off in the monster's face.
+		var sprung := trap
+		trap = null
+		sprung.go_off(by)
 	if occupant == null:
 		Stagger.hit_on(by, settings.empty_search_stagger)
 		return

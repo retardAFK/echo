@@ -5,6 +5,8 @@ extends Node3D
 ## the hunted, and the monster is deafened for deafen_time (Deafness). It is
 ## the hunted's one answer to the monster's ears. Online, only the room sets
 ## it off; the clients' copies only play the crack.
+## Set in an empty hiding spot (T-331, piste R6), it is a trap: hidden in it,
+## stepping near never sets it off, only the monster opening the spot does.
 
 signal burst
 
@@ -16,6 +18,8 @@ const GROUP := &"firecrackers"
 ## Seconds before it can go off, so the one who placed it can step away.
 var arm_left := 0.0
 var done := false
+## Set as a trap in a hiding spot (T-331): unseen, and only the spot sets it off.
+var in_spot := false
 
 @onready var _crack: AudioStreamPlayer3D = $Crack
 @onready var _model: Node3D = $Model
@@ -41,6 +45,7 @@ func _ready() -> void:
 	RetroSurface.apply_to(self, RetroSurface.DEFAULT_SETTINGS)
 	arm_left = settings.firecracker_arm_time
 	_crack.max_distance = settings.firecracker_sound_distance
+	_model.visible = not in_spot
 
 
 func _physics_process(delta: float) -> void:
@@ -48,7 +53,7 @@ func _physics_process(delta: float) -> void:
 
 
 func is_armed() -> bool:
-	return not done and arm_left <= 0.0
+	return not done and not in_spot and arm_left <= 0.0
 
 
 ## Goes off: deafens monster (if any) first, so it does not hear its own crack,
