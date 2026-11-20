@@ -7,7 +7,7 @@ extends CharacterBody3D
 ## The noise system (S-002) listens to it.
 signal gait_changed(gait: PlayerMotion.Gait)
 ## The player used a ruse (S-008): "bottle", "decoy", "hide", "car_alarm" or
-## "firecracker" (S-020).
+## "firecracker", "trap" or "can_wire" (S-020).
 signal ruse_used(kind: StringName)
 
 ## Something in reach is used only if it lies within this angle of the
@@ -16,6 +16,7 @@ const AIM_ANGLE := deg_to_rad(35.0)
 const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
 const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.tscn")
+const CAN_WIRE_SCENE := preload("res://game/entities/can_wire/can_wire.tscn")
 ## How far down an alarm clock looks for the ground in front of the player, in meters.
 const DECOY_GROUND_SEARCH := 2.5
 ## Length of the gestures the others see (S-011, T-125).
@@ -232,6 +233,8 @@ func apply_actions() -> void:
 				_place_firecracker()
 			PlayerCommands.Action.PING:
 				_ping()
+			PlayerCommands.Action.CAN_WIRE:
+				_place_can_wire()
 
 
 func _in_cage() -> bool:
@@ -423,6 +426,18 @@ func _place_firecracker() -> Firecracker:
 	_place_on_ground(firecracker)
 	ruse_used.emit(&"firecracker")
 	return firecracker
+
+
+## Stretches the can wire on the ground in front of the player, across the
+## way it faces (S-020, T-333, piste R5), the same way as an alarm clock.
+func _place_can_wire() -> CanWire:
+	if hiding_in != null or not inventory.use(Inventory.Kind.CAN_WIRE):
+		return null
+	var wire: CanWire = CAN_WIRE_SCENE.instantiate()
+	_place_on_ground(wire)
+	wire.global_rotation = Vector3(0.0, global_rotation.y, 0.0)  # String along local X.
+	ruse_used.emit(&"can_wire")
+	return wire
 
 
 ## Marks for its team what it aims at (S-020, T-328, piste A1): the monster,

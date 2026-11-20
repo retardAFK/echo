@@ -1,0 +1,49 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://game/entities/can_wire/can_wire.gd" id="1_script"]
+[ext_resource type="Resource" path="res://game/data/ruse_settings.tres" id="2_settings"]
+[ext_resource type="AudioStream" path="res://assets/audio/ruses/cans.wav" id="3_rattle"]
+
+[sub_resource type="BoxMesh" id="Mesh_string"]
+size = Vector3(1, 0.006, 0.006)
+
+[sub_resource type="StandardMaterial3D" id="Mat_string"]
+albedo_color = Color(0.78, 0.74, 0.62, 1)
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="Mesh_can"]
+top_radius = 0.033
+bottom_radius = 0.033
+height = 0.115
+radial_segments = 8
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="Mat_tin"]
+albedo_color = Color(0.62, 0.64, 0.66, 1)
+metallic = 0.8
+roughness = 0.45
+
+[node name="CanWire" type="Node3D"]
+script = ExtResource("1_script")
+settings = ExtResource("2_settings")
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="String" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+mesh = SubResource("Mesh_string")
+surface_material_override/0 = SubResource("Mat_string")
+
+[node name="CanLeft" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.25, 0.0575, 0)
+mesh = SubResource("Mesh_can")
+surface_material_override/0 = SubResource("Mat_tin")
+
+[node name="CanRight" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.25, 0.0575, 0)
+mesh = SubResource("Mesh_can")
+surface_material_override/0 = SubResource("Mat_tin")
+
+[node name="Rattle" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("3_rattle")
+max_distance = 40.0

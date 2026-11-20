@@ -182,6 +182,7 @@ func _physics_process(delta: float) -> void:
 	_make_noise(delta, before)
 	_silence_monitors()
 	Firecracker.burst_near(self)  # S-020, T-312.
+	CanWire.yank_near(self)  # S-020, T-333.
 	if Decoy.crush_near(get_tree(), global_position, settings.catch_distance) > 0:  # S-008, Q4.
 		gesture.play(MonsterBody.Action.CRUSH, _body.settings.crush_time)
 	for hunted in get_targets():

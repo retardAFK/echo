@@ -12,6 +12,7 @@ extends RefCounted
 ## rolling, or a gurney shoved over (S-014). GROWL: the monster breaking into a
 ## run; SCREAM: the monster's cry when it catches a hunted (S-012, T-145).
 ## FIRECRACKER: a firecracker going off under the monster (S-020, T-312).
+## CANS: a can wire yanked by the monster passing (S-020, T-333).
 ## New types go last: their numbers travel online.
 enum Type {
 	FOOTSTEP,
@@ -41,6 +42,7 @@ enum Type {
 	GROWL,
 	SCREAM,
 	FIRECRACKER,
+	CANS,
 }
 
 var type: Type
