@@ -8,9 +8,10 @@ extends Node
 ## Hunted: distance from the camera to the monster (its puppet online).
 ## Monster: the pulse while it heard a noise nearby a moment ago.
 ## Hunted, with the same distance (S-020, T-326, piste S2): the monster within
-## duck_range lowers the Ambiance and Musique buses by duck_db, through an
-## amplify effect on each bus (the volumes of the options stay as they are),
-## so that its steps get through the wind and the music.
+## duck_range lowers the Ambiance and Musique buses by duck_db, so that its
+## steps get through the wind and the music. The web build has no bus effect
+## (docs/PIEGES.md): the bus volume itself goes down from the options' volume,
+## and a volume changed in the options meanwhile becomes the new base.
 
 enum Level { CALM, UNEASE, DREAD }
 
@@ -36,6 +37,8 @@ var held_for := 0.0
 var gains: Array[float] = [1.0, 0.0, 0.0]
 ## How much the duck is in, from 0 (not at all) to 1 (duck_db) (T-326).
 var duck := 0.0
+## Ducked bus -> [the options' volume, the volume set last], in decibels.
+var _duck_base := {}
 
 var _players: Array[AudioStreamPlayer] = []
 var _heard_ago := INF
@@ -103,25 +106,16 @@ func _exit_tree() -> void:
 
 func _apply_duck() -> void:
 	for bus in DUCKED_BUSES:
-		var effect := duck_effect(bus)
-		if effect != null:
-			effect.volume_db = audio.duck_db * duck
-
-
-## The amplify effect that lowers a bus, added the first time; null without
-## that bus.
-static func duck_effect(bus: StringName) -> AudioEffectAmplify:
-	var index := AudioServer.get_bus_index(bus)
-	if index < 0:
-		return null
-	for i in AudioServer.get_bus_effect_count(index):
-		var effect := AudioServer.get_bus_effect(index, i)
-		if effect is AudioEffectAmplify and effect.resource_name == "DangerDuck":
-			return effect
-	var added := AudioEffectAmplify.new()
-	added.resource_name = "DangerDuck"
-	AudioServer.add_bus_effect(index, added)
-	return added
+		var index := AudioServer.get_bus_index(bus)
+		if index < 0:
+			continue
+		var current := AudioServer.get_bus_volume_db(index)
+		var entry: Array = _duck_base.get(bus, [current, current])
+		if not is_equal_approx(current, entry[1]):
+			entry = [current, current]  # Changed in the options meanwhile.
+		var volume: float = entry[0] + audio.duck_db * duck
+		AudioServer.set_bus_volume_db(index, volume)
+		_duck_base[bus] = [entry[0], volume]
 
 
 ## Sets a level and its layers at once, without the slow fades (mixing bench).
