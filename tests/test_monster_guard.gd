@@ -101,7 +101,12 @@ func test_in_the_cite_it_remembers_noises_made_inside_a_building() -> void:
 	var monster: Monster = map.get_node("Monster")
 	monster.player = null
 	await wait_physics_frames(2)
-	var box: FuseBox = map.game_loop.fused_boxes[0]
+	# A box out of the hospital's ventilation zones: there, a fuse's quiet noise
+	# is lost in the roar by design (S-014, Q5), and the draw is random.
+	var box: FuseBox = null
+	for each: FuseBox in map.game_loop.fused_boxes:
+		if box == null and not Ventilation.covers(get_tree(), each.global_position):
+			box = each
 	var outside := monster.global_position + Vector3(3, 1, 0)
 	NoiseBus.emit_noise(NoiseEvent.Type.FOOTSTEP, outside, 10.0, null)
 	assert_eq(monster.brain.lure_left, 0.0, "a noise in the street is not a building")
