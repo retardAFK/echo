@@ -94,6 +94,11 @@ func test_the_clock_sets_the_game_time_and_the_wind() -> void:
 	assert_eq(client_world.wind.seed_used, room_world.wind.seed_used, "the same gusts")
 	assert_eq(client_world.wind.time, 100.0)
 	assert_eq(client_world.wind.strength, room_world.wind.gusts.strength(100.0))
+	assert_false(room_world.network.cameras.is_empty())
+	room_world.network.cameras[0].sweep_time = 77.5
+	client_world.apply_clock(room_world.clock())
+	for camera in client_world.network.cameras:
+		assert_eq(camera.sweep_time, 77.5, "the cameras sweep with the room's (T-336)")
 
 
 func test_the_clients_show_the_room_chases() -> void:

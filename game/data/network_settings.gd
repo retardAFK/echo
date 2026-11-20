@@ -33,6 +33,11 @@ extends Resource
 @export_range(5.0, 100.0, 1.0, "suffix:m") var camera_sight: float = 40.0
 ## A camera's field of view, in degrees.
 @export_range(30.0, 120.0, 1.0, "suffix:°") var camera_fov: float = 70.0
+## Cameras sweep left and right (S-020, T-336, piste N3): this far each side
+## of where they were set, in degrees, back and forth in camera_sweep_period
+## seconds. 0 keeps them still.
+@export_range(0.0, 90.0, 1.0, "suffix:°") var camera_sweep_angle: float = 35.0
+@export_range(1.0, 60.0, 0.5, "suffix:s") var camera_sweep_period: float = 8.0
 
 @export_group("Loudspeakers")
 ## A loudspeaker's noise, in meters (Q11).

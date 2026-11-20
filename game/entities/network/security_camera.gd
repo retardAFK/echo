@@ -8,6 +8,11 @@ extends Node3D
 ## The monster holds "interact" under it for monster_hold to smash it: a
 ## CAMERA noise, and it is dead for the rest of the game.
 ## The CityNetwork says who watches it; the camera only shows it.
+## It sweeps (S-020, T-336, piste N3): its head turns camera_sweep_angle each
+## side of where it was set, back and forth in camera_sweep_period seconds,
+## each camera with its own phase (from where it stands, the same on every
+## machine). Its view (sees(), eye_transform()) follows the head. Online, the
+## room's sweep_time reaches the clients once a second (NetWorld.clock()).
 
 const GROUP := &"security_cameras"
 const LED_ON := Color(1.0, 0.08, 0.05)
@@ -23,9 +28,13 @@ const SIGHT_MASK := 2
 ## How many watch through it (on a client: 1 when the room says it is lit).
 var watchers := 0
 var broken := false
+## Seconds the head has swept; the clients take the room's.
+var sweep_time := 0.0
 
 var _smash: HoldProgress
 var _led_material: StandardMaterial3D
+## Where the head's parts sit unturned, as set in the scene.
+var _rest := {}
 
 @onready var _lens: Node3D = $Lens
 @onready var _led: MeshInstance3D = $Led
@@ -41,7 +50,38 @@ func _ready() -> void:
 	_led_material = _led.get_surface_override_material(0).duplicate()
 	_led.set_surface_override_material(0, _led_material)
 	DrawRange.limit(self, DrawRange.INDOOR)  # Small: unseen further.
+	for part: Node3D in [_lens, _led, _body]:
+		_rest[part] = part.transform
 	_show()
+
+
+func _physics_process(delta: float) -> void:
+	if broken:
+		return  # Smashed, it hangs still.
+	sweep_time += delta
+	_turn_head()
+
+
+## The head's turn now, in radians, left or right of where it was set.
+func sweep_angle() -> float:
+	var reach := deg_to_rad(settings.camera_sweep_angle)
+	if reach <= 0.0:
+		return 0.0
+	var phase := fposmod(global_position.x * 0.37 + global_position.z * 0.61, TAU)
+	return reach * sin(TAU * sweep_time / settings.camera_sweep_period + phase)
+
+
+## Sets the head where sweep_time says, now (also for a client told the time).
+func set_sweep_time(seconds: float) -> void:
+	sweep_time = seconds
+	if not broken:
+		_turn_head()
+
+
+func _turn_head() -> void:
+	var turn := Transform3D(Basis(Vector3.UP, sweep_angle()), Vector3.ZERO)
+	for part: Node3D in _rest:
+		part.transform = turn * _rest[part]
 
 
 ## Where a watcher's eyes go: the lens, looking where the camera looks.

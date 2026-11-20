@@ -104,7 +104,8 @@ func state() -> Array:
 
 ## Room side: [game time, seed of the wind's gusts, wind time, noises, scans
 ## and ruses counted for the end screen] (T-301), then the chase statistics
-## (ChaseStats.values(), S-020, T-322).
+## (ChaseStats.values(), S-020, T-322), then how long the cameras have swept
+## (S-020, T-336), so the clients' cameras look where the room's do.
 func clock() -> Array:
 	return [
 		game_loop.get_duration() if game_loop != null else 0.0,
@@ -114,6 +115,11 @@ func clock() -> Array:
 		game_loop.scan_count if game_loop != null else 0,
 		game_loop.ruse_count if game_loop != null else 0,
 		game_loop.chases.values() if game_loop != null and game_loop.chases != null else [],
+		(
+			network.cameras[0].sweep_time
+			if network != null and not network.cameras.is_empty()
+			else 0.0
+		),
 	]
 
 
@@ -130,6 +136,9 @@ func apply_clock(values: Array) -> void:
 			game_loop.chases.apply(values[6])
 	if wind != null:
 		wind.sync(values[1], values[2])
+	if values.size() > 7 and network != null:
+		for camera in network.cameras:
+			camera.set_sweep_time(values[7])  # T-336.
 
 
 ## Client side: makes the map look like the room's.
