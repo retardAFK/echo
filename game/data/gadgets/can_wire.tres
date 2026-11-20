@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="GadgetDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/data/gadget_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://game/entities/can_wire/can_wire.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"can_wire"
+kind = 3
+scene = ExtResource("2_scene")
+hud_key = "HUD_CARRY_CAN_WIRE"

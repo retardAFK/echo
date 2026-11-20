@@ -38,12 +38,7 @@ static func describe(inventory: Inventory, short := false) -> String:
 		var settings := inventory.settings
 		var delay := settings.decoy_short_delay if short else settings.decoy_delay
 		lines.append(Text.t("HUD_CARRY_DECOY", roundi(delay)))
-	if inventory.count(Inventory.Kind.FIRECRACKER) > 0:
-		lines.append(Text.with_keys("HUD_CARRY_FIRECRACKER"))
-	if inventory.count(Inventory.Kind.CAN_WIRE) > 0:
-		lines.append(Text.with_keys("HUD_CARRY_CAN_WIRE"))
-	if inventory.count(Inventory.Kind.WALKMAN) > 0:
-		lines.append(Text.with_keys("HUD_CARRY_WALKMAN"))
-	if inventory.count(Inventory.Kind.SMOKE) > 0:
-		lines.append(Text.with_keys("HUD_CARRY_SMOKE"))
+	for gadget: GadgetDef in GadgetList.default().gadgets:  # S-023, T-351.
+		if inventory.count(gadget.kind) > 0:
+			lines.append(Text.with_keys(gadget.hud_key))
 	return "\n".join(lines)
