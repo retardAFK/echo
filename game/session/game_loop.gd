@@ -4,7 +4,8 @@ extends Node
 ## fuses the hunted found and placed, wails the siren and opens the exit once
 ## the transformer is repaired, and says when the game ends. It also keeps the
 ## numbers shown at the end (duration, noises made by the hunted, scans of the
-## monster). The hunted is the player, or the AI prey when the player is the
+## monster), and the routes replayed on the end screen's map (S-020, T-339).
+## The hunted is the player, or the AI prey when the player is the
 ## monster. GameMap adds it when the map has fuse boxes.
 
 ## The number of fuses found (carried or placed) or placed changed.
@@ -16,6 +17,7 @@ signal ended(hunted_won: bool)
 
 const DROPPED_FUSE_SCENE := preload("res://game/entities/fuse_box/dropped_fuse.tscn")
 const CHASE_SETTINGS := preload("res://game/data/chase_settings.tres")
+const ROUTE_SETTINGS := preload("res://game/data/route_settings.tres")
 
 @export var settings: LoopSettings
 
@@ -25,11 +27,16 @@ var hunted: Node
 ## takes fuses, places those it carries, and wins for all by getting out.
 ## Set before the loop enters the tree; just [hunted] when left empty.
 var team: Array[Node] = []
+## Hunted out of the game (caught for good, hunted_out()). Read only.
+var out: Array[Node] = []
 var rules: LoopRules
 ## Noises made by the hunted since the start.
 var noise_count := 0
 ## Chases, escapes and mean distance for the end screen (S-020, T-322).
 var chases: ChaseStats
+## Where everyone went and the catches, for the end screen's map (S-020,
+## T-339). Recorded in solo and on the room; a client gets the room's at the end.
+var routes: RouteLog
 ## Scans started by the monster since the start.
 var scan_count := 0
 ## Ruses used by the hunted since the start (S-008, Q11).
@@ -67,8 +74,6 @@ var _siren_noise_left := 0.0
 var _rng := RandomNumberGenerator.new()
 ## Fuses each hunted carries, when the team has several.
 var _carried := {}
-## Hunted out of the game (caught for good).
-var _out: Array[Node] = []
 ## Every fuse box of the map.
 var _boxes: Array = []
 ## Hunted captured and waiting for a teammate (S-010, T-107).
@@ -80,12 +85,17 @@ var _exit_opened := false
 func _ready() -> void:
 	rules = LoopRules.new(settings.fuse_count)
 	chases = ChaseStats.new(CHASE_SETTINGS)
+	routes = RouteLog.new(ROUTE_SETTINGS)
 	if not mirror:  # Clients copy the room's figures (NetWorld.clock()).
 		var watch := ChaseWatch.new()
 		watch.name = "ChaseWatch"
 		watch.game_loop = self
 		watch.settings = CHASE_SETTINGS
 		add_child(watch)
+		var route_watch := RouteWatch.new()
+		route_watch.name = "RouteWatch"
+		route_watch.game_loop = self
+		add_child(route_watch)
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
 	if team.is_empty() and hunted != null:
 		team = [hunted]
@@ -115,7 +125,7 @@ func replace_hunted(old: Node, new: Node) -> void:
 	if _carried.has(old):
 		_carried[new] = _carried[old]
 		_carried.erase(old)
-	for list: Array[Node] in [_captured, _out]:
+	for list: Array[Node] in [_captured, out]:
 		var at := list.find(old)
 		if at >= 0:
 			list[at] = new
@@ -137,9 +147,11 @@ func carried_by(node: Node) -> int:
 
 ## A hunted is caught for good (T-100): the monster wins once none is free.
 func hunted_out(node: Node) -> void:
-	if not is_hunted(node) or node in _out:
+	if not is_hunted(node) or node in out:
 		return
-	_out.append(node)
+	out.append(node)
+	if not node in _captured:
+		_log_capture(node)  # Out at once, without a stay in prison (S-018).
 	_captured.erase(node)
 	chases.leave(node.get_instance_id())
 	if free_count() <= 0:
@@ -173,18 +185,19 @@ func _nearest_empty_box(at: Vector3) -> FuseBox:
 
 ## Hunted still in the game, neither out nor captured.
 func free_count() -> int:
-	return team.size() - _out.size() - _captured.size()
+	return team.size() - out.size() - _captured.size()
 
 
 ## Online (S-010, T-107): a hunted captured on its knees, or freed by a
 ## teammate. The monster wins once none is free.
 func set_captured(node: Node, captured: bool) -> void:
-	if not is_hunted(node) or node in _out or (node in _captured) == captured:
+	if not is_hunted(node) or node in out or (node in _captured) == captured:
 		return
 	if not captured:
 		_captured.erase(node)
 		return
 	_captured.append(node)
+	_log_capture(node)
 	drop_fuses(node)
 	if free_count() <= 0:
 		finish(false)
@@ -192,6 +205,15 @@ func set_captured(node: Node, captured: bool) -> void:
 
 func is_captured(node: Node) -> bool:
 	return node in _captured
+
+
+## A catch on the routes of the end screen (S-020, T-339), where it happened.
+func _log_capture(node: Node) -> void:
+	var index := team.find(node)
+	if mirror or index < 0 or not node is Node3D:
+		return
+	var at := (node as Node3D).global_position
+	routes.capture(index + 1, elapsed, Vector2(at.x, at.z))
 
 
 ## The fuses a hunted carries fall at its feet (T-107): any hunted picks them
@@ -405,6 +427,12 @@ func finish(won: bool) -> void:
 	is_over = true
 	hunted_won = won
 	chases.finish(won)
+	if not won:  # Solo: the catch ends the game, the hunted is still free.
+		for member in team:
+			if not member in _captured and not member in out:
+				_log_capture(member)
+	if not mirror:
+		routes.end_time = elapsed
 	ended.emit(won)
 
 
@@ -446,7 +474,7 @@ func _open_exit() -> void:
 
 
 func _on_exit_reached(body: Node3D) -> void:
-	if is_hunted(body) and body not in _out and body not in _captured and is_exit_open():
+	if is_hunted(body) and body not in out and body not in _captured and is_exit_open():
 		finish(true)
 
 
