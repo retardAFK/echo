@@ -2,7 +2,8 @@ class_name CarryHud
 extends CanvasLayer
 ## What the hunted carries (spec S-008, Q11), in small at the bottom right:
 ## "2 bouteilles", "Réveil : 15 s (molette)", and from S-020 "Pétard (F)",
-## "Fil à canettes (T)", "Walkman (V)". Nothing when the hands are empty.
+## "Fil à canettes (T)", "Walkman (V)", "Fumigène (B)". Nothing when the hands
+## are empty.
 
 @export var player: Player
 
@@ -43,4 +44,6 @@ static func describe(inventory: Inventory, short := false) -> String:
 		lines.append(Text.with_keys("HUD_CARRY_CAN_WIRE"))
 	if inventory.count(Inventory.Kind.WALKMAN) > 0:
 		lines.append(Text.with_keys("HUD_CARRY_WALKMAN"))
+	if inventory.count(Inventory.Kind.SMOKE) > 0:
+		lines.append(Text.with_keys("HUD_CARRY_SMOKE"))
 	return "\n".join(lines)

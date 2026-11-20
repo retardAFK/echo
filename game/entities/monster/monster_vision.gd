@@ -22,9 +22,12 @@ static func in_view_cone(
 	return angle <= settings.vision_angle / 2.0
 
 
-## Whether nothing on the world or walls layers stands between the two points.
+## Whether nothing on the world or walls layers, and no smoke cloud (S-020,
+## T-335), stands between the two points.
 static func has_line_of_sight(
 	space: PhysicsDirectSpaceState3D, eye: Vector3, point: Vector3
 ) -> bool:
+	if SmokeCloud.blocks(eye, point):
+		return false
 	var query := PhysicsRayQueryParameters3D.create(eye, point, SIGHT_MASK)
 	return space.intersect_ray(query).is_empty()

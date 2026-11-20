@@ -1,0 +1,48 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://game/entities/smoke/smoke_cloud.gd" id="1_script"]
+[ext_resource type="Resource" path="res://game/data/ruse_settings.tres" id="2_settings"]
+[ext_resource type="AudioStream" path="res://assets/audio/ruses/smoke_hiss.wav" id="3_hiss"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_smoke"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.62, 0.63, 0.6, 0.55)
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="Mesh_puff"]
+material = SubResource("Mat_smoke")
+size = Vector2(2.6, 2.6)
+
+[sub_resource type="Gradient" id="Gradient_fade"]
+offsets = PackedFloat32Array(0, 0.2, 0.75, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[node name="SmokeCloud" type="Node3D"]
+script = ExtResource("1_script")
+settings = ExtResource("2_settings")
+
+[node name="Particles" type="CPUParticles3D" parent="."]
+emitting = false
+amount = 40
+lifetime = 3.0
+preprocess = 0.0
+mesh = SubResource("Mesh_puff")
+emission_shape = 1
+emission_sphere_radius = 3.0
+direction = Vector3(0, 1, 0)
+spread = 180.0
+gravity = Vector3(0, 0.15, 0)
+initial_velocity_min = 0.1
+initial_velocity_max = 0.5
+scale_amount_min = 0.8
+scale_amount_max = 1.6
+color_ramp = SubResource("Gradient_fade")
+
+[node name="Hiss" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("3_hiss")
+max_distance = 30.0

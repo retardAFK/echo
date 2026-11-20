@@ -7,7 +7,7 @@ extends CharacterBody3D
 ## The noise system (S-002) listens to it.
 signal gait_changed(gait: PlayerMotion.Gait)
 ## The player used a ruse (S-008): "bottle", "decoy", "hide", "car_alarm" or
-## "firecracker", "trap", "can_wire" or "walkman" (S-020).
+## "firecracker", "trap", "can_wire", "walkman" or "smoke" (S-020).
 signal ruse_used(kind: StringName)
 
 ## Something in reach is used only if it lies within this angle of the
@@ -18,6 +18,7 @@ const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
 const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.tscn")
 const CAN_WIRE_SCENE := preload("res://game/entities/can_wire/can_wire.tscn")
 const WALKMAN_SCENE := preload("res://game/entities/walkman/walkman.tscn")
+const SMOKE_SCENE := preload("res://game/entities/smoke/smoke_cloud.tscn")
 ## How far down an alarm clock looks for the ground in front of the player, in meters.
 const DECOY_GROUND_SEARCH := 2.5
 ## Length of the gestures the others see (S-011, T-125).
@@ -238,6 +239,8 @@ func apply_actions() -> void:
 				_place_can_wire()
 			PlayerCommands.Action.WALKMAN:
 				_place_walkman()
+			PlayerCommands.Action.SMOKE:
+				_set_off_smoke()
 
 
 func _in_cage() -> bool:
@@ -453,6 +456,19 @@ func _place_walkman() -> Walkman:
 	walkman.global_rotation = Vector3(0.0, global_rotation.y, 0.0)  # Steps go along -Z.
 	ruse_used.emit(&"walkman")
 	return walkman
+
+
+## Sets off the smoke bomb at the player's feet (S-020, T-335, piste R4): a
+## cloud that cuts sight for a while, to slip away.
+func _set_off_smoke() -> SmokeCloud:
+	if hiding_in != null or not inventory.use(Inventory.Kind.SMOKE):
+		return null
+	var cloud: SmokeCloud = SMOKE_SCENE.instantiate()
+	get_parent().add_child(cloud)
+	cloud.global_position = global_position
+	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
+	ruse_used.emit(&"smoke")
+	return cloud
 
 
 ## Marks for its team what it aims at (S-020, T-328, piste A1): the monster,

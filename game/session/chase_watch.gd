@@ -48,8 +48,8 @@ static func sees(monster: Node3D, hunted: Node3D, p_settings: ChaseSettings) -> 
 	var eye: Vector3 = monster.get_eye_position()
 	var aim: Vector3 = hunted.get_eye_position()
 	var gap := aim - eye
-	if gap.length() > p_settings.lost_range:
-		return false
+	if gap.length() > p_settings.lost_range or SmokeCloud.blocks(eye, aim):
+		return false  # Too far, or lost in a smoke bomb's cloud (S-020, T-335).
 	var flat_gap := Vector2(gap.x, gap.z)
 	var forward := -monster.global_basis.z
 	var flat_forward := Vector2(forward.x, forward.z)
