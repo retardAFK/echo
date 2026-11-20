@@ -30,7 +30,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 | — | S-019 | Ambiance des intérieurs : HLM abandonnés avec l'ambiance de l'hôpital (demande du 15/11/2026, hors ordre des phases, `specs/S-019-ambiance-interieurs/`) | T-290 à T-299 | S-016 |
 | — | S-020 | Retours de test : réseau d'abord, puis la dynamique de poursuite (catalogue de Maxime du 19/11/2026, `specs/S-020-retours-de-test/`) | T-300 à T-349 | S-010, S-018 |
 | — | S-022 | Modularité et reprise du code par tout agent : `AGENTS.md`, carte de l'architecture, guide pour ajouter ou retirer un module, lint des outils, découpage de `game_map.gd` (demande du 19/11/2026, hors ordre des phases, `specs/S-022-modularite/`) | T-430 à T-449 | — |
-| — | S-023 | Gadgets au choix, monstre qui monte en puissance, salle d'essai (demande du 20/11/2026 après l'audit de game design, `specs/S-023-gadgets-et-salle-d-essai/`) | T-350 à T-369 | S-020 |
+| — | S-023 | Gadgets au choix, monstre qui monte en puissance, salle d'essai (demande du 20/11/2026 après l'audit de game design, `specs/S-023-gadgets-et-salle-d-essai/`), livrée le 20/11/2026 | T-350 à T-369 | S-020 |
 
 L'ordre suit D-013 (12/11/2026) : le multijoueur passe juste après le test à plusieurs, avant les personnages, l'audio et les menus. Tout ce qui est ajouté avant le réseau (animations, sons d'autres joueurs, menus) devrait sinon être repris pour être synchronisé.
 

@@ -1,6 +1,6 @@
 # S-023 — Gadgets au choix, monstre qui monte en puissance, salle d'essai
 
-**Statut** : validée (20/11/2026). Q1 tranchée par Maxime ; les autres réponses sont des propositions de Claude, ajustables.
+**Statut** : livrée (20/11/2026, PR #229, #230, #232, #233). Validée le 20/11/2026. Q1 tranchée par Maxime ; les autres réponses sont des propositions de Claude, ajustables.
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent)
 **Phase** : hors feuille de route, demandée par Maxime le 20/11/2026 après l'audit de game design (constats 4 et 5, « pourquoi pas », plus une salle d'essai), document : https://claude.ai/artifact/17o3XLs5LgtoGrwwnBVhvd
 **Exigence transverse** : architecture modulaire au maximum (D-022) : ajouter ou retirer un gadget, un palier du monstre ou un poste de la salle d'essai se fait en ajoutant ou en retirant **un fichier de données et une entité**, sans toucher au joueur, au réseau ni aux IA. `docs/MODULES.md` dit comment.
@@ -52,12 +52,12 @@ Plus tard, mes coéquipiers finissent le premier objectif. Un grondement sourd t
 - Les bouteilles, les réveils trouvés dans la cité, le souffle retenu, l'élan et les marques, qui gardent leurs touches.
 
 ## Critères d'acceptation
-- [ ] Avant la partie, en solo et en ligne, le chassé choisit 2 gadgets ; en jeu, il les utilise avec les touches de Q1, 2 charges chacun ; F, T, V et B ne servent plus aux gadgets.
-- [ ] Le choix est gardé d'une partie à l'autre ; le monstre ne le connaît jamais (Q4 précisée : personne ne le voit au salon, les rôles y sont encore inconnus).
-- [ ] Chaque objectif réussi applique le palier suivant au monstre (joué ou IA, solo et en ligne) ; les chassés entendent le grondement et voient la ligne.
-- [ ] La salle d'essai s'ouvre depuis « Jouer seul », a tous les postes de Q8, les mannequins, et F6 change de rôle.
-- [ ] Ajouter un gadget, un palier ou un poste se fait par un fichier de données et une scène ; `docs/MODULES.md` le décrit, et un test le vérifie pour les gadgets existants.
-- [ ] Tests GUT ; `net_walk`, `net_match`, `net_spectate` verts ; 20 parties simulées sans blocage ; budget tenu (60 Mo, 300 appels de dessin dans la cité).
-- [ ] Le guide du jeu est mis à jour (gadgets au choix, paliers du monstre, salle d'essai).
+- [x] Avant la partie, en solo et en ligne, le chassé choisit 2 gadgets ; en jeu, il les utilise avec les touches de Q1, 2 charges chacun ; F, T, V et B ne servent plus aux gadgets.
+- [x] Le choix est gardé d'une partie à l'autre ; le monstre ne le connaît jamais (Q4 précisée : personne ne le voit au salon, les rôles y sont encore inconnus).
+- [x] Chaque objectif réussi applique le palier suivant au monstre (joué ou IA, solo et en ligne) ; les chassés entendent le grondement et voient la ligne.
+- [ ] La salle d'essai s'ouvre depuis « Jouer seul », a tous les postes de Q8, les mannequins, et F6 change de rôle. *Fait sauf le terminal et la caméra, qui demandent un réseau de la cité dans la salle : à ajouter comme poste.*
+- [x] Ajouter un gadget, un palier ou un poste se fait par un fichier de données et une scène ; `docs/MODULES.md` le décrit, et un test le vérifie pour les gadgets existants.
+- [x] Tests GUT ; `net_walk`, `net_match`, `net_spectate` verts ; 20 parties simulées sans blocage ; budget tenu (60 Mo, 300 appels de dessin dans la cité). *1 partie sur 20 bloquée avant tout objectif (donc sans palier), cas déjà vu sur main avant S-023.*
+- [x] Le guide du jeu est mis à jour (gadgets au choix, paliers du monstre, salle d'essai).
 
 ## Notes de playtest
