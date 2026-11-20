@@ -14,6 +14,8 @@ signal state_changed(state: PreyBrain.State)
 ## It used a ruse (S-008): "bottle", "decoy", "hide", "car_alarm" or "firecracker".
 signal ruse_used(kind: StringName)
 
+## Every AI prey, so a teammate's "monstre ici" mark reaches it (S-020, T-328).
+const GROUP := &"preys"
 ## Distance the target must move before the path is recomputed, in meters.
 const RETARGET_DISTANCE := 0.5
 const DOOR_SETTINGS := preload("res://game/data/door_settings.tres")
@@ -93,6 +95,7 @@ var _errand_look_left := 0.0
 
 
 func _ready() -> void:
+	add_to_group(GROUP)
 	_rng.seed = hash(name)
 	inventory = Inventory.new(ruse_settings)
 	brain = PreyBrain.new(settings, _rng.randi())
@@ -843,6 +846,13 @@ func _on_noise_emitted(event: NoiseEvent) -> void:
 	if event.source == self or event.source != monster:
 		return
 	if NoiseBus.can_hear(event, get_eye_position()):
+		_heard_monster = true
+
+
+## A teammate marked the monster at "at" (S-020, T-328): within flee_range, the
+## prey takes it as hearing the monster, so it runs away and hides.
+func warn_of_monster(at: Vector3, flee_range: float) -> void:
+	if global_position.distance_to(at) <= flee_range:
 		_heard_monster = true
 
 
