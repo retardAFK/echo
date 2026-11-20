@@ -66,8 +66,13 @@ const FUSE_BOX_WALL_SEARCH := 3.5
 const CAMERA_WALL_SEARCH := 7.0
 const CAMERA_WALL_GAP := 0.18
 const CAMERA_MAST_RADIUS := 0.06
-## Closer than this to a wall, a camera already hangs on it and stays.
-const CAMERA_ON_WALL := 0.5
+## Closer than this to a wall, a camera already hangs on it and stays (under
+## PlacementCheck.MAX_GAP, S-020, T-325).
+const CAMERA_ON_WALL := 0.25
+## A loudspeaker hangs on the wall behind it (its +Z), found within this
+## distance, its back this far from it (S-020, T-325, piste L2).
+const SPEAKER_WALL_SEARCH := 4.0
+const SPEAKER_WALL_GAP := 0.08
 
 const BUILDING := preload("res://game/entities/building/building.tscn")
 
@@ -397,7 +402,9 @@ const CAMERAS := [
 ## their front looks along -Z), the name.
 const SPEAKERS := [
 	[Vector3(141.6, 2.6, 70.0), -90.0, "NET_SPEAKER_STAGE"],
-	[Vector3(115.8, 2.2, 101.0), 90.0, "NET_SPEAKER_TOWER"],
+	# Against the inner face of the tower's east wall (it stood inside the
+	# wall, at 115.8, until T-325).
+	[Vector3(115.62, 2.2, 101.0), 90.0, "NET_SPEAKER_TOWER"],
 	[Vector3(66.0, 2.4, 139.1), 0.0, "NET_SPEAKER_ARCADE"],
 ]
 
