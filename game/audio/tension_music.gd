@@ -12,6 +12,8 @@ extends Node
 ## steps get through the wind and the music. The web build has no bus effect
 ## (docs/PIEGES.md): the bus volume itself goes down from the options' volume,
 ## and a volume changed in the options meanwhile becomes the new base.
+## Hidden, with that distance again (T-327, piste H3): its Heartbeat beats,
+## faster as the monster comes near.
 
 enum Level { CALM, UNEASE, DREAD }
 
@@ -37,9 +39,11 @@ var held_for := 0.0
 var gains: Array[float] = [1.0, 0.0, 0.0]
 ## How much the duck is in, from 0 (not at all) to 1 (duck_db) (T-326).
 var duck := 0.0
+## The hunted's heart in a hiding spot (T-327).
+var heart: Heartbeat
+
 ## Ducked bus -> [the options' volume, the volume set last], in decibels.
 var _duck_base := {}
-
 var _players: Array[AudioStreamPlayer] = []
 var _heard_ago := INF
 
@@ -57,6 +61,8 @@ func _ready() -> void:
 	for player in _players:
 		player.play()  # Together, so the loops stay in time.
 	NoiseBus.noise_emitted.connect(_on_noise)
+	heart = Heartbeat.new()
+	add_child(heart)
 
 
 func _process(delta: float) -> void:
@@ -65,14 +71,16 @@ func _process(delta: float) -> void:
 	var exit_open := game_loop != null and game_loop.is_exit_open()
 	var target: Level
 	var near := false
+	var distance := -1.0
 	if listener != null and _monster_of(listener) != null:
 		target = monster_target(_heard_ago, exit_open, audio)
 	else:
-		var distance := _monster_distance(listener)
+		distance = _monster_distance(listener)
 		target = target_level(distance, exit_open, audio)
 		near = ducks(distance, audio)
 	update(delta, target)
 	update_duck(delta, near)
+	heart.update(delta, HidingSpot.is_hidden(_hunted_of(listener)), distance)
 
 
 ## Moves the level towards target (kept at least level_hold) and fades the layers.
@@ -170,6 +178,16 @@ func _monster_of(camera: Node) -> MonsterAvatar:
 	var node := camera
 	while node != null:
 		if node is MonsterAvatar:
+			return node
+		node = node.get_parent()
+	return null
+
+
+## The hunted whose camera this is (the player), or null.
+func _hunted_of(camera: Node) -> Node:
+	var node := camera
+	while node != null:
+		if node is Player:
 			return node
 		node = node.get_parent()
 	return null
