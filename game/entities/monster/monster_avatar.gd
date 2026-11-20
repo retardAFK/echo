@@ -58,6 +58,8 @@ var body_action: MonsterBody.Action:
 
 ## Stopped short (S-020, T-307): a door smashed open on the run.
 var stagger := Stagger.new()
+## Getting over a window or a low wall (S-020, T-340): slower than the hunted.
+var vault_motion := VaultMotion.new()
 ## Its run as a gauge, shown under the crosshair's left (S-020, T-309).
 var sprint: MonsterSprint
 ## Deafened by a firecracker (S-020, T-312); online, the room sends it.
@@ -108,10 +110,16 @@ func _physics_process(delta: float) -> void:
 	gesture.update(delta)
 	apply_actions()
 	update_aim()
+	if vault_motion.is_active():
+		global_position = vault_motion.step(delta)  # Over a wall (T-340).
+		velocity = Vector3.ZERO
+		return
 	update_scan(delta, commands.scan)
 	move(commands.move, commands.sprint, delta)
-	if not mirror_world:
-		_hold.update(self, get_interactable(), commands.interact, delta)
+	var target := get_interactable()
+	if mirror_world and not target is Vault:
+		target = null  # Online, a client predicts only the climbs (T-340).
+	_hold.update(self, target, commands.interact, delta)
 
 
 ## Applies the one-shot actions queued in the commands (S-010, T-106). The
@@ -123,8 +131,8 @@ func apply_actions() -> void:
 
 
 ## The hiding spot (S-008, Q7), the door (S-016), the terminal or the camera
-## (S-018) in reach in front of the crosshair, that it can use by holding
-## "interact", or null.
+## (S-018), the window or low wall (S-020, T-340) in reach in front of the
+## crosshair, that it can use by holding "interact", or null.
 func get_interactable() -> Node:
 	var best: Node = null
 	var best_distance := INF
@@ -133,6 +141,7 @@ func get_interactable() -> Node:
 	var usable := get_tree().get_nodes_in_group(HidingSpot.GROUP)
 	usable.append_array(get_tree().get_nodes_in_group(Door.GROUP))
 	usable.append_array(get_tree().get_nodes_in_group(Terminal.MONSTER_GROUP))
+	usable.append_array(get_tree().get_nodes_in_group(Vault.GROUP))  # T-340.
 	for node in usable:
 		var spot := node as Node3D
 		if not spot.can_interact(global_position):
