@@ -65,6 +65,9 @@ extends Resource
 ## played for the ears.
 @export_range(0.5, 100.0, 0.5, "suffix:m") var firecracker_range: float = 25.0
 @export_range(1.0, 100.0, 1.0, "suffix:m") var firecracker_sound_distance: float = 50.0
+## A firecracker set as a trap in an empty hiding spot (S-020, T-331) sits
+## this high above the spot's floor, in meters.
+@export_range(0.0, 2.0, 0.05, "suffix:m") var trap_height: float = 0.3
 
 @export_group("Hiding spots")
 ## Seconds to hold "interact" to get in, get out, or open a hiding spot (Q5, Q7).
