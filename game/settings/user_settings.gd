@@ -23,11 +23,15 @@ const NUMBERS := {
 ## On or off settings and their default. "fullscreen" is the state of the
 ## window, never saved: a browser only allows it right after a key or a click.
 ## "first_steps_*": the first steps of a role were read (S-013, T-166).
+## "tip_*": the first-time tip of a thing was shown (S-020, T-329, FirstTips).
 const FLAGS := {
 	"invert_y": false,
 	"fullscreen": false,
 	"first_steps_hunted": false,
 	"first_steps_monster": false,
+	"tip_hiding_spot": false,
+	"tip_terminal": false,
+	"tip_fuse_box": false,
 }
 const FULLSCREEN := "fullscreen"
 ## Settings picked in a list; the first one is the default.
