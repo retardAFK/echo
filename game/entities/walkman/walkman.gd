@@ -34,6 +34,15 @@ var path_length := -1.0
 var _next_step := 0.0
 
 
+## Puts the walkman down in front of user, its steps going straight ahead of
+## where it faces (GadgetDef contract, S-023, T-351). Returns the ruse it
+## counts as.
+func deploy(user: Player) -> StringName:
+	GadgetUse.place_on_ground(user, self)
+	global_rotation = Vector3(0.0, user.global_rotation.y, 0.0)  # Steps go along -Z.
+	return &"walkman"
+
+
 func _ready() -> void:
 	add_to_group(GROUP)
 	RetroSurface.apply_to(self, RetroSurface.DEFAULT_SETTINGS)

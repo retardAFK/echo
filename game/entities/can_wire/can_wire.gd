@@ -40,6 +40,14 @@ static func yank_near(monster: Node3D) -> int:
 	return count
 
 
+## Stretches the wire on the ground in front of user, across the way it
+## faces (GadgetDef contract, S-023, T-351). Returns the ruse it counts as.
+func deploy(user: Player) -> StringName:
+	GadgetUse.place_on_ground(user, self)
+	global_rotation = Vector3(0.0, user.global_rotation.y, 0.0)  # String along local X.
+	return &"can_wire"
+
+
 func _ready() -> void:
 	add_to_group(GROUP)
 	RetroSurface.apply_to(self, RetroSurface.DEFAULT_SETTINGS)
