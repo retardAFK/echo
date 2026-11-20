@@ -18,10 +18,14 @@ extends Node
 ## The processes tell each other their phase and position through files in
 ## <dir> (seat<N>.json). Each prints ECHO_NET_MATCH and quits with 0 when
 ## the hunted won as planned, 1 otherwise.
+## S-020, T-330 (piste T7): each also fails when its prediction strayed more
+## than match_max_gap from the room while it walked, before it was ever
+## caught (game/data/net_test_settings.tres). --jitter N adds bursts of up to
+## N ms on what the client receives.
 ## Run: godot --headless res://tools/godot/net_match.tscn -- --index N --dir D
 
 const TIMEOUT := 420.0
-const LATENCY_MS := 75
+const TEST_SETTINGS := preload("res://game/data/net_test_settings.tres")
 const PLAYERS := 4
 const MAP := "res://game/maps/tilleuls/tilleuls.scn"
 ## Close enough to a point of the path to aim at the next one, in meters.
@@ -86,6 +90,10 @@ var _status_left := STATUS_TIME
 ## Keypad: digits typed, and seconds before the next one.
 var _typed := 0
 var _key_left := 0.0
+## Largest gap between prediction and room while it walked free (T-330),
+## and whether it was ever held (then the room moved it: no more measure).
+var _walk_worst := 0.0
+var _ever_held := false
 
 
 func _ready() -> void:
@@ -97,8 +105,10 @@ func _ready() -> void:
 				_index = int(args[i + 1])
 			"--dir":
 				_dir = args[i + 1]
+			"--jitter":
+				_settings.debug_jitter_ms = int(args[i + 1])
 	DirAccess.make_dir_recursive_absolute(_dir)
-	_settings.debug_latency_ms = LATENCY_MS
+	_settings.debug_latency_ms = TEST_SETTINGS.match_latency_ms
 	NetSession.settings = _settings
 	_lobby.settings = _settings
 	add_child(_lobby)
@@ -177,6 +187,7 @@ func _step(delta: float) -> void:
 		return
 	if _map == null or _net.own == null or not _net.prediction.started:
 		return
+	_measure_gap()
 	_share_left -= delta
 	if _share_left <= 0.0:
 		_share_left = 0.25
@@ -591,10 +602,12 @@ func _finish(won: bool) -> void:
 		func(kind: int) -> String: return LoopRules.Objective.keys()[kind].to_lower()
 	)
 	var result := (
-		"seat %d, phase %s, hunted won %s, objectives %s, seen %s, %.0f s"
-		% [_seat, _phase, won, ",".join(kinds), _seen, _map.game_loop.get_duration()]
+		"seat %d, phase %s, hunted won %s, objectives %s, seen %s, %.0f s, walk gap %.2f m"
+		% [_seat, _phase, won, ",".join(kinds), _seen, _map.game_loop.get_duration(), _walk_worst]
 	)
 	var planned := won and "2:CAPTURED" in _seen and "2:FREE" in _seen
+	if _walk_worst > TEST_SETTINGS.match_max_gap:
+		planned = false  # T-330: the prediction strayed.
 	var wanted := OS.get_environment("ECHO_OBJECTIVES")
 	if wanted != "" and ",".join(kinds) != wanted:
 		planned = false  # The room's objectives did not reach this client.
@@ -603,6 +616,15 @@ func _finish(won: bool) -> void:
 		return
 	print("ECHO_NET_MATCH ok " + result)
 	get_tree().quit(0)
+
+
+## The gap at the last snapshot, while the player walks free (T-330): once
+## held, the room moves it to a cage and back, which is no prediction error.
+func _measure_gap() -> void:
+	if _net.own.get("held") == true:
+		_ever_held = true
+	if not _ever_held:
+		_walk_worst = maxf(_walk_worst, _net.last_error)
 
 
 func _seat_file(seat: int) -> String:
