@@ -48,6 +48,7 @@ const TABS := [
 			["place_firecracker", OptionRow.Kind.KEY, "OPTIONS_KEY_FIRECRACKER"],
 			["interact", OptionRow.Kind.KEY, "OPTIONS_KEY_INTERACT"],
 			["map", OptionRow.Kind.KEY, "OPTIONS_KEY_MAP"],
+			["ping", OptionRow.Kind.KEY, "OPTIONS_KEY_PING"],
 		],
 	],
 ]

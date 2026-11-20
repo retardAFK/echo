@@ -58,8 +58,8 @@ func test_layers_come_in_4_s_and_go_in_10_s() -> void:
 func test_the_three_layers_play_together_on_the_music_bus() -> void:
 	var music := TensionMusic.new()
 	add_child_autofree(music)
-	assert_eq(music.get_child_count(), 3)
-	for player: AudioStreamPlayer in music.get_children():
+	assert_eq(music.get_child_count(), 4, "3 layers and the heart (T-327)")
+	for player: AudioStreamPlayer in music.get_children().slice(0, 3):
 		assert_true(player.playing)
 		assert_eq(player.bus, &"Musique")
 		var wav := player.stream as AudioStreamWAV
@@ -116,6 +116,33 @@ func test_a_near_monster_lowers_the_wind_and_the_music() -> void:
 	music.free()
 	AudioServer.set_bus_volume_db(ambience, 0.0)
 	AudioServer.set_bus_volume_db(music_bus, 0.0)
+
+
+func test_hidden_the_heart_beats_faster_as_the_monster_comes() -> void:
+	# S-020, T-327 (piste H3): in a hiding spot, a heartbeat that speeds up
+	# with the monster's distance.
+	assert_almost_eq(Heartbeat.interval(-1.0, AUDIO), AUDIO.heart_slow_interval, 0.001)
+	assert_almost_eq(
+		Heartbeat.interval(AUDIO.heart_far + 5.0, AUDIO), AUDIO.heart_slow_interval, 0.001
+	)
+	assert_almost_eq(Heartbeat.interval(AUDIO.heart_near, AUDIO), AUDIO.heart_fast_interval, 0.001)
+	var middle := Heartbeat.interval((AUDIO.heart_far + AUDIO.heart_near) / 2.0, AUDIO)
+	assert_between(middle, AUDIO.heart_fast_interval, AUDIO.heart_slow_interval)
+	var music := TensionMusic.new()
+	add_child_autofree(music)
+	music.set_process(false)
+	var heart := music.heart
+	assert_eq(heart.bus, &"Effets", "not lowered by the danger duck")
+	for i in 100:  # 10 s in the open: no beat.
+		heart.update(0.1, false, 5.0)
+	assert_eq(heart.beats, 0)
+	for i in 100:  # 10 s hidden, the monster far.
+		heart.update(0.1, true, 50.0)
+	var far_beats := heart.beats
+	assert_almost_eq(far_beats, 10, 1)
+	for i in 100:  # 10 s hidden, the monster at 3 m.
+		heart.update(0.1, true, AUDIO.heart_near)
+	assert_almost_eq(heart.beats - far_beats, 28, 2, "about 170 a minute")
 
 
 func test_the_map_starts_the_music() -> void:

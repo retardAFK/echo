@@ -81,6 +81,20 @@ extends Resource
 ## Seconds the duck takes to come in or to go away.
 @export_range(0.1, 10.0, 0.1, "suffix:s") var duck_time: float = 1.0
 
+@export_group("Heartbeat (S-020, T-327)")
+## Hidden: seconds between two heartbeats with the monster far away or none.
+@export_range(0.2, 3.0, 0.05, "suffix:s") var heart_slow_interval: float = 1.0
+## Hidden: seconds between two heartbeats with the monster right there.
+@export_range(0.2, 3.0, 0.05, "suffix:s") var heart_fast_interval: float = 0.35
+## The heart starts to speed up with the monster this close, in meters.
+@export_range(1.0, 100.0, 1.0, "suffix:m") var heart_far: float = 30.0
+## It beats its fastest with the monster this close, in meters.
+@export_range(0.5, 30.0, 0.5, "suffix:m") var heart_near: float = 3.0
+## Seconds before the first beat once hidden.
+@export_range(0.0, 5.0, 0.1, "suffix:s") var heart_first_delay: float = 0.5
+## Volume of a heartbeat, in decibels.
+@export_range(-40.0, 6.0, 0.5, "suffix:dB") var heart_db: float = -8.0
+
 @export_group("Mix (T-147)")
 ## Level of the loudest noises, in decibels, so that everything at once stays
 ## under -3 dBFS in the browser (measured with the mixing bench).
