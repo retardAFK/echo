@@ -51,6 +51,7 @@ func _ready() -> void:
 	_place_fuse_boxes()
 	_place_objectives()
 	_hang_cameras()
+	_hang_speakers()
 	_place_ruses()
 	var region: NavigationRegion3D = _root.get_node("NavigationRegion3D")
 	var started := Time.get_ticks_msec()
@@ -410,6 +411,42 @@ func _hang_cameras() -> void:
 			target = spot + normal * 10.0 + Vector3.DOWN * 3.0  # Not into the wall.
 		camera.global_transform = Transform3D(Basis.looking_at(target - spot, Vector3.UP), spot)
 		print("%s: %.1f m to its wall" % [camera.name, best_distance])
+
+
+## Puts each loudspeaker against the wall behind it (S-020, T-325): two hung
+## more than a meter from their wall (the social centre's stage, the tower).
+func _hang_speakers() -> void:
+	var space := _root.get_world_3d().direct_space_state
+	for speaker: Node3D in _root.get_node("Network/Loudspeakers").get_children():
+		if PlacementCheck.gap(speaker) <= PlacementCheck.MAX_GAP / 2.0:
+			continue  # Already against a wall.
+		var from := speaker.global_position
+		var back := speaker.global_basis.z
+		back.y = 0.0
+		var hit := _wall_hit(space, from, back.normalized(), SPEAKER_WALL_SEARCH)
+		if not hit:
+			push_warning("No wall behind %s" % speaker.name)  # PlacementCheck says where.
+			continue
+		var gap := from.distance_to(hit.position)
+		if gap <= SPEAKER_WALL_GAP + 0.02:
+			continue  # Already against its wall.
+		var normal: Vector3 = hit.normal
+		normal.y = 0.0
+		normal = normal.normalized()
+		var spot: Vector3 = hit.position + normal * SPEAKER_WALL_GAP
+		spot.y = from.y
+		speaker.global_position = spot
+		speaker.global_rotation.y = atan2(-normal.x, -normal.z)  # Its front (-Z) off the wall.
+		print("%s: %.1f m to its wall" % [speaker.name, gap])
+
+
+## The first wall a flat ray meets, or an empty dictionary.
+func _wall_hit(
+	space: PhysicsDirectSpaceState3D, from: Vector3, direction: Vector3, reach: float
+) -> Dictionary:
+	return space.intersect_ray(
+		PhysicsRayQueryParameters3D.create(from, from + direction * reach, MapKit.WALLS_LAYER)
+	)
 
 
 ## A grey mast from the ground up to a camera far from any wall, the camera
