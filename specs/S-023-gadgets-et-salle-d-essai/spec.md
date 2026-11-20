@@ -34,6 +34,7 @@ Plus tard, mes coéquipiers finissent le premier objectif. Un grondement sourd t
 - Q2 : Combien de charges ? → Proposition : **2 gadgets, 2 charges chacun**, soit 4 utilisations comme aujourd'hui (1 de chaque des 4). Valeurs dans `game/data/gadgets/*.tres`.
 - Q3 : Où choisit-on ? → Proposition : en solo, sur l'écran « Objectif et commandes » du chassé ; en ligne, dans le salon, avant « Je suis prêt ». Le dernier choix est gardé dans les réglages. Un chassé qui ne choisit rien garde le choix précédent (au premier lancement : pétard et fumigène). Les IA chassées tirent 2 gadgets au hasard, mais seul ce qu'elles savent utiliser (pétard aujourd'hui) est tiré tant que leur IA n'en sait pas plus.
 - Q4 : Les coéquipiers et le monstre voient-ils le choix ? → Proposition : les coéquipiers oui (dans le salon), le monstre non : « qui a pris la fumée ? » fait partie du jeu.
+  - Précision T-352 (20/11/2026) : en ligne, les rôles sont tirés au lancement (T-110), donc personne ne sait dans le salon qui sera le monstre. Montrer les choix au salon les montrerait aussi au futur monstre : seule la salle les garde, aucun client ne les reçoit. Les coéquipiers voient en jeu ce que fait chacun.
 - Q5 : Quels paliers pour le monstre ? → Proposition, un par objectif réussi :
   1. jauge de scan rechargée en **35 s** au lieu de 45 ;
   2. course de **6,5 s** au lieu de 5 avant l'essoufflement ;

@@ -8,10 +8,10 @@ Bloc de numéros : T-350 à T-369.
 - [x] T-351 — `GadgetDef` et liste des gadgets dans `game/data/gadgets/` ; pétard, fil, walkman et fumigène passent par elle (joueur, réseau, IA, HUD), sans changer leurs règles
   - Résultat vérifiable : comportement identique (tests existants verts) ; un test parcourt la liste et pose chaque gadget en solo et en ligne
   - Dépend de : T-350
-- [ ] T-352 — Choix de 2 gadgets (Q2 à Q4) : écran solo, salon, réglage gardé, IA, synchronisation
+- [x] T-352 — Choix de 2 gadgets (Q2 à Q4) : écran solo, salon, réglage gardé, IA, synchronisation
   - Résultat vérifiable : tests GUT du choix et de son envoi ; le monstre ne reçoit jamais le choix
   - Dépend de : T-351
-- [ ] T-353 — Touches des gadgets selon Q1 et HUD « gadget » ; F, T, V, B libérées ; options › touches et commandes à jour
+- [x] T-353 — Touches des gadgets selon Q1 et HUD « gadget » ; F, T, V, B libérées ; options › touches et commandes à jour
   - Résultat vérifiable : tests GUT d'entrée ; capture du HUD
   - Dépend de : T-352
 - [ ] T-354 — Paliers du monstre (Q5, Q7) : `EscalationStage` dans `game/data/escalation/`, appliqués à chaque objectif, solo et en ligne, monstre joué et IA
@@ -36,3 +36,5 @@ Bloc de numéros : T-350 à T-369.
 ## Compte rendu
 - T-350 (20/11/2026) : spec et tâches écrites après l'audit de game design ; Q1 tranchée par Maxime (touches 1 et 2). PR #229.
 - T-351 (20/11/2026) : `GadgetDef` (id, `Inventory.Kind`, scène, clé du HUD) et `GadgetList` (`game/data/gadgets/gadgets.tres`, chargée et non préchargée pour éviter un cycle avec les scripts des gadgets). Chaque gadget se pose lui-même avec `deploy(user)` ; `GadgetUse` (`game/entities/player/gadget_use.gd`) fait l'utilisation et la pose au sol (réveil compris), ce qui garde `player.gd` sous les 20 méthodes publiques. `CarryHud` parcourt la liste. Règles inchangées : 977 tests GUT sur 978 verts (le dernier « risky » comme avant), dont `tests/test_gadgets.gd` qui pose chaque gadget de la liste. Le réseau garde ses 4 compteurs (`you[14..17]`) jusqu'à T-352.
+- T-352 (20/11/2026) : `LoadoutSettings` (`game/data/loadout_settings.tres` : 2 emplacements, 2 charges, choix par défaut et de l'IA pétard + fumigène) et `Loadout` (`game/session/loadout.gd`, pur : validation, tour des gadgets, index pour le réseau, `equip` sur l'inventaire). Choix dans « Jouer seul » et dans le salon (`LoadoutItems`, entrées « GADGET 1 : … »), gardé dans les réglages (section `loadout`). En ligne il part avec « prêt » (`ask_ready`, en index de la liste) ; la salle le garde et l'applique au joueur, aucun client ne le reçoit (Q4 précisée : les rôles sont tirés au lancement). Les proies IA prennent `ai_gadgets`. Les anciens `start_`/`max_` des 4 gadgets quittent `RuseSettings`. Tests : `tests/test_loadout.gd`.
+- T-353 (20/11/2026) : actions `gadget_1` et `gadget_2` (touches 1 et 2, remappables) à la place de F, T, V et B ; `PlayerCommands` `GADGET_1`/`GADGET_2` ; HUD « Pétard ×2 (1) » par emplacement ; options › touches et aide des commandes à jour. Les tests de chaque gadget passent par les touches et vérifient les 2 charges.

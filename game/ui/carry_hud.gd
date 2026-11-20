@@ -1,9 +1,12 @@
 class_name CarryHud
 extends CanvasLayer
 ## What the hunted carries (spec S-008, Q11), in small at the bottom right:
-## "2 bouteilles", "Réveil : 15 s (molette)", and from S-020 "Pétard (F)",
-## "Fil à canettes (T)", "Walkman (V)", "Fumigène (B)". Nothing when the hands
-## are empty.
+## "2 bouteilles", "Réveil : 15 s (molette)", and the gadgets picked, one per
+## key (S-023, T-353): "Pétard ×2 (1)", "Fumigène ×1 (2)". Nothing when the
+## hands are empty.
+
+## HUD line of each gadget slot, with the key of the slot (S-023, T-353).
+const SLOT_KEYS: Array[String] = ["HUD_CARRY_GADGET_1", "HUD_CARRY_GADGET_2"]
 
 @export var player: Player
 
@@ -24,12 +27,15 @@ func _process(_delta: float) -> void:
 
 func _refresh() -> void:
 	_shown_short = player.decoy_short
-	_label.text = describe(player.inventory, _shown_short)
+	_label.text = describe(player.inventory, _shown_short, player.loadout)
 
 
 ## The text for an inventory, one item kind per line.
 ## With short, the alarm clock is set to its short delay (S-020, T-313).
-static func describe(inventory: Inventory, short := false) -> String:
+## The gadgets are those of loadout, in slot order with the key of the slot.
+static func describe(
+	inventory: Inventory, short := false, loadout: Array[StringName] = []
+) -> String:
 	var lines: PackedStringArray = []
 	var bottles := inventory.count(Inventory.Kind.BOTTLE)
 	if bottles > 0:
@@ -38,7 +44,9 @@ static func describe(inventory: Inventory, short := false) -> String:
 		var settings := inventory.settings
 		var delay := settings.decoy_short_delay if short else settings.decoy_delay
 		lines.append(Text.t("HUD_CARRY_DECOY", roundi(delay)))
-	for gadget: GadgetDef in GadgetList.default().gadgets:  # S-023, T-351.
-		if inventory.count(gadget.kind) > 0:
-			lines.append(Text.with_keys(gadget.hud_key))
+	for slot in mini(loadout.size(), SLOT_KEYS.size()):
+		var gadget_def := GadgetList.default().by_id(loadout[slot])
+		var left := inventory.count(gadget_def.kind) if gadget_def != null else 0
+		if left > 0:
+			lines.append(Text.with_keys(SLOT_KEYS[slot], [Text.t(gadget_def.name_key), left]))
 	return "\n".join(lines)

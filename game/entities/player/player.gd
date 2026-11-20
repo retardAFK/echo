@@ -26,6 +26,15 @@ const PING_SCENE := preload("res://game/entities/ping/ping.tscn")
 
 ## What the player carries (S-008).
 var inventory: Inventory
+## The gadgets it picked for this game, in slot order (S-023, T-352): the
+## keys gadget_1 and gadget_2 use them. Setting it gives the inventory their
+## charges. A player played on this machine starts with the one saved in the
+## settings; the online room sets the one each player chose in the lobby.
+var loadout: Array[StringName] = []:
+	set(value):
+		loadout = Loadout.sanitize(value)
+		if inventory != null:
+			Loadout.equip(inventory, loadout)
 ## Holding its breath (S-020, T-311), with its recharge.
 var breath_hold: BreathHold
 ## Its burst once a minute (S-020, T-338), with its recharge.
@@ -113,6 +122,7 @@ func _ready() -> void:
 	_apply_view_settings("")
 	Settings.changed.connect(_apply_view_settings)
 	inventory = Inventory.new(ruse_settings)
+	loadout = Settings.get_loadout() if local_controls and loadout.is_empty() else loadout
 	breath_hold = BreathHold.new(settings)
 	second_wind = SecondWind.new(settings)
 	# Each player owns its capsule, so resizing it never touches another instance.
@@ -221,7 +231,8 @@ func apply_actions() -> void:
 				in [
 					PlayerCommands.Action.THROW,
 					PlayerCommands.Action.DECOY,
-					PlayerCommands.Action.FIRECRACKER,
+					PlayerCommands.Action.GADGET_1,
+					PlayerCommands.Action.GADGET_2,
 					PlayerCommands.Action.DECOY_SHORT,
 				]
 			)
@@ -247,16 +258,12 @@ func apply_actions() -> void:
 				place_decoy()
 			PlayerCommands.Action.DECOY_SHORT:
 				place_decoy(true)
-			PlayerCommands.Action.FIRECRACKER:
-				GadgetUse.use(self, Inventory.Kind.FIRECRACKER)
+			PlayerCommands.Action.GADGET_1:
+				GadgetUse.use_slot(self, 0)
 			PlayerCommands.Action.PING:
 				_ping()
-			PlayerCommands.Action.CAN_WIRE:
-				GadgetUse.use(self, Inventory.Kind.CAN_WIRE)
-			PlayerCommands.Action.WALKMAN:
-				GadgetUse.use(self, Inventory.Kind.WALKMAN)
-			PlayerCommands.Action.SMOKE:
-				GadgetUse.use(self, Inventory.Kind.SMOKE)
+			PlayerCommands.Action.GADGET_2:
+				GadgetUse.use_slot(self, 1)
 			PlayerCommands.Action.SECOND_WIND:
 				_start_second_wind()
 

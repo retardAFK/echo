@@ -12,18 +12,18 @@ signal action_pushed(action: Action)
 ## One-shot actions, applied once by the avatar.
 ## DECOY_SHORT: an alarm clock set to ring sooner (S-020, T-313).
 ## PING: a mark for the teammates (S-020, T-328).
+## GADGET_1, GADGET_2: use the gadget of the first or second slot of the
+## hunted's Loadout (S-023, T-353).
 enum Action {
 	CROUCH,
 	INTERACT,
 	THROW,
 	DECOY,
-	FIRECRACKER,
+	GADGET_1,
 	DECOY_SHORT,
 	PING,
-	CAN_WIRE,
-	WALKMAN,
-	SMOKE,
-	SECOND_WIND
+	GADGET_2,
+	SECOND_WIND,
 }
 
 ## A line picked in a terminal's menu (S-018): PICK_BASE + its number, from

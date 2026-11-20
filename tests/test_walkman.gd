@@ -43,11 +43,13 @@ func _play(walkman: Walkman) -> void:
 		walkman._physics_process(0.1)
 
 
-func test_each_hunted_carries_one() -> void:
+func test_a_hunted_who_picked_it_carries_two() -> void:
 	var inventory := Inventory.new(SETTINGS)
-	assert_eq(inventory.count(Inventory.Kind.WALKMAN), 1, "one per hunted, from the start")
+	var picked: Array[StringName] = [&"walkman", &"firecracker"]
+	Loadout.equip(inventory, picked)  # Picked before the game (S-023).
+	assert_eq(inventory.count(Inventory.Kind.WALKMAN), Loadout.SETTINGS.charges)
 	assert_false(inventory.can_take(Inventory.Kind.WALKMAN))
-	assert_string_contains(CarryHud.describe(inventory), "Walkman")
+	assert_string_contains(CarryHud.describe(inventory, false, picked), "Walkman")
 
 
 func test_footsteps_go_away_over_the_path_after_the_delay() -> void:
@@ -123,26 +125,28 @@ func test_the_player_puts_it_down_facing_ahead() -> void:
 	player.global_position = Vector3(0, 0.1, 0)
 	player.rotation.y = 0.7
 	await wait_physics_frames(2)
+	player.loadout = [&"firecracker", &"walkman"]  # Picked before the game (S-023).
 	watch_signals(player)
-	player.commands.push(PlayerCommands.Action.WALKMAN)
+	player.commands.push(PlayerCommands.Action.GADGET_2)
 	player.apply_actions()
-	assert_eq(player.inventory.count(Inventory.Kind.WALKMAN), 0)
+	assert_eq(player.inventory.count(Inventory.Kind.WALKMAN), 1, "one of two charges used")
 	assert_signal_emitted_with_parameters(player, "ruse_used", [&"walkman"])
 	var walkmen := get_tree().get_nodes_in_group(Walkman.GROUP)
 	assert_eq(walkmen.size(), 1)
 	var facing := -player.global_basis.z
 	facing.y = 0.0
 	assert_almost_eq((walkmen[0] as Walkman).direction().dot(facing.normalized()), 1.0, 0.01)
-	player.commands.push(PlayerCommands.Action.WALKMAN)
-	player.apply_actions()
-	assert_eq(get_tree().get_nodes_in_group(Walkman.GROUP).size(), 1, "only one per game")
+	for i in 2:
+		player.commands.push(PlayerCommands.Action.GADGET_2)
+		player.apply_actions()
+	assert_eq(get_tree().get_nodes_in_group(Walkman.GROUP).size(), 2, "two charges per game")
 
 
 func test_the_command_travels_online() -> void:
 	var commands := PlayerCommands.new()
-	commands.push(PlayerCommands.Action.WALKMAN)
+	commands.push(PlayerCommands.Action.GADGET_2)
 	var copy := PlayerCommands.from_bytes(commands.to_bytes())
-	assert_eq(copy.take_actions(), [PlayerCommands.Action.WALKMAN] as Array[PlayerCommands.Action])
+	assert_eq(copy.take_actions(), [PlayerCommands.Action.GADGET_2] as Array[PlayerCommands.Action])
 
 
 func test_online_the_room_shows_it_and_the_client_copy_stays_silent() -> void:
@@ -174,8 +178,9 @@ func test_the_carried_count_travels_in_the_snapshot() -> void:
 	var net := NetGame.new()
 	net.settings = NetSettings.new()
 	net.is_room = true
+	player.loadout = [&"walkman", &"firecracker"]
 	net.add_avatar(1, 1, player)
 	add_child_autofree(net)
-	assert_eq(net.snapshot_for(1)["you"][16], 1)
+	assert_eq(net.snapshot_for(1)["you"][16], 2)
 	player.inventory.use(Inventory.Kind.WALKMAN)
-	assert_eq(net.snapshot_for(1)["you"][16], 0)
+	assert_eq(net.snapshot_for(1)["you"][16], 1)

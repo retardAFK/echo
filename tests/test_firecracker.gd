@@ -42,12 +42,12 @@ func _avatar(at: Vector3) -> MonsterAvatar:
 
 func test_settings_follow_the_roadmap() -> void:
 	assert_eq(SETTINGS.deafen_time, 6.0)
-	assert_eq(SETTINGS.start_firecrackers, 1)
-	assert_eq(SETTINGS.max_firecrackers, 1)
 	var inventory := Inventory.new(SETTINGS)
-	assert_eq(inventory.count(Inventory.Kind.FIRECRACKER), 1, "one per hunted, from the start")
+	var picked: Array[StringName] = [&"firecracker", &"smoke"]
+	Loadout.equip(inventory, picked)  # Picked before the game (S-023).
+	assert_eq(inventory.count(Inventory.Kind.FIRECRACKER), Loadout.SETTINGS.charges)
 	assert_false(inventory.can_take(Inventory.Kind.FIRECRACKER))
-	assert_string_contains(CarryHud.describe(inventory), "Pétard")
+	assert_string_contains(CarryHud.describe(inventory, false, picked), "Pétard")
 
 
 func test_deafness_counts_down_and_never_shortens() -> void:
@@ -128,24 +128,24 @@ func test_the_player_places_it_with_its_key() -> void:
 	add_child_autofree(player)
 	player.global_position = Vector3(0, 0.1, 0)
 	await wait_physics_frames(2)
-	player.commands.push(PlayerCommands.Action.FIRECRACKER)
+	player.loadout = [&"firecracker", &"smoke"]  # Slot 1, key 1 (S-023).
+	player.commands.push(PlayerCommands.Action.GADGET_1)
 	player.apply_actions()
-	assert_eq(player.inventory.count(Inventory.Kind.FIRECRACKER), 0)
+	assert_eq(player.inventory.count(Inventory.Kind.FIRECRACKER), 1)
 	assert_eq(get_tree().get_nodes_in_group(Firecracker.GROUP).size(), 1)
-	player.commands.push(PlayerCommands.Action.FIRECRACKER)
-	player.apply_actions()
-	assert_eq(get_tree().get_nodes_in_group(Firecracker.GROUP).size(), 1, "only one per game")
+	for i in 2:
+		player.commands.push(PlayerCommands.Action.GADGET_1)
+		player.apply_actions()
+	assert_eq(get_tree().get_nodes_in_group(Firecracker.GROUP).size(), 2, "two charges per game")
 	for node in get_tree().get_nodes_in_group(Firecracker.GROUP):
 		node.free()
 
 
 func test_the_command_travels_online() -> void:
 	var commands := PlayerCommands.new()
-	commands.push(PlayerCommands.Action.FIRECRACKER)
+	commands.push(PlayerCommands.Action.GADGET_1)
 	var copy := PlayerCommands.from_bytes(commands.to_bytes())
-	assert_eq(
-		copy.take_actions(), [PlayerCommands.Action.FIRECRACKER] as Array[PlayerCommands.Action]
-	)
+	assert_eq(copy.take_actions(), [PlayerCommands.Action.GADGET_1] as Array[PlayerCommands.Action])
 
 
 # S-020, T-331 (piste R6): a firecracker set in an empty hiding spot is a
@@ -190,7 +190,7 @@ func test_the_player_traps_the_empty_spot_it_aims_at() -> void:
 	player.set_look(spot.get_out_yaw() + PI, 0.0)  # Facing the spot.
 	await wait_physics_frames(2)
 	assert_eq(player.get_interactable(), spot, "the spot is aimed at")
-	player.commands.push(PlayerCommands.Action.FIRECRACKER)
+	player.commands.push(PlayerCommands.Action.GADGET_1)
 	player.apply_actions()
 	assert_not_null(spot.trap, "set in the spot")
 	assert_true(spot.trap.in_spot)

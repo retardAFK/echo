@@ -101,6 +101,7 @@ func _ready() -> void:
 	add_to_group(GROUP)
 	_rng.seed = hash(name)
 	inventory = Inventory.new(ruse_settings)
+	Loadout.equip(inventory, Loadout.default_ids(true))  # S-023, T-352.
 	brain = PreyBrain.new(settings, _rng.randi())
 	brain.state_changed.connect(state_changed.emit)
 	brain.set_points(markers_of(wander_route), markers_of(hiding_spots))

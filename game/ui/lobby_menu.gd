@@ -145,7 +145,9 @@ func show_lobby(state: LobbyState) -> void:
 	_room_list.set_item_visible("LOBBY_START", me == state.leader)
 	_room_list.item("LOBBY_START").disabled = not state.can_start(me)
 	_hint.text = Text.t("LOBBY_WAIT_READY") if me == state.leader else Text.t("LOBBY_WAIT_LEADER")
+	LoadoutItems.refresh(_room_list)
 	if arriving:
+		NetSession.set_ready(false)  # Sends the gadgets picked (S-023, T-352).
 		_room_list.focus_first()
 
 
@@ -187,6 +189,10 @@ func _on_entry_chosen(key: String) -> void:
 
 
 func _on_room_chosen(key: String) -> void:
+	if LoadoutItems.choose(_room_list, key):
+		if lobby != null:  # Sends the new pick, ready or not as before.
+			NetSession.set_ready(lobby.is_ready(NetSession.get_place()))
+		return
 	match key:
 		"LOBBY_READY":
 			_on_ready_pressed()

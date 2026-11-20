@@ -36,7 +36,8 @@ func test_each_gadget_is_complete_and_unique() -> void:
 		assert_not_null(gadget_def.scene, "%s: a scene" % gadget_def.id)
 		assert_false(kinds.has(gadget_def.kind), "%s: its own inventory kind" % gadget_def.id)
 		kinds[gadget_def.kind] = true
-		assert_ne(Text.t(gadget_def.hud_key), gadget_def.hud_key, "%s: a HUD text" % gadget_def.id)
+		assert_ne(Text.t(gadget_def.name_key), gadget_def.name_key, "%s: a name" % gadget_def.id)
+		assert_ne(Text.t(gadget_def.help_key), gadget_def.help_key, "%s: a help" % gadget_def.id)
 		var node := gadget_def.scene.instantiate()
 		assert_true(node.has_method("deploy"), "%s: deploy(user)" % gadget_def.id)
 		node.free()
@@ -74,5 +75,10 @@ func test_the_hud_shows_each_gadget_carried() -> void:
 		inventory.set_count(gadget_def.kind, 0)
 	assert_eq(CarryHud.describe(inventory), "")
 	for gadget_def in GadgetList.default().gadgets:
+		var picked: Array[StringName] = [gadget_def.id]
 		inventory.set_count(gadget_def.kind, 1)
-		assert_string_contains(CarryHud.describe(inventory), Text.with_keys(gadget_def.hud_key))
+		assert_string_contains(
+			CarryHud.describe(inventory, false, picked), Text.t(gadget_def.name_key) + " ×1"
+		)
+		assert_eq(CarryHud.describe(inventory), "", "a gadget not picked is not shown")
+		inventory.set_count(gadget_def.kind, 0)

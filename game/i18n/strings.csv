@@ -38,10 +38,18 @@ HUD_INTERACT_PICKUP_DECOY,{interact} : ramasser le réveil
 HUD_CARRY_BOTTLES_ONE,%d bouteille
 HUD_CARRY_BOTTLES_MANY,%d bouteilles
 HUD_CARRY_DECOY,Réveil : %d s (molette)
-HUD_CARRY_FIRECRACKER,Pétard ({place_firecracker})
-HUD_CARRY_CAN_WIRE,Fil à canettes ({place_can_wire})
-HUD_CARRY_WALKMAN,Walkman ({place_walkman})
-HUD_CARRY_SMOKE,Fumigène ({smoke_bomb})
+HUD_CARRY_GADGET_1,%s ×%d ({gadget_1})
+HUD_CARRY_GADGET_2,%s ×%d ({gadget_2})
+GADGET_FIRECRACKER,Pétard
+GADGET_CAN_WIRE,Fil à canettes
+GADGET_WALKMAN,Walkman
+GADGET_SMOKE,Fumigène
+GADGET_HELP_FIRECRACKER,"Pétard : posé au sol, il éclate sous le monstre, qui n'entend plus rien 6 s ; en visant une cachette vide, il la piège"
+GADGET_HELP_CAN_WIRE,Fil à canettes : tendu en travers d'un passage, il tinte quand le monstre passe
+GADGET_HELP_WALKMAN,"Walkman : posé au sol, 3 s plus tard, des pas de course s'éloignent tout droit devant"
+GADGET_HELP_SMOKE,Fumigène : lâché à ses pieds, un nuage de 10 s où personne ne voit à travers
+MENU_GADGET_1,Gadget 1 : %s
+MENU_GADGET_2,Gadget 2 : %s
 HUD_DEAF,Assourdi : %d s
 HUD_INTERACT_HIDE,Maintenir {interact} : se cacher
 HUD_INTERACT_LEAVE,Maintenir {interact} : sortir
@@ -66,10 +74,7 @@ CONTROLS_HOLD_BREATH,{hold_breath} : retenir son souffle (6 s sans bruit de pas 
 CONTROLS_INTERACT,"{interact} : ramasser, interagir ; maintenir {interact} : fusible, cachette"
 CONTROLS_THROW,Clic gauche : lancer une bouteille
 CONTROLS_DECOY,"Clic droit : poser un réveil ; molette : il sonne après 15 ou 5 s"
-CONTROLS_FIRECRACKER,"{place_firecracker} : poser le pétard (il éclate sous le monstre, qui n'entend plus rien 6 s) ; en visant une cachette vide, la piéger"
-CONTROLS_CAN_WIRE,"{place_can_wire} : tendre le fil à canettes en travers du passage (il tinte quand le monstre passe)"
-CONTROLS_WALKMAN,"{place_walkman} : poser le walkman (3 s plus tard, des pas de course s'éloignent tout droit devant)"
-CONTROLS_SMOKE,"{smoke_bomb} : lâcher le fumigène à ses pieds (un nuage de 10 s où personne ne voit à travers)"
+CONTROLS_GADGETS,"{gadget_1} et {gadget_2} : utiliser ses deux gadgets, choisis avant la partie (2 de chaque)"
 CONTROLS_SECOND_WIND,"{second_wind} : second souffle, 2 s plus vite qu'un sprint, une fois par minute (très bruyant)"
 CONTROLS_MAP,{map} : ouvrir ou fermer la carte
 CONTROLS_PING,"{ping} ou clic molette : signaler aux autres chassés (le monstre visé, sinon l'endroit)"
@@ -234,10 +239,8 @@ OPTIONS_KEY_RIGHT,Aller à droite
 OPTIONS_KEY_SPRINT,Courir
 OPTIONS_KEY_CROUCH,S'accroupir ou rôder
 OPTIONS_KEY_HOLD_BREATH,Retenir son souffle
-OPTIONS_KEY_FIRECRACKER,Poser le pétard
-OPTIONS_KEY_CAN_WIRE,Tendre le fil à canettes
-OPTIONS_KEY_WALKMAN,Poser le walkman
-OPTIONS_KEY_SMOKE,Lâcher le fumigène
+OPTIONS_KEY_GADGET_1,Gadget 1
+OPTIONS_KEY_GADGET_2,Gadget 2
 OPTIONS_KEY_SECOND_WIND,Second souffle
 OPTIONS_KEY_INTERACT,Interagir
 OPTIONS_KEY_MAP,Carte

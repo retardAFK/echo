@@ -45,11 +45,13 @@ func _avatar(at: Vector3) -> MonsterAvatar:
 	return avatar
 
 
-func test_each_hunted_carries_one() -> void:
+func test_a_hunted_who_picked_it_carries_two() -> void:
 	var inventory := Inventory.new(SETTINGS)
-	assert_eq(inventory.count(Inventory.Kind.CAN_WIRE), 1, "one per hunted, from the start")
+	var picked: Array[StringName] = [&"can_wire", &"firecracker"]
+	Loadout.equip(inventory, picked)  # Picked before the game (S-023).
+	assert_eq(inventory.count(Inventory.Kind.CAN_WIRE), Loadout.SETTINGS.charges)
 	assert_false(inventory.can_take(Inventory.Kind.CAN_WIRE))
-	assert_string_contains(CarryHud.describe(inventory), "Fil à canettes")
+	assert_string_contains(CarryHud.describe(inventory, false, picked), "Fil à canettes")
 
 
 func test_the_string_runs_across_the_way_it_was_placed() -> void:
@@ -100,26 +102,28 @@ func test_the_player_stretches_it_with_its_key() -> void:
 	player.global_position = Vector3(0, 0.1, 0)
 	player.rotation.y = PI / 2.0
 	await wait_physics_frames(2)
+	player.loadout = [&"can_wire", &"smoke"]  # Picked before the game (S-023).
 	watch_signals(player)
-	player.commands.push(PlayerCommands.Action.CAN_WIRE)
+	player.commands.push(PlayerCommands.Action.GADGET_1)
 	player.apply_actions()
-	assert_eq(player.inventory.count(Inventory.Kind.CAN_WIRE), 0)
+	assert_eq(player.inventory.count(Inventory.Kind.CAN_WIRE), 1, "one of two charges used")
 	assert_signal_emitted_with_parameters(player, "ruse_used", [&"can_wire"])
 	var wires := get_tree().get_nodes_in_group(CanWire.GROUP)
 	assert_eq(wires.size(), 1)
 	var wire := wires[0] as CanWire
 	var along := (wire.ends()[1] - wire.ends()[0]).normalized()
 	assert_almost_eq(along.dot(-player.global_basis.z), 0.0, 0.01, "across the way it faces")
-	player.commands.push(PlayerCommands.Action.CAN_WIRE)
-	player.apply_actions()
-	assert_eq(get_tree().get_nodes_in_group(CanWire.GROUP).size(), 1, "only one per game")
+	for i in 2:
+		player.commands.push(PlayerCommands.Action.GADGET_1)
+		player.apply_actions()
+	assert_eq(get_tree().get_nodes_in_group(CanWire.GROUP).size(), 2, "two charges per game")
 
 
 func test_the_command_travels_online() -> void:
 	var commands := PlayerCommands.new()
-	commands.push(PlayerCommands.Action.CAN_WIRE)
+	commands.push(PlayerCommands.Action.GADGET_1)
 	var copy := PlayerCommands.from_bytes(commands.to_bytes())
-	assert_eq(copy.take_actions(), [PlayerCommands.Action.CAN_WIRE] as Array[PlayerCommands.Action])
+	assert_eq(copy.take_actions(), [PlayerCommands.Action.GADGET_1] as Array[PlayerCommands.Action])
 
 
 func test_online_the_room_tells_everyone() -> void:

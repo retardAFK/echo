@@ -1,9 +1,10 @@
 class_name Inventory
 extends RefCounted
 ## What a hunted carries (spec S-008): bottles to throw (Q1) and alarm clocks
-## to place (Q3), a firecracker (S-020, T-312), a can wire (T-333), a walkman
-## (T-334), a smoke bomb (T-335), each up to a cap from RuseSettings. The player and the AI
-## prey each have one.
+## to place (Q3), each up to a cap from RuseSettings, and the gadgets of
+## game/data/gadgets/ (S-020; S-023, T-352): none at first, then the charges
+## of the gadgets picked (Loadout.equip), LoadoutSettings.charges at most. The
+## player and the AI prey each have one.
 
 signal changed
 
@@ -23,10 +24,6 @@ var _counts := {
 
 func _init(p_settings: RuseSettings) -> void:
 	settings = p_settings
-	_counts[Kind.FIRECRACKER] = settings.start_firecrackers  # One per game.
-	_counts[Kind.CAN_WIRE] = settings.start_can_wires  # One per game too.
-	_counts[Kind.WALKMAN] = settings.start_walkmen  # T-334.
-	_counts[Kind.SMOKE] = settings.start_smoke_bombs  # T-335.
 
 
 func count(kind: Kind) -> int:
@@ -39,13 +36,7 @@ func capacity(kind: Kind) -> int:
 			return settings.max_bottles
 		Kind.DECOY:
 			return settings.max_decoys
-		Kind.CAN_WIRE:
-			return settings.max_can_wires
-		Kind.WALKMAN:
-			return settings.max_walkmen
-		Kind.SMOKE:
-			return settings.max_smoke_bombs
-	return settings.max_firecrackers
+	return Loadout.SETTINGS.charges  # A gadget (S-023, T-352).
 
 
 func can_take(kind: Kind) -> bool:

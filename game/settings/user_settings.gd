@@ -10,6 +10,9 @@ signal changed(key: String)
 const PATH := "user://settings.cfg"
 const SECTION := "settings"
 const KEYS_SECTION := "keys"
+## The gadgets picked for the next game (S-023, T-352), as a list of ids.
+const LOADOUT_SECTION := "loadout"
+const LOADOUT_KEY := "gadgets"
 ## Number settings: default, lowest, highest, step.
 const NUMBERS := {
 	"volume_master": [0.8, 0.0, 1.0, 0.1],
@@ -53,10 +56,8 @@ const REMAPPABLE: Array[String] = [
 	"sprint",
 	"crouch",
 	"hold_breath",
-	"place_firecracker",
-	"place_can_wire",
-	"place_walkman",
-	"smoke_bomb",
+	"gadget_1",
+	"gadget_2",
 	"second_wind",
 	"interact",
 	"map",
@@ -68,10 +69,8 @@ const TOKENS := {
 	"{sprint}": ["sprint"],
 	"{crouch}": ["crouch"],
 	"{hold_breath}": ["hold_breath"],
-	"{place_firecracker}": ["place_firecracker"],
-	"{place_can_wire}": ["place_can_wire"],
-	"{place_walkman}": ["place_walkman"],
-	"{smoke_bomb}": ["smoke_bomb"],
+	"{gadget_1}": ["gadget_1"],
+	"{gadget_2}": ["gadget_2"],
 	"{second_wind}": ["second_wind"],
 	"{interact}": ["interact"],
 	"{map}": ["map"],
@@ -112,6 +111,7 @@ var _values := {}
 ## Default key of each remappable action, read from the project.
 var _default_keys := {}
 var _keys := {}
+var _loadout: Array[StringName] = []
 
 
 func _ready() -> void:
@@ -212,6 +212,7 @@ func ratio(key: String) -> float:
 func reset() -> void:
 	_values.clear()
 	_keys.clear()
+	_loadout = Loadout.default_ids()
 	_apply_all()
 	save_file()
 	changed.emit("")
@@ -220,8 +221,11 @@ func reset() -> void:
 func load_file() -> void:
 	_values.clear()
 	_keys.clear()
+	_loadout = Loadout.default_ids()
 	var file := ConfigFile.new()
 	if file.load(path) == OK:
+		var saved: Variant = file.get_value(LOADOUT_SECTION, LOADOUT_KEY, [])
+		_loadout = Loadout.sanitize(saved if saved is Array else [])
 		for key in NUMBERS.keys() + FLAGS.keys() + CHOICES.keys():
 			if key != FULLSCREEN and file.has_section_key(SECTION, key):
 				_values[key] = sanitize(key, file.get_value(SECTION, key))
@@ -238,7 +242,22 @@ func save_file() -> void:
 		file.set_value(SECTION, key, _values[key])
 	for action: String in _keys:
 		file.set_value(KEYS_SECTION, action, _keys[action])
+	var ids: Array[String] = []
+	for id in _loadout:
+		ids.append(String(id))
+	file.set_value(LOADOUT_SECTION, LOADOUT_KEY, ids)
 	file.save(path)
+
+
+## The gadgets picked for the next game, always a valid Loadout (S-023).
+func get_loadout() -> Array[StringName]:
+	return _loadout.duplicate()
+
+
+func set_loadout(ids: Array) -> void:
+	_loadout = Loadout.sanitize(ids)
+	save_file()
+	changed.emit(LOADOUT_SECTION)
 
 
 ## The physical key of an action.

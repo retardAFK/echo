@@ -22,6 +22,11 @@ var started := false
 ## How many humans may join, monster included. The game always has 3 hunted:
 ## the seats left free are played by AI preys (S-020, T-314).
 var game_size := SEATS
+## The gadgets each player picked (S-023, Q3 and Q4, T-352): player ->
+## indexes in the GadgetList (Loadout.to_indexes). Kept by the room only: the
+## roles are drawn at launch, so a client that saw them could be the monster
+## that knows who took the smoke (to_dict leaves them out unless asked).
+var loadouts := {}
 ## Draws the roles at launch; tests seed it.
 var rng := RandomNumberGenerator.new()
 
@@ -52,6 +57,7 @@ func remove_player(player: int) -> void:
 	if seat >= 0:
 		seats[seat] = 0
 	_ready.erase(player)
+	loadouts.erase(player)
 	if leader == player:
 		var others := players()
 		others.sort()
@@ -65,6 +71,17 @@ func set_ready(player: int, is_ready: bool) -> void:
 
 func is_ready(player: int) -> bool:
 	return _ready.get(player, false)
+
+
+## A player picks its gadgets (made valid), until the game starts.
+func set_loadout(player: int, ids: Array) -> void:
+	if not started and seat_of(player) >= 0:
+		loadouts[player] = Loadout.to_indexes(Loadout.sanitize(ids))
+
+
+## The gadgets a player picked, or the default ones.
+func loadout_of(player: int) -> Array[StringName]:
+	return Loadout.from_indexes(loadouts.get(player, Loadout.to_indexes(Loadout.default_ids())))
 
 
 ## The leader can launch when every player is ready.
@@ -134,13 +151,19 @@ func players() -> Array[int]:
 	return found
 
 
-## The waiting room as sent to every client.
-func to_dict() -> Dictionary:
+## The waiting room as sent to every client; with_loadouts only for the
+## room's own map (S-023, Q4: the monster never learns the picks).
+func to_dict(with_loadouts := false) -> Dictionary:
 	var ready_players: Array[int] = []
 	for player in players():
 		if is_ready(player):
 			ready_players.append(player)
+	var picked := {}
+	if with_loadouts:
+		for player: int in loadouts:
+			picked[str(player)] = loadouts[player]
 	return {
+		"loadouts": picked,
 		"seats": seats.duplicate(),
 		"leader": leader,
 		"ready": ready_players,
@@ -160,6 +183,12 @@ static func from_dict(data: Dictionary) -> LobbyState:
 	state.code = str(data.get("code", ""))
 	state.started = bool(data.get("started", false))
 	state.game_size = clampi(int(data.get("game_size", SEATS)), MIN_GAME_SIZE, SEATS)
+	var picked: Variant = data.get("loadouts", {})
+	if picked is Dictionary:
+		for player in state.players():
+			var indexes: Variant = (picked as Dictionary).get(str(player))
+			if indexes is Array:
+				state.loadouts[player] = Loadout.to_indexes(Loadout.from_indexes(indexes))
 	var ready_read: Array = data.get("ready", [])
 	for player in state.players():
 		state._ready[player] = ready_read.has(player) or ready_read.has(float(player))

@@ -42,11 +42,13 @@ func _player(at: Vector3, yaw: float) -> Player:
 	return player
 
 
-func test_each_hunted_carries_one() -> void:
+func test_a_hunted_who_picked_it_carries_two() -> void:
 	var inventory := Inventory.new(SETTINGS)
-	assert_eq(inventory.count(Inventory.Kind.SMOKE), 1, "one per hunted, from the start")
+	var picked: Array[StringName] = [&"smoke", &"firecracker"]
+	Loadout.equip(inventory, picked)  # Picked before the game (S-023).
+	assert_eq(inventory.count(Inventory.Kind.SMOKE), Loadout.SETTINGS.charges)
 	assert_false(inventory.can_take(Inventory.Kind.SMOKE))
-	assert_string_contains(CarryHud.describe(inventory), "Fumigène")
+	assert_string_contains(CarryHud.describe(inventory, false, picked), "Fumigène")
 
 
 func test_the_cloud_cuts_sight_through_it_for_its_time() -> void:
@@ -101,26 +103,35 @@ func test_the_player_sets_it_off_at_its_feet() -> void:
 	_floor()
 	var player := _player(Vector3(2, 0.1, 3), 0.0)
 	await wait_physics_frames(2)
+	assert_eq(player.loadout[1], &"smoke", "in the default loadout, slot 2")
 	watch_signals(player)
-	player.commands.push(PlayerCommands.Action.SMOKE)
+	player.commands.push(PlayerCommands.Action.GADGET_2)
 	player.apply_actions()
-	assert_eq(player.inventory.count(Inventory.Kind.SMOKE), 0)
+	assert_eq(player.inventory.count(Inventory.Kind.SMOKE), 1, "one of two charges used")
 	assert_signal_emitted_with_parameters(player, "ruse_used", [&"smoke"])
 	var clouds := get_tree().get_nodes_in_group(SmokeCloud.GROUP)
 	assert_eq(clouds.size(), 1)
 	assert_almost_eq(
 		(clouds[0] as SmokeCloud).global_position, player.global_position, Vector3.ONE * 0.01
 	)
-	player.commands.push(PlayerCommands.Action.SMOKE)
-	player.apply_actions()
-	assert_eq(get_tree().get_nodes_in_group(SmokeCloud.GROUP).size(), 1, "only one per game")
+	for i in 2:
+		player.commands.push(PlayerCommands.Action.GADGET_2)
+		player.apply_actions()
+	assert_eq(get_tree().get_nodes_in_group(SmokeCloud.GROUP).size(), 2, "two charges per game")
 
 
 func test_the_command_travels_online() -> void:
 	var commands := PlayerCommands.new()
-	commands.push(PlayerCommands.Action.SMOKE)
+	commands.push(PlayerCommands.Action.SECOND_WIND)
+	commands.push(PlayerCommands.Action.GADGET_2)
 	var copy := PlayerCommands.from_bytes(commands.to_bytes())
-	assert_eq(copy.take_actions(), [PlayerCommands.Action.SMOKE] as Array[PlayerCommands.Action])
+	assert_eq(
+		copy.take_actions(),
+		(
+			[PlayerCommands.Action.SECOND_WIND, PlayerCommands.Action.GADGET_2]
+			as Array[PlayerCommands.Action]
+		)
+	)
 
 
 func test_online_the_room_shows_it_to_everyone() -> void:
@@ -149,8 +160,9 @@ func test_the_carried_count_travels_in_the_snapshot() -> void:
 	var net := NetGame.new()
 	net.settings = NetSettings.new()
 	net.is_room = true
+	player.loadout = [&"smoke", &"firecracker"]
 	net.add_avatar(1, 1, player)
 	add_child_autofree(net)
-	assert_eq(net.snapshot_for(1)["you"][17], 1)
+	assert_eq(net.snapshot_for(1)["you"][17], 2)
 	player.inventory.use(Inventory.Kind.SMOKE)
-	assert_eq(net.snapshot_for(1)["you"][17], 0)
+	assert_eq(net.snapshot_for(1)["you"][17], 1)

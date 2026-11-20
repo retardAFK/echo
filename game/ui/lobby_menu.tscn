@@ -145,7 +145,7 @@ offset_top = 180.0
 offset_right = 234.0
 offset_bottom = 306.0
 script = ExtResource("5_list")
-keys = PackedStringArray("LOBBY_READY", "LOBBY_GAME_SIZE", "LOBBY_START", "LOBBY_LEAVE")
+keys = PackedStringArray("LOBBY_READY", "MENU_GADGET_1", "MENU_GADGET_2", "LOBBY_GAME_SIZE", "LOBBY_START", "LOBBY_LEAVE")
 
 [node name="Status" type="Label" parent="."]
 unique_name_in_owner = true

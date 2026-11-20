@@ -8,4 +8,5 @@ script = ExtResource("1_def")
 id = &"firecracker"
 kind = 2
 scene = ExtResource("2_scene")
-hud_key = "HUD_CARRY_FIRECRACKER"
+name_key = "GADGET_FIRECRACKER"
+help_key = "GADGET_HELP_FIRECRACKER"

@@ -51,10 +51,7 @@ extends Resource
 @export_range(1.0, 100.0, 1.0, "suffix:m") var ring_sound_distance: float = 40.0
 
 @export_group("Firecracker")
-## Firecrackers each hunted carries at the start, and at most (S-020, T-312,
-## piste R1): no pickup in the cité, one per game.
-@export_range(0, 5) var start_firecrackers: int = 1
-@export_range(0, 5) var max_firecrackers: int = 1
+## How many a hunted carries: LoadoutSettings (S-023, T-352).
 ## Seconds after placing before it can go off, to step away from it.
 @export_range(0.0, 10.0, 0.1, "suffix:s") var firecracker_arm_time: float = 1.5
 ## A monster this close (flat distance to its feet) sets it off, in meters.
@@ -70,10 +67,7 @@ extends Resource
 @export_range(0.0, 2.0, 0.05, "suffix:m") var trap_height: float = 0.3
 
 @export_group("Can wire")
-## Can wires each hunted carries at the start, and at most (S-020, T-333,
-## piste R5): no pickup in the cité, one per game.
-@export_range(0, 5) var start_can_wires: int = 1
-@export_range(0, 5) var max_can_wires: int = 1
+## How many a hunted carries: LoadoutSettings (S-023, T-352).
 ## Length of the string stretched across a passage, in meters.
 @export_range(0.5, 6.0, 0.1, "suffix:m") var can_wire_length: float = 2.5
 ## Seconds after placing before it can rattle, to step away from it.
@@ -86,10 +80,7 @@ extends Resource
 @export_range(1.0, 100.0, 1.0, "suffix:m") var can_wire_sound_distance: float = 40.0
 
 @export_group("Walkman")
-## Walkmen each hunted carries at the start, and at most (S-020, T-334,
-## piste R3): no pickup in the cité, one per game.
-@export_range(0, 5) var start_walkmen: int = 1
-@export_range(0, 5) var max_walkmen: int = 1
+## How many a hunted carries: LoadoutSettings (S-023, T-352).
 ## Seconds between placing it and the first step, to get away from it.
 @export_range(0.0, 30.0, 0.5, "suffix:s") var walkman_delay: float = 3.0
 ## How far the footsteps go, straight ahead of where the hunted faced, in
@@ -103,10 +94,7 @@ extends Resource
 @export_range(0.5, 50.0, 0.5, "suffix:m") var walkman_step_range: float = 14.0
 
 @export_group("Smoke")
-## Smoke bombs each hunted carries at the start, and at most (S-020, T-335,
-## piste R4): no pickup in the cité, one per game.
-@export_range(0, 5) var start_smoke_bombs: int = 1
-@export_range(0, 5) var max_smoke_bombs: int = 1
+## How many a hunted carries: LoadoutSettings (S-023, T-352).
 ## How long the cloud cuts sight, in seconds; then it thins out.
 @export_range(1.0, 60.0, 0.5, "suffix:s") var smoke_time: float = 10.0
 ## Radius of the cloud, in meters, reached after smoke_grow_time seconds.
