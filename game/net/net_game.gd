@@ -724,8 +724,8 @@ func apply_event(event: Array) -> void:
 		Event.CLOCK when event.size() == 2 and world != null:
 			world.apply_clock(event[1])
 			var clock: Array = event[1]
-			if clock.size() >= 8:
-				room_fps = clock[7]  # After NetWorld.clock()'s 7 values.
+			if clock.size() >= 9:
+				room_fps = clock[8]  # After NetWorld.clock()'s 8 values.
 		Event.BOTTLE when event.size() == 3:
 			var bottle: ThrownBottle = _spawn_copy(BOTTLE_SCENE, event[1])
 			bottle.linear_velocity = event[2]
