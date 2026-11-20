@@ -60,14 +60,21 @@ func test_blocks_of_flats_have_entrance_doors() -> void:
 
 func test_visited_storeys_of_the_tower_have_open_windows() -> void:
 	# 4 storeys above the hall, 8 modules on each of the 4 sides, but the two
-	# around the door onto the fire escape (S-016).
-	assert_eq(_dressing.count_of(OPEN), 120)
+	# around the door onto the fire escape (S-016), and the hall's broken
+	# window to climb over, on the ground floor (S-020, T-340).
+	assert_eq(_dressing.count_of(OPEN), 121)
+	var ground := 0
 	for i in _dressing.panels.size():
 		if _dressing.variants[i] != OPEN:
 			continue
 		var at := _dressing.panels[i].origin
 		assert_true(TOWER.grow(0.1).has_point(_plan(at)), "open window on the tower")
-		assert_between(at.y, 2.9, 12.1)
+		if at.y < 0.1:
+			ground += 1
+			assert_almost_eq(_plan(at).x, TOWER.position.x, 0.1, "the hall's west front")
+		else:
+			assert_between(at.y, 2.9, 12.1)
+	assert_eq(ground, 1, "one broken window in the hall")
 
 
 func test_hall_entrances_of_the_tower_stay_free() -> void:
