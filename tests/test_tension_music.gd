@@ -87,6 +87,37 @@ func test_a_near_monster_raises_the_music_slowly() -> void:
 	assert_almost_eq(music.gains[0], 1.0, 0.001, "the background stays")
 
 
+func test_a_near_monster_lowers_the_wind_and_the_music() -> void:
+	# S-020, T-326 (piste S2): within 15 m, the Ambiance and Musique buses
+	# lose a few decibels, so that the monster's steps get through.
+	assert_true(TensionMusic.ducks(AUDIO.duck_range - 1.0, AUDIO))
+	assert_false(TensionMusic.ducks(AUDIO.duck_range + 1.0, AUDIO))
+	assert_false(TensionMusic.ducks(-1.0, AUDIO), "no monster")
+	var ambience := AudioServer.get_bus_index(&"Ambiance")
+	var music_bus := AudioServer.get_bus_index(&"Musique")
+	var options := -4.0
+	AudioServer.set_bus_volume_db(ambience, options)
+	AudioServer.set_bus_volume_db(music_bus, options)
+	var music := TensionMusic.new()
+	add_child_autofree(music)
+	music.set_process(false)
+	music.update_duck(AUDIO.duck_time / 2.0, true)
+	assert_almost_eq(AudioServer.get_bus_volume_db(ambience), options + AUDIO.duck_db / 2.0, 0.01)
+	music.update_duck(AUDIO.duck_time, true)
+	assert_almost_eq(AudioServer.get_bus_volume_db(music_bus), options + AUDIO.duck_db, 0.01)
+	AudioServer.set_bus_volume_db(ambience, -13.0)  # Changed in the options meanwhile.
+	music.update_duck(0.0, true)
+	assert_almost_eq(AudioServer.get_bus_volume_db(ambience), -13.0 + AUDIO.duck_db, 0.01)
+	music.update_duck(AUDIO.duck_time, false)
+	assert_almost_eq(AudioServer.get_bus_volume_db(ambience), -13.0, 0.01, "back to the options")
+	music.update_duck(AUDIO.duck_time, true)
+	remove_child(music)
+	assert_almost_eq(AudioServer.get_bus_volume_db(music_bus), options, 0.01, "not after the game")
+	music.free()
+	AudioServer.set_bus_volume_db(ambience, 0.0)
+	AudioServer.set_bus_volume_db(music_bus, 0.0)
+
+
 func test_the_map_starts_the_music() -> void:
 	var map: GameMap = preload("res://game/maps/tilleuls/tilleuls.scn").instantiate()
 	add_child_autofree(map)

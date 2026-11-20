@@ -72,6 +72,15 @@ extends Resource
 ## Volume of each layer at full, in decibels: background, pulse, strings.
 @export var layer_db := Vector3(-10.0, -10.0, -10.0)
 
+@export_group("Danger duck (S-020, T-326)")
+## Hunted: the monster closer than this lowers the wind and the music, in
+## meters, so that its steps get through (piste S2).
+@export_range(1.0, 60.0, 0.5, "suffix:m") var duck_range: float = 15.0
+## How much the Ambiance and Musique buses lose then, in decibels.
+@export_range(-24.0, 0.0, 0.5, "suffix:dB") var duck_db: float = -6.0
+## Seconds the duck takes to come in or to go away.
+@export_range(0.1, 10.0, 0.1, "suffix:s") var duck_time: float = 1.0
+
 @export_group("Mix (T-147)")
 ## Level of the loudest noises, in decibels, so that everything at once stays
 ## under -3 dBFS in the browser (measured with the mixing bench).
