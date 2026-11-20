@@ -42,9 +42,9 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - [x] T-336 — N3 : caméras qui balaient
 - [x] T-337 — N5 : marquer le monstre
 - [x] T-338 — E5 : second souffle du chassé
-- [ ] T-339 — U2 : trajets rejoués en fin de partie (lot C, après le lot B)
-- [ ] T-340 — E6 : fenêtres et murets à enjamber
-- [ ] T-341 — E7 : boucles de poursuite par bâtiment
+- [x] T-339 — U2 : trajets rejoués en fin de partie (lot C, après le lot B)
+- [x] T-340 — E6 : fenêtres et murets à enjamber
+- [x] T-341 — E7 : boucles de poursuite par bâtiment
 - [x] T-342 — T6 : WebRTC, décision écrite dans la spec (Maxime décide)
 - [x] T-346 — Prédiction : petits écarts résorbés lentement
 - [x] T-347 — `net_match` : chemin gardé tant que la cible ne bouge pas
@@ -95,3 +95,10 @@ Bloc réservé : T-300 à T-349. Une branche et une PR par tâche.
 - T-338 (20/11/2026, #221) : élan, touche X (`SecondWind`) : `second_wind_time` = 2 s à 6,5 m/s, un halètement de 25 m au départ et des pas de course à 25 m pendant l'élan, recharge 60 s (`player_settings.gd`). Barre « Élan » en bas à gauche.
 - Test du lot B (20/11/2026, sur `cdcf3fc`, jusqu'à T-336) : 20 parties IA contre IA à ×4. 1 chassé : le monstre gagne 3 sur 10, 7,8 min en moyenne (P1 : 3 sur 10) ; 3 chassés : 6 sur 10 (1 bloquée à 30 min), 7,3 min, 24 poursuites dont 8 fuites réussies (P1 : 4 sur 10, 18 et 3). Les IA chassées n'utilisent ni fil, ni walkman, ni fumigène, ni élan : la mesure voit surtout le train et les caméras. Pas de réglage proposé ; à remesurer avec des testeurs.
 - Guide du jeu (20/11/2026) : commandes R, X, F, T, V, B ; pétard, fil, walkman, fumigène, élan, souffle retenu, train, caméras qui balaient et qui marquent, et parades du monstre.
+- T-339 (20/11/2026, #223) : en fin de partie, la carte rejoue les trajets du monstre (rouge) et de chaque chassé, en 12 s puis 3 s d'arrêt (`route_settings.gd`). Un point toutes les 2 s, 600 points au plus par trajet (`RouteLog`). En ligne, la salle envoie les trajets une fois, avant le dernier état du monde (événement ROUTES).
+- Correctif de `net_match` (20/11/2026, #226) : la salle refermait la porte coupe-feu de la cave pendant que le joueur d'un client était dans l'embrasure, et le battant qui tournait chez le client le poussait à travers le mur du couloir. Chez un client, un battant qui se ferme ne devient solide qu'une fois fermé.
+- Plans de T-340 et T-341 (20/11/2026, #224, #225) : Maxime valide les deux plans, avec le monstre IA qui prend les passages.
+- T-340 (20/11/2026, #227) : 10 passages à enjamber (`Vault`, `vault_settings.gd`). Le chassé passe en 0,5 s avec un bruit de 5 m, le monstre en 1,5 s avec un bruit de 8 m. On ne passe pas accroupi. Les IA les prennent par deux liens de navigation par passage (couche 2 pour le monstre, coût 9 m ; couche 3 pour les chassés, coût 2,5 m). La fenêtre de la galerie est au fond du couloir de livraison derrière la boulangerie, car la vitrine est un modèle vitré. Le hall de la tour reçoit une fenêtre cassée à l'ouest. `PlacementCheck.vault_offenders()` vérifie chaque passage. La CI restait bloquée 30 min parce que `test_transformer` laissait le jeu en pause après une partie gagnée ; corrigé.
+- T-341 (20/11/2026, #228) : 7 boucles (`LOOPS`, `test_tilleuls_loops`) : îlot de la cuisine (13,3 m), réserve de chaises (17,3 m), deux gondoles à l'épicerie (14,1 m chacune), épaves autour d'un pilier (22,0 m), local technique à deux portes (19,3 m), comptoir du poste de soins (12,9 m), deux paires de chambres communicantes (27,5 et 25,5 m, le minimum entre deux portes du couloir). Pire point de vue : 295 draw calls (`tour_palier_2`, 287 avant).
+- Test du lot C (20/11/2026, sur `main` après #228) : 20 parties IA contre IA à ×8. Avec 1 chassé, le monstre gagne 4 sur 10 (6,6 min en moyenne ; lot B : 3 sur 10). Avec 3 chassés, il gagne 5 sur 10, plus 1 partie bloquée à 30 min (6,6 min, 14 poursuites, aucune fuite ; lot B : 6 sur 10). Les chassés IA enjambent 1 à 6 fois par partie ; le monstre IA presque jamais (une fois en 20 parties). Les IA chassées ne tournent pas exprès autour des boucles, donc la mesure ne les voit pas. Pas de réglage proposé ; à remesurer avec des testeurs.
+- Guide du jeu (20/11/2026) : fenêtres et murets (chassé et monstre), boucles.
