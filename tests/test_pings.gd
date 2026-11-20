@@ -158,3 +158,9 @@ func test_the_markers_say_what_and_how_far() -> void:
 	assert_does_not_have(ControlsText.keys_for(GameSession.Role.MONSTER), "CONTROLS_PING")
 	assert_true(UserSettings.REMAPPABLE.has("ping"))
 	assert_true(InputMap.has_action("ping"))
+
+
+func test_the_hunted_s_screen_shows_the_marks() -> void:
+	var map: Node3D = preload("res://game/maps/greybox_test.tscn").instantiate()
+	add_child_autofree(map)
+	assert_eq(map.find_children("*", "PingMarkers", false, false).size(), 1)

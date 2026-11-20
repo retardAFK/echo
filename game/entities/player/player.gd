@@ -122,7 +122,6 @@ func _ready() -> void:
 	_apply_height(settings.standing_height)
 	if local_controls:
 		add_child(BreathBar.new(breath_hold))
-		add_child(PingMarkers.new())  # The team marks (S-020, T-328).
 		_controls = LocalControls.new()
 		_controls.commands = commands
 		add_child(_controls)

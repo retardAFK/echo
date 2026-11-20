@@ -2,8 +2,8 @@ class_name PingMarkers
 extends CanvasLayer
 ## The team marks on a hunted's screen (spec S-020, T-328, piste A1): each
 ## Ping in view shows "Monstre · 12 m" or "Ici · 30 m" where it is, and fades
-## in its last second. Added by the Player played on this machine, so only
-## the hunted see them (the room never sends them to the monster, NetGame).
+## in its last second. Added by HuntedHuds, so only the hunted see them
+## (the room never sends them to the monster, NetGame).
 ## Pale blue, so it is never taken for the monster's orange noise markers.
 
 const HERE_COLOR := Color(0.62, 0.8, 0.95)

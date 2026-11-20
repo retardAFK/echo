@@ -2,7 +2,8 @@ class_name HuntedHuds
 extends RefCounted
 ## What the hunted's screen shows of its own player (S-022, T-433), added to
 ## the map in solo (MapHuntedRole) and online (MapOnlineClient): what it
-## carries, the hiding mask, the highlights of what it can use, its map
+## carries, the hiding mask, the highlights of what it can use, the team
+## marks (S-020, T-328), its map
 ## (S-017), and the network's screens (S-018). The map's other screens (pause,
 ## end, loop HUD) belong to GameMap. To add a hunted HUD, add it here.
 
@@ -25,7 +26,9 @@ static func add_own(map: GameMap) -> Array[Node]:
 	var highlights: InteractHighlights = HIGHLIGHTS_SCENE.instantiate()
 	highlights.player = map.player
 	map.add_child(highlights)
-	var huds: Array[Node] = [carry, mask, highlights]
+	var pings := PingMarkers.new()
+	map.add_child(pings)
+	var huds: Array[Node] = [carry, mask, highlights, pings]
 	var map_screen := _add_map_screen(map)
 	if map_screen != null:
 		huds.append(map_screen)
