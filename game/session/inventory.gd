@@ -2,17 +2,22 @@ class_name Inventory
 extends RefCounted
 ## What a hunted carries (spec S-008): bottles to throw (Q1) and alarm clocks
 ## to place (Q3), a firecracker (S-020, T-312), a can wire (T-333), a walkman
-## (T-334), each up to a cap from RuseSettings. The player and the AI
+## (T-334), a smoke bomb (T-335), each up to a cap from RuseSettings. The player and the AI
 ## prey each have one.
 
 signal changed
 
-enum Kind { BOTTLE, DECOY, FIRECRACKER, CAN_WIRE, WALKMAN }
+enum Kind { BOTTLE, DECOY, FIRECRACKER, CAN_WIRE, WALKMAN, SMOKE }
 
 var settings: RuseSettings
 
 var _counts := {
-	Kind.BOTTLE: 0, Kind.DECOY: 0, Kind.FIRECRACKER: 0, Kind.CAN_WIRE: 0, Kind.WALKMAN: 0
+	Kind.BOTTLE: 0,
+	Kind.DECOY: 0,
+	Kind.FIRECRACKER: 0,
+	Kind.CAN_WIRE: 0,
+	Kind.WALKMAN: 0,
+	Kind.SMOKE: 0
 }
 
 
@@ -21,6 +26,7 @@ func _init(p_settings: RuseSettings) -> void:
 	_counts[Kind.FIRECRACKER] = settings.start_firecrackers  # One per game.
 	_counts[Kind.CAN_WIRE] = settings.start_can_wires  # One per game too.
 	_counts[Kind.WALKMAN] = settings.start_walkmen  # T-334.
+	_counts[Kind.SMOKE] = settings.start_smoke_bombs  # T-335.
 
 
 func count(kind: Kind) -> int:
@@ -37,6 +43,8 @@ func capacity(kind: Kind) -> int:
 			return settings.max_can_wires
 		Kind.WALKMAN:
 			return settings.max_walkmen
+		Kind.SMOKE:
+			return settings.max_smoke_bombs
 	return settings.max_firecrackers
 
 

@@ -2,7 +2,8 @@ class_name NetVisibility
 extends RefCounted
 ## What the room sends each client about the others (S-010, plan, T-097).
 ## A player sees another only within sight_range, inside a cone wider than
-## the camera, with nothing in between, and never someone in a hiding spot.
+## the camera, with nothing in between (walls, or a smoke bomb's cloud, S-020,
+## T-335), and never someone in a hiding spot.
 ## Pure: the room gives the facts (positions, facing, free line of sight).
 
 

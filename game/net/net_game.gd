@@ -10,8 +10,8 @@ extends Node
 ## command applied, "you": [position, velocity, yaw,
 ## gait, hidden, hold ratio, bottles, alarm clocks, hiding spot index, held,
 ## terminal index, camera index (S-018), [stops, seconds left] of the
-## monster stopped short, seconds left deaf, firecrackers, can wires and
-## walkmen carried (S-020)],
+## monster stopped short, seconds left deaf, firecrackers, can wires,
+## walkmen and smoke bombs carried (S-020)],
 ## "others": [[seat, position, yaw, gait, down, gesture], ...]}: those it
 ## sees with its own eyes or through the camera it watches (S-018); gesture is
 ## what its body shows (S-011): a HuntedBody.Gesture, or for the monster a
@@ -46,6 +46,8 @@ extends Node
 ##   stretched, and one yanked by the monster (S-020, T-333).
 ## - [WALKMAN, position, yaw]: to everyone, a walkman put down (S-020, T-334),
 ##   for the clients to see; its footsteps reach them as NOISE events.
+## - [SMOKE, position]: to everyone, a smoke bomb set off (S-020, T-335): the
+##   clients show the cloud; the room alone uses it to hide players (sees()).
 ## - [CLOCK, NetWorld.clock() + [room fps]]: to everyone, once a second (S-020, T-300):
 ##   the game time and the wind, which change every frame and so are not in
 ##   WORLD (which would then go out with every snapshot).
@@ -73,6 +75,7 @@ enum Event {
 	CAN_WIRE,
 	RATTLE,
 	WALKMAN,
+	SMOKE,
 }
 
 ## Seconds between two CLOCK events (T-300).
@@ -91,6 +94,7 @@ const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.
 const PING_SCENE := preload("res://game/entities/ping/ping.tscn")
 const CAN_WIRE_SCENE := preload("res://game/entities/can_wire/can_wire.tscn")
 const WALKMAN_SCENE := preload("res://game/entities/walkman/walkman.tscn")
+const SMOKE_SCENE := preload("res://game/entities/smoke/smoke_cloud.tscn")
 
 var settings: NetSettings = preload("res://game/data/net_settings.tres")
 var is_room := false
@@ -453,6 +457,7 @@ func _on_map_child_added(node: Node) -> void:
 		or node is Ping
 		or node is CanWire
 		or node is Walkman
+		or node is SmokeCloud
 	):
 		_announce.call_deferred(node)
 
@@ -467,6 +472,8 @@ func _announce(node: Node3D) -> void:
 		(node as Decoy).crushed.connect(
 			func() -> void: _send_to_all([Event.CRUSH, node.global_position])
 		)
+	elif node is SmokeCloud:
+		_send_to_all([Event.SMOKE, node.global_position])
 	elif node is Walkman:
 		_send_to_all([Event.WALKMAN, node.global_position, node.global_rotation.y])
 	elif node is CanWire:
@@ -518,6 +525,7 @@ func snapshot_for(place: int) -> Dictionary:
 			inventory.count(Inventory.Kind.FIRECRACKER) if inventory != null else 0,
 			inventory.count(Inventory.Kind.CAN_WIRE) if inventory != null else 0,
 			inventory.count(Inventory.Kind.WALKMAN) if inventory != null else 0,
+			inventory.count(Inventory.Kind.SMOKE) if inventory != null else 0,
 		],
 		"others": _seen_by(viewer),
 	}
@@ -608,6 +616,7 @@ func sees(viewer: Node3D, target: Node3D) -> bool:
 	var query := PhysicsRayQueryParameters3D.create(eye, aim, SIGHT_MASK)
 	query.exclude = [viewer.get_rid(), target.get_rid()]
 	var clear := viewer.get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+	clear = clear and not SmokeCloud.blocks(eye, aim)  # A smoke bomb's cloud (T-335).
 	return NetVisibility.sees(eye, -viewer.global_basis.z, aim, false, clear, settings)
 
 
@@ -763,6 +772,8 @@ func apply_event(event: Array) -> void:
 			walkman.mirror = true  # The room plays the steps.
 			_add_copy(walkman, event[1])
 			walkman.global_rotation = Vector3(0.0, event[2], 0.0)
+		Event.SMOKE when event.size() == 2:
+			_spawn_copy(SMOKE_SCENE, event[1])
 
 
 ## Client side, spectator (T-107): the room sends what a teammate sees. The
@@ -810,6 +821,8 @@ func _apply_own_state(you: Array) -> void:
 			inventory.set_count(Inventory.Kind.CAN_WIRE, you[15])  # T-333.
 		if you.size() >= 17:
 			inventory.set_count(Inventory.Kind.WALKMAN, you[16])  # T-334.
+		if you.size() >= 18:
+			inventory.set_count(Inventory.Kind.SMOKE, you[17])  # T-335.
 	if not own is Player or world == null:
 		return
 	var player := own as Player

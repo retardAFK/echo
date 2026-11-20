@@ -102,6 +102,21 @@ extends Resource
 @export_range(0.1, 3.0, 0.05, "suffix:m") var walkman_stride: float = 0.9
 @export_range(0.5, 50.0, 0.5, "suffix:m") var walkman_step_range: float = 14.0
 
+@export_group("Smoke")
+## Smoke bombs each hunted carries at the start, and at most (S-020, T-335,
+## piste R4): no pickup in the cité, one per game.
+@export_range(0, 5) var start_smoke_bombs: int = 1
+@export_range(0, 5) var max_smoke_bombs: int = 1
+## How long the cloud cuts sight, in seconds; then it thins out.
+@export_range(1.0, 60.0, 0.5, "suffix:s") var smoke_time: float = 10.0
+## Radius of the cloud, in meters, reached after smoke_grow_time seconds.
+@export_range(0.5, 15.0, 0.5, "suffix:m") var smoke_radius: float = 4.0
+@export_range(0.0, 5.0, 0.1, "suffix:s") var smoke_grow_time: float = 1.0
+## Height of the cloud's centre above the ground, in meters.
+@export_range(0.0, 5.0, 0.1, "suffix:m") var smoke_height: float = 1.5
+## Closer than this, two players still see each other through the smoke.
+@export_range(0.0, 5.0, 0.1, "suffix:m") var smoke_clear_distance: float = 1.5
+
 @export_group("Hiding spots")
 ## Seconds to hold "interact" to get in, get out, or open a hiding spot (Q5, Q7).
 @export_range(0.1, 10.0, 0.1, "suffix:s") var hide_time: float = 1.0

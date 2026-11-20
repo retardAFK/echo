@@ -39,6 +39,7 @@ HUD_CARRY_DECOY,Réveil : %d s (molette)
 HUD_CARRY_FIRECRACKER,Pétard ({place_firecracker})
 HUD_CARRY_CAN_WIRE,Fil à canettes ({place_can_wire})
 HUD_CARRY_WALKMAN,Walkman ({place_walkman})
+HUD_CARRY_SMOKE,Fumigène ({smoke_bomb})
 HUD_DEAF,Assourdi : %d s
 HUD_INTERACT_HIDE,Maintenir {interact} : se cacher
 HUD_INTERACT_LEAVE,Maintenir {interact} : sortir
@@ -65,6 +66,7 @@ CONTROLS_DECOY,"Clic droit : poser un réveil ; molette : il sonne après 15 ou 
 CONTROLS_FIRECRACKER,"{place_firecracker} : poser le pétard (il éclate sous le monstre, qui n'entend plus rien 6 s) ; en visant une cachette vide, la piéger"
 CONTROLS_CAN_WIRE,"{place_can_wire} : tendre le fil à canettes en travers du passage (il tinte quand le monstre passe)"
 CONTROLS_WALKMAN,"{place_walkman} : poser le walkman (3 s plus tard, des pas de course s'éloignent tout droit devant)"
+CONTROLS_SMOKE,"{smoke_bomb} : lâcher le fumigène à ses pieds (un nuage de 10 s où personne ne voit à travers)"
 CONTROLS_MAP,{map} : ouvrir ou fermer la carte
 CONTROLS_PING,"{ping} ou clic molette : signaler aux autres chassés (le monstre visé, sinon l'endroit)"
 CONTROLS_PROWL,{crouch} : rôder (silencieux)
@@ -231,6 +233,7 @@ OPTIONS_KEY_HOLD_BREATH,Retenir son souffle
 OPTIONS_KEY_FIRECRACKER,Poser le pétard
 OPTIONS_KEY_CAN_WIRE,Tendre le fil à canettes
 OPTIONS_KEY_WALKMAN,Poser le walkman
+OPTIONS_KEY_SMOKE,Lâcher le fumigène
 OPTIONS_KEY_INTERACT,Interagir
 OPTIONS_KEY_MAP,Carte
 OPTIONS_KEY_PING,Signaler

@@ -38,6 +38,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		commands.push(PlayerCommands.Action.CAN_WIRE)  # S-020, T-333.
 	elif event.is_action_pressed("place_walkman") and captured:
 		commands.push(PlayerCommands.Action.WALKMAN)  # S-020, T-334.
+	elif event.is_action_pressed("smoke_bomb") and captured:
+		commands.push(PlayerCommands.Action.SMOKE)  # S-020, T-335.
 	elif event.is_action_pressed("ping") and captured and _avatar is Player:
 		commands.push(PlayerCommands.Action.PING)  # Hunted only (T-328).
 	elif event is InputEventMouseButton and event.pressed:

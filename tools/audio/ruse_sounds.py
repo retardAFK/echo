@@ -8,7 +8,8 @@ Made by us from noise and oscillators: no sample from anyone else.
 - locker_door.wav: the dented door of a metal locker, creak and latch,
 - bin_lid.wav: the heavy plastic lid of a dumpster, creak and thud,
 - firecracker.wav: a firecracker going off, a sharp crack and its echo (S-020, T-312),
-- cans.wav: a string of tin cans yanked and clattering on the ground (S-020, T-333).
+- cans.wav: a string of tin cans yanked and clattering on the ground (S-020, T-333),
+- smoke_hiss.wav: a smoke bomb going off, a pop and a long hiss (S-020, T-335).
 The loops are seamless: they hold whole cycles and end on silence.
     python tools/audio/ruse_sounds.py <out_dir>   (needs numpy)
 """
@@ -118,6 +119,15 @@ def cans(seconds=1.6):
     return out
 
 
+def smoke_hiss(seconds=3.0):
+    out = np.zeros(int(seconds * RATE))
+    place(out, burst(0.08, 200, 2500, 0.015), 0.0, 0.8)  # The cap popping off.
+    hiss = burst(seconds - 0.05, 2500, 11000, seconds * 0.45)
+    fade_in = np.minimum(np.arange(hiss.size) / (0.15 * RATE), 1.0)
+    place(out, hiss * fade_in, 0.05, 0.6)
+    return out
+
+
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "assets/audio/ruses"
     os.makedirs(out, exist_ok=True)
@@ -129,3 +139,4 @@ if __name__ == "__main__":
     save(os.path.join(out, "bin_lid.wav"), bin_lid(), 0.8)
     save(os.path.join(out, "firecracker.wav"), firecracker(), 0.9)
     save(os.path.join(out, "cans.wav"), cans(), 0.8)
+    save(os.path.join(out, "smoke_hiss.wav"), smoke_hiss(), 0.6)

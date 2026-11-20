@@ -124,6 +124,7 @@ func test_carry_hud_shows_what_is_carried() -> void:
 	player.inventory.set_count(Inventory.Kind.FIRECRACKER, 0)  # Its one firecracker (T-312).
 	player.inventory.set_count(Inventory.Kind.CAN_WIRE, 0)  # And its can wire (T-333).
 	player.inventory.set_count(Inventory.Kind.WALKMAN, 0)  # And its walkman (T-334).
+	player.inventory.set_count(Inventory.Kind.SMOKE, 0)  # And its smoke bomb (T-335).
 	assert_eq(label.text, "")
 	player.inventory.take(Inventory.Kind.BOTTLE)
 	assert_eq(label.text, Text.count("HUD_CARRY_BOTTLES", 1))
