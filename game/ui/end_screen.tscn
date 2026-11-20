@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/ui/end_screen.gd" id="1_end"]
+[ext_resource type="Script" path="res://game/ui/route_replay.gd" id="2_replay"]
 [ext_resource type="Theme" path="res://game/ui/theme/echo_theme.tres" id="9_theme"]
 
 [node name="EndScreen" type="CanvasLayer"]
@@ -15,48 +16,70 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.78)
 
-[node name="Box" type="VBoxContainer" parent="."]
+[node name="Layout" type="HBoxContainer" parent="."]
 theme = ExtResource("9_theme")
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -120.0
-offset_top = -80.0
-offset_right = 120.0
-offset_bottom = 80.0
+offset_left = -220.0
+offset_top = -110.0
+offset_right = 220.0
+offset_bottom = 110.0
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
+theme_override_constants/separation = 20
+
+[node name="ReplayBox" type="VBoxContainer" parent="Layout"]
+unique_name_in_owner = true
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="Replay" type="Control" parent="Layout/ReplayBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 190)
+script = ExtResource("2_replay")
+
+[node name="Legend" type="Label" parent="Layout/ReplayBox"]
+theme_type_variation = &"HintLabel"
+unique_name_in_owner = true
+horizontal_alignment = 1
+text = "END_ROUTES_LEGEND"
+autowrap_mode = 3
+
+[node name="Box" type="VBoxContainer" parent="Layout"]
+custom_minimum_size = Vector2(200, 0)
+alignment = 1
 theme_override_constants/separation = 10
 
-[node name="Title" type="Label" parent="Box"]
+[node name="Title" type="Label" parent="Layout/Box"]
 theme_type_variation = &"HudBig"
 unique_name_in_owner = true
 horizontal_alignment = 1
 
-[node name="Stats" type="Label" parent="Box"]
+[node name="Stats" type="Label" parent="Layout/Box"]
 theme_type_variation = &"BodyLabel"
 unique_name_in_owner = true
 horizontal_alignment = 1
 
-[node name="CopyButton" type="Button" parent="Box"]
+[node name="CopyButton" type="Button" parent="Layout/Box"]
 theme_type_variation = &"SmallMenuItem"
 unique_name_in_owner = true
 text = "END_COPY"
 
-[node name="Buttons" type="HBoxContainer" parent="Box"]
+[node name="Buttons" type="HBoxContainer" parent="Layout/Box"]
 alignment = 1
 theme_override_constants/separation = 12
 
-[node name="ReplayButton" type="Button" parent="Box/Buttons"]
+[node name="ReplayButton" type="Button" parent="Layout/Box/Buttons"]
 theme_type_variation = &"MenuItem"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(80, 0)
 text = "END_REPLAY"
 
-[node name="MenuButton" type="Button" parent="Box/Buttons"]
+[node name="MenuButton" type="Button" parent="Layout/Box/Buttons"]
 theme_type_variation = &"MenuItem"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(80, 0)

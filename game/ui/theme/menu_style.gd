@@ -19,6 +19,12 @@ const MUTED := Color("8c8572")
 const FAINT := Color("6e685a")
 ## Sodium ocher of the street lamps: selection, code, lamps.
 const SODIUM := Color("ddb45a")
+## Routes replayed on the end screen's map (S-020, T-339): the monster in
+## red, each hunted in its own pale color, never the noise orange (rule 2.3).
+const ROUTE_MONSTER := Color("c2493c")
+const ROUTE_HUNTED: Array[Color] = [
+	Color("8fb7d0"), Color("a9c48b"), Color("c9a3c6"), Color("e7e1cf")
+]
 ## Panel behind a group (pause band, tabs), almost black, a bit see-through.
 const PANEL := Color(0.04, 0.035, 0.03, 0.88)
 ## Metal of the digicode and of the intercom.
