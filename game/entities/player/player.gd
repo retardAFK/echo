@@ -7,7 +7,7 @@ extends CharacterBody3D
 ## The noise system (S-002) listens to it.
 signal gait_changed(gait: PlayerMotion.Gait)
 ## The player used a ruse (S-008): "bottle", "decoy", "hide", "car_alarm" or
-## "firecracker", "trap" or "can_wire" (S-020).
+## "firecracker", "trap", "can_wire" or "walkman" (S-020).
 signal ruse_used(kind: StringName)
 
 ## Something in reach is used only if it lies within this angle of the
@@ -17,6 +17,7 @@ const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
 const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.tscn")
 const CAN_WIRE_SCENE := preload("res://game/entities/can_wire/can_wire.tscn")
+const WALKMAN_SCENE := preload("res://game/entities/walkman/walkman.tscn")
 ## How far down an alarm clock looks for the ground in front of the player, in meters.
 const DECOY_GROUND_SEARCH := 2.5
 ## Length of the gestures the others see (S-011, T-125).
@@ -235,6 +236,8 @@ func apply_actions() -> void:
 				_ping()
 			PlayerCommands.Action.CAN_WIRE:
 				_place_can_wire()
+			PlayerCommands.Action.WALKMAN:
+				_place_walkman()
 
 
 func _in_cage() -> bool:
@@ -438,6 +441,18 @@ func _place_can_wire() -> CanWire:
 	wire.global_rotation = Vector3(0.0, global_rotation.y, 0.0)  # String along local X.
 	ruse_used.emit(&"can_wire")
 	return wire
+
+
+## Puts the walkman down in front of the player (S-020, T-334, piste R3): a
+## few seconds later, footsteps go off straight ahead of where it faced.
+func _place_walkman() -> Walkman:
+	if hiding_in != null or not inventory.use(Inventory.Kind.WALKMAN):
+		return null
+	var walkman: Walkman = WALKMAN_SCENE.instantiate()
+	_place_on_ground(walkman)
+	walkman.global_rotation = Vector3(0.0, global_rotation.y, 0.0)  # Steps go along -Z.
+	ruse_used.emit(&"walkman")
+	return walkman
 
 
 ## Marks for its team what it aims at (S-020, T-328, piste A1): the monster,

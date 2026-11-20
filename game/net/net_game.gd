@@ -10,8 +10,8 @@ extends Node
 ## command applied, "you": [position, velocity, yaw,
 ## gait, hidden, hold ratio, bottles, alarm clocks, hiding spot index, held,
 ## terminal index, camera index (S-018), [stops, seconds left] of the
-## monster stopped short, seconds left deaf, firecrackers and can wires
-## carried (S-020)],
+## monster stopped short, seconds left deaf, firecrackers, can wires and
+## walkmen carried (S-020)],
 ## "others": [[seat, position, yaw, gait, down, gesture], ...]}: those it
 ## sees with its own eyes or through the camera it watches (S-018); gesture is
 ## what its body shows (S-011): a HuntedBody.Gesture, or for the monster a
@@ -44,6 +44,8 @@ extends Node
 ##   noises the train covers; the clients just hear it at the same time.
 ## - [CAN_WIRE, position, yaw] and [RATTLE, position]: to everyone, a can wire
 ##   stretched, and one yanked by the monster (S-020, T-333).
+## - [WALKMAN, position, yaw]: to everyone, a walkman put down (S-020, T-334),
+##   for the clients to see; its footsteps reach them as NOISE events.
 ## - [CLOCK, NetWorld.clock() + [room fps]]: to everyone, once a second (S-020, T-300):
 ##   the game time and the wind, which change every frame and so are not in
 ##   WORLD (which would then go out with every snapshot).
@@ -70,6 +72,7 @@ enum Event {
 	TRAIN,
 	CAN_WIRE,
 	RATTLE,
+	WALKMAN,
 }
 
 ## Seconds between two CLOCK events (T-300).
@@ -87,6 +90,7 @@ const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
 const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.tscn")
 const PING_SCENE := preload("res://game/entities/ping/ping.tscn")
 const CAN_WIRE_SCENE := preload("res://game/entities/can_wire/can_wire.tscn")
+const WALKMAN_SCENE := preload("res://game/entities/walkman/walkman.tscn")
 
 var settings: NetSettings = preload("res://game/data/net_settings.tres")
 var is_room := false
@@ -448,6 +452,7 @@ func _on_map_child_added(node: Node) -> void:
 		or node is Firecracker
 		or node is Ping
 		or node is CanWire
+		or node is Walkman
 	):
 		_announce.call_deferred(node)
 
@@ -462,6 +467,8 @@ func _announce(node: Node3D) -> void:
 		(node as Decoy).crushed.connect(
 			func() -> void: _send_to_all([Event.CRUSH, node.global_position])
 		)
+	elif node is Walkman:
+		_send_to_all([Event.WALKMAN, node.global_position, node.global_rotation.y])
 	elif node is CanWire:
 		_send_to_all([Event.CAN_WIRE, node.global_position, node.global_rotation.y])
 		(node as CanWire).rattled.connect(
@@ -510,6 +517,7 @@ func snapshot_for(place: int) -> Dictionary:
 			_deafness_of(viewer),
 			inventory.count(Inventory.Kind.FIRECRACKER) if inventory != null else 0,
 			inventory.count(Inventory.Kind.CAN_WIRE) if inventory != null else 0,
+			inventory.count(Inventory.Kind.WALKMAN) if inventory != null else 0,
 		],
 		"others": _seen_by(viewer),
 	}
@@ -750,6 +758,11 @@ func apply_event(event: Array) -> void:
 			wire.global_rotation = Vector3(0.0, event[2], 0.0)
 		Event.RATTLE when event.size() == 2:
 			_rattle_near(event[1])
+		Event.WALKMAN when event.size() == 3:
+			var walkman: Walkman = WALKMAN_SCENE.instantiate()
+			walkman.mirror = true  # The room plays the steps.
+			_add_copy(walkman, event[1])
+			walkman.global_rotation = Vector3(0.0, event[2], 0.0)
 
 
 ## Client side, spectator (T-107): the room sends what a teammate sees. The
@@ -795,6 +808,8 @@ func _apply_own_state(you: Array) -> void:
 			inventory.set_count(Inventory.Kind.FIRECRACKER, you[14])
 		if you.size() >= 16:
 			inventory.set_count(Inventory.Kind.CAN_WIRE, you[15])  # T-333.
+		if you.size() >= 17:
+			inventory.set_count(Inventory.Kind.WALKMAN, you[16])  # T-334.
 	if not own is Player or world == null:
 		return
 	var player := own as Player

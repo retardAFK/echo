@@ -12,7 +12,7 @@ signal action_pushed(action: Action)
 ## One-shot actions, applied once by the avatar.
 ## DECOY_SHORT: an alarm clock set to ring sooner (S-020, T-313).
 ## PING: a mark for the teammates (S-020, T-328).
-enum Action { CROUCH, INTERACT, THROW, DECOY, FIRECRACKER, DECOY_SHORT, PING, CAN_WIRE }
+enum Action { CROUCH, INTERACT, THROW, DECOY, FIRECRACKER, DECOY_SHORT, PING, CAN_WIRE, WALKMAN }
 
 ## A line picked in a terminal's menu (S-018): PICK_BASE + its number, from
 ## 0, so a tampered client picks only lines the menu has, and nothing else.
