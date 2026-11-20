@@ -202,3 +202,30 @@ func test_the_sound_played_follows_the_door() -> void:
 	await wait_seconds(SETTINGS.fire_close_delay + 0.2)
 	assert_false(door.is_open)
 	assert_eq(creak.stream, Door.SOUND_FIRE_SLAM, "it slams on its own")
+
+
+func test_a_client_door_closing_on_its_player_does_not_sweep_it_away() -> void:
+	# Online, the room shuts a fire door while the client's own player, a few
+	# centimeters ahead of the room's, stands where the open leaf lies: the leaf
+	# swinging shut used to sweep it across the corridor and through its wall
+	# (net_match fall in the cellar corridor, S-020, T-330). It now only stops
+	# bodies once shut, pushing them along the corridor at worst.
+	var ground := StaticBody3D.new()
+	var plane := CollisionShape3D.new()
+	plane.shape = WorldBoundaryShape3D.new()
+	ground.add_child(plane)
+	add_child_autofree(ground)
+	var door := _door(Door.Kind.FIRE)
+	NoiseBus.mirror = true
+	door.mirror(true)  # The leaf swings to -Z, along the hinge side at x = -0.6.
+	await wait_seconds(SETTINGS.swing_time + 0.1)
+	var player: Player = load("res://game/entities/player/player.tscn").instantiate()
+	player.local_controls = false
+	player.position = Vector3(-0.1, 0, -0.6)
+	add_child_autofree(player)
+	await wait_physics_frames(3)
+	var before := player.global_position
+	door.mirror(false)
+	await wait_seconds(SETTINGS.swing_time + 0.3)
+	var across := absf(player.global_position.x - before.x)
+	assert_lt(across, 0.1, "not swept across the doorway")
