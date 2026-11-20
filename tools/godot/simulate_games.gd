@@ -165,10 +165,8 @@ func _play(index: int) -> Dictionary:
 	)
 	var winner: String = {"out": "chassés", "caught": "monstre"}.get(result, "bloquée")
 	print("GRID " + grid.row("simulation", _preys, winner, duration / 60.0))
-	get_tree().paused = false
-	map.queue_free()
-	await get_tree().process_frame
-	return {
+	# Read before the map goes: the loop goes with it.
+	var played := {
 		"result": result,
 		"duration": duration,
 		"ruses": ruses,
@@ -176,3 +174,7 @@ func _play(index: int) -> Dictionary:
 		"chases": loop.chases.chase_count,
 		"escapes": loop.chases.escape_count,
 	}
+	get_tree().paused = false
+	map.queue_free()
+	await get_tree().process_frame
+	return played
