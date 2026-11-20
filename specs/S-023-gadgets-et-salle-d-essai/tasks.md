@@ -26,10 +26,10 @@ Bloc de numéros : T-350 à T-369.
 - [x] T-357 — Mannequins de la salle d'essai : monstre sur rail, chassé qui marche et se cache, F6 pour changer de rôle
   - Résultat vérifiable : tests GUT (pétard et fumée sur le mannequin, scan qui entend le mannequin de chassé)
   - Dépend de : T-356
-- [ ] T-358 — `docs/MODULES.md` (ajouter ou retirer un gadget, un palier, un poste), `docs/ARCHITECTURE.md`, guide du jeu
+- [x] T-358 — `docs/MODULES.md` (ajouter ou retirer un gadget, un palier, un poste), `docs/ARCHITECTURE.md`, guide du jeu
   - Résultat vérifiable : un agent suit la doc pour ajouter un gadget factice dans un test
   - Dépend de : T-353, T-355, T-357
-- [ ] T-359 — Vérification finale : grille de test (T-317) en simulation, CI en ligne, budget
+- [x] T-359 — Vérification finale : grille de test (T-317) en simulation, CI en ligne, budget
   - Résultat vérifiable : lignes de la grille ajoutées ; critères de la spec cochés
   - Dépend de : T-358
 
@@ -42,3 +42,5 @@ Bloc de numéros : T-350 à T-369.
 - T-355 (20/11/2026) : signal `GameLoop.escalated(stage)` ; `LoopHud` (écran du chassé) joue `assets/audio/loop/monster_rumble.wav` (grondement grave de 3 s, fait par `tools/audio/loop_sounds.py`, bus Effets, pas un bruit de jeu) et affiche « Le monstre s'énerve » `rise_message_time` = 3 s.
 - T-356 (20/11/2026) : `game/maps/test_room/test_room.tscn` hérite de la greybox (bâtiment à scanner, placard, bouteilles, réveil, patrouille) et y ajoute `TestRoom` : les postes de `stations.tres` (`TestStation` : pancarte, scène du jeu, place, propriétés), ici porte, muret à enjamber, cachette basse, brancard et alarme de voiture. Gadgets, bouteilles et réveil reviennent chaque seconde, cercles de bruit (F4) affichés, pas de boucle donc pas de fin. Entrée « Jouer seul › Salle d'essai » (`TestRoom.open`). Le terminal et la caméra demandent un réseau de la cité (`CityNetwork`) : poste à ajouter plus tard, la marche à suivre est dans `docs/MODULES.md`. Capture : `salle_essai.png` dans les fichiers du projet.
 - T-357 (20/11/2026) : les mannequins sont les IA du jeu, avec leur propre copie de réglages : le monstre de la greybox patrouille, entend, poursuit, est assourdi ou aveuglé comme en partie mais `catch_distance` = 0, il n'attrape jamais. F6 (`switch_test_role`) recharge la salle dans l'autre rôle : on joue le monstre et la proie IA marche et se cache, pour essayer le scan. Tests : `tests/test_test_room.gd` (postes, recharge, pétard sur le mannequin, scan qui entend le mannequin de chassé).
+- T-358 (20/11/2026) : `docs/MODULES.md` (gadget, palier, poste de la salle d'essai), `docs/ARCHITECTURE.md` et le guide du jeu (révision 37 : choix des gadgets, touches 1 et 2, salle d'essai, montée en puissance du monstre, grondement) sont à jour.
+- T-359 (20/11/2026) : 20 parties simulées ajoutées à la grille de test (S-020) : 13 sorties, 6 captures, 1 blocage avant tout objectif. CI verte sur #233 (`net_walk`, `net_match`, `net_spectate`, export web sous 60 Mo) ; la cité n'est pas touchée, ses appels de dessin non plus. Tous les critères de la spec sont cochés.

@@ -29,3 +29,28 @@ En ligne, on ajoute une question : **le personnage a-t-il saccadé ?** On note l
 | 2026-11-19 | 5a03673 | simulation | 1 | chassés | 5.4 | 0 | 0 | 0 |
 
 Premières lignes (19/11/2026, IA contre IA, 4 parties à 1 chassé puis 4 à 3) : les chassés gagnent 2 fois sur 4 seuls et 3 fois sur 4 à trois, en 6 à 7 min en moyenne. Le monstre IA perd rarement une poursuite : presque chaque poursuite finit en capture, d'où 0 fuite. Les cachettes ont sauvé 5 fois en tout, dont 4 dans une seule partie à trois, que le monstre a gagnée.
+
+Lignes du 20/11/2026 après S-023 (gadgets au choix, paliers du monstre ; 20 parties IA contre IA, 3 chassés, x8) : les chassés sortent 13 fois, le monstre gagne 6 fois, 1 partie bloquée avant tout objectif (donc sans palier), comme sur main avant S-023.
+
+| Date | Version | Mode | Chassés | Gagnant | Durée (min) | Fuites | Cachettes qui ont sauvé | Captures |
+|---|---|---|---|---|---|---|---|---|
+| 2026-11-20 | 5a0e898 | simulation | 3 | chassés | 8.7 | 0 | 0 | 1 |
+| 2026-11-20 | 5a0e898 | simulation | 3 | chassés | 12.4 | 0 | 0 | 1 |
+| 2026-11-20 | 5a0e898 | simulation | 3 | monstre | 4.4 | 0 | 0 | 3 |
+| 2026-11-20 | 5a0e898 | simulation | 3 | chassés | 8.8 | 0 | 0 | 0 |
+| 2026-11-20 | 5a0e898 | simulation | 3 | monstre | 5.1 | 0 | 0 | 3 |
+| 2026-11-20 | 5a0e898 | simulation | 3 | monstre | 1.8 | 0 | 0 | 3 |
+| 2026-11-20 | 5a0e898 | simulation | 3 | monstre | 2.6 | 0 | 0 | 3 |
+| 2026-11-20 | 5a0e898 | simulation | 3 | chassés | 10.1 | 0 | 0 | 1 |
+| 2026-11-20 | 5a0e898 | simulation | 3 | chassés | 5.8 | 0 | 0 | 0 |
+| 2026-11-20 | 684d950 | simulation | 3 | bloquée | 30.0 | 0 | 38 | 1 |
+| 2026-11-20 | 684d950 | simulation | 3 | chassés | 9.6 | 0 | 0 | 0 |
+| 2026-11-20 | 684d950 | simulation | 3 | chassés | 6.2 | 0 | 0 | 0 |
+| 2026-11-20 | 684d950 | simulation | 3 | chassés | 5.4 | 0 | 0 | 0 |
+| 2026-11-20 | 684d950 | simulation | 3 | monstre | 8.0 | 1 | 0 | 3 |
+| 2026-11-20 | 684d950 | simulation | 3 | chassés | 8.6 | 0 | 0 | 1 |
+| 2026-11-20 | 684d950 | simulation | 3 | chassés | 9.4 | 1 | 0 | 1 |
+| 2026-11-20 | 684d950 | simulation | 3 | chassés | 3.3 | 0 | 0 | 2 |
+| 2026-11-20 | 684d950 | simulation | 3 | monstre | 1.5 | 0 | 1 | 1 |
+| 2026-11-20 | 684d950 | simulation | 3 | chassés | 10.0 | 0 | 0 | 0 |
+| 2026-11-20 | 684d950 | simulation | 3 | chassés | 7.5 | 1 | 0 | 0 |
