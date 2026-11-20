@@ -47,7 +47,7 @@ static func aim(
 	p_settings: PingSettings
 ) -> Array:
 	var end := eye + forward * p_settings.reach
-	var query := PhysicsRayQueryParameters3D.create(eye, end, NetGame.SIGHT_MASK)
+	var query := PhysicsRayQueryParameters3D.create(eye, end, MonsterVision.SIGHT_MASK)
 	query.exclude = skip
 	var hit := space.intersect_ray(query)
 	var reach := eye.distance_to(hit.position) if hit else p_settings.reach
