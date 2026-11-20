@@ -127,7 +127,7 @@ func _build_tower() -> void:
 			h + STOREY,
 			WALL,
 			MAT_CONCRETE,
-			side
+			side + ([_tower_vault_gap()] if level == 0 else [])
 		)
 		# East: the fire escape door at the end of each corridor (S-016, Q4).
 		var east_gaps := side.duplicate()
@@ -253,6 +253,12 @@ func _tower_stairs(s: MapKit.Structure, h: float, last: bool) -> void:
 
 ## Ground floor (S-016): a hall through the tower, the stairs down to the
 ## cellars where the technical room was, the bin room, the stuck lift.
+## The broken window of the hall to climb over (S-020, T-340, F6), where the
+## storeys above have theirs.
+func _tower_vault_gap() -> Array:
+	return [TOWER_VAULT_WINDOW.x, TOWER_VAULT_WINDOW.y, WINDOW_TOP, WINDOW_SILL]
+
+
 func _tower_ground_floor(s: MapKit.Structure) -> void:
 	var r := TOWER
 	# Double doors north and south.

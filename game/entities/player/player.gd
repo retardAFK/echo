@@ -36,6 +36,9 @@ var inventory: Inventory
 var breath_hold: BreathHold
 ## Its burst once a minute (S-020, T-338), with its recharge.
 var second_wind: SecondWind
+## Getting over a window or a low wall (S-020, T-340, piste E6): a Vault
+## starts it, and the player does nothing else while it runs.
+var vault_motion := VaultMotion.new()
 ## The hiding spot the player is in (S-008, Q6), or null.
 var hiding_in: HidingSpot
 ## What the player asks this frame (S-010, T-106): from the keyboard and
@@ -146,6 +149,10 @@ func _physics_process(delta: float) -> void:
 	apply_actions()
 	second_wind.update(delta)
 	_update_breath(delta)
+	if vault_motion.is_active():
+		global_position = vault_motion.step(delta)  # Over a wall (T-340).
+		velocity = Vector3.ZERO
+		return
 	if held:
 		if pushing != null:
 			pushing.drop()  # Caught: its hands let go.
@@ -203,6 +210,7 @@ func apply_actions() -> void:
 			mirror_world
 			and action != PlayerCommands.Action.CROUCH
 			and action != PlayerCommands.Action.SECOND_WIND
+			and not _vaults(action)
 		):
 			continue  # The room does it and says so; moving is predicted.
 		if held:
@@ -257,6 +265,12 @@ func apply_actions() -> void:
 				_set_off_smoke()
 			PlayerCommands.Action.SECOND_WIND:
 				_start_second_wind()
+
+
+## Online, a client climbs over a wall with the room, to predict where it
+## goes (S-020, T-340): the room does it from the same command.
+func _vaults(action: PlayerCommands.Action) -> bool:
+	return action == PlayerCommands.Action.INTERACT and get_interactable() is Vault
 
 
 func _in_cage() -> bool:

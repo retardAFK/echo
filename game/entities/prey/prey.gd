@@ -59,6 +59,9 @@ var held := false:
 ## What its hands do, as its body and the players see it (S-011, T-125).
 var gesture := BodyGesture.new()
 
+## Getting over a window or a low wall on its way (S-020, T-340).
+var vault_motion := VaultMotion.new()
+
 var _heard_monster := false
 var _vision_timer := 0.0
 var _stuck_left := 0.0
@@ -102,6 +105,7 @@ func _ready() -> void:
 	brain.state_changed.connect(state_changed.emit)
 	brain.set_points(markers_of(wander_route), markers_of(hiding_spots))
 	_agent.target_position = brain.target
+	Vault.use_links(_agent, false)
 	# A full stuck timer from the start: at 0 it gave up its first goal on its
 	# first frame, before the navigation had its first path.
 	_stuck_left = settings.stuck_time
@@ -205,6 +209,11 @@ func _physics_process(delta: float) -> void:
 	gesture.update(delta)
 	if held:
 		_stay_down(delta)
+		return
+	if vault_motion.is_active():
+		global_position = vault_motion.step(delta)  # Over a wall (T-340).
+		velocity = Vector3.ZERO
+		_stuck_left = settings.stuck_time
 		return
 	var threat := Vector3.ZERO
 	if monster != null:
@@ -873,6 +882,9 @@ func _move(delta: float) -> void:
 			if door != null:
 				door.open_by(self)
 				_opened_door = door
+			var vault := Vault.across(get_tree(), global_position, next)
+			if vault != null and vault.climb(self):
+				return  # Climbing from the next frame (T-340).
 	if global_position.distance_to(_agent.target_position) > JambUnstick.GOAL_CLEARANCE:
 		horizontal = _jamb.update(self, horizontal, delta)  # Not at its goal: a jamb.
 		if _jamb.take_replan():

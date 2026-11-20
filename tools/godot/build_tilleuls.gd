@@ -30,6 +30,7 @@ func _ready() -> void:
 	lining.add_zones(kit)
 	kit.build(_root)
 	_add_doors()
+	_add_vaults()
 	_add_buildings()
 	Hospital.new(self).add_gameplay()  # Monitors and ventilation (S-014, T-186).
 	_add_props()
@@ -114,6 +115,24 @@ func _add_doors() -> void:
 	for floor_box in _metal_floors:
 		metal.add_child(floor_box)
 		floor_box.owner = _root
+
+
+## The windows and low walls to climb over (S-020, T-340): markers on the
+## walls, the AIs cross them by their navigation links (Vault).
+func _add_vaults() -> void:
+	var vaults := _group("Vaults")
+	for i in VAULTS.size():
+		var entry: Array = VAULTS[i]
+		var vault: Vault = VAULT.instantiate()
+		vault.name = "Vault%d" % (i + 1)
+		var at: Vector3 = entry[0]
+		vault.position = kit.world(at.x, at.z, at.y)
+		vault.rotation_degrees.y = entry[1]
+		vault.width = entry[2]
+		vault.top = entry[3]
+		vault.thickness = entry[4]
+		vaults.add_child(vault)
+		vault.owner = _root
 
 
 ## The network of the cité (S-018): its terminals (their desks are navigation

@@ -47,6 +47,7 @@ HUD_INTERACT_HIDE,Maintenir {interact} : se cacher
 HUD_INTERACT_LEAVE,Maintenir {interact} : sortir
 HUD_INTERACT_OPEN,Maintenir {interact} : ouvrir
 HUD_INTERACT_DOOR_OPEN,{interact} : ouvrir la porte
+HUD_INTERACT_VAULT,{interact} : enjamber
 HUD_INTERACT_DOOR_CLOSE,{interact} : fermer la porte
 HUD_INTERACT_SHUTTER_OPEN,{interact} : lever le rideau
 HUD_INTERACT_SHUTTER_CLOSE,{interact} : baisser le rideau

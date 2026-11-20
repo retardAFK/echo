@@ -23,6 +23,9 @@ func before_each() -> void:
 
 func after_each() -> void:
 	NoiseBus.noise_emitted.disconnect(_record)
+	# A won game pauses the tree behind its end screen: the next suites would
+	# wait for frames that never come (test_vault.gd hung there, T-340).
+	get_tree().paused = false
 
 
 func _record(event: NoiseEvent) -> void:

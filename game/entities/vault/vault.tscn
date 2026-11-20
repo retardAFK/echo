@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/entities/vault/vault.gd" id="1_vault"]
+[ext_resource type="Resource" path="res://game/data/vault_settings.tres" id="2_settings"]
+
+[node name="Vault" type="Node3D"]
+script = ExtResource("1_vault")
+settings = ExtResource("2_settings")

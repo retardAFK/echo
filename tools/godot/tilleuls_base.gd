@@ -430,6 +430,9 @@ func _dress_wall(
 			var module: int
 			if tower and storey > 0 and storey < TOWER_VISITED_STOREYS:
 				module = Module.OPEN
+			elif storey == 0 and tower and _opens_vault(mid):
+				module = Module.OPEN  # The hall's broken window (S-020, T-340).
+				rng.randf()  # The same draws as before, the cité keeps its look.
 			elif storey == 0:
 				var door := (
 					not tower and column % door_every == door_every / 2 and absf(normal.y) > 0.5
@@ -447,6 +450,13 @@ func _dress_wall(
 			dressing.panels.append(Transform3D(basis, origin))
 			dressing.variants.append(module)
 			dressing.walls.append(wall)
+
+
+## Whether a ground-floor module of the tower, centered on mid, is the one
+## in front of the hall's broken window (S-020, T-340).
+func _opens_vault(mid: Vector2) -> bool:
+	var window := TOWER_VAULT_WINDOW
+	return absf(mid.x - TOWER.position.x) < 0.1 and mid.y > window.x and mid.y < window.y
 
 
 ## Instances a prop at a plan point, its local -Z (front) turned toward facing.

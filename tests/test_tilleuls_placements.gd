@@ -33,3 +33,14 @@ func test_an_object_in_the_air_is_reported() -> void:
 	await wait_physics_frames(2)
 	assert_eq(PlacementCheck.offenders(self).size(), 1, "a meter up in the air")
 	assert_almost_eq(PlacementCheck.gap(terminal), 1.0, 0.05)
+
+
+## The ten passages to climb over (S-020, T-340): each on a wall, open above
+## its top, with floor to land on both sides.
+func test_every_vault_sits_on_a_wall_with_room_to_land() -> void:
+	var map: Node = MAP_SCENE.instantiate()
+	add_child_autofree(map)
+	await wait_physics_frames(3)
+	assert_eq(PlacementCheck.vaults(map).size(), 10, "M1-M4, F1-F6")
+	var offenders := PlacementCheck.vault_offenders(map)
+	assert_eq(offenders, [] as Array[String], "\n".join(offenders))
