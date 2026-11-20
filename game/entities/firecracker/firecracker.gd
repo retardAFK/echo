@@ -40,6 +40,25 @@ static func burst_near(monster: Node3D) -> int:
 	return count
 
 
+## Puts the firecracker in the world for user (GadgetDef contract, S-023,
+## T-351): on the ground in front of it, the same way as an alarm clock; or,
+## aimed at an empty hiding spot in reach, in there as a trap (T-331, piste
+## R6). Returns the ruse it counts as.
+func deploy(user: Player) -> StringName:
+	var spot := user.get_interactable() as HidingSpot
+	if spot != null and spot.can_trap():
+		in_spot = true
+		user.get_parent().add_child(self)
+		global_position = spot.global_position + Vector3.UP * user.ruse_settings.trap_height
+		spot.trap = self
+		NoiseBus.emit_noise(
+			NoiseEvent.Type.THROW, user.global_position, user.ruse_settings.gesture_range, user
+		)
+		return &"trap"
+	GadgetUse.place_on_ground(user, self)
+	return &"firecracker"
+
+
 func _ready() -> void:
 	add_to_group(GROUP)
 	RetroSurface.apply_to(self, RetroSurface.DEFAULT_SETTINGS)

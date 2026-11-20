@@ -36,6 +36,17 @@ static func blocks(from: Vector3, to: Vector3) -> bool:
 	return false
 
 
+## Sets the cloud off at user's feet (GadgetDef contract, S-023, T-351).
+## Returns the ruse it counts as.
+func deploy(user: Player) -> StringName:
+	user.get_parent().add_child(self)
+	global_position = user.global_position
+	NoiseBus.emit_noise(
+		NoiseEvent.Type.THROW, user.global_position, user.ruse_settings.gesture_range, user
+	)
+	return &"smoke"
+
+
 func _ready() -> void:
 	add_to_group(GROUP)
 	_active.append(self)

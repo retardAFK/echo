@@ -5,7 +5,7 @@ Bloc de numéros : T-350 à T-369.
 - [x] T-350 — Spec S-023
   - Résultat vérifiable : spec, tâches et ligne du backlog fusionnées ; Q1 tranchée par Maxime
   - Dépend de : —
-- [ ] T-351 — `GadgetDef` et liste des gadgets dans `game/data/gadgets/` ; pétard, fil, walkman et fumigène passent par elle (joueur, réseau, IA, HUD), sans changer leurs règles
+- [x] T-351 — `GadgetDef` et liste des gadgets dans `game/data/gadgets/` ; pétard, fil, walkman et fumigène passent par elle (joueur, réseau, IA, HUD), sans changer leurs règles
   - Résultat vérifiable : comportement identique (tests existants verts) ; un test parcourt la liste et pose chaque gadget en solo et en ligne
   - Dépend de : T-350
 - [ ] T-352 — Choix de 2 gadgets (Q2 à Q4) : écran solo, salon, réglage gardé, IA, synchronisation
@@ -35,3 +35,4 @@ Bloc de numéros : T-350 à T-369.
 
 ## Compte rendu
 - T-350 (20/11/2026) : spec et tâches écrites après l'audit de game design ; Q1 tranchée par Maxime (touches 1 et 2). PR #229.
+- T-351 (20/11/2026) : `GadgetDef` (id, `Inventory.Kind`, scène, clé du HUD) et `GadgetList` (`game/data/gadgets/gadgets.tres`, chargée et non préchargée pour éviter un cycle avec les scripts des gadgets). Chaque gadget se pose lui-même avec `deploy(user)` ; `GadgetUse` (`game/entities/player/gadget_use.gd`) fait l'utilisation et la pose au sol (réveil compris), ce qui garde `player.gd` sous les 20 méthodes publiques. `CarryHud` parcourt la liste. Règles inchangées : 977 tests GUT sur 978 verts (le dernier « risky » comme avant), dont `tests/test_gadgets.gd` qui pose chaque gadget de la liste. Le réseau garde ses 4 compteurs (`you[14..17]`) jusqu'à T-352.

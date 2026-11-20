@@ -15,12 +15,6 @@ signal ruse_used(kind: StringName)
 const AIM_ANGLE := deg_to_rad(35.0)
 const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
-const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.tscn")
-const CAN_WIRE_SCENE := preload("res://game/entities/can_wire/can_wire.tscn")
-const WALKMAN_SCENE := preload("res://game/entities/walkman/walkman.tscn")
-const SMOKE_SCENE := preload("res://game/entities/smoke/smoke_cloud.tscn")
-## How far down an alarm clock looks for the ground in front of the player, in meters.
-const DECOY_GROUND_SEARCH := 2.5
 ## Length of the gestures the others see (S-011, T-125).
 const BODY_SETTINGS := preload("res://game/data/hunted_body_settings.tres")
 ## A team mark (S-020, T-328).
@@ -254,15 +248,15 @@ func apply_actions() -> void:
 			PlayerCommands.Action.DECOY_SHORT:
 				place_decoy(true)
 			PlayerCommands.Action.FIRECRACKER:
-				_place_firecracker()
+				GadgetUse.use(self, Inventory.Kind.FIRECRACKER)
 			PlayerCommands.Action.PING:
 				_ping()
 			PlayerCommands.Action.CAN_WIRE:
-				_place_can_wire()
+				GadgetUse.use(self, Inventory.Kind.CAN_WIRE)
 			PlayerCommands.Action.WALKMAN:
-				_place_walkman()
+				GadgetUse.use(self, Inventory.Kind.WALKMAN)
 			PlayerCommands.Action.SMOKE:
-				_set_off_smoke()
+				GadgetUse.use(self, Inventory.Kind.SMOKE)
 			PlayerCommands.Action.SECOND_WIND:
 				_start_second_wind()
 
@@ -436,69 +430,9 @@ func place_decoy(short := false) -> Decoy:
 		return null
 	var decoy: Decoy = DECOY_SCENE.instantiate()
 	decoy.delay = ruse_settings.decoy_short_delay if short else ruse_settings.decoy_delay
-	_place_on_ground(decoy)
+	GadgetUse.place_on_ground(self, decoy)
 	ruse_used.emit(&"decoy")
 	return decoy
-
-
-## Places the firecracker on the ground in front of the player (S-020, T-312,
-## piste R1), the same way as an alarm clock; or, aiming at an empty hiding
-## spot in reach, sets it in there as a trap (T-331, piste R6).
-func _place_firecracker() -> Firecracker:
-	if hiding_in != null or not inventory.use(Inventory.Kind.FIRECRACKER):
-		return null
-	var firecracker: Firecracker = FIRECRACKER_SCENE.instantiate()
-	var spot := get_interactable() as HidingSpot
-	if spot != null and spot.can_trap():  # A trap in the empty spot aimed at (T-331).
-		firecracker.in_spot = true
-		get_parent().add_child(firecracker)
-		firecracker.global_position = spot.global_position + Vector3.UP * ruse_settings.trap_height
-		spot.trap = firecracker
-		NoiseBus.emit_noise(
-			NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self
-		)
-		ruse_used.emit(&"trap")
-		return firecracker
-	_place_on_ground(firecracker)
-	ruse_used.emit(&"firecracker")
-	return firecracker
-
-
-## Stretches the can wire on the ground in front of the player, across the
-## way it faces (S-020, T-333, piste R5), the same way as an alarm clock.
-func _place_can_wire() -> CanWire:
-	if hiding_in != null or not inventory.use(Inventory.Kind.CAN_WIRE):
-		return null
-	var wire: CanWire = CAN_WIRE_SCENE.instantiate()
-	_place_on_ground(wire)
-	wire.global_rotation = Vector3(0.0, global_rotation.y, 0.0)  # String along local X.
-	ruse_used.emit(&"can_wire")
-	return wire
-
-
-## Puts the walkman down in front of the player (S-020, T-334, piste R3): a
-## few seconds later, footsteps go off straight ahead of where it faced.
-func _place_walkman() -> Walkman:
-	if hiding_in != null or not inventory.use(Inventory.Kind.WALKMAN):
-		return null
-	var walkman: Walkman = WALKMAN_SCENE.instantiate()
-	_place_on_ground(walkman)
-	walkman.global_rotation = Vector3(0.0, global_rotation.y, 0.0)  # Steps go along -Z.
-	ruse_used.emit(&"walkman")
-	return walkman
-
-
-## Sets off the smoke bomb at the player's feet (S-020, T-335, piste R4): a
-## cloud that cuts sight for a while, to slip away.
-func _set_off_smoke() -> SmokeCloud:
-	if hiding_in != null or not inventory.use(Inventory.Kind.SMOKE):
-		return null
-	var cloud: SmokeCloud = SMOKE_SCENE.instantiate()
-	get_parent().add_child(cloud)
-	cloud.global_position = global_position
-	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
-	ruse_used.emit(&"smoke")
-	return cloud
 
 
 ## Bursts away once a minute (S-020, T-338, piste E5): two seconds faster
@@ -543,27 +477,6 @@ func _ping() -> Ping:
 	ping.position = (parent as Node3D).to_local(aimed[1]) if parent is Node3D else aimed[1]
 	parent.add_child(ping)
 	return ping
-
-
-## Puts a new node on the ground in front of the player, or at their feet
-## when a wall is in front or there is no ground there; the gesture makes a
-## faint noise.
-func _place_on_ground(placed: Node3D) -> void:
-	var offset := -global_basis.z * ruse_settings.decoy_place_distance
-	var spot := global_position
-	if not test_move(global_transform, offset):  # A wall in front: at the feet.
-		var ahead := global_position + offset
-		var query := PhysicsRayQueryParameters3D.create(
-			ahead + Vector3.UP, ahead + Vector3.DOWN * DECOY_GROUND_SEARCH, collision_mask
-		)
-		query.exclude = [get_rid()]
-		var hit := get_world_3d().direct_space_state.intersect_ray(query)
-		if not hit.is_empty():
-			spot = hit.position
-	get_parent().add_child(placed)
-	placed.global_position = spot
-	NoiseBus.emit_noise(NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self)
-	gesture.play(HuntedBody.Gesture.PICK, BODY_SETTINGS.pick_time)
 
 
 ## Gets into a hiding spot (S-008, Q6): the body stops and stops colliding,
