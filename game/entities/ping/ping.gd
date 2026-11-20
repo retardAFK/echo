@@ -5,6 +5,8 @@ extends Node3D
 ## distance, for settings.time seconds (PingMarkers). No voice in the game:
 ## this is how the hunted talk, and the AI hunted understand it too (a
 ## "monstre ici" mark near one makes it run from the monster).
+## A watched camera that sees the monster makes one too, shorter (time, S-020,
+## T-337, CityNetwork).
 ## Made by the Player (in solo and on the room); online, the room sends it to
 ## the hunted only (NetGame), never to the monster, and the clients copy it.
 
@@ -14,6 +16,8 @@ const GROUP := &"pings"
 
 @export var settings: PingSettings
 var kind := Kind.HERE
+## Seconds it shows, set before it enters the tree; 0 or less: settings.time.
+var time := 0.0
 ## Seconds it still shows.
 var left := 0.0
 ## Online client: a copy of the room's, it warns nobody.
@@ -22,7 +26,7 @@ var mirror := false
 
 func _ready() -> void:
 	add_to_group(GROUP)
-	left = settings.time
+	left = time if time > 0.0 else settings.time
 	if kind == Kind.MONSTER and not mirror:
 		for prey: Node in get_tree().get_nodes_in_group(Prey.GROUP):
 			(prey as Prey).warn_of_monster(global_position, settings.ai_flee_range)
