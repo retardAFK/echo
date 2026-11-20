@@ -29,6 +29,7 @@ END_SCANS,Scans du monstre : %d
 END_RUSES,Ruses utilisées : %d
 END_CHASES,"Poursuites : %d, fuites réussies : %d"
 END_CHASE_DISTANCE,Distance moyenne en poursuite : %s m
+END_ROUTES_LEGEND,"Rouge : le monstre · couleurs : les chassés · × : captures"
 END_REPLAY,Rejouer
 END_MENU,Menu
 END_BACK_TO_LOBBY,Retour au salon

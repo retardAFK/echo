@@ -2,7 +2,8 @@ class_name EndScreen
 extends CanvasLayer
 ## End of a game (spec S-007, Q6): who won, how long it lasted, the fuses
 ## placed, the noises of the hunted, the scans of the monster and the chases
-## (S-020, T-322). "Rejouer"
+## (S-020, T-322), and the routes of everyone replayed fast on the plan of the
+## map (S-020, T-339). "Rejouer"
 ## starts a new game (new fuses), "Menu" goes back to the start menu. The game
 ## is paused behind it.
 
@@ -20,6 +21,11 @@ const LOBBY_SCENE := "res://game/ui/lobby_menu.tscn"
 
 ## Text copied by "Copier le résumé" (S-009, Q7).
 var summary := ""
+## The plan of the map, for the routes; no replay without one (greybox).
+var plan: MapPlan
+
+@onready var _replay_box: Control = %ReplayBox
+@onready var _replay_view: RouteReplay = %Replay
 
 @onready var _title: Label = %Title
 @onready var _stats: Label = %Stats
@@ -85,12 +91,20 @@ func show_result(role: GameSession.Role, game_loop: GameLoop) -> void:
 			)
 		)
 	)
+	_show_routes(game_loop.routes)
 	summary = RunSummary.format(role, game_loop, game_loop.get_average_fps())
 	_copy.text = Text.t("END_COPY")
 	visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = true
 	_replay.grab_focus()
+
+
+## The routes on the plan, if there is a plan and something to replay.
+func _show_routes(routes: RouteLog) -> void:
+	_replay_view.plan = plan
+	_replay_view.play(routes)
+	_replay_box.visible = _replay_view.has_routes()
 
 
 ## Copies the summary of the game, for the questionnaire (S-009, Q7).

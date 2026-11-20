@@ -20,7 +20,7 @@ func _physics_process(delta: float) -> void:
 		return
 	var step := settings.sample_time - _left
 	_left = settings.sample_time
-	var monster := _monster()
+	var monster := find_monster(get_tree())
 	if monster == null:
 		return
 	for member in game_loop.team:
@@ -33,8 +33,9 @@ func _physics_process(delta: float) -> void:
 		game_loop.chases.step(hunted.get_instance_id(), step, distance, seen, caught)
 
 
-func _monster() -> Node3D:
-	for node in get_tree().get_nodes_in_group(Prison.MONSTERS_GROUP):
+## The monster of the game, AI or played (RouteWatch uses it too, T-339).
+static func find_monster(tree: SceneTree) -> Node3D:
+	for node in tree.get_nodes_in_group(Prison.MONSTERS_GROUP):
 		if node is Node3D and node.is_inside_tree() and node.can_process():
 			return node  # A switched-off avatar (simulations) is no monster.
 	return null

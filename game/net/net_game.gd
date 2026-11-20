@@ -76,6 +76,7 @@ enum Event {
 	RATTLE,
 	WALKMAN,
 	SMOKE,
+	ROUTES,
 }
 
 ## Seconds between two CLOCK events (T-300).
@@ -149,6 +150,8 @@ var _window_worst := 0.0
 var _window_worlds := 0
 var _acked := {}
 var _sent_world := []
+## Room side: the routes of the game went to everyone (T-339).
+var _sent_routes := false
 ## Room side: the teammate each spectator's place watches.
 var _watching := {}
 
@@ -420,7 +423,19 @@ func send_world() -> void:
 	if state == _sent_world:
 		return
 	_sent_world = state.duplicate(true)
+	_send_routes()
 	_send_to_all([Event.WORLD, state])
+
+
+## Room side: once the game is over, its routes go to everyone, just before
+## the map that says it is over, so the end screen can replay them (S-020,
+## T-339). Sent once: some kilobytes, too much for every map.
+func _send_routes() -> void:
+	var game_loop := world.game_loop
+	if _sent_routes or game_loop == null or not game_loop.is_over:
+		return
+	_sent_routes = true
+	_send_to_all([Event.ROUTES, game_loop.routes.values()])
 
 
 ## Room side: the game time and the wind to everyone (T-300).
@@ -776,6 +791,8 @@ func apply_event(event: Array) -> void:
 			walkman.mirror = true  # The room plays the steps.
 			_add_copy(walkman, event[1])
 			walkman.global_rotation = Vector3(0.0, event[2], 0.0)
+		Event.ROUTES when event.size() == 2 and world != null and world.game_loop != null:
+			world.game_loop.routes = RouteLog.from_values(event[1], GameLoop.ROUTE_SETTINGS)
 		Event.SMOKE when event.size() == 2:
 			_spawn_copy(SMOKE_SCENE, event[1])
 

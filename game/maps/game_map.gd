@@ -167,6 +167,7 @@ func _setup_game_loop() -> void:
 	add_child(music)
 	end_screen = END_SCREEN_SCENE.instantiate()
 	end_screen.online = client != null
+	end_screen.plan = MapPlan.for_scene(scene_file_path)  # Routes (S-020, T-339).
 	add_child(end_screen)
 	game_loop.ended.connect(_on_game_ended)
 	if prey != null:

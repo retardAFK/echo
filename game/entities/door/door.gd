@@ -301,6 +301,13 @@ func sound_for(open: bool, noise_range: float) -> AudioStream:
 func _set_open(open: bool, animate: bool, sound: AudioStream = null) -> void:
 	is_open = open
 	_leaf.collision_layer = 0 if open else WALLS_LAYER
+	# On an online client, a leaf the room swings shut must not sweep the
+	# client's own player, a little ahead of the room's, out of the doorway and
+	# through a wall (net_match fall in the cellar corridor, S-020, T-330): it
+	# only becomes solid once it is shut.
+	var solid_when_shut := animate and not open and NoiseBus.mirror and is_inside_tree()
+	if solid_when_shut:
+		_leaf.collision_layer = 0
 	var property := "rotation:y"
 	var value := deg_to_rad(settings.open_angle) * _swing if open else 0.0
 	if kind == Kind.SHUTTER:
@@ -316,5 +323,13 @@ func _set_open(open: bool, animate: bool, sound: AudioStream = null) -> void:
 			SoundSpace.play(_bell)
 		_tween = create_tween()
 		_tween.tween_property(_hinge, property, value, settings.swing_time)
+		if solid_when_shut:
+			_tween.tween_callback(_make_solid)
 	else:
 		_hinge.set_indexed(property, value)
+
+
+## The leaf of a client's door, swung shut, stops bodies again.
+func _make_solid() -> void:
+	if not is_open:
+		_leaf.collision_layer = WALLS_LAYER
