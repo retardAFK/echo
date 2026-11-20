@@ -42,7 +42,9 @@ func test_a_caught_hunted_loses_after_the_catch() -> void:
 	assert_true(get_tree().paused, "the game stops behind the end screen")
 	assert_eq(map.end_screen.get_node("%Title").text, "END_CAUGHT")
 	var stats: String = map.end_screen.get_node("%Stats").text
-	assert_eq(stats.split("\n").size(), 5, "duration, fuses, noises, scans, ruses (S-008)")
+	assert_eq(
+		stats.split("\n").size(), 7, "duration, fuses, noises, scans, ruses (S-008), 2 of chases"
+	)
 	assert_string_contains(stats, "0/3")
 
 
@@ -73,6 +75,19 @@ func test_the_end_screen_counts_noises_and_scans() -> void:
 	var stats: String = map.end_screen.get_node("%Stats").text
 	assert_string_contains(stats, "2")
 	assert_string_contains(stats, "1")
+
+
+func test_the_end_screen_shows_the_chases() -> void:
+	# S-020, T-322 (piste E8): chases, successful escapes, mean distance.
+	var map := _make_map()
+	var chases := map.game_loop.chases
+	chases.step(1, 0.1, 8.0, true, false)
+	for i in 20:
+		chases.step(1, 0.1, 6.0, true, false)
+	map.game_loop.finish(true)
+	var stats: String = map.end_screen.get_node("%Stats").text
+	assert_string_contains(stats, tr("END_CHASES") % [1, 1])
+	assert_string_contains(stats, tr("END_CHASE_DISTANCE") % "6,0")
 
 
 func test_in_the_monster_role_catching_the_prey_wins() -> void:
@@ -110,7 +125,7 @@ func test_summary_to_copy() -> void:
 	map.game_loop.finish(false)
 	var summary: String = map.end_screen.summary
 	var lines := summary.split("\n")
-	assert_eq(lines.size(), 9, "header, role, result, 5 figures, fps (S-009, Q7)")
+	assert_eq(lines.size(), 11, "header, role, result, 5 figures, fps, 2 of chases (T-322)")
 	assert_string_contains(lines[0], RunSummary.build_version())
 	assert_string_contains(summary, tr("MENU_PLAY_HUNTED"))
 	assert_string_contains(summary, tr("END_CAUGHT"))

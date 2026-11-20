@@ -1,7 +1,8 @@
 class_name EndScreen
 extends CanvasLayer
 ## End of a game (spec S-007, Q6): who won, how long it lasted, the fuses
-## placed, the noises of the hunted and the scans of the monster. "Rejouer"
+## placed, the noises of the hunted, the scans of the monster and the chases
+## (S-020, T-322). "Rejouer"
 ## starts a new game (new fuses), "Menu" goes back to the start menu. The game
 ## is paused behind it.
 
@@ -44,6 +45,22 @@ static func title_key(role: GameSession.Role, hunted_won: bool) -> String:
 	return "END_ESCAPED" if hunted_won else "END_CAUGHT"
 
 
+## The chase statistics (S-020, T-322): chases and escapes, mean distance.
+static func chase_lines(chases: ChaseStats) -> Array[String]:
+	if chases == null:
+		return []
+	var lines: Array[String] = [
+		Text.t("END_CHASES", [chases.chase_count, chases.escape_count]),
+		Text.t("END_CHASE_DISTANCE", format_meters(chases.mean_distance())),
+	]
+	return lines
+
+
+## "7,4": one decimal, with the French comma.
+static func format_meters(meters: float) -> String:
+	return ("%.1f" % meters).replace(".", ",")
+
+
 ## "9 min 05 s".
 static func format_duration(seconds: float) -> String:
 	var total := int(seconds)
@@ -56,13 +73,16 @@ func show_result(role: GameSession.Role, game_loop: GameLoop) -> void:
 	_stats.text = (
 		"\n"
 		. join(
-			[
-				Text.t("END_DURATION", format_duration(game_loop.get_duration())),
-				Text.t("END_FUSES", [game_loop.rules.placed, game_loop.rules.fuse_count]),
-				Text.t("END_NOISES", game_loop.noise_count),
-				Text.t("END_SCANS", game_loop.scan_count),
-				Text.t("END_RUSES", game_loop.ruse_count),
-			]
+			(
+				[
+					Text.t("END_DURATION", format_duration(game_loop.get_duration())),
+					Text.t("END_FUSES", [game_loop.rules.placed, game_loop.rules.fuse_count]),
+					Text.t("END_NOISES", game_loop.noise_count),
+					Text.t("END_SCANS", game_loop.scan_count),
+					Text.t("END_RUSES", game_loop.ruse_count),
+				]
+				+ chase_lines(game_loop.chases)
+			)
 		)
 	)
 	summary = RunSummary.format(role, game_loop, game_loop.get_average_fps())

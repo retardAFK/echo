@@ -26,4 +26,5 @@ static func format(role: GameSession.Role, game_loop: GameLoop, fps: float) -> S
 		Text.t("END_RUSES", game_loop.ruse_count),
 		Text.t("SUMMARY_FPS", roundi(fps)),
 	]
+	lines.append_array(EndScreen.chase_lines(game_loop.chases))
 	return "\n".join(lines)
