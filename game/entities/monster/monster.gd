@@ -55,6 +55,9 @@ var stagger := Stagger.new()
 var sprint: MonsterSprint
 ## Deafened by a firecracker (S-020, T-312).
 var deafness := Deafness.new()
+## Getting over a window or a low wall on its way (S-020, T-340).
+var vault_motion := VaultMotion.new()
+
 var _vision_timer := 0.0
 var _was_hidden := false
 var _noise: MonsterNoise
@@ -86,6 +89,7 @@ func _ready() -> void:
 	rng.randomize()
 	brain.set_patrol(get_patrol_points(), start_index)
 	_agent.target_position = brain.target
+	Vault.use_links(_agent, true)
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
 	_build_vision_cone()
 
@@ -157,6 +161,10 @@ func _physics_process(delta: float) -> void:
 		return
 	if stagger.update(delta):
 		return  # Stopped short (T-307).
+	if vault_motion.is_active():
+		global_position = vault_motion.step(delta)  # Over a wall (T-340).
+		velocity = Vector3.ZERO
+		return
 	var arrived := _agent.is_navigation_finished()
 	var player_position := Vector3.ZERO
 	var distance := 0.0
@@ -536,6 +544,9 @@ func _move(delta: float) -> void:
 			horizontal = direction * MonsterBrain.speed_for(brain.get_pace(), settings, sprint)
 			look_at(global_position + direction, Vector3.UP)
 			_open_door(direction)
+			var vault := Vault.across(get_tree(), global_position, next)
+			if vault != null and vault.climb(self):
+				return  # Climbing from the next frame (T-340).
 			if _clear_gurney(direction, delta):
 				horizontal = Vector3.ZERO  # Shoving a gurney aside.
 	if global_position.distance_to(_agent.target_position) > JambUnstick.GOAL_CLEARANCE:

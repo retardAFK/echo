@@ -12,12 +12,22 @@ extends Node3D
 ## The hunted presses "interact" (interact()); the monster, which only holds
 ## "interact" on things, holds it (hold()). Holding on after landing does not
 ## climb back: the key must be let go first.
+##
+## The AIs (monster.gd, prey.gd) take it through two navigation links across
+## the wall, one per side of the hunt (MONSTER_LAYER, HUNTED_LAYER), each at
+## the cost of its climbing time: an agent whose navigation layers include
+## the layer plans paths over the wall, and climbs when its next path point
+## lies across it (across()).
 
 ## Someone got over it, from one side to the other.
 signal climbed(by: Node3D)
 
 ## The passages of the map, for the AIs.
 const GROUP := &"vaults"
+## Navigation layers of the links: the monster's, the hunted's. The map's
+## mesh is on layer 1; the AI agents add theirs (use_links()).
+const MONSTER_LAYER := 2
+const HUNTED_LAYER := 3
 
 @export var settings: VaultSettings
 ## Width of the passage along the wall, in meters.
@@ -34,6 +44,40 @@ var _waiting := {}
 func _ready() -> void:
 	add_to_group(Interactable.GROUP)
 	add_to_group(GROUP)
+	_add_link(MONSTER_LAYER, settings.monster_link_cost)
+	_add_link(HUNTED_LAYER, settings.hunted_link_cost)
+
+
+## A two-way link across the wall, from landing point to landing point.
+func _add_link(layer: int, cost: float) -> void:
+	var link := NavigationLink3D.new()
+	link.name = "Link%d" % layer
+	link.navigation_layers = 1 << (layer - 1)
+	link.enter_cost = cost
+	var away := thickness / 2.0 + settings.landing_distance
+	link.start_position = Vector3(0, 0, -away)
+	link.end_position = Vector3(0, 0, away)
+	add_child(link)
+
+
+## Lets an AI agent plan its paths over the passages: the monster's links if
+## `monster`, the hunted's otherwise.
+static func use_links(agent: NavigationAgent3D, monster: bool) -> void:
+	agent.set_navigation_layer_value(MONSTER_LAYER if monster else HUNTED_LAYER, true)
+
+
+## The passage an AI at `at` must climb to reach its next path point `next`:
+## within reach, with `next` across its wall. Null when there is none.
+static func across(tree: SceneTree, at: Vector3, next: Vector3) -> Vault:
+	for node in tree.get_nodes_in_group(GROUP):
+		var vault := node as Vault
+		if vault == null or not vault.can_interact(at):
+			continue
+		var here := vault.to_local(at)
+		var there := vault.to_local(next)
+		if here.z * there.z < 0.0 and absf(there.x) <= vault.width / 2.0 + 1.0:
+			return vault
+	return null
 
 
 ## The point of the passage nearest to a position, on the wall's line.

@@ -219,7 +219,18 @@ func _build_gallery() -> void:
 	_door(mid.call(4), 0.0, span.call(4), Door.Kind.NORMAL, true)
 	# Back wall, east and west walls, roof. The delivery corridor opens at
 	# both ends: a fire door east, an emergency exit west (Q4).
-	kit.wall_x(s, r.position.x, r.end.x, r.end.y - WALL / 2, 0, h, WALL, MAT_CONCRETE)
+	var window := GALLERY_VAULT_WINDOW  # Broken, to climb over (S-020, T-340, F3).
+	kit.wall_x(
+		s,
+		r.position.x,
+		r.end.x,
+		r.end.y - WALL / 2,
+		0,
+		h,
+		WALL,
+		MAT_CONCRETE,
+		[[window.x, window.y, WINDOW_TOP, WINDOW_SILL]]
+	)
 	kit.wall_y(
 		s,
 		front,

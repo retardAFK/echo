@@ -65,6 +65,7 @@ extends Resource
 - Vérifie le budget de 300 appels de dessin (`?bench`, voir `game/bench/bench.gd`) : la cité est déjà près de la limite.
 - Ajoute ses règles de placement dans le `tests/test_tilleuls_*.gd` qui convient (pas devant une porte, pas sur un emplacement de fusible…).
 - Un objet accroché ou posé (caméra, terminal, haut-parleur, relais…) doit toucher un mur ou un sol à 30 cm près : ajoute sa classe à `PlacementCheck.objects()` (`tools/godot/placement_check.gd`), que `tests/test_tilleuls_placements.gd` vérifie dans la CI (S-020, T-325).
+- Un passage à enjamber (`Vault`, S-020, T-340) s'ajoute ou se retire dans la liste `VAULTS` de `tools/godot/tilleuls_layout.gd` (un mur ou une fenêtre doit déjà être là, voir `TOWER_VAULT_WINDOW` et `GALLERY_VAULT_WINDOW`), puis on régénère la carte. `PlacementCheck.vault_offenders()` vérifie qu'il est posé sur un mur, ouvert au-dessus, avec du sol libre des deux côtés ; `tests/test_vault_ai.gd` vérifie que les IA passent par chacun.
 
 ### 1.8 L'IA (si les IA doivent s'en servir ou y réagir)
 - Monstre IA : `game/entities/monster/monster.gd` (le corps) et `monster_brain.gd` (les décisions, pur). Proie IA : `game/entities/prey/prey.gd`, `prey_brain.gd`, et `prey_tasks.gd` pour les objectifs.

@@ -80,6 +80,11 @@ func _play(index: int) -> Dictionary:
 	var monster: Monster = monsters[0] if not monsters.is_empty() else null
 	var grid := TestGrid.new(monster)  # S-020, T-317.
 	grid.chases = loop.chases  # Escapes as the end screen counts them (T-322).
+	var climbs := {"monster": 0, "hunted": 0}  # Over the passages (S-020, T-340).
+	for vault in PlacementCheck.vaults(map):
+		vault.climbed.connect(
+			func(by: Node3D) -> void: climbs["monster" if Vault.is_monster(by) else "hunted"] += 1
+		)
 	var started := Time.get_ticks_msec()
 	var last_report := 0.0
 	var result := "stuck"
@@ -145,7 +150,7 @@ func _play(index: int) -> Dictionary:
 		(
 			(
 				"GAME %d: %s after %.1f min (fuses %d placed %d, noises %d, scans %d, ruses %s,"
-				+ " chases %d, escapes %d, mean distance %.1f m, real %d s)"
+				+ " chases %d, escapes %d, mean distance %.1f m, climbs %d/%d, real %d s)"
 			)
 			% [
 				index,
@@ -159,6 +164,8 @@ func _play(index: int) -> Dictionary:
 				loop.chases.chase_count,
 				loop.chases.escape_count,
 				loop.chases.mean_distance(),
+				climbs.monster,
+				climbs.hunted,
 				(Time.get_ticks_msec() - started) / 1000
 			]
 		)

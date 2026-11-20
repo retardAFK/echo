@@ -82,7 +82,7 @@ Chaque dossier de `game/entities/` contient une scène et son script, avec une `
 | Objectifs | `fuse_box/`, `transformer/`, `exit/`, `objectives/` (code, disquette, relais) |
 | Ruses | `bottle/`, `decoy/`, `pickup/`, `car_alarm/`, `hiding_spot/`, `firecracker/`, `can_wire/`, `walkman/`, `smoke/` |
 | Équipe (S-020) | `ping/` (marque « Monstre » / « Ici » pour les coéquipiers, T-328 ; affichée par `ui/ping_markers.gd`, jamais envoyée au monstre) |
-| Lieux | `building/` (volume scannable), `door/`, `jamb/` (décoince une IA d'un chambranle), `metal_floor/`, `indoor_fog/`, `ventilation/`, `neon/` |
+| Lieux | `building/` (volume scannable), `door/`, `vault/` (fenêtre ou muret à enjamber, T-340 : `VaultMotion` pur pour l'arc, deux liens de navigation par passage pour les IA, couche 2 monstre, couche 3 chassés), `jamb/` (décoince une IA d'un chambranle), `metal_floor/`, `indoor_fog/`, `ventilation/`, `neon/` |
 | Hôpital | `gurney/`, `wheelchair/`, `monitor/` |
 | Prison et réseau (S-018) | `prison/` (cages, règles pures), `network/` (terminaux, caméras, haut-parleurs, rideaux, `city_network.gd`) |
 | Debug | `noise_probe/` |

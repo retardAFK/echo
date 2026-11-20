@@ -319,6 +319,9 @@ const TOWER_SOUTH_DOORS := Vector2(103, 107)
 ## Door of each corridor onto the fire escape, in the east wall (Q4).
 const FIRE_ESCAPE_DOOR := Vector2(99.4, 100.6)
 
+## Broken window of the hall, in the west wall, to climb over (S-020, T-340).
+const TOWER_VAULT_WINDOW := Vector2(100.9, 102.1)
+
 ## Fire door from the hall to the cellar stairs, in the wall at x = 99.
 const CELLAR_DOOR := Vector2(93, 94.2)
 
@@ -471,6 +474,10 @@ const GALLERY_FRONTS := [
 
 const GALLERY_HALF_SHUTTER := 3
 
+## Broken window of the delivery corridor, behind the baker's, in the back
+## wall (south), to climb over (S-020, T-340).
+const GALLERY_VAULT_WINDOW := Vector2(80.0, 81.2)
+
 ## Steep metal stairs up to the roof: behind the back wall (x from, x to)
 ## and along the east wall (y from, y to), their width.
 const GALLERY_BACK_STAIRS := Vector2(60.0, 66.5)
@@ -593,6 +600,26 @@ const MAKESHIFT_SPOT := preload("res://game/entities/hiding_spot/makeshift_spot.
 const METAL_SPOT := preload("res://game/entities/hiding_spot/metal_spot.tscn")
 
 const DOOR := preload("res://game/entities/door/door.tscn")
+
+const VAULT := preload("res://game/entities/vault/vault.tscn")
+
+## Windows and low walls to climb over (S-020, T-340, piste E6, validated by
+## Maxime on 20/11/2026: specs/S-020-retours-de-test/plan-T-340-enjambements.md).
+## Each is [plan point (x, floor height, y) on the wall's middle line, yaw
+## (0: wall along x, 90: wall along y), width, top above the floor,
+## wall thickness]. The windows are gaps of the walls (sill WINDOW_SILL).
+const VAULTS := [
+	[Vector3(71.85, 0, 81), 90.0, 6.0, 0.5, 0.3],  # M1, playground kerb, east.
+	[Vector3(50.15, 0, 81), 90.0, 6.0, 0.5, 0.3],  # M2, playground kerb, west.
+	[Vector3(163, 0, 200), 0.0, 10.0, 1.1, 0.15],  # M3, city stadium, south boards.
+	[Vector3(178, 0, 190), 90.0, 8.0, 1.1, 0.15],  # M4, city stadium, east boards.
+	[Vector3(145, 0, 83.85), 0.0, 2.0, 1.0, 0.3],  # F1, social centre, great hall.
+	[Vector3(177.85, 0, 72.75), 90.0, 1.5, 1.0, 0.3],  # F2, social centre, east.
+	[Vector3(80.6, 0, 148.85), 0.0, 1.2, 1.0, 0.3],  # F3, gallery, behind the baker's.
+	[Vector3(31.85, 0, 114.5), 90.0, 1.2, 1.0, 0.3],  # F4, hospital, east.
+	[Vector3(10.15, 0, 69.5), 90.0, 1.2, 1.0, 0.3],  # F5, hospital, west.
+	[Vector3(92.15, 0, 101.5), 90.0, 1.2, 1.0, 0.3],  # F6, tower hall, west.
+]
 
 const DUMPSTER := preload("res://game/entities/hiding_spot/dumpster.tscn")
 
