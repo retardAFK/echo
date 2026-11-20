@@ -38,8 +38,6 @@ const STUCK_TIME := 1.5
 ## the back and forth of a body the room holds at a jamb while the client
 ## predicts it on (about 1.5 m), which a 0.3 m test took for progress.
 const STUCK_DISTANCE := 2.0
-## The monster walks at least that far from the hunted it caught.
-const AWAY_DISTANCE := 30.0
 ## A teammate goes to free a captured hunted once the monster is that far.
 const SAFE_DISTANCE := 20.0
 ## Seconds a freed hunted waits in its cage, so its rescuer goes out first.
@@ -441,9 +439,10 @@ func _play_monster(delta: float) -> void:
 			else:
 				_go_to(_unvec(prey.get("at", [])), delta, 0.0)
 		"leave":
-			var there := _go_to(_away_point, delta, 1.0)
-			var gone := _own_position().distance_to(_caught_at)
-			if (there or gone >= AWAY_DISTANCE + 10.0) and _clear_of_cages():
+			# All the way to the far patrol point: stopping 40 m from the
+			# catch, it once stood on a walkway the freed hunted had to
+			# take, and each waited on the other until the timeout.
+			if _go_to(_away_point, delta, 1.0) and _clear_of_cages():
 				_phase = "away"
 		"away":
 			pass
