@@ -1,6 +1,6 @@
 # S-020 — Retours de test : réseau d'abord, puis la dynamique de poursuite
 
-**Statut** : en cours (19/11/2026)
+**Statut** : en cours (20/11/2026 : pistes P2 ajoutées)
 **Phase** : hors feuille de route, demandée par Maxime le 19/11/2026 avec sa « feuille de route des propositions » (catalogue de 52 pistes tiré de ses 8 retours de test, du guide du jeu du 17/11/2026 et du code).
 **Source** : le PDF du catalogue, rangé dans les fichiers du projet (`echo-s020/feuille-de-route.pdf`). L'impression s'arrête après U2 : 33 pistes sur 52, dont toutes les P0 et P1.
 
@@ -51,7 +51,65 @@ Critères : tests dans `test_net_sync.gd` (commandes en rafale, paquet perdu, in
 
 L3 (README : « monstre aveugle » → vision normale, D-008) est faite par le fil « Évaluer la modularité du code », qui réécrit le README.
 
-Les P2 lisibles du catalogue (E5, R3 à R6, H3, S2, S3, N3 à N5, A1, U1, U2) suivront, avec leurs propres tâches à partir de T-322 (T-319 à T-321 : saccades en ligne).
+## Pistes P2 (cahier de Maxime du 20/11/2026), T-322 à T-342
+Le PDF du catalogue s'arrête après U2 : pour les 21 pistes P2, le texte de référence est le cahier envoyé par Maxime le 20/11/2026, résumé ici. Toutes les valeurs chiffrées sont des points de départ, réglables dans `game/data/`. Une branche et une PR par tâche.
+
+### Lot A : sans effet sur l'équilibrage, tout de suite (T-322 en premier)
+| Tâche | Piste | Quoi |
+|---|---|---|
+| T-322 | E8 | Statistiques de poursuite à l'écran de fin : nombre de poursuites, de fuites réussies, distance moyenne. Sert à juger le lot P1. La PR définit « poursuite » et « fuite réussie » |
+| T-323 | N4 | L'écran du terminal éclaire à 10 m au lieu de « de loin » |
+| T-324 | L1 | Roues rondes : cylindres à 12 faces au lieu de boîtes (`tools/blender/car_park.py`, ligne « Flat tyres », et `tools/blender/outdoor.py`, avec `cylinder()` de `hospital_kit.py`), modèles régénérés |
+| T-325 | L2 | Contrôle automatique des placements, branché dans la CI : tout objet du réseau (caméra, terminal, relais) à plus de 30 cm d'un mur ou d'un sol est signalé |
+| T-326 | S2 | Pour le chassé, à moins de 15 m du monstre, le vent et la musique perdent quelques décibels pour laisser passer ses pas |
+| T-327 | H3 | Caché, un battement de cœur qui accélère avec la proximité du monstre, à partir de `tension_music.gd` sans la dupliquer |
+| T-328 | A1 | Une touche pour marquer « monstre ici » ou « objectif ici », vu par les coéquipiers (et pris en compte par les IA si c'est simple) |
+| T-329 | U1 | Une bulle la première fois qu'on voit une cachette, un terminal ou un boîtier à fusible, enregistrée pour ne s'afficher qu'une fois |
+| T-330 | T7 | Une partie de test en CI avec `debug_latency_ms` et `debug_jitter_ms`, qui échoue si `worst_error` dépasse un seuil ; compléter `net_walk` et `net_match` plutôt que les dupliquer |
+
+### Test du lot P1 avant le lot B
+Simulations et tests en ligne de la CI, avec les statistiques de T-322. Si le monstre gagne encore une part raisonnable des parties, le lot B suit. S'il est devenu trop faible, on s'arrête et Claude propose d'abord un réglage, car chaque piste du lot B renforce le chassé.
+
+### Lot B : ruses et réseau, après le verdict du test du lot P1
+| Tâche | Piste | Quoi |
+|---|---|---|
+| T-331 | R6 | Piège dans une cachette vide : un pétard (T-312) ou un réveil, qui se déclenche à l'ouverture |
+| T-332 | S3 | Pendant les 8 s de passage du train (`game/audio/ambient_train.gd`), les bruits près de la voie ferrée ne s'affichent pas chez le monstre ; calcul côté salle |
+| T-333 | R5 | Fil à canettes tendu en travers d'un passage, qui tinte quand le monstre passe |
+| T-334 | R3 | Walkman : un leurre qui joue des pas se déplaçant sur 15 m |
+| T-335 | R4 | Fumigène : un nuage de 10 s qui coupe la vue ; le filtre de visibilité de la salle (`sees()`, `net_visibility.gd`) en tient compte |
+| T-336 | N3 | Caméras qui balaient : ±35° en 8 s ; la détection côté salle (`camera_sees`) suit l'orientation courante |
+| T-337 | N5 | Depuis un terminal, le monstre vu par une caméra est signalé 5 s à toute l'équipe |
+| T-338 | E5 | Second souffle du chassé : une fois par minute, 2 s à 6,5 m/s, très bruyant |
+
+### Lot C : gros chantiers, après le lot B
+| Tâche | Piste | Quoi |
+|---|---|---|
+| T-339 | U2 | Trajets de chacun et captures rejoués en accéléré sur la carte, en fin de partie |
+| T-340 | E6 | Fenêtres et murets à enjamber : 0,5 s pour le chassé, 1,5 s pour le monstre ; la PR propose d'abord la liste des emplacements |
+| T-341 | E7 | Boucles de poursuite : 2 ou 3 circuits par bâtiment (îlot de cuisine, rayons de la galerie, piliers du parking) ; la PR propose d'abord un plan par bâtiment |
+
+### Critères communs aux pistes P2
+- Chaque règle de jeu nouvelle a un test GUT qui échoue sans le correctif.
+- Les tests en ligne de la CI (`net_walk`, `net_match`, `net_spectate`) passent ; le solo n'est pas cassé.
+- Une piste qui change une règle visible du joueur met à jour le guide du jeu s'il est dans le dépôt, et le dit dans sa PR.
+- Un choix que le cahier ne tranche pas est proposé dans la PR, pas imposé.
+
+### T-342 (T6) : WebRTC, décision à prendre par Maxime
+Pas d'implémentation : seulement la décision, à prendre par Maxime.
+
+**Mesures** (`worst_error` : plus grand écart entre la position prédite par le client et celle de la salle, au sprint en ligne droite, `net_walk`) :
+
+| Connexion simulée | Avant T-319 | Après T-321 |
+|---|---|---|
+| 150 ms de latence | 0,20 à 0,30 m | 0,10 à 0,20 m |
+| 150 ms + 100 ms de rafales (`debug_jitter_ms`) | 0,40 à 0,60 m | 0,10 à 0,50 m |
+
+Le critère de S-020 (sous 0,3 m à 150 ms) est tenu. L'écart qui reste avec 100 ms de rafales vient du TCP sous le WebSocket : un paquet perdu retient tous les suivants, qui arrivent ensuite groupés, et la file de commandes de la salle se vide plus longtemps que son avance de 3 commandes. WebRTC (UDP, paquets non ordonnés) supprimerait ce blocage.
+
+**Ce que WebRTC coûterait** : un serveur de signalisation en plus du WebSocket, un serveur TURN pour les réseaux qui bloquent l'UDP (réseaux d'entreprise, filtres comme Zscaler), l'extension `webrtc-native` à compiler pour le serveur Linux, et une CI à 4 clients plus difficile à monter. Plusieurs jours de travail et un risque de joueurs qui ne peuvent plus se connecter.
+
+**Recommandation de Claude** : ne pas passer à WebRTC maintenant. 100 ms de rafales est un cas dur, plus fort qu'une connexion domestique normale vers un serveur en France ; à 150 ms sans rafale, l'écart est déjà sous le critère. Revoir la question si, en vraie partie, l'écran F3 (T-303) montre souvent un écart de prédiction au-dessus de 0,3 m, ou si le test sous mauvaise connexion de T-330 ne tient pas son seuil. **Maxime décide.**
 
 ## Critères d'acceptation
 - [ ] En ligne, l'état de la carte n'est envoyé que quand il change (test GUT) ; le chrono et le vent restent à l'heure de la salle.
