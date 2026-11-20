@@ -14,6 +14,9 @@ signal fuses_changed(found: int, placed: int)
 signal exit_opened
 ## The game is over: the hunted got out (won) or was caught.
 signal ended(hunted_won: bool)
+## The monster rose to a new stage (S-023, Q5 and Q6): stage 1 after the
+## first objective done. Emitted by the MonsterEscalation child.
+signal escalated(stage: int)
 
 const DROPPED_FUSE_SCENE := preload("res://game/entities/fuse_box/dropped_fuse.tscn")
 const CHASE_SETTINGS := preload("res://game/data/chase_settings.tres")
@@ -96,6 +99,10 @@ func _ready() -> void:
 		route_watch.name = "RouteWatch"
 		route_watch.game_loop = self
 		add_child(route_watch)
+	var escalation := MonsterEscalation.new()  # Solo, room and client alike (Q7).
+	escalation.name = "MonsterEscalation"
+	escalation.game_loop = self
+	add_child(escalation)
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
 	if team.is_empty() and hunted != null:
 		team = [hunted]

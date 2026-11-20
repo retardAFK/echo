@@ -126,6 +126,12 @@ func missing() -> int:
 	return maxi(fuse_count - placed, 0)
 
 
+## Objectives done so far: each fuse placed, and each other objective done.
+## The monster rises one stage per objective (S-023, Q5).
+func done_count() -> int:
+	return mini(placed, fuse_count) + objectives.size() - fuse_count - pending.size()
+
+
 ## Every objective done: the exit opens.
 func is_repaired() -> bool:
 	return placed >= fuse_count and pending.is_empty()

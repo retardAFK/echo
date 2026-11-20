@@ -53,7 +53,7 @@ Plus tard, mes coéquipiers finissent le premier objectif. Un grondement sourd t
 
 ## Critères d'acceptation
 - [ ] Avant la partie, en solo et en ligne, le chassé choisit 2 gadgets ; en jeu, il les utilise avec les touches de Q1, 2 charges chacun ; F, T, V et B ne servent plus aux gadgets.
-- [ ] Le choix est gardé d'une partie à l'autre ; les coéquipiers le voient dans le salon, le monstre jamais.
+- [ ] Le choix est gardé d'une partie à l'autre ; le monstre ne le connaît jamais (Q4 précisée : personne ne le voit au salon, les rôles y sont encore inconnus).
 - [ ] Chaque objectif réussi applique le palier suivant au monstre (joué ou IA, solo et en ligne) ; les chassés entendent le grondement et voient la ligne.
 - [ ] La salle d'essai s'ouvre depuis « Jouer seul », a tous les postes de Q8, les mannequins, et F6 change de rôle.
 - [ ] Ajouter un gadget, un palier ou un poste se fait par un fichier de données et une scène ; `docs/MODULES.md` le décrit, et un test le vérifie pour les gadgets existants.

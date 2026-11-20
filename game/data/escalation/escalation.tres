@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EscalationList" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://game/data/escalation_list.gd" id="1_list"]
+[ext_resource type="Script" path="res://game/data/escalation_stage.gd" id="5_stage"]
+[ext_resource type="Resource" path="res://game/data/escalation/stage_1_scan.tres" id="2_scan"]
+[ext_resource type="Resource" path="res://game/data/escalation/stage_2_sprint.tres" id="3_sprint"]
+[ext_resource type="Resource" path="res://game/data/escalation/stage_3_siren.tres" id="4_siren"]
+
+[resource]
+script = ExtResource("1_list")
+stages = Array[ExtResource("5_stage")]([ExtResource("2_scan"), ExtResource("3_sprint"), ExtResource("4_siren")])

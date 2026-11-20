@@ -115,6 +115,10 @@ extends Resource
 @export_range(0.0, 10.0, 0.1, "suffix:s") var scan_focus_time: float = 1.0
 ## Farthest building that can be aimed at, in meters.
 @export_range(1.0, 200.0, 1.0, "suffix:m") var scan_max_distance: float = 30.0
+## The scan of one level of a building of several levels (the hospital) hears
+## every level of it. Off at the start (S-014, Q4); the last stage of the
+## monster's rise turns it on (S-023, Q5, game/data/escalation/).
+@export var scan_whole_complex := false
 ## Farthest scannable building whose name the reticle shows, with "too far"
 ## beyond scan_max_distance (S-009, T-086), in meters.
 @export_range(1.0, 300.0, 1.0, "suffix:m") var scan_hint_distance: float = 120.0

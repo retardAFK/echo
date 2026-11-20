@@ -30,6 +30,11 @@ extends Resource
 @export_range(0.1, 10.0, 0.1, "suffix:s") var siren_noise_interval: float = 2.0
 ## Seconds the exit grille takes to rise.
 @export_range(0.1, 20.0, 0.1, "suffix:s") var gate_open_time: float = 3.0
+## How long "Le monstre s'énerve" stays on the hunted's screen when the
+## monster rises a stage (S-023, Q6), in seconds.
+@export_range(0.5, 10.0, 0.5, "suffix:s") var rise_message_time: float = 3.0
+## Loudness of the growl heard then, in dB.
+@export_range(-40.0, 6.0, 1.0, "suffix:dB") var rise_rumble_db: float = -4.0
 ## Least distance between the start points of two hunted (S-010, T-100).
 @export_range(0.0, 200.0, 1.0, "suffix:m") var spawn_spacing: float = 40.0
 

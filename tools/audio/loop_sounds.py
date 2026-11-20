@@ -4,7 +4,9 @@ Made by us from noise and oscillators: no sample from anyone else.
 - fuse_clank.wav: the metal door of a fuse box, a latch and a fuse pulled out,
 - repair_sparks.wav: sheet metal knocked and electric sparks at the transformer,
 - transformer_hum.wav: the repaired transformer humming at 50 Hz (loop),
-- siren.wav: the cité's siren, rising and falling twice in 10 s.
+- siren.wav: the cité's siren, rising and falling twice in 10 s,
+- monster_rumble.wav: a deep growl rolling over the cité when the monster
+  rises a stage (S-023, Q6, T-355); heard by the hunted, not a game noise.
 The hum loops seamlessly: every partial has a whole number of cycles.
     python tools/audio/loop_sounds.py <out_dir>   (needs numpy)
 """
@@ -98,6 +100,27 @@ def siren(seconds=10.0):
     return (tone + echo) * (0.4 + 0.6 * sweep) * envelope
 
 
+def monster_rumble(seconds=3.2):
+    """A low growl that swells and dies: two detuned voices near 48 Hz with
+    rough harmonics, a throaty noise band, and a far echo off the blocks."""
+    t = np.arange(int(seconds * RATE)) / RATE
+    swell = np.clip(np.minimum(t / 1.1, (seconds - t) / 1.6), 0, 1) ** 1.5
+    wobble = 1.0 + 0.05 * np.sin(2 * np.pi * 1.7 * t) + 0.03 * np.sin(2 * np.pi * 4.3 * t)
+    out = np.zeros_like(t)
+    for base, level in ((46.0, 1.0), (49.5, 0.8)):
+        phase = 2 * np.pi * np.cumsum(base * wobble * (1.0 - 0.12 * t / seconds)) / RATE
+        for harmonic, part in ((1, 1.0), (2, 0.55), (3, 0.35), (5, 0.18), (7, 0.08)):
+            out += level * part * np.sin(harmonic * phase)
+    out = np.tanh(out * 0.9)  # Rough, like a throat.
+    throat = shaped_noise(seconds, band(70, 420, 1.0)) * 0.6
+    grit = 0.5 + 0.5 * np.sin(2 * np.pi * 23 * t) ** 2  # Rattling, 23 times a second.
+    sound = (out + throat * grit) * swell
+    echo = np.zeros_like(sound)
+    delay = int(0.41 * RATE)
+    echo[delay:] = sound[:-delay] * 0.3
+    return sound + echo
+
+
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "assets/audio/loop"
     os.makedirs(out, exist_ok=True)
@@ -105,3 +128,4 @@ if __name__ == "__main__":
     save(os.path.join(out, "repair_sparks.wav"), repair_sparks(), 0.8)
     save(os.path.join(out, "transformer_hum.wav"), transformer_hum(), 0.6)
     save(os.path.join(out, "siren.wav"), siren(), 0.8)
+    save(os.path.join(out, "monster_rumble.wav"), monster_rumble(), 0.85)

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="EscalationStage" format=3]
+
+[ext_resource type="Script" path="res://game/data/escalation_stage.gd" id="1_stage"]
+
+[resource]
+script = ExtResource("1_stage")
+name_key = "ESCALATION_SCAN"
+overrides = {
+"scan_recharge_time": 35.0
+}
