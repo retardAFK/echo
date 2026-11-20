@@ -1,6 +1,6 @@
 # S-023 — Gadgets au choix, monstre qui monte en puissance, salle d'essai
 
-**Statut** : en clarification (20/11/2026). Q1 à trancher par Maxime ; les autres réponses sont des propositions de Claude, ajustables.
+**Statut** : validée (20/11/2026). Q1 tranchée par Maxime ; les autres réponses sont des propositions de Claude, ajustables.
 **Piliers servis** : P1 (le son trahit), P2 (le dilemme permanent)
 **Phase** : hors feuille de route, demandée par Maxime le 20/11/2026 après l'audit de game design (constats 4 et 5, « pourquoi pas », plus une salle d'essai), document : https://claude.ai/artifact/17o3XLs5LgtoGrwwnBVhvd
 **Exigence transverse** : architecture modulaire au maximum (D-022) : ajouter ou retirer un gadget, un palier du monstre ou un poste de la salle d'essai se fait en ajoutant ou en retirant **un fichier de données et une entité**, sans toucher au joueur, au réseau ni aux IA. `docs/MODULES.md` dit comment.
@@ -30,7 +30,7 @@ Plus tard, mes coéquipiers finissent le premier objectif. Un grondement sourd t
 - En tant qu'agent qui reprend le code, je veux ajouter un gadget, un palier ou un poste d'essai par un fichier de données, afin de ne pas toucher au joueur, au réseau ni aux IA.
 
 ## Clarifications
-- Q1 : Comment change-t-on de gadget, sachant que la molette sert déjà au délai du réveil (T-313), que son clic marque (T-328) et qu'elle fait défiler le menu des terminaux ? → Proposition : **touches 1 et 2** (rangée du haut, même place en AZERTY et en QWERTY) : chaque touche **choisit et utilise** son gadget, sans étape de sélection. La molette garde ses usages. Autres choix : la molette change de gadget et le délai du réveil passe à « maintenir clic droit » ; ou une touche qui fait tourner les gadgets. → R : à trancher par Maxime.
+- Q1 : Comment change-t-on de gadget, sachant que la molette sert déjà au délai du réveil (T-313), que son clic marque (T-328) et qu'elle fait défiler le menu des terminaux ? → Proposition : **touches 1 et 2** (rangée du haut, même place en AZERTY et en QWERTY) : chaque touche **choisit et utilise** son gadget, sans étape de sélection. La molette garde ses usages. Autres choix : la molette change de gadget et le délai du réveil passe à « maintenir clic droit » ; ou une touche qui fait tourner les gadgets. → R : **touches 1 et 2** (Maxime, 20/11/2026).
 - Q2 : Combien de charges ? → Proposition : **2 gadgets, 2 charges chacun**, soit 4 utilisations comme aujourd'hui (1 de chaque des 4). Valeurs dans `game/data/gadgets/*.tres`.
 - Q3 : Où choisit-on ? → Proposition : en solo, sur l'écran « Objectif et commandes » du chassé ; en ligne, dans le salon, avant « Je suis prêt ». Le dernier choix est gardé dans les réglages. Un chassé qui ne choisit rien garde le choix précédent (au premier lancement : pétard et fumigène). Les IA chassées tirent 2 gadgets au hasard, mais seul ce qu'elles savent utiliser (pétard aujourd'hui) est tiré tant que leur IA n'en sait pas plus.
 - Q4 : Les coéquipiers et le monstre voient-ils le choix ? → Proposition : les coéquipiers oui (dans le salon), le monstre non : « qui a pris la fumée ? » fait partie du jeu.

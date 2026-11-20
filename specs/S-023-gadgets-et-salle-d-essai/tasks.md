@@ -2,7 +2,7 @@
 
 Bloc de numéros : T-350 à T-369.
 
-- [ ] T-350 — Spec S-023
+- [x] T-350 — Spec S-023
   - Résultat vérifiable : spec, tâches et ligne du backlog fusionnées ; Q1 tranchée par Maxime
   - Dépend de : —
 - [ ] T-351 — `GadgetDef` et liste des gadgets dans `game/data/gadgets/` ; pétard, fil, walkman et fumigène passent par elle (joueur, réseau, IA, HUD), sans changer leurs règles
@@ -34,3 +34,4 @@ Bloc de numéros : T-350 à T-369.
   - Dépend de : T-358
 
 ## Compte rendu
+- T-350 (20/11/2026) : spec et tâches écrites après l'audit de game design ; Q1 tranchée par Maxime (touches 1 et 2). PR #229.
