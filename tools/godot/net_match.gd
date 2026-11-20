@@ -38,6 +38,9 @@ const STUCK_TIME := 1.5
 ## the back and forth of a body the room holds at a jamb while the client
 ## predicts it on (about 1.5 m), which a 0.3 m test took for progress.
 const STUCK_DISTANCE := 2.0
+## The spectate bot's monster walks at least that far from the hunted it
+## caught (net_spectate.gd); this one goes all the way to its far point.
+const AWAY_DISTANCE := 30.0
 ## A teammate goes to free a captured hunted once the monster is that far.
 const SAFE_DISTANCE := 20.0
 ## Seconds a freed hunted waits in its cage, so its rescuer goes out first.
