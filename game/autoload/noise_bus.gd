@@ -1,6 +1,8 @@
 extends Node
 ## Central noise service (constitution 2.4, spec S-002).
 ## Every noise source goes through emit_noise; listeners connect to noise_emitted.
+## A noise is masked (lost for the monster) in a ventilation zone (S-014) or
+## near the railway while a train passes (AmbientTrain, S-020, T-332).
 
 signal noise_emitted(event: NoiseEvent)
 
@@ -31,6 +33,8 @@ func emit_noise(
 	event.by_monster = by_monster or (source != null and Door.is_monster(source))
 	if noise_range <= settings.ventilation_mask and is_inside_tree():
 		event.masked = Ventilation.covers(get_tree(), position)
+	if not event.masked and is_inside_tree():
+		event.masked = AmbientTrain.covers(get_tree(), position)  # S-020, T-332.
 	if mirror and source != null and source != local_source:
 		return event
 	noise_emitted.emit(event)
