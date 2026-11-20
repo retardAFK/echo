@@ -161,6 +161,32 @@ func test_online_a_hunted_gets_up_at_once_when_it_moves() -> void:
 	assert_eq(player.terminal, terminal, "sat again by the room later: it is so")
 
 
+func test_a_lit_screen_shows_only_up_close() -> void:
+	# S-020, T-323 (piste N4): the screen lights the one at the keyboard,
+	# seen from 10 m at most; further, it looks idle.
+	assert_true(Terminal.shows_lit(true, true, false))
+	assert_false(Terminal.shows_lit(true, true, true), "too far")
+	assert_false(Terminal.shows_lit(true, false, false), "nobody at it")
+	assert_false(Terminal.shows_lit(false, true, false), "switched off")
+	var terminal: Terminal = TERMINAL_SCENE.instantiate()
+	add_child_autofree(terminal)
+	var camera := Camera3D.new()
+	add_child_autofree(camera)
+	camera.make_current()
+	terminal.mirror_state(false, true)
+	var light: OmniLight3D = terminal.get_node("ScreenLight")
+	camera.global_position = (
+		terminal.global_position + Vector3(0, 1, SETTINGS.lit_screen_range - 2.0)
+	)
+	await wait_process_frames(2)
+	assert_true(light.visible, "close: lit")
+	camera.global_position = (
+		terminal.global_position + Vector3(0, 1, SETTINGS.lit_screen_range + 2.0)
+	)
+	await wait_process_frames(2)
+	assert_false(light.visible, "far: looks idle")
+
+
 func test_the_monster_switches_a_terminal_off() -> void:
 	_ground()
 	var network := _small_network()
