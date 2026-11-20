@@ -35,6 +35,8 @@ extends Node
 ## - [CRUSH, position]: to everyone, the monster crushed a ringing alarm clock.
 ## - [FIRECRACKER, position] and [POP, position]: to everyone, a firecracker
 ##   placed, and one set off by the monster (S-020, T-312).
+## - [PING, position, Ping.Kind]: to the hunted only, never the monster, a
+##   team mark (S-020, T-328); the client shows its own copy.
 ## - [CLOCK, NetWorld.clock() + [room fps]]: to everyone, once a second (S-020, T-300):
 ##   the game time and the wind, which change every frame and so are not in
 ##   WORLD (which would then go out with every snapshot).
@@ -46,7 +48,7 @@ signal caught_reported(seat: int, state: CaptureState.State)
 ## Client side: this player is out of the game and watches a teammate.
 signal spectating
 
-enum Event { NOISE, SCAN, CAUGHT, WORLD, BOTTLE, DECOY, CRUSH, CLOCK, FIRECRACKER, POP }
+enum Event { NOISE, SCAN, CAUGHT, WORLD, BOTTLE, DECOY, CRUSH, CLOCK, FIRECRACKER, POP, PING }
 
 ## Seconds between two CLOCK events (T-300).
 const CLOCK_INTERVAL := 1.0
@@ -61,6 +63,7 @@ const SIGHT_MASK := 1 | NoiseBus.WALLS_COLLISION_MASK
 const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
 const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.tscn")
+const PING_SCENE := preload("res://game/entities/ping/ping.tscn")
 
 var settings: NetSettings = preload("res://game/data/net_settings.tres")
 var is_room := false
@@ -353,9 +356,14 @@ func _on_noise_emitted(event: NoiseEvent) -> void:
 
 ## Only the hunted are told: the monster scans on its own screen already.
 func _on_scan_changed(scanned: bool, index: int) -> void:
+	_send_to_hunted([Event.SCAN, index, scanned])
+
+
+## To the hunted only: scans, and the team marks the monster must not see (T-328).
+func _send_to_hunted(event: Array) -> void:
 	for place in avatars:
 		if seats[place] != LobbyState.MONSTER_SEAT:
-			_send_event(place, [Event.SCAN, index, scanned])
+			_send_event(place, event)
 
 
 func _send_event(place: int, event: Array) -> void:
@@ -399,7 +407,7 @@ func _send_to_all(event: Array) -> void:
 ## Room side: a bottle thrown or an alarm clock placed on the map, sent once
 ## the thrower has set where it starts (the same frame).
 func _on_map_child_added(node: Node) -> void:
-	if node is ThrownBottle or node is Decoy or node is Firecracker:
+	if node is ThrownBottle or node is Decoy or node is Firecracker or node is Ping:
 		_announce.call_deferred(node)
 
 
@@ -413,6 +421,8 @@ func _announce(node: Node3D) -> void:
 		(node as Decoy).crushed.connect(
 			func() -> void: _send_to_all([Event.CRUSH, node.global_position])
 		)
+	elif node is Ping:
+		_send_to_hunted([Event.PING, node.global_position, (node as Ping).kind])
 	elif node is Firecracker:
 		_send_to_all([Event.FIRECRACKER, node.global_position])
 		(node as Firecracker).burst.connect(
@@ -675,6 +685,11 @@ func apply_event(event: Array) -> void:
 			_spawn_copy(FIRECRACKER_SCENE, event[1])
 		Event.POP when event.size() == 2:
 			_pop_near(event[1])
+		Event.PING when event.size() == 3:
+			var ping: Ping = PING_SCENE.instantiate()
+			ping.mirror = true  # The room's AI was warned already.
+			ping.kind = clampi(event[2], 0, Ping.Kind.size() - 1) as Ping.Kind
+			_add_copy(ping, event[1])
 
 
 ## Client side, spectator (T-107): the room sends what a teammate sees. The

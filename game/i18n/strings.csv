@@ -62,6 +62,7 @@ CONTROLS_THROW,Clic gauche : lancer une bouteille
 CONTROLS_DECOY,"Clic droit : poser un réveil ; molette : il sonne après 15 ou 5 s"
 CONTROLS_FIRECRACKER,"{place_firecracker} : poser le pétard (il éclate sous le monstre, qui n'entend plus rien 6 s)"
 CONTROLS_MAP,{map} : ouvrir ou fermer la carte
+CONTROLS_PING,"{ping} ou clic molette : signaler aux autres chassés (le monstre visé, sinon l'endroit)"
 CONTROLS_PROWL,{crouch} : rôder (silencieux)
 CONTROLS_SCAN,Maintenir clic droit en visant un bâtiment visitable proche : scanner
 CONTROLS_OPEN,Maintenir {interact} : ouvrir une cachette
@@ -226,6 +227,7 @@ OPTIONS_KEY_HOLD_BREATH,Retenir son souffle
 OPTIONS_KEY_FIRECRACKER,Poser le pétard
 OPTIONS_KEY_INTERACT,Interagir
 OPTIONS_KEY_MAP,Carte
+OPTIONS_KEY_PING,Signaler
 OPTIONS_ON,Oui
 OPTIONS_OFF,Non
 OPTIONS_PRESS_KEY,Appuie sur une touche… (Échap : annuler)
@@ -287,6 +289,8 @@ HUD_POST_IT_BLANK,Post-it vierge
 HUD_POST_IT_ELSEWHERE,"Post-it vierge, le code est sur un autre"
 MAP_CODE_READ,Taper le code %s sur le clavier du transformateur
 HUD_KEYPAD_READ,Code lu sur le post-it : %s
+PING_MONSTER,Monstre · %d m
+PING_HERE,Ici · %d m
 TIP_HIDING_SPOT,"Une cachette : maintiens {interact} devant pour t'y glisser. Le monstre peut l'ouvrir, ne t'y cache pas sous ses yeux."
 TIP_TERMINAL,"Un terminal du réseau de la cité : maintiens {interact} pour t'y installer, puis choisis une action dans son menu."
 TIP_FUSE_BOX,"Un boîtier électrique : une petite lumière rouge veut dire qu'il a un fusible. Maintiens {interact} pour le prendre."

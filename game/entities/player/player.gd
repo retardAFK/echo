@@ -20,6 +20,8 @@ const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.
 const DECOY_GROUND_SEARCH := 2.5
 ## Length of the gestures the others see (S-011, T-125).
 const BODY_SETTINGS := preload("res://game/data/hunted_body_settings.tres")
+## A team mark (S-020, T-328).
+const PING_SCENE := preload("res://game/entities/ping/ping.tscn")
 
 @export var settings: PlayerSettings
 ## Values of the ruses: bottles, alarm clocks, hiding spots (S-008).
@@ -96,6 +98,8 @@ var _controls: LocalControls
 ## Caught (S-011, T-127): time left looking at the monster, and its eyes.
 var _catcher_left := 0.0
 var _catcher_eyes := Vector3.ZERO
+## When it last marked something for its team (Time.get_ticks_msec, T-328).
+var _ping_msec := -1
 
 @onready var _collision: CollisionShape3D = $CollisionShape3D
 @onready var _head: Node3D = $Head
@@ -226,6 +230,8 @@ func apply_actions() -> void:
 				place_decoy(true)
 			PlayerCommands.Action.FIRECRACKER:
 				_place_firecracker()
+			PlayerCommands.Action.PING:
+				_ping()
 
 
 func _in_cage() -> bool:
@@ -405,6 +411,38 @@ func _place_firecracker() -> Firecracker:
 	_place_on_ground(firecracker)
 	ruse_used.emit(&"firecracker")
 	return firecracker
+
+
+## Marks for its team what it aims at (S-020, T-328, piste A1): the monster,
+## or the spot. Once per cooldown; nothing when the aim meets nothing.
+func _ping() -> Ping:
+	var ping: Ping = PING_SCENE.instantiate()
+	var now := Time.get_ticks_msec()
+	if _ping_msec >= 0 and now - _ping_msec < ping.settings.cooldown * 1000.0:
+		ping.free()
+		return null
+	var monsters: Array = []
+	for monster: Node3D in get_tree().get_nodes_in_group(Prison.MONSTERS_GROUP):
+		if monster.can_process() and monster.is_visible_in_tree():
+			monsters.append(monster)
+	var aimed := Ping.aim(
+		_camera.global_position,
+		-_camera.global_basis.z,
+		monsters,
+		get_world_3d().direct_space_state,
+		[get_rid()],
+		ping.settings
+	)
+	if aimed.is_empty():
+		ping.free()
+		return null
+	_ping_msec = now
+	ping.kind = aimed[0]
+	var parent := get_parent()
+	# Placed before entering the tree, where it warns the AI preys.
+	ping.position = (parent as Node3D).to_local(aimed[1]) if parent is Node3D else aimed[1]
+	parent.add_child(ping)
+	return ping
 
 
 ## Puts a new node on the ground in front of the player, or at their feet
