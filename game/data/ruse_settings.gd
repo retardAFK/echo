@@ -69,6 +69,22 @@ extends Resource
 ## this high above the spot's floor, in meters.
 @export_range(0.0, 2.0, 0.05, "suffix:m") var trap_height: float = 0.3
 
+@export_group("Can wire")
+## Can wires each hunted carries at the start, and at most (S-020, T-333,
+## piste R5): no pickup in the cité, one per game.
+@export_range(0, 5) var start_can_wires: int = 1
+@export_range(0, 5) var max_can_wires: int = 1
+## Length of the string stretched across a passage, in meters.
+@export_range(0.5, 6.0, 0.1, "suffix:m") var can_wire_length: float = 2.5
+## Seconds after placing before it can rattle, to step away from it.
+@export_range(0.0, 10.0, 0.1, "suffix:s") var can_wire_arm_time: float = 1.5
+## A monster's feet this close to the string (flat distance) yank it, in meters.
+@export_range(0.05, 2.0, 0.05, "suffix:m") var can_wire_trigger_distance: float = 0.5
+## Range of the rattle's noise, in meters: the hunted hear the monster passed.
+@export_range(0.5, 100.0, 0.5, "suffix:m") var can_wire_range: float = 20.0
+## How far the rattle is played for the ears, in meters.
+@export_range(1.0, 100.0, 1.0, "suffix:m") var can_wire_sound_distance: float = 40.0
+
 @export_group("Hiding spots")
 ## Seconds to hold "interact" to get in, get out, or open a hiding spot (Q5, Q7).
 @export_range(0.1, 10.0, 0.1, "suffix:s") var hide_time: float = 1.0

@@ -34,6 +34,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_avatar.set("decoy_short", not _avatar.get("decoy_short"))  # T-313.
 	elif event.is_action_pressed("place_firecracker") and captured:
 		commands.push(PlayerCommands.Action.FIRECRACKER)
+	elif event.is_action_pressed("place_can_wire") and captured:
+		commands.push(PlayerCommands.Action.CAN_WIRE)  # S-020, T-333.
 	elif event.is_action_pressed("ping") and captured and _avatar is Player:
 		commands.push(PlayerCommands.Action.PING)  # Hunted only (T-328).
 	elif event is InputEventMouseButton and event.pressed:

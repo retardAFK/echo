@@ -188,6 +188,7 @@ func move(input: Vector2, sprinting: bool, delta: float) -> void:
 	_noise.update(delta, moved, _pace, global_position, get_ear_position(), self)
 	if not mirror_world:
 		Firecracker.burst_near(self)  # S-020, T-312: the room sets it off.
+		CanWire.yank_near(self)  # S-020, T-333.
 	if not mirror_world and Decoy.crush_near(get_tree(), global_position, settings.catch_distance):
 		gesture.play(MonsterBody.Action.CRUSH, BODY_SETTINGS.crush_time)  # S-008, Q4.
 

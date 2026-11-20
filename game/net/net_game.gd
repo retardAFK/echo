@@ -10,7 +10,8 @@ extends Node
 ## command applied, "you": [position, velocity, yaw,
 ## gait, hidden, hold ratio, bottles, alarm clocks, hiding spot index, held,
 ## terminal index, camera index (S-018), [stops, seconds left] of the
-## monster stopped short (S-020)],
+## monster stopped short, seconds left deaf, firecrackers and can wires
+## carried (S-020)],
 ## "others": [[seat, position, yaw, gait, down, gesture], ...]}: those it
 ## sees with its own eyes or through the camera it watches (S-018); gesture is
 ## what its body shows (S-011): a HuntedBody.Gesture, or for the monster a
@@ -41,6 +42,8 @@ extends Node
 ## - [TRAIN, train index, forward]: to everyone, a train starts its pass
 ##   (S-020, T-332). Only the room starts trains, and only it decides which
 ##   noises the train covers; the clients just hear it at the same time.
+## - [CAN_WIRE, position, yaw] and [RATTLE, position]: to everyone, a can wire
+##   stretched, and one yanked by the monster (S-020, T-333).
 ## - [CLOCK, NetWorld.clock() + [room fps]]: to everyone, once a second (S-020, T-300):
 ##   the game time and the wind, which change every frame and so are not in
 ##   WORLD (which would then go out with every snapshot).
@@ -65,6 +68,8 @@ enum Event {
 	POP,
 	PING,
 	TRAIN,
+	CAN_WIRE,
+	RATTLE,
 }
 
 ## Seconds between two CLOCK events (T-300).
@@ -81,6 +86,7 @@ const BOTTLE_SCENE := preload("res://game/entities/bottle/thrown_bottle.tscn")
 const DECOY_SCENE := preload("res://game/entities/decoy/decoy.tscn")
 const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.tscn")
 const PING_SCENE := preload("res://game/entities/ping/ping.tscn")
+const CAN_WIRE_SCENE := preload("res://game/entities/can_wire/can_wire.tscn")
 
 var settings: NetSettings = preload("res://game/data/net_settings.tres")
 var is_room := false
@@ -436,7 +442,13 @@ func _on_train_passing(forward: bool, index: int) -> void:
 ## Room side: a bottle thrown or an alarm clock placed on the map, sent once
 ## the thrower has set where it starts (the same frame).
 func _on_map_child_added(node: Node) -> void:
-	if node is ThrownBottle or node is Decoy or node is Firecracker or node is Ping:
+	if (
+		node is ThrownBottle
+		or node is Decoy
+		or node is Firecracker
+		or node is Ping
+		or node is CanWire
+	):
 		_announce.call_deferred(node)
 
 
@@ -449,6 +461,11 @@ func _announce(node: Node3D) -> void:
 		_send_to_all([Event.DECOY, node.global_position, (node as Decoy).timer.delay])
 		(node as Decoy).crushed.connect(
 			func() -> void: _send_to_all([Event.CRUSH, node.global_position])
+		)
+	elif node is CanWire:
+		_send_to_all([Event.CAN_WIRE, node.global_position, node.global_rotation.y])
+		(node as CanWire).rattled.connect(
+			func() -> void: _send_to_all([Event.RATTLE, node.global_position])
 		)
 	elif node is Ping:
 		_send_to_hunted([Event.PING, node.global_position, (node as Ping).kind])
@@ -492,6 +509,7 @@ func snapshot_for(place: int) -> Dictionary:
 			_stagger_of(viewer),
 			_deafness_of(viewer),
 			inventory.count(Inventory.Kind.FIRECRACKER) if inventory != null else 0,
+			inventory.count(Inventory.Kind.CAN_WIRE) if inventory != null else 0,
 		],
 		"others": _seen_by(viewer),
 	}
@@ -725,6 +743,13 @@ func apply_event(event: Array) -> void:
 			var index: int = event[1]
 			if index >= 0 and index < trains.size():
 				trains[index].run_pass(event[2])
+		Event.CAN_WIRE when event.size() == 3:
+			var wire: CanWire = CAN_WIRE_SCENE.instantiate()
+			wire.mirror = true  # The room yanks it.
+			_add_copy(wire, event[1])
+			wire.global_rotation = Vector3(0.0, event[2], 0.0)
+		Event.RATTLE when event.size() == 2:
+			_rattle_near(event[1])
 
 
 ## Client side, spectator (T-107): the room sends what a teammate sees. The
@@ -768,6 +793,8 @@ func _apply_own_state(you: Array) -> void:
 		inventory.set_count(Inventory.Kind.DECOY, you[7])
 		if you.size() >= 15:
 			inventory.set_count(Inventory.Kind.FIRECRACKER, you[14])
+		if you.size() >= 16:
+			inventory.set_count(Inventory.Kind.CAN_WIRE, you[15])  # T-333.
 	if not own is Player or world == null:
 		return
 	var player := own as Player
@@ -848,6 +875,19 @@ func _puppet(seat: int) -> NetPuppet:
 		get_parent().add_child(puppet)
 		puppets[seat] = puppet
 	return puppets[seat]
+
+
+## Client side: the copy of the can wire the room says the monster yanked.
+func _rattle_near(at: Vector3) -> void:
+	var nearest: CanWire = null
+	var best := NetWorld.VOICE_REACH
+	for node in get_tree().get_nodes_in_group(CanWire.GROUP):
+		var wire := node as CanWire
+		if wire != null and not wire.done and wire.global_position.distance_to(at) <= best:
+			nearest = wire
+			best = wire.global_position.distance_to(at)
+	if nearest != null:
+		nearest.rattle()
 
 
 func _pop_near(at: Vector3) -> void:

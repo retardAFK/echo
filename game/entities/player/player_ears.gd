@@ -12,7 +12,7 @@ const VOICES := 4
 ## the transformer and its siren, a breaking bottle and a ringing alarm clock, a
 ## hiding spot's door (S-008), a door (S-016), a cage, a terminal's keyboard,
 ## a smashed camera, a loudspeaker, a shutter, a relay switch (S-018), a
-## firecracker (S-020). The ears add nothing.
+## firecracker and a can wire (S-020). The ears add nothing.
 const SELF_VOICED := [
 	NoiseEvent.Type.FUSE,
 	NoiseEvent.Type.REPAIR,
@@ -28,6 +28,7 @@ const SELF_VOICED := [
 	NoiseEvent.Type.SHUTTER,
 	NoiseEvent.Type.SWITCH,
 	NoiseEvent.Type.FIRECRACKER,
+	NoiseEvent.Type.CANS,
 ]
 ## The prison's bell (S-018, Q4), played where it rings.
 const SOUND_BELL := preload("res://assets/audio/network/prison_bell.wav")
