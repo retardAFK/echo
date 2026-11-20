@@ -103,7 +103,8 @@ func state() -> Array:
 
 
 ## Room side: [game time, seed of the wind's gusts, wind time, noises, scans
-## and ruses counted for the end screen] (T-301).
+## and ruses counted for the end screen] (T-301), then the chase statistics
+## (ChaseStats.values(), S-020, T-322).
 func clock() -> Array:
 	return [
 		game_loop.get_duration() if game_loop != null else 0.0,
@@ -112,6 +113,7 @@ func clock() -> Array:
 		game_loop.noise_count if game_loop != null else 0,
 		game_loop.scan_count if game_loop != null else 0,
 		game_loop.ruse_count if game_loop != null else 0,
+		game_loop.chases.values() if game_loop != null and game_loop.chases != null else [],
 	]
 
 
@@ -124,6 +126,8 @@ func apply_clock(values: Array) -> void:
 		game_loop.noise_count = values[3]
 		game_loop.scan_count = values[4]
 		game_loop.ruse_count = values[5]
+		if values.size() > 6 and game_loop.chases != null:
+			game_loop.chases.apply(values[6])
 	if wind != null:
 		wind.sync(values[1], values[2])
 

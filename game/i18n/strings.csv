@@ -26,6 +26,8 @@ END_FUSES,Fusibles posés : %d/%d
 END_NOISES,Bruits du chassé : %d
 END_SCANS,Scans du monstre : %d
 END_RUSES,Ruses utilisées : %d
+END_CHASES,"Poursuites : %d, fuites réussies : %d"
+END_CHASE_DISTANCE,Distance moyenne en poursuite : %s m
 END_REPLAY,Rejouer
 END_MENU,Menu
 END_BACK_TO_LOBBY,Retour au salon
@@ -285,3 +287,6 @@ HUD_POST_IT_BLANK,Post-it vierge
 HUD_POST_IT_ELSEWHERE,"Post-it vierge, le code est sur un autre"
 MAP_CODE_READ,Taper le code %s sur le clavier du transformateur
 HUD_KEYPAD_READ,Code lu sur le post-it : %s
+TIP_HIDING_SPOT,"Une cachette : maintiens {interact} devant pour t'y glisser. Le monstre peut l'ouvrir, ne t'y cache pas sous ses yeux."
+TIP_TERMINAL,"Un terminal du réseau de la cité : maintiens {interact} pour t'y installer, puis choisis une action dans son menu."
+TIP_FUSE_BOX,"Un boîtier électrique : une petite lumière rouge veut dire qu'il a un fusible. Maintiens {interact} pour le prendre."

@@ -11,6 +11,8 @@ extends Node3D
 ## A GUARD terminal also opens the cages (T-264); a CODE one, the transformer's
 ## keypad, only takes a code (T-266): terminal_keypad.tscn, a box on the
 ## transformer's wall instead of a PC on a desk (S-020, T-316).
+## The lit screen shows only within lit_screen_range of the camera that
+## looks at it; further, it looks idle (S-020, T-323, piste N4).
 
 ## Someone sat down at it, or left it.
 signal sat(user: Node3D)
@@ -51,6 +53,8 @@ var _sit: HoldProgress
 var _switch: HoldProgress
 var _keyboard_left := 0.0
 var _screen_material: StandardMaterial3D
+## The camera of this screen is further than lit_screen_range (T-323).
+var _far := false
 
 @onready var _screen: MeshInstance3D = $Screen
 @onready var _light: OmniLight3D = $ScreenLight
@@ -69,6 +73,24 @@ func _ready() -> void:
 	_keys.stream = SOUND_KEYS
 	DrawRange.limit(self, DrawRange.INDOOR)
 	_show()
+
+
+func _process(_delta: float) -> void:
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return  # The room has no screen.
+	var far := (
+		camera.global_position.distance_to(_screen.global_position) > settings.lit_screen_range
+	)
+	if far != _far:
+		_far = far
+		_show()
+
+
+## Whether the screen shows lit: on, someone at it, and the viewer close
+## enough (T-323).
+static func shows_lit(on: bool, in_use: bool, far: bool) -> bool:
+	return on and in_use and not far
 
 
 func is_on() -> bool:
@@ -202,11 +224,12 @@ func voice() -> void:
 func _show() -> void:
 	if _screen_material == null:
 		return
+	var lit := shows_lit(is_on(), is_in_use(), _far)
 	var color := SCREEN_IDLE
 	if not is_on():
 		color = SCREEN_OFF
-	elif is_in_use():
+	elif lit:
 		color = SCREEN_LIT
 	_screen_material.albedo_color = color
 	_screen_material.emission = color
-	_light.visible = is_on() and is_in_use()
+	_light.visible = lit

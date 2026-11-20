@@ -133,8 +133,8 @@ def car_parked(k):
         m.box(x, 2.1, 0.6, x + 0.2, 2.12, 0.72, k["light"])
         m.box(x, -2.12, 0.6, x + 0.2, -2.1, 0.72, k["rust"])
     for x in (-0.95, 0.75):
-        for y in (-1.55, 1.05):
-            m.box(x, y, 0.0, x + 0.2, y + 0.6, 0.6, k["tyre"])
+        for y in (-1.55, 1.05):  # Round wheels, 12 sides (S-020, T-324).
+            m.cylinder((x + 0.1, y + 0.3, 0.3), 0.3, 0.2, "x", k["tyre"], meters=4.0)
     return m
 
 

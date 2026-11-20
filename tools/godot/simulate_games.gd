@@ -41,15 +41,22 @@ func _ready() -> void:
 	var wins := results.filter(func(r: Dictionary) -> bool: return r.result == "out").size()
 	var stuck := results.filter(func(r: Dictionary) -> bool: return r.result == "stuck").size()
 	var scans := 0
+	var chases := 0
+	var escapes := 0
 	for r: Dictionary in results:
 		scans += r.scans
+		chases += r.chases
+		escapes += r.escapes
 	var mean := 0.0
 	for d: float in durations:
 		mean += d / durations.size()
 	print(
 		(
-			"SUMMARY games %d, prey out %d, caught %d, stuck %d, mean %.1f min, scans %d"
-			% [_games, wins, _games - wins - stuck, stuck, mean / 60.0, scans]
+			(
+				"SUMMARY games %d, prey out %d, caught %d, stuck %d, mean %.1f min, scans %d,"
+				+ " chases %d, escapes %d"
+			)
+			% [_games, wins, _games - wins - stuck, stuck, mean / 60.0, scans, chases, escapes]
 		)
 	)
 	get_tree().quit()
@@ -72,6 +79,7 @@ func _play(index: int) -> Dictionary:
 	var monsters := map.get_children().filter(func(n: Node) -> bool: return n is Monster)
 	var monster: Monster = monsters[0] if not monsters.is_empty() else null
 	var grid := TestGrid.new(monster)  # S-020, T-317.
+	grid.chases = loop.chases  # Escapes as the end screen counts them (T-322).
 	var started := Time.get_ticks_msec()
 	var last_report := 0.0
 	var result := "stuck"
@@ -135,7 +143,10 @@ func _play(index: int) -> Dictionary:
 		)
 	print(
 		(
-			"GAME %d: %s after %.1f min (fuses %d placed %d, noises %d, scans %d, ruses %s, real %d s)"
+			(
+				"GAME %d: %s after %.1f min (fuses %d placed %d, noises %d, scans %d, ruses %s,"
+				+ " chases %d, escapes %d, mean distance %.1f m, real %d s)"
+			)
 			% [
 				index,
 				result,
@@ -145,13 +156,25 @@ func _play(index: int) -> Dictionary:
 				loop.noise_count,
 				scans,
 				ruses,
+				loop.chases.chase_count,
+				loop.chases.escape_count,
+				loop.chases.mean_distance(),
 				(Time.get_ticks_msec() - started) / 1000
 			]
 		)
 	)
 	var winner: String = {"out": "chassés", "caught": "monstre"}.get(result, "bloquée")
 	print("GRID " + grid.row("simulation", _preys, winner, duration / 60.0))
+	# Read before the map goes: the loop goes with it.
+	var played := {
+		"result": result,
+		"duration": duration,
+		"ruses": ruses,
+		"scans": scans,
+		"chases": loop.chases.chase_count,
+		"escapes": loop.chases.escape_count,
+	}
 	get_tree().paused = false
 	map.queue_free()
 	await get_tree().process_frame
-	return {"result": result, "duration": duration, "ruses": ruses, "scans": scans}
+	return played
