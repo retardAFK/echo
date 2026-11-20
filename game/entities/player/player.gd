@@ -403,11 +403,23 @@ func place_decoy(short := false) -> Decoy:
 
 
 ## Places the firecracker on the ground in front of the player (S-020, T-312,
-## piste R1), the same way as an alarm clock.
+## piste R1), the same way as an alarm clock; or, aiming at an empty hiding
+## spot in reach, sets it in there as a trap (T-331, piste R6).
 func _place_firecracker() -> Firecracker:
 	if hiding_in != null or not inventory.use(Inventory.Kind.FIRECRACKER):
 		return null
 	var firecracker: Firecracker = FIRECRACKER_SCENE.instantiate()
+	var spot := get_interactable() as HidingSpot
+	if spot != null and spot.can_trap():  # A trap in the empty spot aimed at (T-331).
+		firecracker.in_spot = true
+		get_parent().add_child(firecracker)
+		firecracker.global_position = spot.global_position + Vector3.UP * ruse_settings.trap_height
+		spot.trap = firecracker
+		NoiseBus.emit_noise(
+			NoiseEvent.Type.THROW, global_position, ruse_settings.gesture_range, self
+		)
+		ruse_used.emit(&"trap")
+		return firecracker
 	_place_on_ground(firecracker)
 	ruse_used.emit(&"firecracker")
 	return firecracker

@@ -7,6 +7,7 @@ const FIRECRACKER_SCENE := preload("res://game/entities/firecracker/firecracker.
 const AVATAR_SCENE := preload("res://game/entities/monster/monster_avatar.tscn")
 const PLAYER_SCENE := preload("res://game/entities/player/player.tscn")
 const MAP_SCENE := preload("res://game/maps/greybox_test.tscn")
+const SPOT_SCENE := preload("res://game/entities/hiding_spot/closet.tscn")
 
 var _noises: Array[NoiseEvent] = []
 
@@ -145,3 +146,67 @@ func test_the_command_travels_online() -> void:
 	assert_eq(
 		copy.take_actions(), [PlayerCommands.Action.FIRECRACKER] as Array[PlayerCommands.Action]
 	)
+
+
+# S-020, T-331 (piste R6): a firecracker set in an empty hiding spot is a
+# trap that only the monster opening the spot sets off.
+
+
+func _spot() -> HidingSpot:
+	var spot: HidingSpot = SPOT_SCENE.instantiate()
+	add_child_autofree(spot)
+	return spot
+
+
+func test_a_trapped_spot_goes_off_when_the_monster_opens_it() -> void:
+	var spot := _spot()
+	var trap: Firecracker = FIRECRACKER_SCENE.instantiate()
+	trap.in_spot = true
+	add_child_autofree(trap)
+	spot.trap = trap
+	trap.arm_left = 0.0
+	var avatar := _avatar(spot.global_position + Vector3(0.5, 0, 0))
+	await wait_physics_frames(1)
+	assert_eq(Firecracker.burst_near(avatar), 0, "walking by never sets it off")
+	assert_false(spot.can_trap(), "one trap at a time")
+	spot.open(avatar)
+	assert_true(trap.done, "opening the spot sets it off")
+	assert_eq(avatar.deafness.left, SETTINGS.deafen_time)
+	assert_null(spot.trap)
+	assert_true(spot.can_trap())
+
+
+func test_the_player_traps_the_empty_spot_it_aims_at() -> void:
+	var body := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	shape.shape = WorldBoundaryShape3D.new()
+	body.add_child(shape)
+	add_child_autofree(body)
+	var spot := _spot()
+	var player: Player = PLAYER_SCENE.instantiate()
+	add_child_autofree(player)
+	var front := spot.get_exit_point()
+	player.global_position = Vector3(front.x, 0.1, front.z)
+	player.set_look(spot.get_out_yaw() + PI, 0.0)  # Facing the spot.
+	await wait_physics_frames(2)
+	assert_eq(player.get_interactable(), spot, "the spot is aimed at")
+	player.commands.push(PlayerCommands.Action.FIRECRACKER)
+	player.apply_actions()
+	assert_not_null(spot.trap, "set in the spot")
+	assert_true(spot.trap.in_spot)
+	assert_false(spot.trap.is_armed(), "only the spot sets it off")
+	spot.trap.free()
+
+
+func test_a_client_copy_of_a_trap_stays_hidden() -> void:
+	var parent := Node3D.new()
+	add_child_autofree(parent)
+	var net := NetGame.new()
+	parent.add_child(net)
+	net.apply_event([NetGame.Event.FIRECRACKER, Vector3(1, 0, 1), true])
+	net.apply_event([NetGame.Event.FIRECRACKER, Vector3(5, 0, 5)])
+	var copies := get_tree().get_nodes_in_group(Firecracker.GROUP)
+	assert_eq(copies.size(), 2)
+	var hidden := copies.filter(func(f: Firecracker) -> bool: return f.in_spot)
+	assert_eq(hidden.size(), 1)
+	assert_false((hidden[0].get_node("Model") as Node3D).visible)

@@ -60,7 +60,7 @@ CONTROLS_HOLD_BREATH,{hold_breath} : retenir son souffle (6 s sans bruit de pas 
 CONTROLS_INTERACT,"{interact} : ramasser, interagir ; maintenir {interact} : fusible, cachette"
 CONTROLS_THROW,Clic gauche : lancer une bouteille
 CONTROLS_DECOY,"Clic droit : poser un réveil ; molette : il sonne après 15 ou 5 s"
-CONTROLS_FIRECRACKER,"{place_firecracker} : poser le pétard (il éclate sous le monstre, qui n'entend plus rien 6 s)"
+CONTROLS_FIRECRACKER,"{place_firecracker} : poser le pétard (il éclate sous le monstre, qui n'entend plus rien 6 s) ; en visant une cachette vide, la piéger"
 CONTROLS_MAP,{map} : ouvrir ou fermer la carte
 CONTROLS_PING,"{ping} ou clic molette : signaler aux autres chassés (le monstre visé, sinon l'endroit)"
 CONTROLS_PROWL,{crouch} : rôder (silencieux)
