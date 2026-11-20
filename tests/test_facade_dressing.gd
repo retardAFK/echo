@@ -120,7 +120,8 @@ func test_social_centre_has_window_frames_and_its_entrance() -> void:
 
 func test_car_park_has_its_wrecks_pillars_and_sign() -> void:
 	var car_park := _map.get_node("CarParkDressing")
-	assert_eq(car_park.find_children("Wreck*", "", false, false).size(), 3)
+	var wrecks := car_park.find_children("Wreck*", "", false, false)
+	assert_eq(wrecks.size(), 5, "3, and 2 around a pillar for a chase loop (S-020, T-341)")
 	assert_eq(car_park.find_children("Pillar*", "", false, false).size(), 8)
 	assert_not_null(car_park.get_node_or_null("SignP"))
 	assert_eq(car_park.find_children("*", "CollisionShape3D", true, false).size(), 0)
