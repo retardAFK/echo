@@ -37,7 +37,7 @@ extends Node
 ## - [FIRECRACKER, position, in a spot] and [POP, position]: to everyone, a
 ##   firecracker placed (or set as a trap in a hiding spot, T-331), and one set
 ##   off by the monster (S-020, T-312).
-## - [PING, position, Ping.Kind]: to the hunted only, never the monster, a
+## - [PING, position, Ping.Kind, seconds]: to the hunted only, never the monster, a
 ##   team mark (S-020, T-328); the client shows its own copy.
 ## - [TRAIN, train index, forward]: to everyone, a train starts its pass
 ##   (S-020, T-332). Only the room starts trains, and only it decides which
@@ -482,7 +482,9 @@ func _announce(node: Node3D) -> void:
 			func() -> void: _send_to_all([Event.RATTLE, node.global_position])
 		)
 	elif node is Ping:
-		_send_to_hunted([Event.PING, node.global_position, (node as Ping).kind])
+		var ping := node as Ping
+		var seconds := ping.time if ping.time > 0.0 else ping.settings.time
+		_send_to_hunted([Event.PING, ping.global_position, ping.kind, seconds])
 	elif node is Firecracker:
 		_send_to_all([Event.FIRECRACKER, node.global_position, (node as Firecracker).in_spot])
 		(node as Firecracker).burst.connect(
@@ -751,10 +753,12 @@ func apply_event(event: Array) -> void:
 			_add_copy(firecracker, event[1])
 		Event.POP when event.size() == 2:
 			_pop_near(event[1])
-		Event.PING when event.size() == 3:
+		Event.PING when event.size() >= 3:
 			var ping: Ping = PING_SCENE.instantiate()
 			ping.mirror = true  # The room's AI was warned already.
 			ping.kind = clampi(event[2], 0, Ping.Kind.size() - 1) as Ping.Kind
+			if event.size() >= 4:
+				ping.time = event[3]  # A camera's mark is shorter (T-337).
 			_add_copy(ping, event[1])
 		Event.TRAIN when event.size() == 3:
 			var index: int = event[1]

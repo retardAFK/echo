@@ -133,7 +133,9 @@ func test_the_room_sends_marks_to_the_hunted_only() -> void:
 	add_child_autofree(ping)
 	await wait_process_frames(1)
 	var sent := net.sent_events.filter(func(s: Array) -> bool: return s[1][0] == NetGame.Event.PING)
-	assert_eq(sent, [[1, [NetGame.Event.PING, Vector3(3, 0, 4), Ping.Kind.MONSTER]]])
+	assert_eq(
+		sent, [[1, [NetGame.Event.PING, Vector3(3, 0, 4), Ping.Kind.MONSTER, ping.settings.time]]]
+	)
 	for avatar: Node in net.avatars.values():
 		avatar.free()
 	net.avatars.clear()

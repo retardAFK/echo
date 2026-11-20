@@ -53,3 +53,11 @@ extends Resource
 @export_range(0.0, 50.0, 0.5, "suffix:m") var shutter_range: float = 12.0
 ## Seconds before it can go down again, counted from when it went down.
 @export_range(1.0, 600.0, 1.0, "suffix:s") var shutter_recharge: float = 60.0
+
+@export_group("Camera marks")
+## A hunted at a terminal watching a camera that sees the monster marks it
+## for the whole team (S-020, T-337, piste N5): a "Monstre" mark this long, in
+## seconds, renewed this often while the camera still sees it.
+@export_range(1.0, 30.0, 0.5, "suffix:s") var camera_mark_time: float = 5.0
+## Seconds between two looks of a watched camera for the monster.
+@export_range(0.05, 2.0, 0.05, "suffix:s") var camera_mark_check: float = 0.25

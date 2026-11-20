@@ -6,12 +6,18 @@ extends Node
 ## It lists them in a fixed order, the same on the room and on every client,
 ## says what a terminal's menu offers, carries out what a hunted picks there
 ## (a PICK action), and keeps who watches which camera.
+## A watched camera that sees the monster marks it for the whole team (S-020,
+## T-337, piste N5): a Ping "Monstre" of camera_mark_time seconds, renewed
+## while the camera still sees it. The room alone marks (not on a mirror).
 ## Online, the room sends state() in NetWorld; a client shows it with apply().
 
 ## What a line of a terminal's menu does.
 enum Entry { CAMERA, SPEAKER, SHUTTER, OPEN_CAGES, DIGIT, DOWNLOAD }
 
 const GROUP := &"city_network"
+const PING_SCENE := preload("res://game/entities/ping/ping.tscn")
+## Height of the monster's body the cameras look for, in meters.
+const MONSTER_AIM_HEIGHT := 1.5
 
 var terminals: Array[Terminal] = []
 var cameras: Array[SecurityCamera] = []
@@ -34,6 +40,9 @@ var mirror := false:
 var _watching := {}
 ## Guard terminals opening the cages: Terminal -> seconds done.
 var _opening := {}
+## Seconds before each watched camera may mark the monster again (T-337).
+var _mark_left := {}
+var _look_left := 0.0
 
 
 static func of(node: Node) -> CityNetwork:
@@ -182,12 +191,61 @@ func _physics_process(delta: float) -> void:
 	if mirror:
 		return
 	_open_cages(delta)
+	_mark_monsters(delta)
 	for user: Variant in _watching.keys():
 		var camera: SecurityCamera = _watching[user]
 		if not is_instance_valid(user):
 			_forget(user)
 		elif camera.broken or not _may_watch(user):
 			watch(user, null)
+
+
+## Room side: each watched camera looks for the monster now and then, and
+## marks it for the team when it sees it (T-337). Returns the marks made.
+func _mark_monsters(delta: float) -> Array[Ping]:
+	var marks: Array[Ping] = []
+	for camera: SecurityCamera in _mark_left.keys():
+		_mark_left[camera] = maxf(_mark_left[camera] - delta, 0.0)
+	_look_left -= delta
+	if _look_left > 0.0 or _watching.is_empty():
+		return marks
+	var looked := {}
+	for user: Variant in _watching:
+		var camera: SecurityCamera = _watching[user]
+		if looked.has(camera) or camera.broken:
+			continue
+		looked[camera] = true
+		_look_left = camera.settings.camera_mark_check
+		if _mark_left.get(camera, 0.0) > 0.0:
+			continue
+		var seen := spotted_monster(camera)
+		if seen != null:
+			marks.append(_mark(seen, camera))
+	return marks
+
+
+## The monster a camera sees, or null.
+func spotted_monster(camera: SecurityCamera) -> Node3D:
+	for monster: Node3D in get_tree().get_nodes_in_group(Prison.MONSTERS_GROUP):
+		if not monster.is_visible_in_tree():
+			continue
+		var skip: Array[RID] = []
+		if monster is CollisionObject3D:
+			skip.append((monster as CollisionObject3D).get_rid())
+		if camera.sees(monster.global_position + Vector3.UP * MONSTER_AIM_HEIGHT, skip):
+			return monster
+	return null
+
+
+func _mark(monster: Node3D, camera: SecurityCamera) -> Ping:
+	var ping: Ping = PING_SCENE.instantiate()
+	ping.kind = Ping.Kind.MONSTER
+	ping.time = camera.settings.camera_mark_time
+	var map := get_parent() as Node3D  # Placed before it warns the AI hunted.
+	ping.position = map.to_local(monster.global_position) if map else monster.global_position
+	get_parent().add_child(ping)
+	_mark_left[camera] = camera.settings.camera_mark_time
+	return ping
 
 
 ## At a terminal, or waiting in a cage.
