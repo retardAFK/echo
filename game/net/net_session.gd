@@ -138,7 +138,7 @@ func get_seat() -> int:
 
 func set_ready(is_ready: bool) -> void:
 	if mode == Mode.CLIENT:
-		link.ask_ready(is_ready)
+		link.ask_ready(is_ready, Settings.get_loadout())  # With the gadgets (S-023).
 
 
 ## Client side, leader only: how many play, monster included (2 to 4).

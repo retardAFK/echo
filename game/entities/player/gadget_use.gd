@@ -25,6 +25,13 @@ static func use(user: Player, kind: Inventory.Kind) -> Node3D:
 	return gadget
 
 
+## Uses the gadget of a slot of user's Loadout (keys gadget_1, gadget_2,
+## S-023, T-353). Returns the gadget placed, or null.
+static func use_slot(user: Player, slot: int) -> Node3D:
+	var kind := Loadout.kind_in(user.loadout, slot)
+	return use(user, kind as Inventory.Kind) if kind >= 0 else null
+
+
 ## Puts placed on the ground in front of user, or at its feet when a wall is
 ## in front or there is no ground there; the gesture makes a faint noise.
 static func place_on_ground(user: Player, placed: Node3D) -> void:

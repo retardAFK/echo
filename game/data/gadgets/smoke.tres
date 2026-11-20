@@ -8,4 +8,5 @@ script = ExtResource("1_def")
 id = &"smoke"
 kind = 5
 scene = ExtResource("2_scene")
-hud_key = "HUD_CARRY_SMOKE"
+name_key = "GADGET_SMOKE"
+help_key = "GADGET_HELP_SMOKE"

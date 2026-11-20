@@ -160,6 +160,9 @@ func _new_player(place: int, seat: int) -> Player:
 	map.add_child(player)
 	player.get_node("Head/Camera3D").current = false
 	_net.add_avatar(place, seat, player)
+	var lobby := GameSession.online_lobby
+	if lobby != null:
+		player.loadout = lobby.loadout_of(place)  # Picked in the lobby (S-023, T-352).
 	return player
 
 

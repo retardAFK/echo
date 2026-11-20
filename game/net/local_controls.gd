@@ -32,14 +32,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		commands.push(PlayerCommands.Action.DECOY_SHORT if short else PlayerCommands.Action.DECOY)
 	elif event.is_action_pressed("decoy_delay") and "decoy_short" in _avatar:
 		_avatar.set("decoy_short", not _avatar.get("decoy_short"))  # T-313.
-	elif event.is_action_pressed("place_firecracker") and captured:
-		commands.push(PlayerCommands.Action.FIRECRACKER)
-	elif event.is_action_pressed("place_can_wire") and captured:
-		commands.push(PlayerCommands.Action.CAN_WIRE)  # S-020, T-333.
-	elif event.is_action_pressed("place_walkman") and captured:
-		commands.push(PlayerCommands.Action.WALKMAN)  # S-020, T-334.
-	elif event.is_action_pressed("smoke_bomb") and captured:
-		commands.push(PlayerCommands.Action.SMOKE)  # S-020, T-335.
+	elif event.is_action_pressed("gadget_1") and captured:
+		commands.push(PlayerCommands.Action.GADGET_1)  # S-023, T-353.
+	elif event.is_action_pressed("gadget_2") and captured:
+		commands.push(PlayerCommands.Action.GADGET_2)
 	elif event.is_action_pressed("second_wind") and captured and _avatar is Player:
 		commands.push(PlayerCommands.Action.SECOND_WIND)  # Hunted only (T-338).
 	elif event.is_action_pressed("ping") and captured and _avatar is Player:

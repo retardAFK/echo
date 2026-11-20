@@ -15,5 +15,7 @@ extends Resource
 @export var kind: Inventory.Kind = Inventory.Kind.FIRECRACKER
 ## The scene placed in the world; its root script has deploy(user: Player).
 @export var scene: PackedScene
-## Key of game/i18n/strings.csv for the HUD line, "Pétard ({key})".
-@export var hud_key := ""
+## Keys of game/i18n/strings.csv: its name ("Pétard"), and one sentence on
+## what it does, shown when the hunted picks its gadgets.
+@export var name_key := ""
+@export var help_key := ""

@@ -56,6 +56,9 @@ func _ready() -> void:
 	_credits.closed.connect(show_home)
 	for key: String in ROLES:
 		_role_list.item(key).focus_entered.connect(preview.bind(ROLES[key]))
+	for key in LoadoutItems.KEYS:  # The hunted's gadgets (S-023, T-352).
+		_role_list.item(key).focus_entered.connect(_preview_gadget.bind(key))
+	LoadoutItems.refresh(_role_list)
 	var version := str(ProjectSettings.get_setting("application/config/version", ""))
 	_version.text = Text.t("MENU_VERSION", version if version != "" else "dev")
 	show_home()
@@ -134,8 +137,16 @@ func _on_main_chosen(key: String) -> void:
 			show_credits()
 
 
+## The hunted's goal and controls, with what the gadget under the cursor does.
+func _preview_gadget(key: String) -> void:
+	preview(GameSession.Role.HUNTED)
+	_goal.text = LoadoutItems.help(key)
+
+
 func _on_role_chosen(key: String) -> void:
-	if ROLES.has(key):
+	if LoadoutItems.choose(_role_list, key):
+		_preview_gadget(key)
+	elif ROLES.has(key):
 		choose(ROLES[key])
 	else:
 		show_home()

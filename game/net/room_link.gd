@@ -367,9 +367,11 @@ func pong(sent_msec: int) -> void:
 	pinged.emit(ping_ms)
 
 
-func ask_ready(is_ready: bool) -> void:
+## With it go the gadgets it picked (S-023, T-352), which it may change
+## until the game starts.
+func ask_ready(is_ready: bool, loadout: Array[StringName] = []) -> void:
 	if place > 0:
-		_request_ready.rpc_id(1, is_ready)
+		_request_ready.rpc_id(1, is_ready, Loadout.to_indexes(loadout))
 
 
 ## Client side: the leader sets how many play (2 to 4).
@@ -401,9 +403,11 @@ func _request_game_size(wanted: int) -> void:
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _request_ready(is_ready: bool) -> void:
+func _request_ready(is_ready: bool, loadout: Array = []) -> void:
 	if _sender_place() != 0:
 		lobby.set_ready(_sender_place(), is_ready)
+		if not loadout.is_empty():
+			lobby.set_loadout(_sender_place(), Loadout.from_indexes(loadout))
 		_broadcast_lobby()
 
 
@@ -414,7 +418,7 @@ func _request_start() -> void:
 	var state := lobby.to_dict()
 	for id in players:
 		_start_game.rpc_id(id, state)
-	game_started.emit(state)
+	game_started.emit(lobby.to_dict(true))  # The room's map equips the picks (S-023).
 
 
 ## Room side: the game is over; back to the waiting room, sent to everyone.

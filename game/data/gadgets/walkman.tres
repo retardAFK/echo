@@ -8,4 +8,5 @@ script = ExtResource("1_def")
 id = &"walkman"
 kind = 4
 scene = ExtResource("2_scene")
-hud_key = "HUD_CARRY_WALKMAN"
+name_key = "GADGET_WALKMAN"
+help_key = "GADGET_HELP_WALKMAN"
