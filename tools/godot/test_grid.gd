@@ -6,7 +6,8 @@ extends RefCounted
 ## specs/S-020-retours-de-test/grille-de-test.md.
 ##   1. Who won?
 ##   2. In how long?
-##   3. Did a hunted get away at least once? (chases the monster lost)
+##   3. Did a hunted get away at least once? (successful escapes, as the end
+##      screen counts them: ChaseStats, S-020, T-322)
 ##   4. Did a hiding spot save someone? (hidden while the monster came close,
 ##      out again without being caught)
 ##   5. How many catches?
@@ -19,6 +20,8 @@ const CLOSE := 5.0
 var escapes := 0
 var saves := 0
 var catches := 0
+## The game's chase statistics (T-322): when set, they give the escapes.
+var chases: ChaseStats
 
 var _chasing := false
 var _tested := {}  # Hidden prey -> the monster came close.
@@ -50,6 +53,8 @@ func watch(monster: Monster, preys: Array) -> void:
 ## escapes, saves, catches.
 func row(mode: String, hunted: int, winner: String, minutes: float) -> String:
 	var away := maxi(escapes - catches, 0)  # A chase that ends in a catch is no escape.
+	if chases != null:
+		away = chases.escape_count
 	var day := Time.get_date_string_from_system()
 	var output := []
 	OS.execute("git", ["rev-parse", "--short", "HEAD"], output)

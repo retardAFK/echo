@@ -90,9 +90,27 @@ func test_the_clock_sets_the_game_time_and_the_wind() -> void:
 	client_world.apply_clock(room_world.clock())
 	assert_eq(client.game_loop.get_duration(), 42.0)
 	assert_eq(client.game_loop.noise_count, 17, "the end screen's counts")
+	assert_eq(client.game_loop.chases.chase_count, 0)
 	assert_eq(client_world.wind.seed_used, room_world.wind.seed_used, "the same gusts")
 	assert_eq(client_world.wind.time, 100.0)
 	assert_eq(client_world.wind.strength, room_world.wind.gusts.strength(100.0))
+
+
+func test_the_clients_show_the_room_chases() -> void:
+	# S-020, T-322: the room counts the chases, the clients copy its figures.
+	var room_world: NetWorld = _map(8)[1]
+	var made := _map(9)
+	var client: GameMap = made[0]
+	var client_world: NetWorld = made[1]
+	client.game_loop.mirror = true
+	var chases := room_world.game_loop.chases
+	chases.step(1, 0.1, 5.0, true, false)
+	chases.step(1, 1.0, 7.0, true, false)
+	chases.step(1, 0.1, 7.0, false, true)
+	client_world.apply_clock(room_world.clock())
+	assert_eq(client.game_loop.chases.chase_count, 1)
+	assert_eq(client.game_loop.chases.catch_count, 1)
+	assert_almost_eq(client.game_loop.chases.mean_distance(), 7.0, 0.01)
 
 
 func test_the_room_draws_alarm_clocks_the_client_removes_them() -> void:

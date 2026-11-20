@@ -15,6 +15,7 @@ signal exit_opened
 signal ended(hunted_won: bool)
 
 const DROPPED_FUSE_SCENE := preload("res://game/entities/fuse_box/dropped_fuse.tscn")
+const CHASE_SETTINGS := preload("res://game/data/chase_settings.tres")
 
 @export var settings: LoopSettings
 
@@ -27,6 +28,8 @@ var team: Array[Node] = []
 var rules: LoopRules
 ## Noises made by the hunted since the start.
 var noise_count := 0
+## Chases, escapes and mean distance for the end screen (S-020, T-322).
+var chases: ChaseStats
 ## Scans started by the monster since the start.
 var scan_count := 0
 ## Ruses used by the hunted since the start (S-008, Q11).
@@ -76,6 +79,13 @@ var _exit_opened := false
 
 func _ready() -> void:
 	rules = LoopRules.new(settings.fuse_count)
+	chases = ChaseStats.new(CHASE_SETTINGS)
+	if not mirror:  # Clients copy the room's figures (NetWorld.clock()).
+		var watch := ChaseWatch.new()
+		watch.name = "ChaseWatch"
+		watch.game_loop = self
+		watch.settings = CHASE_SETTINGS
+		add_child(watch)
 	NoiseBus.noise_emitted.connect(_on_noise_emitted)
 	if team.is_empty() and hunted != null:
 		team = [hunted]
@@ -131,6 +141,7 @@ func hunted_out(node: Node) -> void:
 		return
 	_out.append(node)
 	_captured.erase(node)
+	chases.leave(node.get_instance_id())
 	if free_count() <= 0:
 		finish(false)
 		return
@@ -393,6 +404,7 @@ func finish(won: bool) -> void:
 		return
 	is_over = true
 	hunted_won = won
+	chases.finish(won)
 	ended.emit(won)
 
 
