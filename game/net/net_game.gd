@@ -39,6 +39,9 @@ extends Node
 ##   off by the monster (S-020, T-312).
 ## - [PING, position, Ping.Kind]: to the hunted only, never the monster, a
 ##   team mark (S-020, T-328); the client shows its own copy.
+## - [TRAIN, train index, forward]: to everyone, a train starts its pass
+##   (S-020, T-332). Only the room starts trains, and only it decides which
+##   noises the train covers; the clients just hear it at the same time.
 ## - [CAN_WIRE, position, yaw] and [RATTLE, position]: to everyone, a can wire
 ##   stretched, and one yanked by the monster (S-020, T-333).
 ## - [CLOCK, NetWorld.clock() + [room fps]]: to everyone, once a second (S-020, T-300):
@@ -64,6 +67,7 @@ enum Event {
 	FIRECRACKER,
 	POP,
 	PING,
+	TRAIN,
 	CAN_WIRE,
 	RATTLE,
 }
@@ -88,6 +92,8 @@ var settings: NetSettings = preload("res://game/data/net_settings.tres")
 var is_room := false
 ## The scannable buildings of the map, in the same order on both sides.
 var buildings: Array[Building] = []
+## The passing trains of the map (T-332), in tree order on both sides.
+var trains: Array[AmbientTrain] = []
 ## The things of the map that change, and the game loop (T-099).
 var world: NetWorld
 ## Room side without network (tests): the events sent, as [place, event].
@@ -143,6 +149,11 @@ func _ready() -> void:
 	# Before the avatars on the room (commands first), after them on a client
 	# (record where the frame left the player).
 	process_physics_priority = -10 if is_room else 10
+	for train: AmbientTrain in get_tree().get_nodes_in_group(AmbientTrain.GROUP):
+		trains.append(train)
+		train.auto = is_room
+		if is_room:
+			train.pass_started.connect(_on_train_passing.bind(trains.size() - 1))
 	if is_room:
 		NoiseBus.noise_emitted.connect(_on_noise_emitted)
 		if NetSession.link != null:
@@ -421,6 +432,11 @@ func _on_place_ready(place: int) -> void:
 func _send_to_all(event: Array) -> void:
 	for place in avatars:
 		_send_event(place, event)
+
+
+## Room side: a train starts its pass; everyone hears it now (T-332).
+func _on_train_passing(forward: bool, index: int) -> void:
+	_send_to_all([Event.TRAIN, index, forward])
 
 
 ## Room side: a bottle thrown or an alarm clock placed on the map, sent once
@@ -723,6 +739,10 @@ func apply_event(event: Array) -> void:
 			ping.mirror = true  # The room's AI was warned already.
 			ping.kind = clampi(event[2], 0, Ping.Kind.size() - 1) as Ping.Kind
 			_add_copy(ping, event[1])
+		Event.TRAIN when event.size() == 3:
+			var index: int = event[1]
+			if index >= 0 and index < trains.size():
+				trains[index].run_pass(event[2])
 		Event.CAN_WIRE when event.size() == 3:
 			var wire: CanWire = CAN_WIRE_SCENE.instantiate()
 			wire.mirror = true  # The room yanks it.
