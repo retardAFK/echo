@@ -7,6 +7,10 @@ extends Node
 ## change: one knows "it is close", never "it is there".
 ## Hunted: distance from the camera to the monster (its puppet online).
 ## Monster: the pulse while it heard a noise nearby a moment ago.
+## Hunted, with the same distance (S-020, T-326, piste S2): the monster within
+## duck_range lowers the Ambiance and Musique buses by duck_db, through an
+## amplify effect on each bus (the volumes of the options stay as they are),
+## so that its steps get through the wind and the music.
 
 enum Level { CALM, UNEASE, DREAD }
 
@@ -19,6 +23,8 @@ const LAYERS: Array[AudioStream] = [
 const PUPPETS_GROUP := &"monster_puppets"
 const BUS := &"Musique"
 const SILENT_GAIN := 0.001
+## The buses lowered when the monster is near (T-326).
+const DUCKED_BUSES: Array[StringName] = [&"Ambiance", &"Musique"]
 
 var audio: AudioSettings = preload("res://game/data/audio_settings.tres")
 ## Opens the strings for everyone once the exit is open; may stay null.
@@ -28,6 +34,8 @@ var level := Level.CALM
 var held_for := 0.0
 ## Loudness of each layer, from 0 to 1.
 var gains: Array[float] = [1.0, 0.0, 0.0]
+## How much the duck is in, from 0 (not at all) to 1 (duck_db) (T-326).
+var duck := 0.0
 
 var _players: Array[AudioStreamPlayer] = []
 var _heard_ago := INF
@@ -53,12 +61,15 @@ func _process(delta: float) -> void:
 	var listener := get_viewport().get_camera_3d() if is_inside_tree() else null
 	var exit_open := game_loop != null and game_loop.is_exit_open()
 	var target: Level
+	var near := false
 	if listener != null and _monster_of(listener) != null:
 		target = monster_target(_heard_ago, exit_open, audio)
 	else:
 		var distance := _monster_distance(listener)
 		target = target_level(distance, exit_open, audio)
+		near = ducks(distance, audio)
 	update(delta, target)
+	update_duck(delta, near)
 
 
 ## Moves the level towards target (kept at least level_hold) and fades the layers.
@@ -71,6 +82,46 @@ func update(delta: float, target: Level) -> void:
 	for i in range(1, gains.size()):
 		gains[i] = fade(gains[i], level >= i, delta, audio)
 	_apply_gains()
+
+
+## Moves the duck towards in or out over duck_time and applies it (T-326).
+func update_duck(delta: float, near: bool) -> void:
+	duck = move_toward(duck, 1.0 if near else 0.0, delta / audio.duck_time)
+	_apply_duck()
+
+
+## Whether the monster at this distance lowers the wind and the music (-1: no
+## monster).
+static func ducks(distance: float, p_audio: AudioSettings) -> bool:
+	return distance >= 0.0 and distance <= p_audio.duck_range
+
+
+func _exit_tree() -> void:
+	duck = 0.0
+	_apply_duck()  # The menus after the game are not lowered.
+
+
+func _apply_duck() -> void:
+	for bus in DUCKED_BUSES:
+		var effect := duck_effect(bus)
+		if effect != null:
+			effect.volume_db = audio.duck_db * duck
+
+
+## The amplify effect that lowers a bus, added the first time; null without
+## that bus.
+static func duck_effect(bus: StringName) -> AudioEffectAmplify:
+	var index := AudioServer.get_bus_index(bus)
+	if index < 0:
+		return null
+	for i in AudioServer.get_bus_effect_count(index):
+		var effect := AudioServer.get_bus_effect(index, i)
+		if effect is AudioEffectAmplify and effect.resource_name == "DangerDuck":
+			return effect
+	var added := AudioEffectAmplify.new()
+	added.resource_name = "DangerDuck"
+	AudioServer.add_bus_effect(index, added)
+	return added
 
 
 ## Sets a level and its layers at once, without the slow fades (mixing bench).
