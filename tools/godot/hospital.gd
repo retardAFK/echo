@@ -206,6 +206,8 @@ const LINKS := [
 	[-3.0, 1, 100.0, 27.0],
 	[-3.0, 1, 124.0, 27.0],  # Archives, linen room, technical room.
 	[0.0, 1, 112.0, 27.0],  # Care room and emergency airlock.
+	[3.0, -1, 68.0, 18.5],  # Rooms 101 and 103 (S-020, T-341, H2).
+	[3.0, -1, 114.5, 18.5],  # Rooms 107 and 109 (H2).
 	[6.0, -1, 70.0, 15.0],
 	[6.0, -1, 85.0, 15.0],  # The operating theatres.
 ]
@@ -301,6 +303,8 @@ const FURNITURE := [
 	["hospital_bed", Vector3(11.2, 3.0, 118.0), Vector2.RIGHT],
 	["iv_pole", Vector3(12.6, 3.0, 119.5), Vector2.RIGHT],
 	["hospital_bed", Vector3(11.2, 3.0, 123.0), Vector2.RIGHT],
+	# The nurses' station's counter, an island (S-020, T-341, H1).
+	["counter", Vector3(27.5, 3.0, 93.5), Vector2.UP, 3.0 / 2.1],
 	["hospital_bed", Vector3(30.8, 3.0, 65.0), Vector2.LEFT],
 	["hospital_bed", Vector3(30.8, 3.0, 71.0), Vector2.LEFT],
 	["hospital_bed", Vector3(30.8, 3.0, 84.0), Vector2.LEFT],

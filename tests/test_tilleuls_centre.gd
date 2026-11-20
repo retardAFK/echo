@@ -11,7 +11,7 @@ const PLACES := {
 	"north entrance": Vector3(161.5, 0, 58),
 	"west entrance": Vector3(138, 0, 71.5),
 	"kitchen back door": Vector3(157.6, 0, 86),
-	"kitchen": Vector3(156, 0, 81),
+	"kitchen": Vector3(156, 0, 82.75),  # South of its island (S-020, T-341).
 	"last office": Vector3(170, 0, 80),
 	"wings": Vector3(140.85, 0, 70),
 }

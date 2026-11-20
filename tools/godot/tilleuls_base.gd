@@ -149,7 +149,7 @@ func _buildings() -> Dictionary:
 				Vector3(176, 0, 62),
 				Vector3(176, 0, 74),
 				Vector3(170, 0, 82),
-				Vector3(156, 0, 80.5),
+				Vector3(158.5, 0, 79),  # Off the kitchen island (S-020, T-341).
 				Vector3(170, 0, 70.5)
 			]
 		],
@@ -162,7 +162,7 @@ func _buildings() -> Dictionary:
 			[
 				Vector3(55, 0, 143),
 				Vector3(61, 0, 145),
-				Vector3(76, 0, 142),
+				Vector3(77.5, 0, 139.6),  # Off the gondolas (S-020, T-341).
 				Vector3(84, 0, 148),
 				Vector3(47.5, 0, 148),
 				Vector3(71, 0, 146)

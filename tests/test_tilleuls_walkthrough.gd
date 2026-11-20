@@ -110,13 +110,14 @@ func test_player_runs_down_into_the_car_park() -> void:
 
 
 func test_player_crouches_under_the_shutter() -> void:
+	# Down the middle aisle of the grocer, between its gondolas (S-020, T-341).
 	_straight = true
-	var standing: bool = await _walk(Vector3(73.7, 0, 137), Vector3(73.7, 0, 142), 3, false)
+	var standing: bool = await _walk(Vector3(74.75, 0, 137), Vector3(74.75, 0, 142), 3, false)
 	gut.p("standing, stopped at %s" % (_player.global_position + ORIGIN))
 	assert_false(standing, "standing, the shutter stops the player")
 	_player.toggle_crouch()
 	await wait_physics_frames(30)
-	var crouching: bool = await _walk(Vector3(73.7, 0, 137), Vector3(73.7, 0, 142), 10, false)
+	var crouching: bool = await _walk(Vector3(74.75, 0, 137), Vector3(74.75, 0, 142), 10, false)
 	assert_true(
 		crouching, "crouching, the player goes under (at %s)" % (_player.global_position + ORIGIN)
 	)

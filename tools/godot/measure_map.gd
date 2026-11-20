@@ -58,6 +58,12 @@ const VIEWS := [
 	["hopital_couloir_2", Vector3(21, 7.6, 59), Vector3(21, 7.4, 131)],
 	["hopital_sous_sol", Vector3(21, -1.4, 129), Vector3(21, -1.6, 57)],
 	["hopital_hall", Vector3(30, 1.6, 94), Vector3(20, 1.4, 94)],
+	# Chase loops (S-020, T-341): the grocer's gondolas, the nurses' station,
+	# the island of wrecks, the chair store.
+	["epicerie_gondoles", Vector3(74.75, 1.6, 139.5), Vector3(75, 1, 146)],
+	["poste_de_soins", Vector3(23, 4.6, 92), Vector3(30, 4, 95)],
+	["parking_ilot", Vector3(142, -1.4, 106), Vector3(150, -2, 110)],
+	["salle_reserve_chaises", Vector3(146, 1.6, 66), Vector3(153, 1, 72)],
 	["hopital_escalier", Vector3(21, 1.6, 64), Vector3(25, 3, 58)],
 	["hopital_quai", Vector3(8, 1.6, 74), Vector3(8, -2, 92)],
 	["hopital_secours", Vector3(34, 1.6, 140), Vector3(24, 5, 133)],
