@@ -1,6 +1,6 @@
 """Builds the models of the underground car park and the garages (S-006, T-047).
 
-- "car_wreck": a burnt-out car shell, flat tyres, no glass (4.2 x 2 x 1.4 m),
+- "car_wreck": a burnt-out car shell, round flat tyres, no glass (4.2 x 2 x 1.4 m),
 - "car_park_sign": the "P" sign at the top of the ramp, on its post,
 - "car_park_pillar": a 0.5 m pillar with worn white bands and its bay number,
 - "neon_fixture": a dead neon tube hanging from the slab,
@@ -156,9 +156,12 @@ def car_wreck(k):
     m.box(-0.92, 2.1, 0.3, 0.92, 2.2, 0.45, k["metal"])
     for x in (-0.95, 0.75):
         for y in (-1.6, 1.05):
-            m.box(x, y, 0.0, x + 0.2, y + 0.6, 0.4, k["tyre"])  # Flat tyres.
-            rim = x - 0.01 if x < 0 else x + 0.2
-            m.box(rim, y + 0.18, 0.1, rim + 0.01, y + 0.42, 0.34, k["metal"])
+            # Flat tyres: round, 12 sides, squashed flat on the ground (T-324).
+            tyre = m.cylinder((x + 0.1, y + 0.3, 0.22), 0.3, 0.2, "x", k["tyre"], meters=4.0)
+            for v in {v for f in tyre for v in f.verts}:
+                v.co.z = max(v.co.z, 0.0)
+            rim = x - 0.005 if x < 0 else x + 0.205
+            m.cylinder((rim, y + 0.3, 0.22), 0.13, 0.01, "x", k["metal"], segments=8)
     del roof, cabin
     return m
 
