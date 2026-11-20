@@ -19,6 +19,10 @@ extends Resource
 @export_range(0.1, 10.0, 0.1, "suffix:s") var monster_hold: float = 1.0
 ## A lit screen's light, in meters (it shows the one at the keyboard).
 @export_range(0.5, 10.0, 0.5, "suffix:m") var screen_light_range: float = 3.0
+## A screen lit by the one at the keyboard shows only this close to the
+## viewer's camera, in meters; further, it looks idle and casts no light
+## (S-020, T-323, piste N4: going to a terminal was nearly suicidal).
+@export_range(1.0, 100.0, 0.5, "suffix:m") var lit_screen_range: float = 10.0
 
 @export_group("Cameras")
 ## The monster smashing a camera, in meters (Q11).
