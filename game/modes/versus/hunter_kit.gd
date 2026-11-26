@@ -27,6 +27,8 @@ var chest: VersusChest
 var chest_held := 0.0
 ## The keys of its player, held and pressed (T-381).
 var keys := HeldKeys.new()
+## A client's copy of its prompt (T-381), as the room says.
+var mirror_prompt: Array = []
 ## Holding interact by a downed teammate to revive it (Q5).
 var revive := DownedHold.new()
 ## Teammates it revived, for the end screen.
@@ -91,6 +93,25 @@ func equip(item: VersusItem) -> VersusItem:
 	if view_model != null:
 		view_model.set_weapon(item.id)
 	return left
+
+
+## A client (T-381): shows weapon in its hands, as the room says it took it.
+func show_weapon(weapon: VersusItem) -> void:
+	loadout.weapon = weapon
+	if laser != null:
+		laser.queue_free()
+		laser = null
+	if weapon != null and weapon.id == &"uv_laser":
+		laser = UvLaser.new(self)
+		add_child(laser)
+	if view_model != null:
+		view_model.set_weapon(weapon.id if weapon != null else &"")
+
+
+## What holding interact does now (KitPrompts), or on a client what the room
+## says.
+func shown_prompt() -> Array:
+	return mirror_prompt if mode.mirror else KitPrompts.of_hunter(self)
 
 
 ## Uses the tool of slot (0 or 1, keys gadget_1 and gadget_2); true if used.
@@ -235,6 +256,9 @@ func reset_fall() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if mode.mirror:
+		_show_mirror(delta)
+		return
 	if is_played():
 		keys.update((body as Player).commands)
 	vitals.update(delta)
@@ -263,6 +287,22 @@ func _physics_process(delta: float) -> void:
 		_read_commands((body as Player).commands, delta)
 	elif not body is Player:
 		_think(delta)
+
+
+## A client (T-381): the room plays; only its arms and its laser beam
+## show here, at once.
+func _show_mirror(delta: float) -> void:
+	keys.update((body as Player).commands)
+	if view_model != null:
+		view_model.speed = Vector2(body.velocity.x, body.velocity.z).length()
+		view_model.lower(1.0 if not vitals.is_standing() else (0.4 if reloading else 0.0))
+		view_model.visible = not vitals.is_out()
+		if keys.pressed(PlayerCommands.FLAG_FIRE) and clip > 0 and not reloading:
+			view_model.kick()
+	if laser != null:
+		var battery := laser.battery
+		laser.update(vitals.is_standing() and keys.held(PlayerCommands.FLAG_FIRE), delta)
+		laser.battery = battery  # The room's.
 
 
 ## The player's keys (T-381), from its commands: the same on this machine

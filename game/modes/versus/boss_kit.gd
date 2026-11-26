@@ -30,8 +30,8 @@ var keys := HeldKeys.new()
 var finish := DownedHold.new()
 ## Its leap (phase 2+), and the noises it may leap onto.
 var leap: BossLeap
-## Its shadow where it lands, shown while it leaps.
-var leap_shadow: MeshInstance3D
+## A client's copy of its prompt (T-381), as the room says.
+var mirror_prompt: Array = []
 var view_model: ViewModel
 var _move_left := 0.0
 var _claw_wait := 0.0
@@ -63,8 +63,6 @@ func _ready() -> void:
 	leap = BossLeap.new(mode.settings)
 	health.phase_changed.connect(_on_phase_changed)
 	NoiseBus.noise_emitted.connect(_on_noise)
-	leap_shadow = _make_shadow()
-	add_child(leap_shadow)
 	if is_local():
 		view_model = ViewModel.new(ViewModel.Kind.BOSS)
 		(body as MonsterAvatar).get_camera().add_child(view_model)
@@ -177,6 +175,12 @@ func reset_fall() -> void:
 	_fall.reset()
 
 
+## What holding interact does now (KitPrompts), or on a client what the room
+## says.
+func shown_prompt() -> Array:
+	return mirror_prompt if mode.mirror else KitPrompts.of_boss(self)
+
+
 ## Whether its phase lets it leap now (Q9).
 func can_leap() -> bool:
 	var phase := health.current_phase()
@@ -191,13 +195,14 @@ func leap_to(target: Vector3) -> bool:
 	leap.start(body.global_position, target)
 	move = Move.LEAPING
 	_hold()
-	leap_shadow.global_position = target + Vector3.UP * 0.05
-	leap_shadow.visible = true
+	mode.show_leap(target)
 	_play_gesture(MonsterBody.Action.CATCH, mode.settings.leap_time)
 	return true
 
 
 func _physics_process(delta: float) -> void:
+	if mode.mirror:
+		return  # A client (T-381): the room plays, the HUD shows its copy.
 	if is_played():
 		keys.update((body as MonsterAvatar).commands)
 	health.update(delta)
@@ -384,7 +389,6 @@ func _charge_step(delta: float) -> void:
 
 ## The landing (Q9): a shock wave hurts and throws the standing hunted near.
 func _land_leap() -> void:
-	leap_shadow.visible = false
 	var hit := false
 	var settings := mode.settings
 	for hunter in mode.hunters:
@@ -419,25 +423,6 @@ func _on_noise(event: NoiseEvent) -> void:
 func _exit_tree() -> void:
 	if NoiseBus.noise_emitted.is_connected(_on_noise):
 		NoiseBus.noise_emitted.disconnect(_on_noise)
-
-
-func _make_shadow() -> MeshInstance3D:
-	var shadow := MeshInstance3D.new()
-	var disc := CylinderMesh.new()
-	disc.top_radius = mode.settings.leap_radius
-	disc.bottom_radius = mode.settings.leap_radius
-	disc.height = 0.02
-	disc.radial_segments = 24
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0, 0, 0, 0.55)
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	disc.material = material
-	shadow.mesh = disc
-	shadow.top_level = true
-	shadow.visible = false
-	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	return shadow
 
 
 func _end_move() -> void:

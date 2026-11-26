@@ -63,28 +63,28 @@ func _process(delta: float) -> void:
 func _draw_hud() -> void:
 	var size := _canvas.size
 	var font := _canvas.get_theme_default_font()
-	var boss := mode.boss
-	if boss == null:
+	var health := mode.boss_health()
+	if health == null:
 		return
 	# The boss bar (Q7, Q8), bottom middle.
 	var width := size.x * 0.5
 	var bar := Rect2(Vector2((size.x - width) * 0.5, size.y - 56.0), Vector2(width, 10.0))
 	_canvas.draw_rect(bar.grow(2.0), BAR_BACK)
-	_canvas.draw_rect(Rect2(bar.position, Vector2(width * boss.health.ratio(), 10.0)), BAR_COLOR)
-	var phase := boss.health.current_phase()
+	_canvas.draw_rect(Rect2(bar.position, Vector2(width * health.ratio(), 10.0)), BAR_COLOR)
+	var phase := health.current_phase()
 	var title := Text.t("VERSUS_BOSS_NAME")
 	if phase != null:
 		title += "  ·  " + Text.t(phase.name_key)
-	if boss.health.is_kneeling():
+	if health.is_kneeling():
 		title += "  ·  " + Text.t("VERSUS_KNEEL")
 	_canvas.draw_string(font, bar.position + Vector2(0, -6), title, HORIZONTAL_ALIGNMENT_LEFT)
 	_draw_clock(size, font)
 	var hunter := mode.local_hunter()
 	if hunter != null:
 		_draw_hunter(hunter, size, font)
-		_draw_tracked(boss, size)
-	elif boss.is_local():
-		_draw_boss(boss, size, font)
+		_draw_tracked(size)
+	elif mode.boss != null and mode.boss.is_local():
+		_draw_boss(mode.boss, size, font)
 	if _hit_left > 0.0:
 		var color := FACE_COLOR if _hit_face else Color.WHITE
 		var c := size * 0.5
@@ -119,7 +119,7 @@ func _draw_clock(size: Vector2, font: Font) -> void:
 		_canvas.draw_string(
 			font, Vector2(0, 46), dawn, HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, color
 		)
-	elif rules.boss_tracked() and mode.boss.is_local():
+	elif mode.tracked_position() != null and mode.boss != null and mode.boss.is_local():
 		var tracked := Text.t("VERSUS_TRACKED")
 		_canvas.draw_string(
 			font, Vector2(0, 46), tracked, HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, TRACKED_COLOR
@@ -127,11 +127,12 @@ func _draw_clock(size: Vector2, font: Font) -> void:
 
 
 ## A boss that has not attacked for long is shown in red (Q4).
-func _draw_tracked(boss: BossKit, size: Vector2) -> void:
-	if mode.rules == null or not mode.rules.boss_tracked():
+func _draw_tracked(size: Vector2) -> void:
+	var tracked: Variant = mode.tracked_position()
+	if tracked == null:
 		return
 	var camera := _canvas.get_viewport().get_camera_3d()
-	var point := boss.body.global_position + Vector3.UP * 1.2
+	var point: Vector3 = tracked + Vector3.UP * 1.2
 	if camera == null or camera.is_position_behind(point):
 		return
 	var at := camera.unproject_position(point)
@@ -171,33 +172,13 @@ func _draw_hunter(hunter: HunterKit, size: Vector2, font: Font) -> void:
 			200,
 			10
 		)
-	if hunter.vitals.is_out():
-		_draw_prompt(Text.t("VERSUS_OUT"), -1.0, size, font)
-	elif hunter.vitals.is_down():
-		_draw_down(hunter, size, font)
-	elif not _draw_revive_prompt(hunter, size, font):
-		_draw_chest_prompt(hunter, size, font)
+	_draw_kit_prompt(hunter.shown_prompt(), size, font)
 
 
-## Downed (Q5): the seconds left, and a teammate's revive under way.
-func _draw_down(hunter: HunterKit, size: Vector2, font: Font) -> void:
-	var text := Text.t("VERSUS_DOWN_TIME", ceili(hunter.vitals.down_left))
-	var ratio := -1.0
-	for other in mode.hunters:
-		if other.revive.target == hunter:
-			text = Text.t("VERSUS_BEING_REVIVED")
-			ratio = other.revive.ratio(other.revive_time())
-	_draw_prompt(text, ratio, size, font)
-
-
-## A downed teammate in reach (Q5); false if none.
-func _draw_revive_prompt(hunter: HunterKit, size: Vector2, font: Font) -> bool:
-	var reach := mode.settings.revive_reach
-	if DownedHold.nearest(mode.hunters, hunter.body.global_position, reach, hunter) == null:
-		return false
-	var ratio := hunter.revive.ratio(hunter.revive_time())
-	_draw_prompt(Text.with_keys("VERSUS_REVIVE"), ratio, size, font)
-	return true
+## What holding interact does (KitPrompts), under the crosshair.
+func _draw_kit_prompt(prompt: Array, size: Vector2, font: Font) -> void:
+	if prompt.size() >= 3:
+		_draw_prompt(KitPrompts.text_of(prompt), prompt[2], size, font)
 
 
 ## A text under the crosshair and, if ratio is 0 or more, a progress bar.
@@ -226,18 +207,6 @@ static func weapon_line(hunter: HunterKit) -> String:
 	return Text.t(weapon.name_key)
 
 
-## Under the crosshair: what holding interact on the chest in sight does,
-## and how far along it is (Q30).
-func _draw_chest_prompt(hunter: HunterKit, size: Vector2, font: Font) -> void:
-	var chest := hunter.chest if hunter.chest != null else hunter.chest_in_reach()
-	if chest == null or (chest.is_open and chest.item == null):
-		return
-	var text := Text.with_keys("VERSUS_CHEST_OPEN")
-	if chest.is_open:
-		text = Text.with_keys("VERSUS_CHEST_TAKE", Text.t(chest.item.name_key))
-	_draw_prompt(text, hunter.chest_held / chest.hold_time(mode.settings), size, font)
-
-
 func _draw_boss(boss: BossKit, size: Vector2, font: Font) -> void:
 	_canvas.draw_rect(Rect2(8, size.y - 80, 100, 4), BAR_BACK)
 	_canvas.draw_rect(Rect2(8, size.y - 80, 100 * boss.health.rage / 100.0, 4), RAGE_COLOR)
@@ -250,7 +219,4 @@ func _draw_boss(boss: BossKit, size: Vector2, font: Font) -> void:
 	if boss.can_leap():
 		var leap := Text.with_keys("VERSUS_LEAP_READY")
 		_canvas.draw_string(font, Vector2(8, size.y - 100), leap, HORIZONTAL_ALIGNMENT_LEFT)
-	var reach := mode.settings.finish_reach
-	if DownedHold.nearest(mode.hunters, boss.body.global_position, reach) != null:
-		var ratio := boss.finish.ratio(mode.settings.finish_time)
-		_draw_prompt(Text.with_keys("VERSUS_FINISH"), ratio, size, font)
+	_draw_kit_prompt(boss.shown_prompt(), size, font)

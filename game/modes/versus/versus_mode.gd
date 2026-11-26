@@ -9,8 +9,11 @@ extends Node
 ## Dawn near (Q3): a siren, and the boss enters its last phase. The end
 ## (Q1, Q28): slow motion and a camera turning around the fallen boss, then
 ## the end screen (VersusEndScreen) with what each hunted did (VersusStats).
-## Solo for now, in the test room or the cité ("Jouer seul › Versus",
-## T-375); online comes with T-381.
+## Solo in the test room or the cité ("Jouer seul › Versus", T-375), or
+## online (T-381): the room plays it like solo, with the humans' avatars
+## driven by their commands, and VersusNet tells the clients; a client
+## (mirror) only shows it: a kit on its own avatar copying the room, the
+## chests, the flares, the end.
 ## To remove the mode: docs/MODULES.md, "Le mode Versus".
 
 signal finished(winner: VersusRules.Winner)
@@ -31,6 +34,17 @@ var end_screen: VersusEndScreen
 var dawn_announced := false
 ## The arena of this map (Q24), or null: the whole map (the test room).
 var arena: VersusArena
+## Online (T-381): the map's NetGame, or null in solo; mirror on a client.
+var net: NetGame
+var mirror := false
+var link: VersusNet
+## Client side: where the room says the tracked boss is (Q4), or null.
+var tracked_at: Variant = null
+## The boss's shadow where it lands (Q9).
+var leap_shadow: MeshInstance3D
+var _mirror_health: BossHealth
+var _leap_shadow_left := 0.0
+var _ended := false
 var _lit: Array[Flare] = []
 var _slowmo_left := 0.0
 var _end_left := -1.0
@@ -50,16 +64,28 @@ func _ready() -> void:
 
 func _setup() -> void:
 	stats = VersusStats.new(settings)
+	net = get_parent().get(&"net")
+	mirror = net != null and not net.is_room
 	arena = arena_of(get_parent().scene_file_path)
 	if arena != null:
 		var builder := ArenaBuilder.new(arena)
 		get_parent().add_child(builder)
 		builder.use_navigation(get_parent())
+	leap_shadow = _make_shadow()
+	add_child(leap_shadow)
+	end_screen = VersusEndScreen.new()
+	end_screen.online = net != null
+	add_child(end_screen)
+	if mirror:
+		_setup_mirror()
+		return
 	for node in _hunted_nodes():
 		var kit := HunterKit.new(self)
 		hunters.append(kit)
 		node.add_child(kit)
 	for node in get_tree().get_nodes_in_group(Prison.MONSTERS_GROUP):
+		if node.is_queued_for_deletion():
+			continue  # Online: the AI monster a human's avatar replaced.
 		var monster_settings: MonsterSettings = node.get(&"settings")
 		monster_settings.catch_distance = 0.0  # Its own copy: blows, not catches.
 		boss = BossKit.new(self)
@@ -76,10 +102,72 @@ func _setup() -> void:
 	rules = VersusRules.new(settings, boss.health)
 	for kit in hunters:
 		rules.hunted.append(kit.vitals)
+	if net != null:
+		link = VersusNet.new(self, net)
+		add_child(link)
+	if net == null or not net.is_room:
+		hud = VersusHud.new(self)
+		add_child(hud)
+
+
+## A client (T-381): a kit on its own avatar, the rest from the room.
+func _setup_mirror() -> void:
+	var own := net.own
+	if own is Player:
+		var kit := HunterKit.new(self)
+		hunters.append(kit)
+		own.add_child(kit)
+	elif own is MonsterAvatar:
+		boss = BossKit.new(self)
+		own.add_child(boss)
+	_mirror_health = boss.health if boss != null else BossHealth.new(settings, LobbyState.SEATS - 1)
+	rules = VersusRules.new(settings, boss_health())
+	link = VersusNet.new(self, net)
+	add_child(link)
 	hud = VersusHud.new(self)
 	add_child(hud)
-	end_screen = VersusEndScreen.new()
-	add_child(end_screen)
+
+
+## The boss's health: its kit's, or on a hunted's client the room's copy.
+func boss_health() -> BossHealth:
+	if mirror:
+		return _mirror_health
+	return boss.health if boss != null else null
+
+
+## Where the tracked boss is (Q4), or null while it is not tracked.
+func tracked_position() -> Variant:
+	if mirror:
+		return tracked_at
+	if rules != null and boss != null and rules.boss_tracked():
+		return boss.body.global_position
+	return null
+
+
+## The kit of a hunted's body, or null.
+func kit_of(node: Node) -> HunterKit:
+	for kit in hunters:
+		if kit.body == node:
+			return kit
+	return null
+
+
+## The item of the settings with id, or null.
+func item(id: StringName) -> VersusItem:
+	for each in settings.items:
+		if each.id == id:
+			return each
+	return null
+
+
+## The boss leaps onto target (Q9): its shadow shows there while it flies,
+## for everyone.
+func show_leap(target: Vector3) -> void:
+	leap_shadow.global_position = target + Vector3.UP * 0.05
+	leap_shadow.visible = true
+	_leap_shadow_left = settings.leap_time
+	if link != null and not mirror:
+		link.send([VersusNet.Event.LEAP, target])
 
 
 ## The arena of the map at map_path, or null.
@@ -111,7 +199,7 @@ func _place(body: Node3D, point: Vector3, yaw: float) -> void:
 ## chests, T-383) and the test room get their launcher at once.
 func _gear_up() -> void:
 	for kit in hunters:
-		if arena == null or not kit.is_local():
+		if arena == null or not kit.is_played():
 			kit.equip(settings.first_weapon)
 			continue
 		var start := kit.body.global_position
@@ -141,6 +229,8 @@ func _on_phase_changed(index: int) -> void:
 	var phase := boss.health.current_phase()
 	if phase != null and phase.lights_out:
 		put_lights_out()
+		if link != null:
+			link.send([VersusNet.Event.LIGHTS_OUT])
 	if arena != null and index > 0:
 		var from := settings.arena_chests + (index - 1) * settings.phase_chests
 		_add_arena_chests(from, settings.phase_chests, true)
@@ -192,7 +282,7 @@ func local_hunter() -> HunterKit:
 
 ## The boss's kit if node is the boss (a flare hit it), else null.
 func boss_of(node: Node) -> BossKit:
-	if boss != null and node == boss.body:
+	if boss != null and node == boss.body and not mirror:
 		return boss
 	return null
 
@@ -218,6 +308,8 @@ func nearest_standing(point: Vector3) -> HunterKit:
 func add_flare(flare: Flare, at: Vector3) -> void:
 	add_child(flare)
 	flare.global_position = at
+	if link != null and not mirror:
+		link.send([VersusNet.Event.SHOT, at, flare.velocity])
 	_lit = _lit.filter(func(lit: Flare) -> bool: return is_instance_valid(lit))
 	_lit.append(flare)
 	while _lit.size() > settings.flare_lights:
@@ -227,6 +319,8 @@ func add_flare(flare: Flare, at: Vector3) -> void:
 ## A flare of shooter hit the boss (Q21): the shooter's hit marker.
 func on_boss_hit(_kit: BossKit, shooter: Node3D, face: bool, taken: float) -> void:
 	stats.on_hit(shooter, face, taken)
+	if link != null and shooter != null and link.seat_of(shooter) > 0:
+		link.send([VersusNet.Event.HIT, face], link.seat_of(shooter))
 	if hud != null and local_hunter() != null and shooter == local_hunter().body:
 		hud.show_hit(face)
 
@@ -236,13 +330,21 @@ func is_over() -> bool:
 
 
 func _physics_process(delta: float) -> void:
+	if _leap_shadow_left > 0.0:
+		_leap_shadow_left -= delta
+		leap_shadow.visible = _leap_shadow_left > 0.0
 	if rules == null:
 		return
-	if rules.winner == VersusRules.Winner.NONE:
+	if mirror:
+		if rules.winner != VersusRules.Winner.NONE and not _ended:
+			_on_end()  # The room says it is over: the same slow motion here.
+	elif rules.winner == VersusRules.Winner.NONE:
 		if rules.update(delta) != VersusRules.Winner.NONE:
 			_on_end()
 		elif rules.dawn_near() and not dawn_announced:
 			_announce_dawn()
+		return
+	if not _ended:
 		return
 	var real := delta / maxf(Engine.time_scale, 0.01)
 	if _orbit != null:
@@ -251,7 +353,7 @@ func _physics_process(delta: float) -> void:
 		_slowmo_left -= real
 		if _slowmo_left <= 0.0:
 			Engine.time_scale = 1.0
-	if _end_left > 0.0:
+	if _end_left > 0.0 and not mirror:
 		_end_left -= real
 		if _end_left <= 0.0:
 			_finish()
@@ -260,6 +362,9 @@ func _physics_process(delta: float) -> void:
 ## The game is over: whoever listens (the test room plays again) decides
 ## what comes next; with nobody (a game in the cité), the end screen.
 func _finish() -> void:
+	if net != null:
+		_finish_online()
+		return
 	var handled := not finished.get_connections().is_empty()
 	finished.emit(rules.winner)
 	if not handled:
@@ -267,6 +372,46 @@ func _finish() -> void:
 		if hud != null:
 			hud.visible = false
 		end_screen.show_result(self)
+
+
+## The room (T-381): the end screen's values to everyone, then back to the
+## lobby, as at the end of a Hunt.
+func _finish_online() -> void:
+	Engine.time_scale = 1.0
+	var mvp := stats.mvp(hunters)
+	(
+		link
+		. send(
+			[
+				VersusNet.Event.END,
+				rules.winner,
+				rules.time_left() <= 0.0,
+				rules.clock,
+				stats.rows(hunters, link.seat_of),
+				link.seat_of(mvp.body) if mvp != null else -1,
+			]
+		)
+	)
+	get_tree().create_timer(NetSession.settings.end_return_delay).timeout.connect(
+		NetSession.end_game
+	)
+
+
+## A client (T-381): the end screen with what the room sent.
+func show_online_end(winner: int, dawn: bool, clock: float, rows: Array, mvp_seat: int) -> void:
+	Engine.time_scale = 1.0
+	if hud != null:
+		hud.visible = false
+	var own_seat := -1
+	var lobby := GameSession.online_lobby
+	if lobby != null and NetSession.link != null:
+		own_seat = lobby.seat_of(NetSession.link.place)
+	end_screen.show_values(
+		VersusEndScreen.title_key(winner as VersusRules.Winner, dawn, boss != null),
+		clock,
+		VersusStats.lines_of(rows, own_seat),
+		VersusStats.seat_name(mvp_seat, own_seat) if mvp_seat >= 0 else ""
+	)
 
 
 ## Dawn is near (Q3): a siren, and the boss enters its last phase.
@@ -279,6 +424,7 @@ func _announce_dawn() -> void:
 
 
 func _on_end() -> void:
+	_ended = true
 	if rules.winner == VersusRules.Winner.HUNTED:
 		Engine.time_scale = settings.kill_slowmo_scale  # The killing blow (Q1).
 		_slowmo_left = settings.kill_slowmo_time
@@ -325,7 +471,32 @@ func _hunted_nodes() -> Array[Node]:
 	var player: Variant = map.get(&"player")
 	if player is Player and is_instance_valid(player) and (player as Node).is_inside_tree():
 		found.append(player)
+	var room: Variant = map.get(&"room")
+	if room != null:
+		for each: Node in room.online_hunted:  # Online (T-381): the humans' too.
+			if each not in found:
+				found.append(each)
 	for prey in get_tree().get_nodes_in_group(Prey.GROUP):
 		if prey not in found:
 			found.append(prey)
 	return found
+
+
+func _make_shadow() -> MeshInstance3D:
+	var shadow := MeshInstance3D.new()
+	shadow.name = "LeapShadow"
+	var disc := CylinderMesh.new()
+	disc.top_radius = settings.leap_radius
+	disc.bottom_radius = settings.leap_radius
+	disc.height = 0.02
+	disc.radial_segments = 24
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0, 0, 0, 0.55)
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	disc.material = material
+	shadow.mesh = disc
+	shadow.top_level = true
+	shadow.visible = false
+	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return shadow

@@ -48,6 +48,8 @@ extends Node
 ##   for the clients to see; its footsteps reach them as NOISE events.
 ## - [SMOKE, position]: to everyone, a smoke bomb set off (S-020, T-335): the
 ##   clients show the cloud; the room alone uses it to hide players (sees()).
+## - [MODE, payload]: the game mode's own events (S-024, T-381), sent by
+##   send_mode_event() and played by mode_link.apply_net_event(payload).
 ## - [CLOCK, NetWorld.clock() + [room fps]]: to everyone, once a second (S-020, T-300):
 ##   the game time and the wind, which change every frame and so are not in
 ##   WORLD (which would then go out with every snapshot).
@@ -77,6 +79,7 @@ enum Event {
 	WALKMAN,
 	SMOKE,
 	ROUTES,
+	MODE,
 }
 
 ## Seconds between two CLOCK events (T-300).
@@ -105,6 +108,13 @@ var buildings: Array[Building] = []
 var trains: Array[AmbientTrain] = []
 ## The things of the map that change, and the game loop (T-099).
 var world: NetWorld
+## The game mode's own network part (S-024, T-381), or null (the Hunt has
+## none). Room side, mode_link.net_snapshot(seat) goes in each snapshot as
+## "mode", and mode_link.net_ready_events() to a player whose map is ready;
+## client side, mode_link.apply_net_snapshot(value) and
+## apply_net_event(payload) receive them. The network knows nothing else of
+## the mode.
+var mode_link: Object
 ## Room side without network (tests): the events sent, as [place, event].
 var sent_events := []
 ## Room side: avatar of each human place (Player or MonsterAvatar), by place.
@@ -450,6 +460,17 @@ func _on_place_ready(place: int) -> void:
 	if world != null and avatars.has(place):
 		_send_event(place, [Event.WORLD, world.state()])
 		_send_event(place, [Event.CLOCK, world.clock() + [Engine.get_frames_per_second()]])
+	if mode_link != null and avatars.has(place):
+		for payload: Array in mode_link.net_ready_events():
+			_send_event(place, [Event.MODE, payload])
+
+
+## Room side: a game mode's event (S-024, T-381) to everyone, or only to
+## the player in seat.
+func send_mode_event(payload: Array, seat := -1) -> void:
+	for place in avatars:
+		if seat < 0 or seats[place] == seat:
+			_send_event(place, [Event.MODE, payload])
 
 
 func _send_to_all(event: Array) -> void:
@@ -509,7 +530,10 @@ func _announce(node: Node3D) -> void:
 
 func _send_snapshots() -> void:
 	for place in avatars:
-		NetSession.link.send_snapshot(place, snapshot_for(place))
+		var snapshot := snapshot_for(place)
+		if mode_link != null:
+			snapshot["mode"] = mode_link.net_snapshot(seats[place])
+		NetSession.link.send_snapshot(place, snapshot)
 
 
 ## Room side: what the player in a place is sent.
@@ -724,6 +748,8 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 	for seat in puppets:
 		if not seen.has(seat):
 			puppets[seat].visible = false
+	if mode_link != null and snapshot.has("mode"):
+		mode_link.apply_net_snapshot(snapshot["mode"])
 
 
 ## Client side: plays an event from the room.
@@ -795,6 +821,8 @@ func apply_event(event: Array) -> void:
 			world.game_loop.routes = RouteLog.from_values(event[1], GameLoop.ROUTE_SETTINGS)
 		Event.SMOKE when event.size() == 2:
 			_spawn_copy(SMOKE_SCENE, event[1])
+		Event.MODE when event.size() == 2 and event[1] is Array and mode_link != null:
+			mode_link.apply_net_event(event[1])
 
 
 ## Client side, spectator (T-107): the room sends what a teammate sees. The
