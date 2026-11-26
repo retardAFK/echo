@@ -9,11 +9,16 @@ var _settings: VersusSettings
 
 func before_each() -> void:
 	_settings = SETTINGS.duplicate()
+	_settings.boss_health_per_hunted = 400.0  # The numbers below (the tuned ones may move).
+	_settings.boss_health_scales = PackedFloat32Array()
 
 
 func test_boss_health_scales_with_hunted() -> void:
 	assert_eq(BossHealth.new(_settings, 2).max_health, 800.0)
 	assert_eq(BossHealth.new(_settings, 4).max_health, 1600.0)
+	_settings.boss_health_scales = PackedFloat32Array([1.0, 1.0, 1.0, 0.5])
+	assert_eq(BossHealth.new(_settings, 3).max_health, 1200.0)
+	assert_eq(BossHealth.new(_settings, 4).max_health, 800.0, "scaled for four")
 
 
 func test_phases_change_at_thresholds_with_a_shield() -> void:
