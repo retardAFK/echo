@@ -30,9 +30,9 @@ Bloc de numéros : T-370 à T-399.
 - [x] T-382 — Boss IA (`BossBrain`)
 - [x] T-383 — Chassé IA (`PreyFighter`)
 - [x] T-384 — Équilibre : 20 parties simulées par effectif (2, 3, 4 chassés)
-- [ ] T-385 — Modèles des bras et armes (`tools/blender/viewmodels.py`), lance-fusées dans la main du modèle du chassé, gestes du boss ; montrés à Maxime
-- [ ] T-386 — Sons : tir, touche, visage, roulade, cri, charge, musique de combat ; montrés à Maxime
-- [ ] T-387 — Guide du jeu, `docs/`, vérification finale (budgets, critères)
+- [ ] T-385 — (remplacée par S-025, T-409) Modèles des bras et armes (`tools/blender/viewmodels.py`), lance-fusées dans la main du modèle du chassé, gestes du boss ; montrés à Maxime
+- [ ] T-386 — (remplacée par S-025, T-410) Sons : tir, touche, visage, roulade, cri, charge, musique de combat ; montrés à Maxime
+- [ ] T-387 — (remplacée par S-025, T-411) Guide du jeu, `docs/`, vérification finale (budgets, critères)
 
 ## Compte rendu
 - T-370 (26/11/2026) : spec, plan et tâches proposés ; résumé présenté à Maxime, avec une question (qui gagne à la fin du chrono). PR #235.

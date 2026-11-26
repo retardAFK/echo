@@ -1,6 +1,6 @@
 # S-024 — Mode Versus : le monstre devient un boss
 
-**Statut** : **validée par Maxime le 26/11/2026** (« go », décision D-023). Le prototype de la salle d'essai (T-371 à T-374) est fait ; la construction suit `tasks.md` à partir de T-375.
+**Statut** : armes, vue, ambiance et fin **remplacées par S-025** (Versus arcade, D-024, 26/11/2026). **Validée par Maxime le 26/11/2026** (« go », décision D-023). Le prototype de la salle d'essai (T-371 à T-374) est fait ; la construction suit `tasks.md` à partir de T-375.
 **Piliers servis** : P1 (le son trahit : chaque tir fait du bruit et guide le boss), P2 (le dilemme permanent : tirer, c'est se montrer)
 **Phase** : hors feuille de route, demandée par Maxime le 26/11/2026 (« un mode Versus où les chassés affrontent le chasseur en mode boss de Dark Souls, jouissif, avec des attaques à distance, le boss jouable aussi, penser à la modélisation du mode FPS et à qui gagne comment »).
 **Exigence transverse** : modulaire au maximum (D-022). Le mode Versus est un **module** : retirer le dossier `game/modes/versus/`, ses réglages et sa ligne dans la liste des modes rend le jeu exactement tel qu'avant. Une arme, une attaque du boss ou une phase s'ajoute par **un fichier de données et une scène**, sans toucher au joueur, au réseau ni aux IA. `docs/MODULES.md` dit comment.

@@ -32,6 +32,7 @@ Ce document liste tout ce qui reste à faire jusqu'à la sortie publique : les p
 | — | S-022 | Modularité et reprise du code par tout agent : `AGENTS.md`, carte de l'architecture, guide pour ajouter ou retirer un module, lint des outils, découpage de `game_map.gd` (demande du 19/11/2026, hors ordre des phases, `specs/S-022-modularite/`) | T-430 à T-449 | — |
 | — | S-023 | Gadgets au choix, monstre qui monte en puissance, salle d'essai (demande du 20/11/2026 après l'audit de game design, `specs/S-023-gadgets-et-salle-d-essai/`), livrée le 20/11/2026 | T-350 à T-369 | S-020 |
 | — | S-024 | Mode Versus : le monstre devient un boss joué contre 2 à 4 chassés armés de lumière et de son (demande du 26/11/2026, `specs/S-024-mode-versus/`), validée le 26/11/2026 (D-023), en construction | T-370 à T-399 | S-023 |
+| — | S-025 | Versus arcade : refonte fun façon Fortnite (vue à la 3e personne, armes à impact immédiat, raretés, zone, portes ouvertes, ambiance de jour), demande du 26/11/2026 après test de Maxime (`specs/S-025-versus-arcade/`), D-024 | T-400 à T-429 | S-024 |
 
 L'ordre suit D-013 (12/11/2026) : le multijoueur passe juste après le test à plusieurs, avant les personnages, l'audio et les menus. Tout ce qui est ajouté avant le réseau (animations, sons d'autres joueurs, menus) devrait sinon être repris pour être synchronisé.
 
