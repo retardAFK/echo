@@ -15,6 +15,13 @@ extends Resource
 @export_range(0.0, 100.0, 0.5) var phase_weight: float = 1.0
 
 
+## The rarity of item among rarities, or null (no item, no rarities).
+static func of(item: VersusItem, rarities: Array[VersusRarity]) -> VersusRarity:
+	if item == null or rarities.is_empty():
+		return null
+	return rarities[clampi(item.rarity, 0, rarities.size() - 1)]
+
+
 ## The index of a rarity drawn among rarities by weight (phase_weight for
 ## the chests of a new phase); 0 when none.
 static func draw(rarities: Array[VersusRarity], rng: RandomNumberGenerator, phase := false) -> int:

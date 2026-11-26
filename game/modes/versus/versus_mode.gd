@@ -36,6 +36,8 @@ var end_screen: VersusEndScreen
 var dawn_announced := false
 ## The arena of this map (Q24), or null: the whole map (the test room).
 var arena: VersusArena
+## The zone that shrinks (S-025, Q6), or null without an arena.
+var zone: VersusZone
 ## Online (T-381): the map's NetGame, or null in solo; mirror on a client.
 var net: NetGame
 var mirror := false
@@ -48,6 +50,11 @@ var _mirror_health: BossHealth
 var _leap_shadow_left := 0.0
 var _ended := false
 var _lit: Array[Flare] = []
+## Seconds left before the zone hurts each hunted outside it again.
+var _zone_ticks := {}
+## The zone step whose warning and start were announced.
+var _zone_warned := -1
+var _zone_started := -1
 ## The copies of the guns by rarity (item).
 var _rare_items := {}
 var _slowmo_left := 0.0
@@ -77,6 +84,9 @@ func _setup() -> void:
 		builder.use_navigation(get_parent())
 	_open_doors()
 	add_child(VersusDaylight.new(self))
+	if arena != null:
+		zone = VersusZone.new(settings, arena.bounds)
+		add_child(ZoneWall.new(self, zone))
 	leap_shadow = _make_shadow()
 	add_child(leap_shadow)
 	end_screen = VersusEndScreen.new()
@@ -113,6 +123,9 @@ func _setup() -> void:
 	rules = VersusRules.new(settings, boss.health)
 	for kit in hunters:
 		rules.hunted.append(kit.vitals)
+		kit.vitals.downed.connect(announce.bind("VERSUS_DOWN_BANNER", []))
+		kit.vitals.revived.connect(announce.bind("VERSUS_REVIVED_BANNER", []))
+		kit.vitals.out.connect(announce.bind("VERSUS_OUT_BANNER", []))
 	if net != null:
 		link = VersusNet.new(self, net)
 		add_child(link)
@@ -222,16 +235,9 @@ func item(id: StringName, rarity := 0) -> VersusItem:
 	return _rare_items[key]
 
 
-## The rarity of item (S-025, Q3), or null without rarities.
-func rarity_of(given: VersusItem) -> VersusRarity:
-	if given == null or settings.rarities.is_empty():
-		return null
-	return settings.rarities[clampi(given.rarity, 0, settings.rarities.size() - 1)]
-
-
 ## What a chest holds (Q31): an item drawn by weight and, for a gun, its
 ## rarity (S-025, Q3), better in the chests of a new phase.
-func draw_item(rng: RandomNumberGenerator, phase: bool) -> VersusItem:
+func _draw_item(rng: RandomNumberGenerator, phase: bool) -> VersusItem:
 	var drawn := VersusLoadout.draw(settings.items, rng, phase)
 	if drawn == null or drawn.slot != VersusItem.Slot.WEAPON:
 		return drawn
@@ -299,13 +305,15 @@ func add_chest(point: Vector3, item: VersusItem) -> VersusChest:
 
 func _add_arena_chests(from: int, count: int, phase: bool) -> void:
 	for i in range(from, mini(from + count, arena.chest_spots.size())):
-		add_chest(arena.chest_spots[i], draw_item(get_parent().rng, phase))
+		add_chest(arena.chest_spots[i], _draw_item(get_parent().rng, phase))
 
 
 ## A new phase (Q32): new chests, better ones; the cry of the phase that
 ## says so puts the lights out (Q8).
 func _on_phase_changed(index: int) -> void:
 	var phase := boss.health.current_phase()
+	if phase != null and index > 0:
+		announce("VERSUS_PHASE_BANNER", [index + 1, phase.name_key])
 	if phase != null and phase.lights_out:
 		put_lights_out()
 		if link != null:
@@ -448,6 +456,8 @@ func _physics_process(delta: float) -> void:
 		if rules.winner != VersusRules.Winner.NONE and not _ended:
 			_on_end()  # The room says it is over: the same slow motion here.
 	elif rules.winner == VersusRules.Winner.NONE:
+		_hurt_outside_zone(delta)
+		_announce_zone()
 		if rules.update(delta) != VersusRules.Winner.NONE:
 			_on_end()
 		elif rules.dawn_near() and not dawn_announced:
@@ -520,9 +530,52 @@ func show_online_end(winner: int, dawn: bool, clock: float, rows: Array, mvp_sea
 	)
 
 
+## Outside the zone (S-025, Q6): a hunted loses a point every
+## zone_hunted_tick seconds, the boss a share of its health each second.
+func _hurt_outside_zone(delta: float) -> void:
+	if zone == null:
+		return
+	var clock := rules.clock
+	for kit in hunters:
+		if not kit.vitals.is_standing() or not zone.is_outside(kit.body.global_position, clock):
+			_zone_ticks[kit] = settings.zone_hunted_tick
+			continue
+		_zone_ticks[kit] = _zone_ticks.get(kit, settings.zone_hunted_tick) - delta
+		if _zone_ticks[kit] <= 0.0:
+			_zone_ticks[kit] = settings.zone_hunted_tick
+			if kit.vitals.hurt(1, true):
+				kit.hurt.emit(1)
+	if boss != null and zone.is_outside(boss.body.global_position, clock):
+		boss.health.take_hit(boss.health.max_health * settings.zone_boss_share * delta)
+
+
+## The banner says when the zone is about to shrink, then that it shrinks.
+func _announce_zone() -> void:
+	if zone == null:
+		return
+	var next := zone.next_step(rules.clock)
+	var step: int = next[0]
+	var wait: float = next[1]
+	if wait > 0.0 and wait <= settings.zone_warning and _zone_warned < step:
+		_zone_warned = step
+		announce("VERSUS_ZONE_SOON", [ceili(wait)])
+	elif wait == 0.0 and _zone_started < step:
+		_zone_started = step
+		announce("VERSUS_ZONE_SHRINKS")
+
+
+## A banner for everyone (S-025, Q4): text key and its values.
+func announce(key: String, values: Array = []) -> void:
+	if hud != null:
+		hud.show_banner(key, values)
+	if link != null and not mirror:
+		link.send([VersusNet.Event.BANNER, key, values])
+
+
 ## Dawn is near (Q3): a siren, and the boss enters its last phase.
 func _announce_dawn() -> void:
 	dawn_announced = true
+	announce("VERSUS_DAWN_NEAR")
 	NoiseBus.emit_noise(
 		NoiseEvent.Type.SIREN, boss.body.global_position, settings.dawn_siren_range, null
 	)

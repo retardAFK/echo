@@ -150,7 +150,9 @@ func test_rarer_guns_deal_more_and_phase_chests_are_rarer() -> void:
 	assert_eq(versus.item(&"light_smg", 2), epic, "one copy each")
 	assert_eq(versus.item(&"light_smg"), settings.first_weapon, "common: the item itself")
 	assert_eq(versus.item(&"medkit", 3).rarity, 0, "tools have no rarity")
-	var hit := HitscanShot.hit_of(SMG, false, versus.rarity_of(epic).damage_multiplier)
+	var hit := HitscanShot.hit_of(
+		SMG, false, VersusRarity.of(epic, settings.rarities).damage_multiplier
+	)
 	assert_almost_eq(hit[0], SMG.damage * 1.2, 0.001)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 11

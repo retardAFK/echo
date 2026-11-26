@@ -20,6 +20,10 @@ const LASER_COLOR := Color(0.62, 0.3, 1.0)
 const DAWN_COLOR := Color(1.0, 0.6, 0.3)
 const TRACKED_COLOR := Color(1.0, 0.1, 0.05)
 const NUMBER_FACE := Color(1.0, 0.86, 0.15)
+const BANNER_BACK := Color(0.08, 0.05, 0.2, 0.75)
+const ZONE_COLOR := Color(0.75, 0.45, 1.0)
+## Seconds a banner stays.
+const BANNER_TIME := 2.5
 ## Steady hits (the UV laser) add up into the same number for this long.
 const STEADY_TIME := 0.4
 
@@ -30,6 +34,10 @@ var _hit_face := false
 var _hurt_left := 0.0
 ## Seconds left, and in all, of the boss's white screen (a flash grenade).
 var _blind_left := 0.0
+## The banners waiting, the one shown (text) and how long it has been.
+var _banners: Array[String] = []
+var _banner := ""
+var _banner_age := BANNER_TIME
 var _blind_time := 1.0
 var _end_text := ""
 ## The damage numbers on screen: [point, amount, face, age, steady, drift].
@@ -78,6 +86,16 @@ func show_damage(point: Vector3, taken: float, face: bool, steady := false) -> v
 		_numbers.pop_front()
 
 
+## A banner at the top (S-025, Q4): an event everyone sees, its text from
+## key and values (a value that is a text key is translated here).
+func show_banner(key: String, values: Array = []) -> void:
+	var shown := []
+	for value: Variant in values:
+		var is_key := value is String and (value as String).begins_with("VERSUS_")
+		shown.append(Text.t(value) if is_key else value)
+	_banners.append(Text.t(key, shown) if not shown.is_empty() else Text.t(key))
+
+
 ## The boss played here is blinded by a flash grenade (S-025, T-404): a
 ## white screen that fades in seconds.
 func show_blind(seconds: float) -> void:
@@ -94,6 +112,12 @@ func _process(delta: float) -> void:
 	_hit_left = maxf(_hit_left - delta, 0.0)
 	_hurt_left = maxf(_hurt_left - delta, 0.0)
 	_blind_left = maxf(_blind_left - delta, 0.0)
+	_banner_age += delta
+	if _banner_age >= BANNER_TIME and not _banners.is_empty():
+		_banner = _banners.pop_front()
+		_banner_age = 0.0
+	elif _banner_age >= BANNER_TIME:
+		_banner = ""
 	for number: Array in _numbers:
 		number[3] += delta
 	var life := mode.settings.damage_number_time
@@ -120,6 +144,8 @@ func _draw_hud() -> void:
 		title += "  ·  " + Text.t("VERSUS_KNEEL")
 	_canvas.draw_string(font, bar.position + Vector2(0, -6), title, HORIZONTAL_ALIGNMENT_LEFT)
 	_draw_clock(size, font)
+	_draw_banner(size, font)
+	_draw_zone(size, font)
 	var hunter := mode.local_hunter()
 	if hunter != null:
 		_draw_hunter(hunter, size, font)
@@ -202,6 +228,69 @@ func _draw_clock(size: Vector2, font: Font) -> void:
 		)
 
 
+## The banner of the last event, under the clock.
+func _draw_banner(size: Vector2, font: Font) -> void:
+	if _banner == "":
+		return
+	var alpha := clampf((BANNER_TIME - _banner_age) * 3.0, 0.0, 1.0)
+	var width := font.get_string_size(_banner, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x + 40.0
+	var back := Rect2((size.x - width) * 0.5, 62.0, width, 30.0)
+	_canvas.draw_rect(back, Color(BANNER_BACK, BANNER_BACK.a * alpha))
+	_canvas.draw_string(
+		font,
+		Vector2(0, 84),
+		_banner,
+		HORIZONTAL_ALIGNMENT_CENTER,
+		size.x,
+		18,
+		Color(1, 1, 1, alpha)
+	)
+
+
+## The zone (S-025, Q6): when it shrinks next, and a warning while this
+## machine's player is outside it.
+func _draw_zone(size: Vector2, font: Font) -> void:
+	var zone := mode.zone
+	if zone == null or mode.rules == null:
+		return
+	var clock := mode.rules.clock
+	var next := zone.next_step(clock)
+	var line := ""
+	if next[1] > 0.0:
+		var wait := ceili(next[1])
+		line = Text.t("VERSUS_ZONE_NEXT", [wait / 60, wait % 60])
+	elif next[1] == 0.0:
+		line = Text.t("VERSUS_ZONE_SHRINKS")
+	if line != "":
+		_canvas.draw_string(
+			font, Vector2(size.x - 216, 28), line, HORIZONTAL_ALIGNMENT_RIGHT, 200, 14, ZONE_COLOR
+		)
+	var own := _own_body()
+	if own != null and zone.is_outside(own.global_position, clock):
+		var warning := Text.t(
+			"VERSUS_OUTSIDE_ZONE", [ceili(zone.distance_out(own.global_position, clock))]
+		)
+		_canvas.draw_string(
+			font,
+			Vector2(0, size.y * 0.5 - 60),
+			warning,
+			HORIZONTAL_ALIGNMENT_CENTER,
+			size.x,
+			22,
+			ZONE_COLOR
+		)
+
+
+## This machine's player's body, hunted or boss, or null.
+func _own_body() -> Node3D:
+	var hunter := mode.local_hunter()
+	if hunter != null:
+		return hunter.body
+	if mode.boss != null and mode.boss.is_local():
+		return mode.boss.body
+	return null
+
+
 ## A boss that has not attacked for long is shown in red (Q4).
 func _draw_tracked(size: Vector2) -> void:
 	var tracked: Variant = mode.tracked_position()
@@ -226,7 +315,7 @@ func _draw_hunter(hunter: HunterKit, size: Vector2, font: Font) -> void:
 	_canvas.draw_rect(Rect2(8, size.y - 98, 80, 3), BAR_BACK)
 	_canvas.draw_rect(Rect2(8, size.y - 98, 80 * hunter.stamina.value, 3), STAMINA_COLOR)
 	var right := Vector2(size.x - 408, size.y - 70)
-	var rarity := mode.rarity_of(hunter.loadout.weapon)
+	var rarity := VersusRarity.of(hunter.loadout.weapon, mode.settings.rarities)
 	var tint := (
 		rarity.color if rarity != null and hunter.loadout.weapon.weapon != null else Color.WHITE
 	)

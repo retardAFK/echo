@@ -107,7 +107,7 @@ func equip(item: VersusItem) -> VersusItem:
 
 ## The color of item's rarity on its gun (S-025), or the common glow.
 func _glow_of(item: VersusItem) -> Color:
-	var rarity := mode.rarity_of(item)
+	var rarity := VersusRarity.of(item, mode.settings.rarities)
 	if rarity == null or item.rarity <= 0:
 		return ViewModel.SMG_GLOW
 	return rarity.color
@@ -214,7 +214,7 @@ func fire() -> bool:
 
 ## What its gun's damage is multiplied by: its rarity's (S-025, Q3).
 func power() -> float:
-	var rarity := mode.rarity_of(loadout.weapon)
+	var rarity := VersusRarity.of(loadout.weapon, mode.settings.rarities)
 	return rarity.damage_multiplier if rarity != null else 1.0
 
 

@@ -18,6 +18,7 @@ extends Node
 ##   [SHOT, position, velocity, gravity, trail]: a flare fired (the
 ##   precision rifle's: no gravity, a trail), the clients show their copy;
 ##   [FLASH, point]: a flash grenade went off there (S-025);
+##   [BANNER, text key, values]: the banner of an event (S-025, Q4);
 ##   [HIT, face, point, damage, steady]: to the shooter, its hit marker
 ##   (Q21) and its damage number (S-025);
 ##   [TRACER, from, to, color]: a gun's shot (S-025), its tracer;
@@ -26,7 +27,7 @@ extends Node
 ##   [END, winner, dawn, clock, rows, mvp seat]: the end screen (Q28), rows
 ##   as VersusStats.rows gives them.
 
-enum Event { CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END, TRACER, FLASH }
+enum Event { CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END, TRACER, FLASH, BANNER }
 
 var mode: VersusMode
 var net: NetGame
@@ -221,6 +222,8 @@ func apply_net_event(payload: Array) -> void:
 			mode.add_tracer(payload[1], payload[2], payload[3])
 		Event.FLASH when payload.size() == 2:
 			mode.show_flash(payload[1])
+		Event.BANNER when payload.size() == 3 and mode.hud != null:
+			mode.hud.show_banner(payload[1], payload[2])
 		Event.LIGHTS_OUT:
 			mode.put_lights_out()
 		Event.LEAP when payload.size() == 2:
