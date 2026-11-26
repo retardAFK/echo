@@ -329,6 +329,11 @@ VERSUS_PHASE_ENRAGED,L'enragé
 VERSUS_BOSS_NAME,LE MONSTRE
 VERSUS_KNEEL,À genoux !
 VERSUS_DOWN,À terre
+VERSUS_DOWN_TIME,À terre : %d s
+VERSUS_OUT,Hors combat
+VERSUS_REVIVE,Maintenir {interact} : relever
+VERSUS_BEING_REVIVED,On vous relève
+VERSUS_FINISH,Maintenir {interact} : achever
 VERSUS_FLARES,Fusées : %d (+%d)
 VERSUS_RELOADING,Rechargement…
 VERSUS_RAGE,Rage

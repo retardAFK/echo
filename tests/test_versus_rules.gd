@@ -82,9 +82,10 @@ func test_hunted_down_revive_and_out() -> void:
 	assert_eq(vitals.health, _settings.revive_health)
 	vitals.hurt(2)
 	assert_true(vitals.revive())
+	assert_eq(vitals.revives_left, 0)
 	vitals.hurt(2)
-	assert_false(vitals.revive(), "a third revive is too many")
-	assert_true(vitals.is_out())
+	assert_true(vitals.is_out(), "its third fall: out at once")
+	assert_false(vitals.revive())
 
 
 func test_hunted_bleeds_out_and_finish() -> void:

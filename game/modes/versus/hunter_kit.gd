@@ -7,7 +7,9 @@ extends Node
 ## Prey, added by VersusMode. It starts empty-handed (Q29) and gears up at
 ## the chests (VersusChest). The player's keys: left click fires (held for
 ## the UV laser), R reloads, Space rolls, gadget_1 and gadget_2 use the
-## tools (HunterTools), interact held opens a chest or takes from it.
+## tools (HunterTools), interact held revives a downed teammate (Q5,
+## DownedHold), else opens a chest or takes from it. Downed, it crawls;
+## out, it stays where it fell.
 ## An AI prey fires by itself at the boss when it sees it.
 
 signal hurt(damage: int)
@@ -23,6 +25,10 @@ var laser: UvLaser
 ## The chest it holds interact on, and how long it has held it.
 var chest: VersusChest
 var chest_held := 0.0
+## Holding interact by a downed teammate to revive it (Q5).
+var revive := DownedHold.new()
+## Teammates it revived, for the end screen.
+var revives_done := 0
 ## True while reloading.
 var reloading := false
 var view_model: ViewModel
@@ -33,6 +39,9 @@ var _dodge_velocity := Vector3.ZERO
 var _ai_wait := 0.0
 var _down_label: Label3D
 var _fall := FallWatch.new()
+## The player's own settings while it crawls (downed).
+var _standing_settings: PlayerSettings
+var _crouched_by_fall := false
 
 
 func _init(p_mode: VersusMode) -> void:
@@ -46,6 +55,8 @@ func _ready() -> void:
 	stamina = Stamina.new(mode.settings)
 	vitals.downed.connect(_on_downed)
 	vitals.revived.connect(_on_revived)
+	vitals.out.connect(_on_out)
+	revive.started.connect(_on_revive_started)
 	if is_local():
 		var camera := body.get_viewport().get_camera_3d()
 		view_model = ViewModel.new(ViewModel.Kind.HUNTER)
@@ -239,7 +250,7 @@ func _read_keys(delta: float) -> void:
 	for slot in VersusLoadout.TOOL_SLOTS:
 		if Input.is_action_just_pressed("gadget_%d" % (slot + 1)):
 			use_tool(slot)
-	hold_chest(Input.is_action_pressed("interact"), delta)
+	_hold_interact(Input.is_action_pressed("interact"), delta)
 	if Input.is_action_just_pressed("hold_breath"):
 		reload()
 	if Input.is_action_just_pressed("dodge"):
@@ -263,6 +274,40 @@ func chest_in_reach() -> VersusChest:
 			best = each
 			best_score = score
 	return best
+
+
+## Seconds a revive takes: shorter with a medkit (Q13).
+func revive_time() -> float:
+	var factor := mode.settings.medkit_revive_factor if _medkit_slot() >= 0 else 1.0
+	return mode.settings.revive_time * factor
+
+
+## Interact held: a downed teammate in reach first (Q5), else the chests.
+func _hold_interact(held: bool, delta: float) -> void:
+	var settings := mode.settings
+	var done := revive.update(
+		mode.hunters, body.global_position, held, delta, revive_time(), settings.revive_reach, self
+	)
+	if done != null and done.vitals.revive():
+		revives_done += 1
+		var slot := _medkit_slot()
+		if slot >= 0:
+			loadout.spend(slot)
+	hold_chest(held and revive.target == null and done == null, delta)
+
+
+func _medkit_slot() -> int:
+	for slot in VersusLoadout.TOOL_SLOTS:
+		var item := loadout.tool_in(slot)
+		if item != null and item.id == &"medkit":
+			return slot
+	return -1
+
+
+func _on_revive_started(_target: HunterKit) -> void:
+	NoiseBus.emit_noise(
+		NoiseEvent.Type.RESCUE, body.global_position, mode.settings.revive_noise_range, body
+	)
 
 
 ## One frame of interact held (held) or not, on the chest in reach (Q30):
@@ -304,7 +349,7 @@ func _ai_wants(item: VersusItem) -> bool:
 ## An AI prey fires at the boss it sees within range: flares now and
 ## then, or the UV laser held while it sees it.
 func _think(delta: float) -> void:
-	hold_chest(true, delta)
+	_hold_interact(true, delta)
 	var boss := mode.boss
 	var alive := boss != null and not boss.health.is_dead()
 	if laser != null:
@@ -326,9 +371,24 @@ func _sees_boss(reach: float) -> bool:
 	return body.get_world_3d().direct_space_state.intersect_ray(query).is_empty()
 
 
+## Downed (Q5): a player crawls, an AI prey lies still.
 func _on_downed() -> void:
+	revive.reset()
+	chest = null
+	chest_held = 0.0
+	if laser != null:
+		laser.update(false, 0.0)
 	if body is Player:
-		(body as Player).held = true  # It stays down where it fell.
+		var player := body as Player
+		_standing_settings = player.settings
+		var crawl: PlayerSettings = player.settings.duplicate()
+		crawl.walk_speed = mode.settings.crawl_speed
+		crawl.sprint_speed = mode.settings.crawl_speed
+		crawl.crouch_speed = mode.settings.crawl_speed
+		player.settings = crawl
+		_crouched_by_fall = not player.is_sneaking()
+		if _crouched_by_fall:
+			player.toggle_crouch()
 	else:
 		body.set_physics_process(false)
 		_down_label = Label3D.new()
@@ -340,8 +400,30 @@ func _on_downed() -> void:
 
 func _on_revived() -> void:
 	if body is Player:
-		(body as Player).held = false
+		_stand_up(body as Player)
 	else:
 		body.set_physics_process(true)
 		if _down_label != null:
 			_down_label.queue_free()
+			_down_label = null
+
+
+## Out (Q5): it stays where it fell, the others play on.
+func _on_out() -> void:
+	revive.reset()
+	if body is Player:
+		_stand_up(body as Player)
+		(body as Player).held = true
+		return
+	if _down_label == null:
+		_on_downed()  # Out at once: lies still like a downed one.
+	_down_label.text = Text.t("VERSUS_OUT")
+
+
+func _stand_up(player: Player) -> void:
+	if _standing_settings != null:
+		player.settings = _standing_settings
+		_standing_settings = null
+	if _crouched_by_fall:
+		player.toggle_crouch()
+		_crouched_by_fall = false
