@@ -87,7 +87,8 @@ func _ready() -> void:
 		spot.found.connect(_on_hidden_found)
 	if VersusMode.is_on():
 		add_child(VersusMode.new())  # S-024: the Versus module, game/modes/versus/.
-	_setup_game_loop()
+	else:
+		_setup_game_loop()  # The Versus has its own end (S-024, Q1 to Q6).
 	pause_menu = PAUSE_MENU_SCENE.instantiate()
 	add_child(pause_menu)
 	add_child(ShaderWarmup.new())  # No stutter on the first sight of a place (T-085).

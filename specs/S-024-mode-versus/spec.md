@@ -1,6 +1,6 @@
 # S-024 — Mode Versus : le monstre devient un boss
 
-**Statut** : proposée par Claude le 26/11/2026, à valider par Maxime. Le **prototype** dans la salle d'essai (T-371 à T-374) est lancé avec son accord du 26/11/2026 (« je veux bien ») et jouable depuis « Jouer seul › Versus (prototype) » ; le reste attend la validation de la spec.
+**Statut** : **validée par Maxime le 26/11/2026** (« go », décision D-023). Le prototype de la salle d'essai (T-371 à T-374) est fait ; la construction suit `tasks.md` à partir de T-375.
 **Piliers servis** : P1 (le son trahit : chaque tir fait du bruit et guide le boss), P2 (le dilemme permanent : tirer, c'est se montrer)
 **Phase** : hors feuille de route, demandée par Maxime le 26/11/2026 (« un mode Versus où les chassés affrontent le chasseur en mode boss de Dark Souls, jouissif, avec des attaques à distance, le boss jouable aussi, penser à la modélisation du mode FPS et à qui gagne comment »).
 **Exigence transverse** : modulaire au maximum (D-022). Le mode Versus est un **module** : retirer le dossier `game/modes/versus/`, ses réglages et sa ligne dans la liste des modes rend le jeu exactement tel qu'avant. Une arme, une attaque du boss ou une phase s'ajoute par **un fichier de données et une scène**, sans toucher au joueur, au réseau ni aux IA. `docs/MODULES.md` dit comment.
@@ -29,7 +29,7 @@ Il charge : un rugissement, il se baisse, ses griffes s'écartent (1 s pour réa
 - En tant qu'agent qui reprend le code, je veux ajouter ou retirer une arme, une attaque, une phase ou le mode entier par des fichiers de données, afin de ne pas toucher au cœur du jeu.
 
 ## Clarifications
-Toutes les réponses ci-dessous sont des **propositions de Claude**, à valider ou corriger par Maxime. Les chiffres sont des points de départ, réglés ensuite par simulation.
+Les réponses ci-dessous ont été proposées par Claude et **validées par Maxime le 26/11/2026** (« go »), avec ses corrections notées sur place. Les chiffres sont des points de départ, réglés ensuite par simulation.
 
 ### Qui gagne, et comment (demande explicite de Maxime)
 - Q1 : Comment gagnent les chassés ? → Proposition : en **vidant la barre de vie du boss** avant la fin du chrono. Le dernier coup déclenche un **ralenti de 1,5 s** et une caméra qui tourne autour du boss qui s'effondre, vue par tous (le boss compris).
@@ -91,7 +91,8 @@ Toutes les réponses ci-dessous sont des **propositions de Claude**, à valider 
 - Q23 : Viseur ? → Proposition : croix fine au centre pour les chassés (le lance-fusées tire en arc : la croix montre le départ, la fusée retombe un peu après 25 m) ; pour le boss, le réticule actuel et un cercle qui montre la portée de la griffe.
 
 ### L'arène et la partie
-- Q24 : Où se joue le Versus ? → Proposition : dans la **cité des Tilleuls**, sur une **arène** bouclée par des barrières de chantier : la place centrale, le parking et l'aire de jeux (environ 90 × 70 m), avec des murets pour s'abriter et des caisses de fusées. Les bâtiments de l'arène restent fermés (pas d'intérieurs : moins de chemins, combat lisible, budget d'appels de dessin tenu). Une arène plus grande ou d'autres arènes plus tard, chacune par un fichier de données.
+- Q24 : Où se joue le Versus ? → Dans la **cité des Tilleuls**, sur une **arène inspirée de la map** (Maxime, 26/11/2026 : « inspire-toi de la map ») bouclée par des barrières de chantier : la place centrale, le parking et l'aire de jeux (environ 90 × 70 m), avec des murets pour s'abriter et des caisses de fusées. Les bâtiments de l'arène restent fermés (pas d'intérieurs : moins de chemins, combat lisible, budget d'appels de dessin tenu), mais **leurs toits sont accessibles** (Maxime, 26/11/2026) par des échelles et escaliers de secours extérieurs : un tireur en hauteur voit loin, mais le boss l'y suit (Q34). Une arène plus grande ou d'autres arènes plus tard, chacune par un fichier de données.
+- Q34 : Et si l'on tombe d'un toit ? → **Dégâts de chute** (Maxime, 26/11/2026 : « prévoir chute »), pour les chassés comme pour le boss : rien sous 4 m ; 1 point de vie de 4 à 7 m ; 2 points au-delà de 7 m ; une chute de plus de 10 m (un toit de la tour) met **à terre**. Le boss, lui, perd 5 % de sa vie par chute de plus de 7 m, et se relève **sonné 1 s** (on le punit de sauter). Une roulade (Espace) au moment de l'atterrissage enlève 1 point de vie de dégâts. Chaque chute de plus de 4 m fait un bruit de 15 m.
 - Q25 : Combien de joueurs ? → Proposition : **1 boss contre 2 à 4 chassés**, humains ou IA ; le boss est toujours un humain en ligne (comme en Traque), tiré au sort au lancement.
 - Q26 : Dans le salon ? → Proposition : le chef choisit le **mode** (« Traque » ou « Versus ») avant de lancer, sur la ligne au-dessus du nombre de joueurs. En solo, « Jouer seul › Versus » contre le boss IA ou en boss contre des chassés IA.
 - Q27 : Le son et la règle du monstre caché ? → Proposition : en Versus, la règle 2.3 « le monstre ne se montre pas plus de 2 s d'affilée » ne s'applique pas (on le combat en face) : c'est la décision **D-023** à écrire au journal. La musique de tension (S-012) passe en musique de combat, plus forte à chaque phase.
@@ -105,6 +106,7 @@ Toutes les réponses ci-dessous sont des **propositions de Claude**, à valider 
 
 ## Critères d'acceptation
 - [ ] Dans le salon, le chef choisit Traque ou Versus ; en solo, « Jouer seul › Versus » en chassé ou en boss.
+- [ ] L'arène s'inspire de la cité, ses toits sont accessibles et une chute fait des dégâts (Q24, Q34).
 - [ ] Les chassés démarrent sans arme, s'équipent dans les coffres (Q29 à Q32), tirent au lance-fusées et au lance-laser UV, utilisent 2 outils, esquivent, tombent à terre, se relèvent entre eux, selon Q5 et Q13 à Q16.
 - [ ] Le boss (joué ou IA) a ses 5 attaques, ses 3 phases, sa rage, sa posture, selon Q7 à Q12.
 - [ ] Les conditions de victoire de Q1 à Q6 sont tenues, et l'écran de fin le dit (Q28).

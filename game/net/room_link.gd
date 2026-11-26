@@ -374,10 +374,15 @@ func ask_ready(is_ready: bool, loadout: Array[StringName] = []) -> void:
 		_request_ready.rpc_id(1, is_ready, Loadout.to_indexes(loadout))
 
 
-## Client side: the leader sets how many play (2 to 4).
-func ask_game_size(wanted: int) -> void:
+## Client side, the leader's choices before the launch: how many play
+## (game_size, 2 to 4) or the game mode (mode, S-024, Q26), by name.
+func ask_choice(choice: StringName, wanted: Variant) -> void:
 	if place > 0:
-		_request_game_size.rpc_id(1, wanted)
+		match choice:
+			&"game_size":
+				_request_game_size.rpc_id(1, int(wanted))
+			&"mode":
+				_request_mode.rpc_id(1, str(wanted))
 
 
 ## Client side: the leader asks to launch.
@@ -399,6 +404,12 @@ func _broadcast_lobby() -> void:
 @rpc("any_peer", "call_remote", "reliable")
 func _request_game_size(wanted: int) -> void:
 	if _sender_place() != 0 and lobby.set_game_size(_sender_place(), wanted):
+		_broadcast_lobby()
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _request_mode(wanted: String) -> void:
+	if _sender_place() != 0 and lobby.set_mode(_sender_place(), StringName(wanted)):
 		_broadcast_lobby()
 
 

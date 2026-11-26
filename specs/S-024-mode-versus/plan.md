@@ -1,12 +1,12 @@
 # Plan — S-024
 
-**Statut** : proposé par Claude (26/11/2026), avec la spec. Le prototype (T-371 à T-374) suit ce plan dans la salle d'essai ; le reste attend la validation de la spec.
+**Statut** : validé avec la spec le 26/11/2026 (D-023). Le prototype (T-371 à T-374) est fait ; la suite part de T-375.
 
 ## Approche technique
 
 ### Un mode de jeu, un module
 Le jeu n'a aujourd'hui qu'une façon de jouer (la Traque). S-024 ajoute la notion de **mode** :
-- `GameSession.mode` (`&"hunt"` par défaut, `&"versus"`) dit quel mode est en cours, en solo comme en ligne.
+- `GameSession.mode` (`&"hunt"` par défaut, `&"versus"`) dit quel mode est en cours, en solo comme en ligne. Les modes sont listés dans `game/modes/game_modes.gd` (`GameModes`), avec le drapeau `online` qui dit si le salon peut le proposer (le Versus l'aura avec T-381).
 - Tout le Versus vit dans **`game/modes/versus/`** : règles pures, entités (armes, projectiles, bras), HUD, données (`data/*.tres`). Le reste du jeu ne le connaît pas : c'est la map qui, au démarrage, ajoute le nœud **`VersusMode`** si `GameSession.mode == &"versus"` (une ligne dans `game_map.gd`, la seule à retirer avec le dossier).
 - `VersusMode` s'accroche aux nœuds existants **par groupes et signaux** : il donne une `Weapon` à chaque chassé (`Player` et `Prey`), un `BossKit` à chaque monstre (`MonsterAvatar` et `Monster`), et remplace la règle « toucher = attraper » par des dégâts (il met `catch_distance` à 0 dans la copie des réglages de chaque monstre, comme la salle d'essai).
 
@@ -65,5 +65,5 @@ Le jeu n'a aujourd'hui qu'une façon de jouer (la Traque). S-024 ajoute la notio
 
 ## Conformité à la constitution
 - Moteur, langage, rendu : inchangés. Aucune arme à feu, aucun asset externe (modèles par script, sons par script).
-- Règle 2.3 « le monstre ne se montre pas plus de 2 s » : **écart demandé** pour le Versus seulement (D-023).
+- Règle 2.3 « le monstre ne se montre pas plus de 2 s » : **écart accordé** pour le Versus seulement (D-023, 26/11/2026).
 - Budgets : voir « Impact sur la performance ».

@@ -6,13 +6,15 @@ extends Node
 ## this folder that knows it). It gives each hunted (Player, Prey) a
 ## HunterKit and each monster (Monster, MonsterAvatar) a BossKit, runs the
 ## rules (VersusRules) and shows the HUD (VersusHud) to the local player.
-## Prototype: solo only (the test room); online comes with T-381.
+## Solo for now, in the test room or the cité ("Jouer seul › Versus",
+## T-375); online comes with T-381.
 ## To remove the mode: docs/MODULES.md, "Le mode Versus".
 
 signal finished(winner: VersusRules.Winner)
 
-const MODE := &"versus"
+const MODE := GameModes.VERSUS
 const SETTINGS := preload("res://game/modes/versus/data/versus_settings.tres")
+const START_MENU := "res://game/ui/start_menu.tscn"
 
 var settings: VersusSettings = SETTINGS
 var rules: VersusRules
@@ -122,7 +124,17 @@ func _physics_process(delta: float) -> void:
 	if _end_left > 0.0:
 		_end_left -= real
 		if _end_left <= 0.0:
-			finished.emit(rules.winner)
+			_finish()
+
+
+## The game is over: whoever listens (the test room plays again) decides
+## what comes next; with nobody (a game in the cité), back to the menu.
+func _finish() -> void:
+	var handled := not finished.get_connections().is_empty()
+	finished.emit(rules.winner)
+	if not handled:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		get_tree().change_scene_to_file.call_deferred(START_MENU)
 
 
 func _on_end() -> void:

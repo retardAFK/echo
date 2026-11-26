@@ -3,9 +3,11 @@ extends Control
 ## Online game menu (S-010, Q3 and Q6, T-096; style A of S-013, T-169):
 ## create a game or type its code on the digicode, then the waiting room: the
 ## code to send, the intercom with the four seats (monster, hunted 1 to 3),
-## who is in and who is ready, how many play (the leader chooses, 2 to 4) and
-## the leader's "Lancer". The roles are drawn at random at launch; hunted
-## seats nobody takes are played by AIs. Texts go through strings.csv.
+## who is in and who is ready, how many play (the leader chooses, 2 to 4),
+## the game mode (the leader chooses among GameModes.online(), S-024, Q26,
+## shown once there is more than one) and the leader's "Lancer". The roles
+## are drawn at random at launch; hunted seats nobody takes are played by AIs.
+## Texts go through strings.csv.
 
 ## The leader launched the game; seat is this player's (0 = monster).
 signal launched(seat: int)
@@ -142,6 +144,9 @@ func show_lobby(state: LobbyState) -> void:
 	var size_item := _room_list.item("LOBBY_GAME_SIZE")
 	size_item.text = Text.t("LOBBY_GAME_SIZE", state.game_size).to_upper()
 	_room_list.set_item_visible("LOBBY_GAME_SIZE", me == state.leader)
+	var mode_item := _room_list.item("LOBBY_MODE")
+	mode_item.text = Text.t("LOBBY_MODE", Text.t(GameModes.name_key(state.mode))).to_upper()
+	_room_list.set_item_visible("LOBBY_MODE", me == state.leader and GameModes.online().size() > 1)
 	_room_list.set_item_visible("LOBBY_START", me == state.leader)
 	_room_list.item("LOBBY_START").disabled = not state.can_start(me)
 	_hint.text = Text.t("LOBBY_WAIT_READY") if me == state.leader else Text.t("LOBBY_WAIT_LEADER")
@@ -199,6 +204,9 @@ func _on_room_chosen(key: String) -> void:
 		"LOBBY_GAME_SIZE":
 			if lobby != null:
 				NetSession.set_game_size(next_game_size(lobby))
+		"LOBBY_MODE":
+			if lobby != null:
+				NetSession.set_game_mode(GameModes.next_online(lobby.mode))
 		"LOBBY_START":
 			NetSession.start_game()
 		_:
@@ -237,7 +245,7 @@ func _on_game_started(state: LobbyState) -> void:
 static func enter_game(tree: SceneTree, state: LobbyState) -> void:
 	var seat := state.seat_of(NetSession.get_place())
 	GameSession.online_seat = seat
-	GameSession.mode = &"hunt"  # Online plays the Traque (S-024: Versus later).
+	GameSession.mode = state.mode  # The leader's pick (S-024, Q26).
 	GameSession.role = (
 		GameSession.Role.MONSTER if seat == LobbyState.MONSTER_SEAT else GameSession.Role.HUNTED
 	)

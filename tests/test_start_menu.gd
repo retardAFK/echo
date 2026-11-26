@@ -15,6 +15,7 @@ func before_each() -> void:
 
 func after_each() -> void:
 	GameSession.role = GameSession.Role.HUNTED
+	GameSession.mode = GameModes.HUNT
 
 
 func test_entries_use_translation_keys() -> void:
@@ -43,6 +44,19 @@ func test_role_entries_set_the_role() -> void:
 	_menu.get_node("%RoleList").item("MENU_PLAY_HUNTED").pressed.emit()
 	assert_eq(GameSession.role, GameSession.Role.HUNTED)
 	assert_eq(GameSession.online_seat, -1, "alone, not online")
+
+
+func test_versus_entries_start_the_versus_in_a_role() -> void:
+	_menu.show_solo()
+	var roles: MenuList = _menu.get_node("%RoleList")
+	roles.item("MENU_VERSUS_MONSTER").pressed.emit()
+	assert_eq(GameSession.mode, GameModes.VERSUS)
+	assert_eq(GameSession.role, GameSession.Role.MONSTER)
+	roles.item("MENU_PLAY_HUNTED").pressed.emit()
+	assert_eq(GameSession.mode, GameModes.HUNT, "the Traque again")
+	roles.item("MENU_VERSUS_HUNTED").grab_focus()
+	assert_eq(_menu.get_node("%Goal").text, tr("VERSUS_GOAL_HUNTED"))
+	assert_false(_menu.get_node("%Controls").text.contains("{"), "keys named")
 
 
 func test_role_under_the_cursor_shows_goal_and_controls() -> void:

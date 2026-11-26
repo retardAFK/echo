@@ -27,6 +27,28 @@ func test_players_sit_hunted_first_then_monster() -> void:
 	assert_false(lobby.add_player(5), "four seats")
 
 
+func test_leader_picks_a_mode_that_plays_online() -> void:
+	var lobby := LobbyState.new()
+	lobby.add_player(1)
+	lobby.add_player(2)
+	lobby.set_ready(2, true)
+	assert_eq(lobby.mode, GameModes.HUNT, "the Traque by default")
+	assert_false(lobby.set_mode(2, GameModes.HUNT), "only the leader")
+	assert_false(lobby.set_mode(1, &"nope"), "a known mode")
+	assert_eq(
+		lobby.set_mode(1, GameModes.VERSUS),
+		GameModes.plays_online(GameModes.VERSUS),
+		"the Versus once it plays online (T-381)"
+	)
+	assert_true(lobby.set_mode(1, GameModes.HUNT))
+	assert_false(lobby.is_ready(2), "everyone says again they are ready")
+	var read := LobbyState.from_dict(lobby.to_dict())
+	assert_eq(read.mode, lobby.mode)
+	var bad := lobby.to_dict()
+	bad["mode"] = "nope"
+	assert_eq(LobbyState.from_dict(bad).mode, GameModes.HUNT, "unknown: the Traque")
+
+
 func test_start_needs_leader_and_everyone_ready() -> void:
 	var lobby := LobbyState.new()
 	lobby.add_player(1)
@@ -156,8 +178,8 @@ func test_waiting_room_over_the_network() -> void:
 	var seen := LobbyState.from_dict(first.lobby_state)
 	assert_eq(seen.code, "KRBX")
 	assert_eq(seen.leader, first.place)
-	second.ask_game_size(2)  # Not the leader: ignored.
-	first.ask_game_size(2)
+	second.ask_choice(&"game_size", 2)  # Not the leader: ignored.
+	first.ask_choice(&"game_size", 2)
 	await _wait_until(func() -> bool: return room.lobby.game_size == 2)
 	assert_eq(room.lobby.game_size, 2)
 	second.ask_start()  # Not the leader: ignored.

@@ -3,7 +3,9 @@ extends Control
 ## Home screen (spec S-013, T-162, style A): play alone or online, options
 ## and credits (T-167). "Jouer seul" opens the role choice (S-004, Q1), with
 ## the goal and the controls of the role under the cursor (S-009, Q5);
-## choosing a role starts the game.
+## choosing a role starts the game. The Versus entries (S-024, Q26, T-375)
+## start the same map in the Versus mode, as a hunted or as the boss; they
+## are shown only while GameModes lists the Versus.
 ## It is the main scene, so the choice also works in the web build.
 
 signal role_chosen(role: GameSession.Role)
@@ -15,6 +17,11 @@ const LOBBY_SCENE := "res://game/ui/lobby_menu.tscn"
 const ROLES := {
 	"MENU_PLAY_HUNTED": GameSession.Role.HUNTED,
 	"MENU_PLAY_MONSTER": GameSession.Role.MONSTER,
+}
+## The Versus entries of "Jouer seul" (S-024, Q26) and the role each plays.
+const VERSUS_ROLES := {
+	"MENU_VERSUS_HUNTED": GameSession.Role.HUNTED,
+	"MENU_VERSUS_MONSTER": GameSession.Role.MONSTER,
 }
 
 ## Tests turn this off to stay on the menu after a choice.
@@ -60,7 +67,9 @@ func _ready() -> void:
 		_role_list.item(key).focus_entered.connect(_preview_gadget.bind(key))
 	LoadoutItems.refresh(_role_list)
 	_role_list.item("MENU_TEST_ROOM").focus_entered.connect(_preview_test_room)
-	_role_list.item("MENU_VERSUS_TEST").focus_entered.connect(_preview_versus_test)
+	for key: String in VERSUS_ROLES:
+		_role_list.item(key).focus_entered.connect(_preview_versus.bind(VERSUS_ROLES[key]))
+		_role_list.set_item_visible(key, GameModes.has(GameModes.VERSUS))
 	var version := str(ProjectSettings.get_setting("application/config/version", ""))
 	_version.text = Text.t("MENU_VERSION", version if version != "" else "dev")
 	show_home()
@@ -108,9 +117,9 @@ func preview(role: GameSession.Role) -> void:
 	_controls.text = ControlsText.controls(role)
 
 
-## Picks a role and starts the game alone.
-func choose(role: GameSession.Role) -> void:
-	GameSession.mode = &"hunt"
+## Picks a role and starts the game alone, in mode (the Traque by default).
+func choose(role: GameSession.Role, mode := GameModes.HUNT) -> void:
+	GameSession.mode = mode
 	GameSession.role = role
 	GameSession.online_seat = -1
 	role_chosen.emit(role)
@@ -152,10 +161,11 @@ func _preview_test_room() -> void:
 	_controls.text = ""
 
 
-## What the Versus prototype is (S-024, T-374).
-func _preview_versus_test() -> void:
-	_goal.text = Text.t("VERSUS_TEST_GOAL")
-	_controls.text = ""
+## The goal and controls of a role in the Versus (S-024, T-375).
+func _preview_versus(role: GameSession.Role) -> void:
+	var boss := role == GameSession.Role.MONSTER
+	_goal.text = Text.t("VERSUS_GOAL_BOSS" if boss else "VERSUS_GOAL_HUNTED")
+	_controls.text = Text.with_keys("VERSUS_CONTROLS_BOSS" if boss else "VERSUS_CONTROLS_HUNTED")
 
 
 func _on_role_chosen(key: String) -> void:
@@ -164,9 +174,8 @@ func _on_role_chosen(key: String) -> void:
 	elif key == "MENU_TEST_ROOM":
 		if change_scene:
 			TestRoom.open(get_tree(), GameSession.Role.HUNTED)  # S-023, T-356.
-	elif key == "MENU_VERSUS_TEST":
-		if change_scene:
-			TestRoom.open_versus(get_tree(), GameSession.Role.HUNTED)  # S-024, T-374.
+	elif VERSUS_ROLES.has(key):
+		choose(VERSUS_ROLES[key], GameModes.VERSUS)  # S-024, T-375.
 	elif ROLES.has(key):
 		choose(ROLES[key])
 	else:

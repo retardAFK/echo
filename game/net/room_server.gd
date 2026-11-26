@@ -53,6 +53,7 @@ func _on_game_started(state: Dictionary) -> void:
 	_physics_worst = 0.0
 	_report_left = LOAD_REPORT_TIME
 	GameSession.online_lobby = LobbyState.from_dict(state)
+	GameSession.mode = GameSession.online_lobby.mode  # S-024, Q26.
 	add_child(map_scene.instantiate())  # A child, so this node keeps the room going.
 
 

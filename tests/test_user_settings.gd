@@ -124,8 +124,11 @@ func test_options_screen_changes_values_with_the_keyboard() -> void:
 	row._gui_input(right)
 	assert_almost_eq(float(Settings.get_value("volume_master")), 0.9, 0.001)
 	options.show_tab(3)
-	var key_row: OptionRow = options.get_rows()[1]
-	assert_eq(key_row.setting, "move_forward")
+	var key_row: OptionRow
+	for each in options.get_rows():
+		if each.setting == "move_forward":
+			key_row = each
+	assert_not_null(key_row, "the key of move_forward is offered")
 	key_row._pressed()
 	assert_true(key_row.waiting)
 	var key := InputEventKey.new()
@@ -135,6 +138,18 @@ func test_options_screen_changes_values_with_the_keyboard() -> void:
 	key_row._gui_input(key)
 	assert_eq(Settings.key_of("move_forward"), KEY_UP)
 	assert_false(key_row.waiting)
+
+
+func test_a_long_tab_goes_on_two_columns_read_downwards() -> void:
+	assert_eq(OptionsMenu.column_order([1, 2, 3, 4, 5], 2), [1, 4, 2, 5, 3])
+	assert_eq(OptionsMenu.column_order([1, 2, 3], 1), [1, 2, 3])
+	var options: OptionsMenu = OPTIONS_SCENE.instantiate()
+	add_child_autofree(options)
+	options.open()
+	options.show_tab(3)
+	assert_eq(options.get_node("%Lines").columns, 2, "the keys fit above the buttons")
+	options.show_tab(0)
+	assert_eq(options.get_node("%Lines").columns, 1)
 
 
 func test_options_from_the_home_screen_and_back() -> void:
