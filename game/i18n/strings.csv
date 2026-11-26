@@ -346,7 +346,7 @@ VERSUS_YOU,Vous
 VERSUS_HUNTED_N,Chassé %d
 VERSUS_CARD,Écho · Versus · %s · %s
 VERSUS_COPY_CARD,Copier la carte
-VERSUS_FLARES,Fusées : %d (+%d)
+VERSUS_AMMO,%d / %d
 VERSUS_RELOADING,Rechargement…
 VERSUS_RAGE,Rage
 VERSUS_FURY,FUREUR
@@ -369,10 +369,10 @@ VERSUS_NO_WEAPON,Sans arme
 VERSUS_CHEST_OPEN,Maintenir {interact} : ouvrir le coffre
 VERSUS_CHEST_TAKE,Maintenir {interact} : prendre %s
 VERSUS_TOOL_LINE,%s : %s ×%d
-VERSUS_ITEM_FLARE_LAUNCHER,Lance-fusées
+VERSUS_ITEM_LIGHT_SMG,Mitraillette à lumière
 VERSUS_ITEM_UV_LASER,Lance-laser UV
 VERSUS_ITEM_SONIC_CANNON,Canon sonique
 VERSUS_ITEM_MEDKIT,Trousse
 VERSUS_ITEM_FIRECRACKER,Pétards
 VERSUS_ITEM_SMOKE,Fumigène
-VERSUS_ITEM_FLARES,Boîte de fusées
+VERSUS_ITEM_AMMO,Boîte de munitions

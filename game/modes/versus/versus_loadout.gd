@@ -1,7 +1,7 @@
 class_name VersusLoadout
 extends RefCounted
 ## What a Versus hunted carries (spec S-024, Q13, Q31, T-377): one weapon,
-## two tools with their uses, and its spare flares. Pure, for tests.
+## two tools with their uses, and its spare ammo. Pure, for tests.
 ## Taking an item from a chest gives back what goes into the chest instead:
 ## the old weapon, or the oldest tool when both slots are taken.
 
@@ -10,8 +10,8 @@ const TOOL_SLOTS := 2
 var weapon: VersusItem
 var tools: Array[VersusItem] = []
 var uses: Array[int] = []
-## Flares left besides those in the launcher.
-var spare_flares := 0
+## Shots left besides those in the gun's clip.
+var spare_ammo := 0
 
 
 ## Takes item; returns what it leaves in the chest (null: nothing).
@@ -22,7 +22,7 @@ func take(item: VersusItem) -> VersusItem:
 			weapon = item
 			return old
 		VersusItem.Slot.AMMO:
-			spare_flares += item.uses
+			spare_ammo += item.uses
 			return null
 	var left: VersusItem
 	if tools.size() >= TOOL_SLOTS:
@@ -35,6 +35,11 @@ func take(item: VersusItem) -> VersusItem:
 
 func has_weapon(id: StringName) -> bool:
 	return weapon != null and weapon.id == id
+
+
+## The gun in hand (how it shoots), or null: no weapon, or the UV laser.
+func gun() -> VersusWeapon:
+	return weapon.weapon if weapon != null else null
 
 
 ## The tool in slot, or null.
@@ -54,10 +59,10 @@ func spend(slot: int) -> bool:
 	return true
 
 
-## Takes up to wanted flares from the spares; returns how many.
-func draw_flares(wanted: int) -> int:
-	var given := mini(wanted, spare_flares)
-	spare_flares -= given
+## Takes up to wanted shots from the spares; returns how many.
+func draw_ammo(wanted: int) -> int:
+	var given := mini(wanted, spare_ammo)
+	spare_ammo -= given
 	return given
 
 

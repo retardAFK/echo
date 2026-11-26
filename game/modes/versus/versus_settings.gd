@@ -1,7 +1,8 @@
 class_name VersusSettings
 extends Resource
 ## Tunable values of the Versus mode (spec S-024, T-371): the boss's health,
-## phases, poise and rage, the hunted's health, stamina and flare launcher,
+## phases, poise and rage, the hunted's health, stamina and guns (their own numbers in
+## data/weapons/, VersusWeapon),
 ## and the clock. Starting values from the spec, to tune by simulation.
 
 @export_group("Boss")
@@ -89,8 +90,9 @@ extends Resource
 ## Range of the roll's noise, in meters (Q15).
 @export_range(0.0, 50.0, 0.5, "suffix:m") var dodge_noise_range: float = 6.0
 
-@export_group("Flare launcher")
-## Damage of a flare on the body (Q13).
+@export_group("Flares")
+## A Flare: a shot that flies (S-024; S-025 keeps it for the precision
+## rifle of T-404). Damage of a flare on the body (Q13).
 @export_range(0.0, 500.0, 1.0) var flare_damage: float = 30.0
 ## Damage of a flare in the face (Q13).
 @export_range(0.0, 500.0, 1.0) var flare_face_damage: float = 60.0
@@ -107,14 +109,6 @@ extends Resource
 @export_range(0.5, 10.0, 0.1, "suffix:s") var flare_life: float = 2.0
 ## Seconds a flare burns on the ground (Q13).
 @export_range(0.0, 30.0, 0.5, "suffix:s") var flare_ground_time: float = 8.0
-## Flares in the launcher (Q13).
-@export_range(1, 20) var flare_clip: int = 6
-## Seconds between two shots.
-@export_range(0.05, 3.0, 0.05, "suffix:s") var flare_cooldown: float = 0.45
-## Seconds to reload (Q13).
-@export_range(0.1, 10.0, 0.1, "suffix:s") var reload_time: float = 2.0
-## Range of a shot's noise, in meters (Q13).
-@export_range(0.0, 60.0, 0.5, "suffix:m") var shot_noise_range: float = 20.0
 
 @export_group("Clock")
 ## Length of a Versus game, in seconds (Q3).
@@ -133,6 +127,8 @@ extends Resource
 @export_range(1.0, 30.0, 0.5, "suffix:m") var flare_light_range: float = 9.0
 ## Seconds the hit marker stays on the crosshair (Q21).
 @export_range(0.05, 1.0, 0.05, "suffix:s") var hit_marker_time: float = 0.25
+## Seconds a damage number floats over the boss (S-025, Q4).
+@export_range(0.1, 3.0, 0.05, "suffix:s") var damage_number_time: float = 0.8
 
 @export_group("Boss blows")
 ## Claw reach, half angle and height (Q9).
@@ -208,9 +204,11 @@ extends Resource
 @export_range(0.0, 10.0, 0.5, "suffix:s") var brain_retreat_time: float = 3.0
 
 @export_group("AI hunted")
-## Farthest the AI hunted shoots at the boss, and its time between shots.
+## Farthest the AI hunted shoots at the boss; it fires in bursts of
+## ai_burst_time (holding fire), ai_fire_interval apart (S-025).
 @export_range(1.0, 60.0, 1.0, "suffix:m") var ai_fire_range: float = 25.0
 @export_range(0.2, 10.0, 0.1, "suffix:s") var ai_fire_interval: float = 1.4
+@export_range(0.1, 5.0, 0.1, "suffix:s") var ai_burst_time: float = 1.0
 ## Where it goes (Q17, PreyFighter), chosen every ai_think_interval: a
 ## downed teammate when the boss is at least ai_revive_safe from it; a chest
 ## (any when unarmed, else within ai_chest_detour with the boss at least
@@ -262,8 +260,8 @@ extends Resource
 ## Chests of the arena at the start, and new ones at each phase (Q32).
 @export_range(0, 20) var arena_chests: int = 4
 @export_range(0, 20) var phase_chests: int = 3
-## Spare flares a hunted has when it gets its launcher.
-@export_range(0, 60) var start_spare_flares: int = 12
+## Spare shots a hunted has when it gets its first gun.
+@export_range(0, 300) var start_spare_ammo: int = 90
 
 @export_group("UV laser")
 ## The lance-laser UV (Q13): reach, damage per second (twice in the face),

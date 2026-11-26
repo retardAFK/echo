@@ -4,10 +4,10 @@
 
 [resource]
 script = ExtResource("1_item")
-id = &"flare_launcher"
-slot = 0
-name_key = "VERSUS_ITEM_FLARE_LAUNCHER"
-uses = 0
-weight = 0.0
-phase_weight = 0.0
+id = &"ammo"
+slot = 2
+name_key = "VERSUS_ITEM_AMMO"
+uses = 60
+weight = 2.0
+phase_weight = 1.0
 gadget_kind = -1

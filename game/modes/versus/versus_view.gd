@@ -25,6 +25,8 @@ var arm: SpringArm3D
 var _own_camera: Camera3D
 var _hunted_body: HuntedBody
 var _monster_body: MonsterBody
+## How hard the camera shakes now (0 to 1), after a shot (S-025, T-403).
+var _shake := 0.0
 
 
 func _init(p_settings: VersusSettings, p_avatar: CharacterBody3D) -> void:
@@ -64,7 +66,15 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		_apply()
 
 
-func _process(_delta: float) -> void:
+## Shakes the camera a little (a shot's kick, S-025): amount from 0 to 1.
+func shake(amount: float) -> void:
+	_shake = clampf(maxf(_shake, amount), 0.0, 1.0)
+
+
+func _process(delta: float) -> void:
+	_shake = move_toward(_shake, 0.0, delta * 6.0)
+	camera.h_offset = randf_range(-1.0, 1.0) * _shake * 0.06
+	camera.v_offset = randf_range(-1.0, 1.0) * _shake * 0.06
 	if first_person:
 		return
 	var speed := Vector2(avatar.velocity.x, avatar.velocity.z).length()
