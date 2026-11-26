@@ -334,6 +334,7 @@ VERSUS_OUT,Hors combat
 VERSUS_REVIVE,Maintenir {interact} : relever
 VERSUS_BEING_REVIVED,On vous relève
 VERSUS_FINISH,Maintenir {interact} : achever
+VERSUS_LEAP_READY,Bond prêt : {interact} en visant un bruit
 VERSUS_FLARES,Fusées : %d (+%d)
 VERSUS_RELOADING,Rechargement…
 VERSUS_RAGE,Rage
@@ -352,7 +353,7 @@ OPTIONS_KEY_DODGE,Roulade (Versus)
 VERSUS_GOAL_HUNTED,"Mode Versus : ensemble, videz la barre de vie du monstre avant l'aube (10 minutes). Lisez ses attaques et esquivez. Chaque tir fait du bruit : il sait d'où vous tirez."
 VERSUS_GOAL_BOSS,"Mode Versus : tu es le boss. Mets tous les chassés à terre, ou tiens jusqu'à l'aube (10 minutes). Leurs tirs s'affichent en orange."
 VERSUS_CONTROLS_HUNTED,"{move} : se déplacer · souris : viser\nClic gauche : tirer (maintenu : laser) · {hold_breath} : recharger\n{gadget_1} et {gadget_2} : outils · {dodge} : roulade\nMaintenir {interact} : ouvrir un coffre, relever un coéquipier"
-VERSUS_CONTROLS_BOSS,"{move} : se déplacer · souris : regarder\nClic gauche : griffe · {dodge} : charge\n{hold_breath} : Fureur quand la rage est pleine\nMaintenir clic droit : scanner"
+VERSUS_CONTROLS_BOSS,"{move} : se déplacer · souris : regarder\nClic gauche : griffe · {dodge} : charge\n{hold_breath} : Fureur quand la rage est pleine\nMaintenir {interact} sur un chassé à terre : l'achever\nPhase 2 : {interact} en visant un bruit : bond\nMaintenir clic droit : scanner"
 VERSUS_NO_WEAPON,Sans arme
 VERSUS_CHEST_OPEN,Maintenir {interact} : ouvrir le coffre
 VERSUS_CHEST_TAKE,Maintenir {interact} : prendre %s

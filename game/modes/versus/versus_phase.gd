@@ -17,3 +17,5 @@ extends Resource
 @export var can_leap := false
 ## Whether entering the phase puts the arena lights out (Q8, phase 2).
 @export var lights_out := false
+## Whether its claw strikes twice during the phase (Q8, phase 3).
+@export var double_claw := false

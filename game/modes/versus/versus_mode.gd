@@ -124,11 +124,42 @@ func _add_arena_chests(from: int, count: int, phase: bool) -> void:
 		add_chest(arena.chest_spots[i], VersusLoadout.draw(settings.items, get_parent().rng, phase))
 
 
-## A new phase (Q32): new chests, better ones.
+## A new phase (Q32): new chests, better ones; the cry of the phase that
+## says so puts the lights out (Q8).
 func _on_phase_changed(index: int) -> void:
+	var phase := boss.health.current_phase()
+	if phase != null and phase.lights_out:
+		put_lights_out()
 	if arena != null and index > 0:
 		var from := settings.arena_chests + (index - 1) * settings.phase_chests
 		_add_arena_chests(from, settings.phase_chests, true)
+
+
+## The lights of the arena go out for good (Q8): its lamps (in the test
+## room, every lamp of the map) but not the flares nor what someone carries,
+## and the night gets darker. Returns how many went out.
+func put_lights_out() -> int:
+	var map := get_parent()
+	var carriers: Array[Node] = [boss.body]
+	for kit in hunters:
+		carriers.append(kit.body)
+	var count := 0
+	for node in map.find_children("*", "Light3D", true, false):
+		var light := node as Light3D
+		if light is DirectionalLight3D or not light.visible or is_ancestor_of(light):
+			continue
+		if carriers.any(func(carrier: Node) -> bool: return carrier.is_ancestor_of(light)):
+			continue
+		if arena != null and not arena.contains(light.global_position):
+			continue
+		light.visible = false
+		count += 1
+	for node in map.find_children("*", "WorldEnvironment", true, false):
+		var world := node as WorldEnvironment
+		if world.environment != null:
+			world.environment = world.environment.duplicate()
+			world.environment.ambient_light_energy *= settings.lights_out_ambient
+	return count
 
 
 ## A firecracker going off by the boss hurts it (Q13).

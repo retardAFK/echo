@@ -5,14 +5,17 @@ extends Node
 ## before the blow, and, for the played boss, its first-person arms. A child
 ## of a Monster (AI) or a MonsterAvatar (played), added by VersusMode.
 ## Played: left click claws, Space charges, R starts the Fury, interact
-## held by a downed hunted finishes it (Q5, DownedHold).
+## held by a downed hunted finishes it (Q5, DownedHold), else interact
+## leaps onto the noise aimed at (phase 2+, BossLeap). Each new phase starts
+## with a cry; in phase 3 the claw strikes twice (Q8).
 ## AI: claws a hunted in reach, charges one 6 to 14 m away in sight,
+## leaps onto the noise of one farther away (phase 2+),
 ## finishes a downed one at its feet when no standing one is in reach.
 ## Any blow that makes it flinch breaks a finish.
 
 signal hit_taken(face: bool)
 
-enum Move { NONE, CLAW_WINDUP, CHARGE_WINDUP, CHARGING, STUNNED }
+enum Move { NONE, CLAW_WINDUP, CHARGE_WINDUP, CHARGING, STUNNED, LEAPING }
 
 ## Seconds the body is held still each frame while a move or a kneel lasts.
 const HOLD := 0.1
@@ -23,6 +26,10 @@ var health: BossHealth
 var move := Move.NONE
 ## Holding interact by a downed hunted to finish it (Q5).
 var finish := DownedHold.new()
+## Its leap (phase 2+), and the noises it may leap onto.
+var leap: BossLeap
+## Its shadow where it lands, shown while it leaps.
+var leap_shadow: MeshInstance3D
 var view_model: ViewModel
 var _move_left := 0.0
 var _claw_wait := 0.0
@@ -36,6 +43,7 @@ var _fall := FallWatch.new()
 var _slow_left := 0.0
 var _push_velocity := Vector3.ZERO
 var _push_left := 0.0
+var _second_claw := false
 
 
 func _init(p_mode: VersusMode) -> void:
@@ -50,6 +58,11 @@ func _ready() -> void:
 	_base_walk = settings.walk_speed
 	_base_run = settings.run_speed
 	hit_taken.connect(func(_face: bool) -> void: finish.reset())
+	leap = BossLeap.new(mode.settings)
+	health.phase_changed.connect(_on_phase_changed)
+	NoiseBus.noise_emitted.connect(_on_noise)
+	leap_shadow = _make_shadow()
+	add_child(leap_shadow)
 	if is_local():
 		view_model = ViewModel.new(ViewModel.Kind.BOSS)
 		(body as MonsterAvatar).get_camera().add_child(view_model)
@@ -156,8 +169,29 @@ func reset_fall() -> void:
 	_fall.reset()
 
 
+## Whether its phase lets it leap now (Q9).
+func can_leap() -> bool:
+	var phase := health.current_phase()
+	return phase != null and phase.can_leap and leap.wait <= 0.0
+
+
+## Starts the leap onto target (Q9) if it can.
+func leap_to(target: Vector3) -> bool:
+	if move != Move.NONE or not can_leap():
+		return false
+	_face(target - body.global_position)
+	leap.start(body.global_position, target)
+	move = Move.LEAPING
+	_hold()
+	leap_shadow.global_position = target + Vector3.UP * 0.05
+	leap_shadow.visible = true
+	_play_gesture(MonsterBody.Action.CATCH, mode.settings.leap_time)
+	return true
+
+
 func _physics_process(delta: float) -> void:
 	health.update(delta)
+	leap.update(delta)
 	var fallen := _fall.update(body.is_on_floor(), body.global_position.y)
 	if fallen > 0.0:
 		land(fallen)
@@ -194,6 +228,11 @@ func _physics_process(delta: float) -> void:
 		Move.CHARGING:
 			_hold()
 			_charge_step(delta)
+		Move.LEAPING:
+			_hold()
+			body.global_position = leap.fly(delta)
+			if not leap.leaping:
+				_land_leap()
 		Move.STUNNED:
 			_hold()
 			_move_left -= delta
@@ -230,6 +269,13 @@ func _read_keys(delta: float) -> void:
 	hold_finish(Input.is_action_pressed("interact"), delta)
 	if finish.target != null:
 		return
+	if Input.is_action_just_pressed("interact") and can_leap():
+		var eyes: Vector3 = body.call(&"get_eye_position")
+		var aim := -(body as MonsterAvatar).get_camera().global_basis.z
+		var target: Variant = leap.pick(eyes, aim)
+		if target != null:
+			leap_to(target)
+			return
 	if Input.is_action_just_pressed("throw"):
 		claw()
 	if Input.is_action_just_pressed("dodge"):
@@ -250,6 +296,13 @@ func _think(delta: float) -> void:
 	hold_finish(distance > mode.settings.claw_reach, delta)
 	if finish.target != null or target == null:
 		return
+	if distance > mode.settings.charge_distance and can_leap():
+		var noise: Variant = leap.pick(
+			body.global_position, Vector3.ZERO, target.body.global_position
+		)
+		if noise != null and (noise as Vector3).distance_to(target.body.global_position) < 4.0:
+			leap_to(noise)
+			return
 	if distance <= mode.settings.claw_reach * 0.9:
 		_face(offset)
 		claw()
@@ -281,6 +334,12 @@ func _land_claw() -> void:
 	health.attacked(hit)
 	if view_model != null:
 		view_model.swipe()
+	var phase := health.current_phase()
+	if phase != null and phase.double_claw and not _second_claw:
+		_second_claw = true  # Enraged: a second blow right after (Q8).
+		_move_left = mode.settings.double_claw_delay
+		return
+	_second_claw = false
 	_claw_wait = mode.settings.claw_cooldown
 	_end_move()
 
@@ -310,8 +369,67 @@ func _charge_step(delta: float) -> void:
 		_end_move()
 
 
+## The landing (Q9): a shock wave hurts and throws the standing hunted near.
+func _land_leap() -> void:
+	leap_shadow.visible = false
+	var hit := false
+	var settings := mode.settings
+	for hunter in mode.hunters:
+		var offset := hunter.body.global_position - body.global_position
+		offset.y = 0.0
+		if not hunter.vitals.is_standing() or offset.length() > settings.leap_radius:
+			continue
+		if hunter.take_blow(settings.leap_damage):
+			hit = true
+			hunter.knock(offset.normalized() * settings.leap_knock)
+	health.attacked(hit)
+	NoiseBus.emit_noise(NoiseEvent.Type.IMPACT, body.global_position, settings.leap_range, body)
+	_end_move()
+
+
+## A new phase (Q8): its cry, heard far.
+func _on_phase_changed(index: int) -> void:
+	if index > 0:
+		MonsterNoise.scream(body)
+
+
+## It remembers where the hunted made noise (its leap targets).
+func _on_noise(event: NoiseEvent) -> void:
+	if event.source == body:
+		return
+	for hunter in mode.hunters:
+		if event.source == hunter.body:
+			leap.hear(event.position)
+			return
+
+
+func _exit_tree() -> void:
+	if NoiseBus.noise_emitted.is_connected(_on_noise):
+		NoiseBus.noise_emitted.disconnect(_on_noise)
+
+
+func _make_shadow() -> MeshInstance3D:
+	var shadow := MeshInstance3D.new()
+	var disc := CylinderMesh.new()
+	disc.top_radius = mode.settings.leap_radius
+	disc.bottom_radius = mode.settings.leap_radius
+	disc.height = 0.02
+	disc.radial_segments = 24
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0, 0, 0, 0.55)
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	disc.material = material
+	shadow.mesh = disc
+	shadow.top_level = true
+	shadow.visible = false
+	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return shadow
+
+
 func _end_move() -> void:
 	move = Move.NONE
+	_second_claw = false
 	if view_model != null:
 		view_model.lower(0.0)
 
