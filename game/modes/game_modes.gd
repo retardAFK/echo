@@ -11,10 +11,10 @@ const HUNT := &"hunt"
 const VERSUS := &"versus"
 
 ## Each mode: its name, the key of its name in strings.csv, and whether it
-## plays online yet (the Versus does with T-381).
+## plays online (the Versus does since T-381).
 const LIST: Array[Dictionary] = [
 	{"id": HUNT, "name_key": "MODE_HUNT", "online": true},
-	{"id": VERSUS, "name_key": "MODE_VERSUS", "online": false},
+	{"id": VERSUS, "name_key": "MODE_VERSUS", "online": true},
 ]
 
 

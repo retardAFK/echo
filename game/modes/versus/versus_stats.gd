@@ -69,3 +69,30 @@ func lines(hunters: Array[HunterKit]) -> Array[String]:
 			)
 		)
 	return result
+
+
+## Online (T-381): one row per hunted, [seat, damage, face hits, revives],
+## seat_of giving each body's seat; the clients write their own lines.
+func rows(hunters: Array[HunterKit], seat_of: Callable) -> Array:
+	var result := []
+	for kit in hunters:
+		result.append(
+			[seat_of.call(kit.body), roundi(damage_of(kit)), faces_of(kit), kit.revives_done]
+		)
+	return result
+
+
+## The lines of rows, the hunted of own_seat called "Vous".
+static func lines_of(rows: Array, own_seat: int) -> Array[String]:
+	var result: Array[String] = []
+	for row: Array in rows:
+		if row.size() >= 4:
+			result.append(
+				Text.t("VERSUS_END_LINE", [seat_name(row[0], own_seat), row[1], row[2], row[3]])
+			)
+	return result
+
+
+## "Vous" for own_seat, else "Chassé n".
+static func seat_name(seat: int, own_seat: int) -> String:
+	return Text.t("VERSUS_YOU") if seat == own_seat else Text.t("VERSUS_HUNTED_N", seat)

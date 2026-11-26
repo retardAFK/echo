@@ -171,6 +171,8 @@ jobs:
           # S-018, T-267: two fuses and the code on the transformer's keypad,
           # for the rooms the lobby starts and for net_match's own check.
           ECHO_OBJECTIVES: fuse,fuse,code
+          # S-024, T-381: a Versus game of 100 s for net_versus.
+          ECHO_VERSUS_TIME: "100"
         run: |
           build/server/echo_server.x86_64 --headless -- --lobby > build/server/lobby.log 2>&1 &
           sleep 2
@@ -232,10 +234,27 @@ jobs:
               tail -n 20 build/server/spectate/client*.log
             fi
           fi
+          if [ "$code" -eq 0 ]; then
+            # S-024, T-381: an online Versus, a boss and a hunted (2 AI
+            # preys): the chest, a flare on the boss, a claw, dawn, the end.
+            mkdir -p build/server/versus
+            for index in 0 1; do
+              timeout 300 godot --headless res://tools/godot/net_versus.tscn -- --index $index \
+                --dir build/server/versus > build/server/versus/client$index.log 2>&1 &
+              pids[$index]=$!
+            done
+            for index in 0 1; do
+              wait ${pids[$index]} || code=1
+              grep ECHO_NET_VERSUS build/server/versus/client$index.log | tee -a build/server/smoke.log
+            done
+            if [ "$code" -ne 0 ]; then
+              tail -n 30 build/server/versus/client*.log
+            fi
+          fi
           pkill -f echo_server.x86_64
           echo "--- lobby and rooms ---"
           cat build/server/lobby.log
-          grep -E "ECHO_NET_(SMOKE|WALK|REJOIN|MATCH|SPECTATE)" build/server/smoke.log >> "$GITHUB_STEP_SUMMARY"
+          grep -E "ECHO_NET_(SMOKE|WALK|REJOIN|MATCH|SPECTATE|VERSUS)" build/server/smoke.log >> "$GITHUB_STEP_SUMMARY"
           grep "load" build/server/lobby.log | tail -n 1 >> "$GITHUB_STEP_SUMMARY"
           exit $code
 

@@ -127,7 +127,10 @@ func _setup_online() -> void:
 		_add_part(client, "OnlineClient")
 		client.setup(net)
 	add_child(net)
-	_setup_game_loop()
+	if VersusMode.is_on():
+		add_child(VersusMode.new())  # S-024, T-381: the Versus online, no loop.
+	else:
+		_setup_game_loop()
 	net.world.game_loop = game_loop
 	if room != null:
 		room.start()

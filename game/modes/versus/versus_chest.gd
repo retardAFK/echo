@@ -75,6 +75,14 @@ func open(by: Node, settings: VersusSettings) -> void:
 
 
 ## What is in it now (what a hunted left, or null: empty).
+## A client's copy (T-381): open or not, holding p_item, as the room says.
+func mirror(open_now: bool, p_item: VersusItem) -> void:
+	if open_now and not is_open:
+		is_open = true
+		_lid.rotation.x = LID_OPEN
+	set_item(p_item)
+
+
 func set_item(p_item: VersusItem) -> void:
 	item = p_item
 	_show_item()

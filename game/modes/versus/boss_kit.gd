@@ -24,12 +24,14 @@ var mode: VersusMode
 var body: CharacterBody3D
 var health: BossHealth
 var move := Move.NONE
+## The keys of its player, held and pressed (T-381).
+var keys := HeldKeys.new()
 ## Holding interact by a downed hunted to finish it (Q5).
 var finish := DownedHold.new()
 ## Its leap (phase 2+), and the noises it may leap onto.
 var leap: BossLeap
-## Its shadow where it lands, shown while it leaps.
-var leap_shadow: MeshInstance3D
+## A client's copy of its prompt (T-381), as the room says.
+var mirror_prompt: Array = []
 var view_model: ViewModel
 var _move_left := 0.0
 var _claw_wait := 0.0
@@ -61,16 +63,20 @@ func _ready() -> void:
 	leap = BossLeap.new(mode.settings)
 	health.phase_changed.connect(_on_phase_changed)
 	NoiseBus.noise_emitted.connect(_on_noise)
-	leap_shadow = _make_shadow()
-	add_child(leap_shadow)
 	if is_local():
 		view_model = ViewModel.new(ViewModel.Kind.BOSS)
 		(body as MonsterAvatar).get_camera().add_child(view_model)
 
 
-## Whether this machine's player drives it (else the AI).
+## Whether this machine's player drives it (its arms and HUD show here).
 func is_local() -> bool:
 	return body is MonsterAvatar and (body as MonsterAvatar).local_controls
+
+
+## Whether a human plays it through its commands: here, or on the room
+## (T-381). Else the AI (or a client's mirror of its own avatar).
+func is_played() -> bool:
+	return body is MonsterAvatar and not (body as MonsterAvatar).mirror_world
 
 
 ## A flare hit it at point (Q13): face or body, damage and poise.
@@ -169,6 +175,12 @@ func reset_fall() -> void:
 	_fall.reset()
 
 
+## What holding interact does now (KitPrompts), or on a client what the room
+## says.
+func shown_prompt() -> Array:
+	return mirror_prompt if mode.mirror else KitPrompts.of_boss(self)
+
+
 ## Whether its phase lets it leap now (Q9).
 func can_leap() -> bool:
 	var phase := health.current_phase()
@@ -183,13 +195,16 @@ func leap_to(target: Vector3) -> bool:
 	leap.start(body.global_position, target)
 	move = Move.LEAPING
 	_hold()
-	leap_shadow.global_position = target + Vector3.UP * 0.05
-	leap_shadow.visible = true
+	mode.show_leap(target)
 	_play_gesture(MonsterBody.Action.CATCH, mode.settings.leap_time)
 	return true
 
 
 func _physics_process(delta: float) -> void:
+	if mode.mirror:
+		return  # A client (T-381): the room plays, the HUD shows its copy.
+	if is_played():
+		keys.update((body as MonsterAvatar).commands)
 	health.update(delta)
 	leap.update(delta)
 	var fallen := _fall.update(body.is_on_floor(), body.global_position.y)
@@ -239,9 +254,9 @@ func _physics_process(delta: float) -> void:
 			if _move_left <= 0.0:
 				_end_move()
 		Move.NONE:
-			if is_local():
-				_read_keys(delta)
-			else:
+			if is_played():
+				_read_commands((body as MonsterAvatar).commands, delta)
+			elif not body is MonsterAvatar:
 				_think(delta)
 	if move != Move.NONE:
 		finish.reset()
@@ -265,22 +280,25 @@ func hold_finish(pressed: bool, delta: float) -> void:
 		done.vitals.finish()
 
 
-func _read_keys(delta: float) -> void:
-	hold_finish(Input.is_action_pressed("interact"), delta)
+## The player's keys (T-381), from its commands: the same on this machine
+## and on the room. Left click claws, Space charges, R starts the Fury,
+## interact finishes or leaps.
+func _read_commands(commands: PlayerCommands, delta: float) -> void:
+	hold_finish(keys.held(PlayerCommands.FLAG_INTERACT), delta)
 	if finish.target != null:
 		return
-	if Input.is_action_just_pressed("interact") and can_leap():
+	if keys.pressed(PlayerCommands.FLAG_INTERACT) and can_leap():
 		var eyes: Vector3 = body.call(&"get_eye_position")
-		var aim := -(body as MonsterAvatar).get_camera().global_basis.z
+		var aim := -Basis.from_euler(Vector3(commands.pitch, commands.yaw, 0.0)).z
 		var target: Variant = leap.pick(eyes, aim)
 		if target != null:
 			leap_to(target)
 			return
-	if Input.is_action_just_pressed("throw"):
+	if keys.pressed(PlayerCommands.FLAG_FIRE):
 		claw()
-	if Input.is_action_just_pressed("dodge"):
+	if keys.pressed(PlayerCommands.FLAG_DODGE):
 		charge(-body.global_basis.z)
-	if Input.is_action_just_pressed("hold_breath"):
+	if keys.pressed(PlayerCommands.FLAG_BREATH):
 		health.start_fury()
 
 
@@ -371,7 +389,6 @@ func _charge_step(delta: float) -> void:
 
 ## The landing (Q9): a shock wave hurts and throws the standing hunted near.
 func _land_leap() -> void:
-	leap_shadow.visible = false
 	var hit := false
 	var settings := mode.settings
 	for hunter in mode.hunters:
@@ -406,25 +423,6 @@ func _on_noise(event: NoiseEvent) -> void:
 func _exit_tree() -> void:
 	if NoiseBus.noise_emitted.is_connected(_on_noise):
 		NoiseBus.noise_emitted.disconnect(_on_noise)
-
-
-func _make_shadow() -> MeshInstance3D:
-	var shadow := MeshInstance3D.new()
-	var disc := CylinderMesh.new()
-	disc.top_radius = mode.settings.leap_radius
-	disc.bottom_radius = mode.settings.leap_radius
-	disc.height = 0.02
-	disc.radial_segments = 24
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0, 0, 0, 0.55)
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	disc.material = material
-	shadow.mesh = disc
-	shadow.top_level = true
-	shadow.visible = false
-	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	return shadow
 
 
 func _end_move() -> void:

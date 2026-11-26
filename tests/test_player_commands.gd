@@ -119,3 +119,16 @@ func test_monster_avatar_prowls_from_commands() -> void:
 	await wait_physics_frames(10)
 	assert_eq(avatar.get_pace(), MonsterBrain.Pace.PROWL)
 	assert_lt(avatar.global_position.z, 0.0)
+
+
+func test_the_versus_keys_cross_the_network() -> void:
+	var commands := PlayerCommands.new()
+	commands.fire = true
+	commands.tool_2 = true
+	var back := PlayerCommands.from_bytes(commands.to_bytes())
+	assert_true(back.fire)
+	assert_false(back.dodge)
+	assert_false(back.tool_1)
+	assert_true(back.tool_2)
+	var frames: Array[PlayerCommands] = [commands]
+	assert_true(PlayerCommands.frames_from_bytes(PlayerCommands.frames_to_bytes(frames))[0].fire)

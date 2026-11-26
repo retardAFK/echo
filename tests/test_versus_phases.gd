@@ -65,10 +65,10 @@ func test_the_boss_leaps_from_phase_2_and_its_landing_throws_the_hunted() -> voi
 	assert_eq(boss.leap.heard.size(), 1, "it heard the hunted")
 	var target: Vector3 = boss.leap.pick(boss.body.global_position, Vector3.ZERO, player.position)
 	assert_true(boss.leap_to(target + Vector3(1.0, 0, 0)))
-	assert_true(boss.leap_shadow.visible, "its shadow where it lands")
+	assert_true(versus.leap_shadow.visible, "its shadow where it lands")
 	var start := player.global_position
 	await wait_until(func() -> bool: return boss.move == BossKit.Move.NONE, 3.0)
-	assert_false(boss.leap_shadow.visible)
+	assert_false(versus.leap_shadow.visible)
 	assert_eq(hunter.vitals.health, SETTINGS.hunted_health - SETTINGS.leap_damage)
 	await wait_physics_frames(15)
 	assert_gt(player.global_position.distance_to(start), 1.0, "thrown")
