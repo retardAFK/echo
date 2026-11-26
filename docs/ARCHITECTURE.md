@@ -119,7 +119,7 @@ NetWorld.apply()                ◄─────── état des objets de la 
 ```
 
 - `NetSession` (autoload) garde le mode : `SOLO`, `CLIENT` ou `ROOM`.
-- `GameMap._setup_online()` ajoute `NetGame`, qui relaie l'état, et une partie : `MapOnlineRoom` sur la salle (pose les avatars et les IA des places vides, applique la règle de capture et la prison, remplace les absents par des IA) ou `MapOnlineClient` chez un joueur (son avatar, ses HUD, les captures annoncées, la reconnexion).
+- `GameMap._setup_online()` ajoute `NetGame`, qui relaie l'état, et une partie : `MapOnlineRoom` sur la salle (pose les avatars et les IA des places vides, applique la règle de capture et la prison, remplace les absents par des IA) ou `MapOnlineClient` chez un joueur (son avatar, ses HUD, les captures annoncées, la reconnexion). Un autre mode de jeu (le Versus) remplace cette partie et parle au réseau par `NetGame.mode_link` (instantanés et événements `MODE` à lui).
 - `NetWorld` liste **dans le même ordre des deux côtés** les objets de la map qui changent (fusibles, ramassables, alarmes, cachettes, portes, moniteurs, brancards, fauteuils, transformateur, prison, réseau, vent). **Une entité qui change pendant la partie doit y être ajoutée**, sinon les clients ne la voient pas changer (voir [`MODULES.md`](MODULES.md)).
 - Règle de secret : un client ne reçoit jamais ce qu'il ne pourrait pas savoir (qui se cache où, position d'un coéquipier hors de vue).
 
@@ -207,5 +207,5 @@ Fichiers de plus de 500 lignes dans `game/` : `prey.gd` (876), `net_game.gd` (81
 - **GUT 9.7.1** (`.gutconfig.json`, `tests/pre_run_hook.gd` impose 3 fusibles). Un fichier `test_<sujet>.gd` par sujet. Les classes pures se testent sans scène ; les tests de scène chargent la vraie scène (`tilleuls.scn` dans 44 fichiers).
 - **CI** (`.github/workflows/ci.yml`), sur chaque PR :
   1. `lint` : `gdformat --check` et `gdlint` sur `game/`, `tests/` et `tools/` (règles par défaut de gdtoolkit 4.5.0 : 100 caractères par ligne, 1 000 lignes par fichier).
-  2. `godot` : import headless, tests GUT, export web et contrôle du budget de 60 Mo (D-007), export du serveur, **4 robots qui jouent une vraie partie en ligne** (`tools/godot/net_match.tscn`) et un spectateur (`net_spectate.tscn`), puis sur `main` : déploiement du serveur et publication itch.io.
+  2. `godot` : import headless, tests GUT, export web et contrôle du budget de 60 Mo (D-007), export du serveur, **4 robots qui jouent une vraie partie en ligne** (`tools/godot/net_match.tscn`) un spectateur (`net_spectate.tscn`) et 2 robots qui jouent une partie Versus (`net_versus.tscn`, S-024), puis sur `main` : déploiement du serveur et publication itch.io.
 - Commandes locales : voir [`AGENTS.md`](../AGENTS.md#commandes).
