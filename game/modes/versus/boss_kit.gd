@@ -205,6 +205,8 @@ func leap_to(target: Vector3) -> bool:
 
 
 func _physics_process(delta: float) -> void:
+	if view_model != null:
+		view_model.visible = mode.first_person()  # Behind the shoulder: no arms (S-025).
 	if mode.mirror:
 		return  # A client (T-381): the room plays, the HUD shows its copy.
 	if is_played():

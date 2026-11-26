@@ -19,7 +19,14 @@ const VIEWS := [
 	["centre_social_ouest", Vector3(132, 1.7, 72), Vector3(145, 1.4, 72)],
 	["toit_centre", Vector3(150, 6.0, 80), Vector3(120, 2.0, 100)],
 	["parking", Vector3(150, 1.7, 120), Vector3(170, 1.0, 100)],
+	# Seen through the player's own camera, behind its shoulder (T-402): the
+	# player stands at the eye point (its feet) and looks at the target.
+	["joueur_place", Vector3(100, 0, 118), Vector3(130, 1.5, 95)],
+	["joueur_porte_tour", Vector3(108, 0, 116), Vector3(108, 1.4, 104)],
+	["joueur_boss", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
 ]
+## Views whose name starts with this are seen through the player's camera.
+const PLAYER_PREFIX := "joueur_"
 
 
 func _ready() -> void:
@@ -42,15 +49,31 @@ func _ready() -> void:
 	for view: Array in VIEWS:
 		if not only.is_empty() and not only.has(view[0]):
 			continue
-		camera.make_current()
 		var eye: Vector3 = view[1] - ORIGIN
 		var target: Vector3 = view[2] - ORIGIN
 		eye.y = view[1].y
 		target.y = view[2].y
-		camera.look_at_from_position(eye, target)
+		if String(view[0]).begins_with(PLAYER_PREFIX):
+			_stand_player(map, eye, target, view[0])
+		else:
+			camera.make_current()
+			camera.look_at_from_position(eye, target)
 		for i in SETTLE_FRAMES:
 			await get_tree().process_frame
 		var draws := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 		get_viewport().get_texture().get_image().save_png(out_dir.path_join("%s.png" % view[0]))
 		print("%-20s draw calls %4d" % [view[0], draws])
 	get_tree().quit()
+
+
+## The player at feet, looking at target, its own view current.
+func _stand_player(map: Node, feet: Vector3, target: Vector3, view_name: String) -> void:
+	var player: Player = map.get("player")
+	player.global_position = feet
+	var gap := target - (feet + Vector3.UP * 1.6)
+	player.set_look(atan2(-gap.x, -gap.z), atan2(gap.y, Vector2(gap.x, gap.z).length()))
+	var versus := map.get_node("VersusMode") as VersusMode
+	if versus.view != null:
+		versus.view.camera.make_current()
+	if versus.boss != null and String(view_name).ends_with("_boss"):
+		versus.boss.body.global_position = target - Vector3.UP * 1.5  # In view.
