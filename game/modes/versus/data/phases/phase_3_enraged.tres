@@ -10,3 +10,4 @@ speed_scale = 1.2
 damage_taken_scale = 1.25
 can_leap = true
 lights_out = false
+double_claw = true

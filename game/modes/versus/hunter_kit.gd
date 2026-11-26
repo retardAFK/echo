@@ -181,6 +181,14 @@ func dodge(direction: Vector3) -> bool:
 	return true
 
 
+## Thrown by push (the leap's shock wave, Q9): it slides like a roll,
+## without its shield.
+func knock(push: Vector3) -> void:
+	push.y = 0.0
+	_dodge_left = mode.settings.dodge_time
+	_dodge_velocity = push / mode.settings.dodge_time
+
+
 ## A blow of the boss (Q9); true if it hurt.
 func take_blow(damage: int) -> bool:
 	if not vitals.hurt(damage):

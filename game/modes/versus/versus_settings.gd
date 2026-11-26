@@ -142,6 +142,25 @@ extends Resource
 @export_range(0.3, 3.0, 0.1, "suffix:m") var charge_hit_radius: float = 1.2
 ## Seconds the boss is stunned after charging into a wall (Q9).
 @export_range(0.0, 10.0, 0.1, "suffix:s") var charge_stun: float = 2.0
+## The leap (Q9, phase 2+): onto a noise heard lately, between these
+## distances, aimed within this cosine of the noise (a played boss).
+@export_range(0.0, 20.0, 0.5, "suffix:m") var leap_min_distance: float = 5.0
+@export_range(5.0, 60.0, 1.0, "suffix:m") var leap_range: float = 25.0
+@export_range(0.5, 1.0, 0.01) var leap_aim_cos: float = 0.95
+## Seconds a noise stays a leap target.
+@export_range(0.5, 20.0, 0.5, "suffix:s") var leap_noise_memory: float = 4.0
+## Seconds in the air (its shadow shows that long) and the arc's height.
+@export_range(0.3, 3.0, 0.05, "suffix:s") var leap_time: float = 1.0
+@export_range(0.0, 10.0, 0.5, "suffix:m") var leap_height: float = 3.5
+## The shock wave at the landing: radius, hit points, how far it throws.
+@export_range(0.5, 10.0, 0.1, "suffix:m") var leap_radius: float = 3.0
+@export_range(0, 3) var leap_damage: int = 1
+@export_range(0.0, 10.0, 0.5, "suffix:m") var leap_knock: float = 3.0
+@export_range(1.0, 60.0, 0.5, "suffix:s") var leap_cooldown: float = 12.0
+## Seconds between the two blows of the double claw (phase 3, Q8).
+@export_range(0.1, 1.0, 0.05, "suffix:s") var double_claw_delay: float = 0.3
+## Share of the ambient light left when the arena lights go out (Q8).
+@export_range(0.0, 1.0, 0.05) var lights_out_ambient: float = 0.5
 
 @export_group("End")
 ## Time scale of the slow motion on the killing blow, and its real length (Q1).
