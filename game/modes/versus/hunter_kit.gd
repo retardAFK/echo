@@ -22,6 +22,7 @@ var _dodge_left := 0.0
 var _dodge_velocity := Vector3.ZERO
 var _ai_wait := 0.0
 var _down_label: Label3D
+var _fall := FallWatch.new()
 
 
 func _init(p_mode: VersusMode) -> void:
@@ -130,6 +131,28 @@ func take_blow(damage: int) -> bool:
 	return true
 
 
+## Lands after a fall of height meters (Q34): a noise, and points lost,
+## one less when rolling.
+func land(height: float) -> void:
+	var settings := mode.settings
+	if FallRules.is_loud(settings, height):
+		NoiseBus.emit_noise(
+			NoiseEvent.Type.FOOTSTEP, body.global_position, settings.fall_noise_range, body
+		)
+	var damage := FallRules.hunted_damage(settings, height, settings.hunted_health)
+	if _dodge_left > 0.0:
+		damage = FallRules.after_roll(settings, damage, height)
+	if damage > 0 and vitals.hurt(damage, true):
+		hurt.emit(damage)
+		if view_model != null:
+			view_model.flash(Color.RED)
+
+
+## Forgets the fall under way: it was moved to its start (Q29).
+func reset_fall() -> void:
+	_fall.reset()
+
+
 func _physics_process(delta: float) -> void:
 	vitals.update(delta)
 	stamina.update(delta)
@@ -143,6 +166,9 @@ func _physics_process(delta: float) -> void:
 		view_model.speed = Vector2(body.velocity.x, body.velocity.z).length()
 		view_model.lower(1.0 if not vitals.is_standing() else (0.4 if reloading else 0.0))
 		view_model.visible = not vitals.is_out()
+	var fallen := _fall.update(body.is_on_floor(), body.global_position.y)
+	if fallen > 0.0:
+		land(fallen)
 	if _dodge_left > 0.0:
 		_dodge_left -= delta
 		body.move_and_collide(_dodge_velocity * delta)

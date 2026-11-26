@@ -21,6 +21,8 @@ var rules: VersusRules
 var boss: BossKit
 var hunters: Array[HunterKit] = []
 var hud: VersusHud
+## The arena of this map (Q24), or null: the whole map (the test room).
+var arena: VersusArena
 var _lit: Array[Flare] = []
 var _slowmo_left := 0.0
 var _end_left := -1.0
@@ -37,6 +39,11 @@ func _ready() -> void:
 
 
 func _setup() -> void:
+	arena = arena_of(get_parent().scene_file_path)
+	if arena != null:
+		var builder := ArenaBuilder.new(arena)
+		get_parent().add_child(builder)
+		builder.use_navigation(get_parent())
 	for node in _hunted_nodes():
 		var kit := HunterKit.new(self)
 		hunters.append(kit)
@@ -50,11 +57,37 @@ func _setup() -> void:
 	if boss == null:
 		push_warning("Versus: no monster in the map")
 		return
+	if arena != null:
+		_place_everyone()
 	rules = VersusRules.new(settings, boss.health)
 	for kit in hunters:
 		rules.hunted.append(kit.vitals)
 	hud = VersusHud.new(self)
 	add_child(hud)
+
+
+## The arena of the map at map_path, or null.
+func arena_of(map_path: String) -> VersusArena:
+	for each in settings.arenas:
+		if each.map_path == map_path:
+			return each
+	return null
+
+
+## Everyone to their start (Q29): the hunted side by side, the boss away.
+func _place_everyone() -> void:
+	for i in hunters.size():
+		_place(hunters[i].body, arena.hunted_spawn(i), arena.hunted_yaw)
+		hunters[i].reset_fall()
+	_place(boss.body, arena.boss_spawn, arena.boss_yaw)
+	boss.reset_fall()
+
+
+func _place(body: Node3D, point: Vector3, yaw: float) -> void:
+	body.global_position = point
+	body.rotation.y = yaw
+	if body is CharacterBody3D:
+		(body as CharacterBody3D).velocity = Vector3.ZERO
 
 
 ## The kit of the hunted played on this machine, or null.

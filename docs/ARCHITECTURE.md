@@ -160,6 +160,9 @@ tools/godot/build_tilleuls.gd   ← le lancer ; il hérite d'une chaîne de fich
 game/maps/tilleuls/tilleuls.scn          (binaire, LFS : ne jamais éditer à la main)
 game/maps/tilleuls/tilleuls_navmesh.res  (navigation, LFS)
 game/maps/tilleuls/tilleuls_surfaces.tres, tilleuls_plan.tres
+        │   puis, pour le Versus (S-024) : godot --headless res://tools/godot/build_versus_arena.tscn
+        ▼   (build_versus_arena.gd hérite de tilleuls_places.gd : l'arène suit la cité)
+game/modes/versus/data/arenas/tilleuls_tour.tres, tilleuls_tour_navmesh.res
 ```
 
 Toute position de gameplay (fusibles, cachettes, terminaux, leurres, portes) est écrite dans le générateur. Pour ajouter un objet à la map : on l'ajoute au générateur, on relance, on **commite la scène et le maillage de navigation**. Les tests `test_tilleuls*.gd` relisent la scène générée et vérifient ses règles (pas de cachette à moins d'1 m d'une porte, etc.).
