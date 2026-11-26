@@ -10,7 +10,9 @@ extends Node
 ## tools (HunterTools), interact held revives a downed teammate (Q5,
 ## DownedHold), else opens a chest or takes from it. Downed, it crawls;
 ## out, it stays where it fell.
-## An AI prey fires by itself at the boss when it sees it.
+## An AI prey (T-383) goes where PreyFighter says (a downed teammate, a
+## chest), rolls away from the boss's blows and fires by itself at the boss
+## when it sees it.
 
 signal hurt(damage: int)
 
@@ -36,11 +38,15 @@ var revives_done := 0
 ## True while reloading.
 var reloading := false
 var view_model: ViewModel
+## Where an AI prey goes (T-383).
+var fighter: PreyFighter
 var _cooldown := 0.0
 var _reload_left := 0.0
 var _dodge_left := 0.0
 var _dodge_velocity := Vector3.ZERO
 var _ai_wait := 0.0
+var _ai_goal_wait := 0.0
+var _sent_to: Variant = null
 var _down_label: Label3D
 var _fall := FallWatch.new()
 ## The player's own settings while it crawls (downed).
@@ -57,6 +63,7 @@ func _ready() -> void:
 	body = get_parent()
 	vitals = HuntedVitals.new(mode.settings)
 	stamina = Stamina.new(mode.settings)
+	fighter = PreyFighter.new(mode.settings)
 	vitals.downed.connect(_on_downed)
 	vitals.revived.connect(_on_revived)
 	vitals.out.connect(_on_out)
@@ -410,10 +417,13 @@ func _ai_wants(item: VersusItem) -> bool:
 	return loadout.tools.size() < VersusLoadout.TOOL_SLOTS
 
 
-## An AI prey fires at the boss it sees within range: flares now and
-## then, or the UV laser held while it sees it.
+## An AI prey: it goes where PreyFighter says, rolls away from a blow,
+## and fires at the boss it sees within range: flares now and then, or the
+## UV laser held while it sees it.
 func _think(delta: float) -> void:
 	_hold_interact(true, delta)
+	_steer(delta)
+	_ai_dodge()
 	var boss := mode.boss
 	var alive := boss != null and not boss.health.is_dead()
 	if laser != null:
@@ -425,6 +435,59 @@ func _think(delta: float) -> void:
 	_ai_wait = mode.settings.ai_fire_interval
 	if _sees_boss(mode.settings.ai_fire_range):
 		fire()
+
+
+## Sends the Prey towards its goal (Q17): beside a downed teammate, before
+## a chest worth opening; back to its own ways without one.
+func _steer(delta: float) -> void:
+	var prey := body as Prey
+	if prey == null or mode.boss == null:
+		return
+	fighter.update(delta)
+	_ai_goal_wait -= delta
+	if _ai_goal_wait > 0.0:
+		return
+	_ai_goal_wait = mode.settings.ai_think_interval
+	var downed: Array[Vector3] = []
+	for kit in mode.hunters:
+		if kit != self and kit.vitals.is_down():
+			downed.append(kit.body.global_position)
+	var chests: Array[Vector3] = []
+	for node in body.get_tree().get_nodes_in_group(VersusChest.GROUP):
+		var each := node as VersusChest
+		if not each.is_open or (each.item != null and _ai_wants(each.item)):
+			chests.append(each.global_position)
+	var own := body.global_position
+	var goal := fighter.choose(
+		own, mode.boss.body.global_position, downed, chests, loadout.weapon != null
+	)
+	if goal == PreyFighter.Goal.NONE:
+		if _sent_to != null and prey.brain.state == PreyBrain.State.SEARCH:
+			prey.brain.end_detour()
+		_sent_to = null
+		return
+	if prey.brain.state in [PreyBrain.State.FLEE, PreyBrain.State.HIDE]:
+		return  # Away from the boss first.
+	var side := own - fighter.point
+	side.y = 0.0
+	var spot := fighter.point + side.normalized() * 0.9 if side.length() > 0.9 else own
+	if _sent_to == null or (_sent_to as Vector3).distance_to(spot) > 1.0:
+		_sent_to = spot
+	if prey.brain.state != PreyBrain.State.SEARCH or prey.brain.target != _sent_to:
+		prey.brain.send_to(_sent_to)
+
+
+## Rolls away, sideways, from a blow the boss winds up at it.
+func _ai_dodge() -> void:
+	var boss := mode.boss
+	if boss == null:
+		return
+	var offset := body.global_position - boss.body.global_position
+	offset.y = 0.0
+	var windup_claw := boss.move == BossKit.Move.CLAW_WINDUP
+	var windup_charge := boss.move == BossKit.Move.CHARGE_WINDUP
+	if fighter.should_dodge(windup_claw, windup_charge, offset.length()):
+		dodge(offset.cross(Vector3.UP) if windup_charge else offset)
 
 
 func _sees_boss(reach: float) -> bool:

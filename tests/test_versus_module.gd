@@ -12,6 +12,7 @@ const CLASSES: Array[String] = [
 	"VersusEndScreen",
 	"BossLeap",
 	"BossBrain",
+	"PreyFighter",
 	"DownedHold",
 	"VersusItem",
 	"VersusLoadout",
