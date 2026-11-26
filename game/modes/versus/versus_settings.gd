@@ -181,6 +181,19 @@ extends Resource
 ## The siren of dawn near (Q3).
 @export_range(0.0, 200.0, 5.0, "suffix:m") var dawn_siren_range: float = 100.0
 
+@export_group("AI boss")
+## The AI boss's choices (Q12, BossBrain): how much farther a hunted that
+## hurt it more may be than the nearest and still be its target; how far
+## from its teammates a shooter is alone (a leap target); how near the heard
+## noise must be to that shooter.
+@export_range(0.0, 30.0, 0.5, "suffix:m") var brain_grudge_margin: float = 6.0
+@export_range(0.0, 30.0, 0.5, "suffix:m") var brain_lone_distance: float = 8.0
+@export_range(0.5, 10.0, 0.5, "suffix:m") var brain_leap_near: float = 4.0
+## It backs off for brain_retreat_time once its poise reaches this share of
+## poise_max, before it would kneel.
+@export_range(0.0, 1.0, 0.05) var brain_retreat_poise: float = 0.8
+@export_range(0.0, 10.0, 0.5, "suffix:s") var brain_retreat_time: float = 3.0
+
 @export_group("AI hunted")
 ## Farthest the AI hunted shoots at the boss, and its time between shots.
 @export_range(1.0, 60.0, 1.0, "suffix:m") var ai_fire_range: float = 25.0
