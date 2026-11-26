@@ -72,6 +72,14 @@ func detour_to(point: Vector3) -> bool:
 	return true
 
 
+## Sends it to a point from outside the loop (a game mode such as the
+## Versus, S-024, T-383): it makes its way there; flight still comes first.
+## end_detour sends it back to what it did.
+func send_to(point: Vector3) -> void:
+	target = point
+	_set_state(State.SEARCH)
+
+
 ## Back on its way after a detour.
 func end_detour() -> void:
 	if state == State.SEARCH:
