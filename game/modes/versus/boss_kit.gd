@@ -85,17 +85,34 @@ func is_played() -> bool:
 
 ## A flare hit it at point (Q13): face or body, damage and poise.
 func take_flare(flare: Flare, point: Vector3) -> void:
+	var face := is_face(point)
+	var settings := mode.settings
+	var damage := settings.flare_face_damage if face else settings.flare_damage
+	var poise := settings.flare_face_poise if face else settings.flare_poise
+	_take(flare.shooter, point, damage, poise, face)
+
+
+## A pellet of shooter's gun hit it at point (S-025, T-403): face or body.
+func take_shot(shooter: Node3D, point: Vector3, gun: VersusWeapon) -> void:
+	var face := is_face(point)
+	var hit := HitscanShot.hit_of(gun, face)
+	_take(shooter, point, hit[0], hit[1], face)
+
+
+## Whether point is on its face (Q13): near its eyes.
+func is_face(point: Vector3) -> bool:
 	var eyes: Vector3 = body.call(&"get_eye_position")
-	var face := point.distance_to(eyes) <= mode.settings.face_radius
-	var damage := mode.settings.flare_face_damage if face else mode.settings.flare_damage
-	var poise := mode.settings.flare_face_poise if face else mode.settings.flare_poise
+	return point.distance_to(eyes) <= mode.settings.face_radius
+
+
+func _take(shooter: Node3D, point: Vector3, damage: float, poise: float, face: bool) -> void:
 	var taken := health.take_hit(damage, poise)
 	if taken <= 0.0:
 		return
 	if face and move == Move.CLAW_WINDUP:
-		_end_move()  # A flare in the face breaks its blow.
+		_end_move()  # A shot in the face breaks its blow.
 	hit_taken.emit(face)
-	mode.on_boss_hit(self, flare.shooter, face, taken)
+	mode.on_boss_hit(self, shooter, face, taken, point)
 	if view_model != null:
 		view_model.flash(Color.WHITE)
 
@@ -104,13 +121,12 @@ func take_flare(flare: Flare, point: Vector3) -> void:
 ## or body, and it is slowed while the beam stays on it.
 func take_laser(shooter: Node3D, point: Vector3, delta: float) -> void:
 	var settings := mode.settings
-	var eyes: Vector3 = body.call(&"get_eye_position")
-	var face := point.distance_to(eyes) <= settings.face_radius
+	var face := is_face(point)
 	var damage := settings.laser_damage_per_second * delta * (2.0 if face else 1.0)
 	_slow_left = maxf(_slow_left, delta * 2.0 + 0.1)
 	var taken := health.take_hit(damage, 0.0)
 	if taken > 0.0:
-		mode.on_boss_hit(self, shooter, face, taken)
+		mode.on_boss_hit(self, shooter, face, taken, point, true)
 
 
 ## The sonic cannon's blast from offset's direction (Q13): pushed back

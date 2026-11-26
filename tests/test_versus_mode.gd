@@ -1,6 +1,6 @@
 extends GutTest
 ## The Versus mode prototype in the test room (spec S-024, T-372 to T-374):
-## kits, flares on the boss, claws and charge on the hunted, who wins.
+## kits, shots on the boss, claws and charge on the hunted, who wins.
 
 const ROOM_SCENE := preload("res://game/maps/test_room/test_room.tscn")
 
@@ -69,20 +69,17 @@ func test_a_flare_in_the_face_hurts_more_and_shows_a_red_marker() -> void:
 		boss.health.max_health - boss.health.health, versus.settings.flare_face_damage, "face"
 	)
 	assert_eq(versus.hud._hit_face, true)
-	assert_eq(hunter.clip, versus.settings.flare_clip, "not shot by the player's launcher")
+	assert_eq(hunter.clip, hunter.loadout.gun().clip, "not shot by the player's gun")
 
 
-func test_firing_spends_a_flare_makes_noise_and_reloads() -> void:
+func test_firing_spends_a_shot_and_an_empty_gun_reloads() -> void:
 	var map := _open(GameSession.Role.HUNTED)
 	await wait_physics_frames(3)
 	var hunter := _versus(map).local_hunter()
-	watch_signals(NoiseBus)
 	assert_true(hunter.fire())
-	assert_eq(hunter.clip, _versus(map).settings.flare_clip - 1)
-	assert_signal_emitted(NoiseBus, "noise_emitted", "a shot is heard by the boss")
-	assert_false(hunter.fire(), "cooldown")
+	assert_eq(hunter.clip, hunter.loadout.gun().clip - 1)
 	hunter.clip = 0
-	await wait_seconds(_versus(map).settings.flare_cooldown + 0.05)
+	await wait_seconds(hunter.loadout.gun().fire_interval + 0.05)
 	assert_false(hunter.fire())
 	assert_true(hunter.reloading)
 

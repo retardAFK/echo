@@ -8,19 +8,21 @@ extends Node
 ##   [clock, boss health, phase, kneel left, rage, fury left, boss position
 ##   if tracked (Q4) else null, winner, you, boss max health], with you,
 ##   for a hunted:
-##   [health, state, down left, weapon id, clip, spare flares, reloading,
+##   [health, state, down left, weapon id, clip, spare ammo, reloading,
 ##   battery, tools [[id, uses], ...], prompt, revives done]; for the boss:
 ##   [move, leap wait, prompt]; prompt as KitPrompts gives it.
 ## Events (send_mode_event), as [Event, ...]:
 ##   [CHESTS, [[position, item id, open], ...]]: the chests, when they change;
 ##   [SHOT, position, velocity]: a flare fired, the clients show their copy;
-##   [HIT, face]: to the shooter, its hit marker (Q21);
+##   [HIT, face, point, damage, steady]: to the shooter, its hit marker
+##   (Q21) and its damage number (S-025);
+##   [TRACER, from, to, color]: a gun's shot (S-025), its tracer;
 ##   [LIGHTS_OUT]: the cry of phase 2 (Q8);
 ##   [LEAP, target]: the boss leaps, its shadow shows there (Q9);
 ##   [END, winner, dawn, clock, rows, mvp seat]: the end screen (Q28), rows
 ##   as VersusStats.rows gives them.
 
-enum Event { CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END }
+enum Event { CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END, TRACER }
 
 var mode: VersusMode
 var net: NetGame
@@ -82,7 +84,7 @@ static func hunter_state(kit: HunterKit) -> Array:
 		kit.vitals.down_left,
 		String(weapon.id) if weapon != null else "",
 		kit.clip,
-		kit.loadout.spare_flares,
+		kit.loadout.spare_ammo,
 		kit.reloading,
 		kit.laser.battery if kit.laser != null else 0.0,
 		tools,
@@ -178,7 +180,7 @@ func apply_hunter_state(kit: HunterKit, you: Array) -> void:
 	if weapon != kit.loadout.weapon:
 		kit.show_weapon(weapon)
 	kit.clip = you[4]
-	kit.loadout.spare_flares = you[5]
+	kit.loadout.spare_ammo = you[5]
 	kit.reloading = you[6]
 	if kit.laser != null:
 		kit.laser.battery = you[7]
@@ -204,8 +206,11 @@ func apply_net_event(payload: Array) -> void:
 			flare.mode = mode
 			flare.velocity = payload[2]
 			mode.add_flare(flare, payload[1])
-		Event.HIT when payload.size() == 2 and mode.hud != null:
+		Event.HIT when payload.size() == 5 and mode.hud != null:
 			mode.hud.show_hit(payload[1])
+			mode.hud.show_damage(payload[2], payload[3], payload[1], payload[4])
+		Event.TRACER when payload.size() == 4:
+			mode.add_tracer(payload[1], payload[2], payload[3])
 		Event.LIGHTS_OUT:
 			mode.put_lights_out()
 		Event.LEAP when payload.size() == 2:

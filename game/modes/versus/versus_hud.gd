@@ -1,8 +1,10 @@
 class_name VersusHud
 extends CanvasLayer
 ## The Versus HUD (spec S-024, Q21, Q23, T-372 and T-373), drawn by code:
-## the boss bar and its phase at the bottom, the hit marker on the crosshair,
-## and for the hunted its hit points, stamina and flares, for the boss its
+## the boss bar and its phase at the bottom, the hit marker on the crosshair
+## and the damage numbers over the boss (S-025, T-403: white on the body,
+## yellow in the face, bigger the harder),
+## and for the hunted its hit points, stamina and ammo, for the boss its
 ## rage. A red edge when hurt, the result at the end. Under the crosshair,
 ## what holding interact does (open a chest, revive, finish, Q5 and Q30)
 ## and how far along it is. At the top, the clock and dawn near (Q3); a
@@ -17,6 +19,9 @@ const FACE_COLOR := Color(1.0, 0.2, 0.15)
 const LASER_COLOR := Color(0.62, 0.3, 1.0)
 const DAWN_COLOR := Color(1.0, 0.6, 0.3)
 const TRACKED_COLOR := Color(1.0, 0.1, 0.05)
+const NUMBER_FACE := Color(1.0, 0.86, 0.15)
+## Steady hits (the UV laser) add up into the same number for this long.
+const STEADY_TIME := 0.4
 
 var mode: VersusMode
 var _canvas: Control
@@ -24,6 +29,8 @@ var _hit_left := 0.0
 var _hit_face := false
 var _hurt_left := 0.0
 var _end_text := ""
+## The damage numbers on screen: [point, amount, face, age, steady, drift].
+var _numbers: Array = []
 
 
 func _init(p_mode: VersusMode) -> void:
@@ -49,6 +56,21 @@ func show_hit(face: bool) -> void:
 	_hit_face = face
 
 
+## A damage number at point (S-025, Q4): taken points, in the face or not;
+## steady hits (the laser's beam) add up into the last steady number.
+func show_damage(point: Vector3, taken: float, face: bool, steady := false) -> void:
+	if steady and not _numbers.is_empty():
+		var last: Array = _numbers[-1]
+		if last[4] and last[3] < STEADY_TIME:
+			last[1] += taken
+			last[2] = last[2] or face
+			return
+	var drift := randf_range(-24.0, 24.0)
+	_numbers.append([point, taken, face, 0.0, steady, drift])
+	if _numbers.size() > 24:
+		_numbers.pop_front()
+
+
 func show_end(winner: VersusRules.Winner) -> void:
 	var key := "VERSUS_HUNTED_WIN" if winner == VersusRules.Winner.HUNTED else "VERSUS_BOSS_WIN"
 	_end_text = Text.t(key)
@@ -57,6 +79,10 @@ func show_end(winner: VersusRules.Winner) -> void:
 func _process(delta: float) -> void:
 	_hit_left = maxf(_hit_left - delta, 0.0)
 	_hurt_left = maxf(_hurt_left - delta, 0.0)
+	for number: Array in _numbers:
+		number[3] += delta
+	var life := mode.settings.damage_number_time
+	_numbers = _numbers.filter(func(number: Array) -> bool: return number[3] < life)
 	_canvas.queue_redraw()
 
 
@@ -90,6 +116,7 @@ func _draw_hud() -> void:
 		var c := size * 0.5
 		for corner: Vector2 in [Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]:
 			_canvas.draw_line(c + corner * 4.0, c + corner * 10.0, color, 2.0)
+	_draw_numbers(font)
 	if _hurt_left > 0.0:
 		var edge := Color(0.8, 0.0, 0.0, _hurt_left)
 		for rect: Rect2 in [
@@ -103,6 +130,37 @@ func _draw_hud() -> void:
 		_canvas.draw_string(
 			font, Vector2(0, size.y * 0.4), _end_text, HORIZONTAL_ALIGNMENT_CENTER, size.x, 32
 		)
+
+
+## The damage numbers (S-025, Q4): they jump up from where the shot hit,
+## grow with the damage, and fade out.
+func _draw_numbers(font: Font) -> void:
+	var camera := _canvas.get_viewport().get_camera_3d()
+	if camera == null:
+		return
+	var life := mode.settings.damage_number_time
+	for number: Array in _numbers:
+		var point: Vector3 = number[0]
+		if camera.is_position_behind(point):
+			continue
+		var age: float = number[3]
+		var t := age / life
+		var at := camera.unproject_position(point)
+		at += Vector2(number[5] * t, -60.0 * t - 18.0)
+		var amount: float = number[1]
+		var text := str(maxi(roundi(amount), 1))
+		var size := clampi(14 + roundi(amount * 0.4), 14, 30) + (6 if number[2] else 0)
+		var pop := 1.0 + maxf(0.0, 0.15 - age) * 3.0  # It pops when it appears.
+		size = roundi(size * pop)
+		var color: Color = NUMBER_FACE if number[2] else Color.WHITE
+		color.a = clampf((1.0 - t) * 2.5, 0.0, 1.0)
+		var outline := Color(0.0, 0.0, 0.0, color.a * 0.8)
+		var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+		var origin := at - Vector2(width * 0.5, 0.0)
+		_canvas.draw_string_outline(
+			font, origin, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, 4, outline
+		)
+		_canvas.draw_string(font, origin, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, color)
 
 
 ## The clock, top middle, and dawn near (Q3).
@@ -193,17 +251,19 @@ func _draw_prompt(text: String, ratio: float, size: Vector2, font: Font) -> void
 	_canvas.draw_rect(bar, STAMINA_COLOR)
 
 
-## What the hunted holds, for the HUD: its weapon and flares, or empty hands.
+## What the hunted holds, for the HUD: its weapon and ammo (clip / spare),
+## or empty hands.
 static func weapon_line(hunter: HunterKit) -> String:
 	if hunter.vitals.is_down():
 		return Text.t("VERSUS_DOWN")
 	var weapon := hunter.loadout.weapon
 	if weapon == null:
 		return Text.t("VERSUS_NO_WEAPON")
-	if weapon.id == &"flare_launcher":
+	if weapon.weapon != null:
 		if hunter.reloading:
 			return Text.t("VERSUS_RELOADING")
-		return Text.t("VERSUS_FLARES", [hunter.clip, hunter.loadout.spare_flares])
+		var ammo := Text.t("VERSUS_AMMO", [hunter.clip, hunter.loadout.spare_ammo])
+		return Text.t(weapon.name_key) + "  " + ammo
 	return Text.t(weapon.name_key)
 
 
