@@ -133,6 +133,14 @@ func update(delta: float) -> void:
 		rage = maxf(rage - settings.rage_decay * delta, 0.0)
 
 
+## Moves on to the phase index if it is not there yet (dawn near, Q3).
+func enter_phase(index: int) -> void:
+	while phase < mini(index, settings.phases.size() - 1):
+		phase += 1
+		_shield_left = settings.phase_shield_time
+		phase_changed.emit(phase)
+
+
 func _update_phase() -> void:
 	var r := ratio()
 	while phase + 1 < settings.phases.size() and r <= settings.phases[phase + 1].start_ratio:

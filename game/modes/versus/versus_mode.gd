@@ -6,6 +6,9 @@ extends Node
 ## this folder that knows it). It gives each hunted (Player, Prey) a
 ## HunterKit and each monster (Monster, MonsterAvatar) a BossKit, runs the
 ## rules (VersusRules) and shows the HUD (VersusHud) to the local player.
+## Dawn near (Q3): a siren, and the boss enters its last phase. The end
+## (Q1, Q28): slow motion and a camera turning around the fallen boss, then
+## the end screen (VersusEndScreen) with what each hunted did (VersusStats).
 ## Solo for now, in the test room or the cité ("Jouer seul › Versus",
 ## T-375); online comes with T-381.
 ## To remove the mode: docs/MODULES.md, "Le mode Versus".
@@ -14,7 +17,6 @@ signal finished(winner: VersusRules.Winner)
 
 const MODE := GameModes.VERSUS
 const SETTINGS := preload("res://game/modes/versus/data/versus_settings.tres")
-const START_MENU := "res://game/ui/start_menu.tscn"
 ## How far in front of a hunted's start its first chest stands, in meters.
 const FIRST_CHEST_DISTANCE := 2.0
 
@@ -23,11 +25,17 @@ var rules: VersusRules
 var boss: BossKit
 var hunters: Array[HunterKit] = []
 var hud: VersusHud
+var stats: VersusStats
+var end_screen: VersusEndScreen
+## Whether dawn near was announced (Q3).
+var dawn_announced := false
 ## The arena of this map (Q24), or null: the whole map (the test room).
 var arena: VersusArena
 var _lit: Array[Flare] = []
 var _slowmo_left := 0.0
 var _end_left := -1.0
+var _orbit: Camera3D
+var _orbit_angle := 0.0
 
 
 ## Whether the game being started is a Versus one.
@@ -41,6 +49,7 @@ func _ready() -> void:
 
 
 func _setup() -> void:
+	stats = VersusStats.new(settings)
 	arena = arena_of(get_parent().scene_file_path)
 	if arena != null:
 		var builder := ArenaBuilder.new(arena)
@@ -69,6 +78,8 @@ func _setup() -> void:
 		rules.hunted.append(kit.vitals)
 	hud = VersusHud.new(self)
 	add_child(hud)
+	end_screen = VersusEndScreen.new()
+	add_child(end_screen)
 
 
 ## The arena of the map at map_path, or null.
@@ -214,7 +225,8 @@ func add_flare(flare: Flare, at: Vector3) -> void:
 
 
 ## A flare of shooter hit the boss (Q21): the shooter's hit marker.
-func on_boss_hit(_kit: BossKit, shooter: Node3D, face: bool, _taken: float) -> void:
+func on_boss_hit(_kit: BossKit, shooter: Node3D, face: bool, taken: float) -> void:
+	stats.on_hit(shooter, face, taken)
 	if hud != null and local_hunter() != null and shooter == local_hunter().body:
 		hud.show_hit(face)
 
@@ -229,8 +241,12 @@ func _physics_process(delta: float) -> void:
 	if rules.winner == VersusRules.Winner.NONE:
 		if rules.update(delta) != VersusRules.Winner.NONE:
 			_on_end()
+		elif rules.dawn_near() and not dawn_announced:
+			_announce_dawn()
 		return
 	var real := delta / maxf(Engine.time_scale, 0.01)
+	if _orbit != null:
+		_turn_orbit(real)
 	if _slowmo_left > 0.0:
 		_slowmo_left -= real
 		if _slowmo_left <= 0.0:
@@ -242,22 +258,59 @@ func _physics_process(delta: float) -> void:
 
 
 ## The game is over: whoever listens (the test room plays again) decides
-## what comes next; with nobody (a game in the cité), back to the menu.
+## what comes next; with nobody (a game in the cité), the end screen.
 func _finish() -> void:
 	var handled := not finished.get_connections().is_empty()
 	finished.emit(rules.winner)
 	if not handled:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		get_tree().change_scene_to_file.call_deferred(START_MENU)
+		Engine.time_scale = 1.0
+		if hud != null:
+			hud.visible = false
+		end_screen.show_result(self)
+
+
+## Dawn is near (Q3): a siren, and the boss enters its last phase.
+func _announce_dawn() -> void:
+	dawn_announced = true
+	NoiseBus.emit_noise(
+		NoiseEvent.Type.SIREN, boss.body.global_position, settings.dawn_siren_range, null
+	)
+	boss.health.enter_phase(settings.phases.size() - 1)
 
 
 func _on_end() -> void:
 	if rules.winner == VersusRules.Winner.HUNTED:
 		Engine.time_scale = settings.kill_slowmo_scale  # The killing blow (Q1).
 		_slowmo_left = settings.kill_slowmo_time
+		_start_orbit()
 	_end_left = settings.end_delay + settings.kill_slowmo_time
 	if hud != null:
 		hud.show_end(rules.winner)
+
+
+## A camera turning around the fallen boss, seen by all (Q1).
+func _start_orbit() -> void:
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return
+	_orbit = Camera3D.new()
+	_orbit.name = "OrbitCamera"
+	_orbit.fov = camera.fov
+	_orbit.far = camera.far
+	_orbit.cull_mask = camera.cull_mask
+	add_child(_orbit)
+	var offset := camera.global_position - boss.body.global_position
+	_orbit_angle = atan2(offset.x, offset.z)
+	_turn_orbit(0.0)
+	_orbit.make_current()
+
+
+func _turn_orbit(real_delta: float) -> void:
+	_orbit_angle += TAU * settings.orbit_turns * real_delta
+	var centre := boss.body.global_position + Vector3.UP
+	var around := Vector3(sin(_orbit_angle), 0.0, cos(_orbit_angle)) * settings.orbit_distance
+	_orbit.global_position = centre + around + Vector3.UP * settings.orbit_height
+	_orbit.look_at(centre, Vector3.UP)
 
 
 func _exit_tree() -> void:
