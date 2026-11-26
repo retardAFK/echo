@@ -113,7 +113,8 @@ func _play_fighter(delta: float) -> void:
 		if chest == null:
 			return
 		if _go_to(chest.global_position, delta, CHEST_STAND):
-			_hold_on(chest.global_position)
+			_look_down_at(chest.global_position + Vector3.UP * 0.3)
+			_wanted["interact"] = true
 		return
 	_phase = "fight"
 	var boss := _unvec(_read(LobbyState.MONSTER_SEAT).get("at", []))
@@ -140,6 +141,14 @@ func _play_boss(delta: float) -> void:
 		if _shot_left <= 0.0:
 			_shot_left = SHOT_TIME * 2.0
 			_fire = true
+
+
+## Looks at a point, up or down as a player would (the chest at its feet).
+func _look_down_at(at: Vector3) -> void:
+	var player := _net.own as Player
+	var gap := at - player.get_eye_position()
+	var flat := Vector2(gap.x, gap.z).length()
+	player.set_look(atan2(-gap.x, -gap.z), atan2(gap.y, flat))
 
 
 func _other_seat() -> int:

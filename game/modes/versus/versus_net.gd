@@ -6,7 +6,8 @@ extends Node
 ## its kit and the boss's health copy what the room says.
 ## Each snapshot carries, for its player (net_snapshot):
 ##   [clock, boss health, phase, kneel left, rage, fury left, boss position
-##   if tracked (Q4) else null, winner, you], with you, for a hunted:
+##   if tracked (Q4) else null, winner, you, boss max health], with you,
+##   for a hunted:
 ##   [health, state, down left, weapon id, clip, spare flares, reloading,
 ##   battery, tools [[id, uses], ...], prompt, revives done]; for the boss:
 ##   [move, leap wait, prompt]; prompt as KitPrompts gives it.
@@ -65,6 +66,7 @@ func net_snapshot(seat: int) -> Array:
 		tracked,
 		mode.rules.winner,
 		you,
+		health.max_health,
 	]
 
 
@@ -132,12 +134,13 @@ func _avatar_of(seat: int) -> Node3D:
 
 
 func apply_net_snapshot(value: Variant) -> void:
-	if not value is Array or (value as Array).size() < 9:
+	if not value is Array or (value as Array).size() < 10:
 		return
 	var values: Array = value
 	var rules := mode.rules
 	rules.clock = values[0]
 	var health := mode.boss_health()
+	health.max_health = values[9]
 	health.health = values[1]
 	health.phase = clampi(values[2], 0, maxi(mode.settings.phases.size() - 1, 0))
 	health.kneel_left = values[3]
