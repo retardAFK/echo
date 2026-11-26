@@ -198,6 +198,17 @@ extends Resource
 ## Farthest the AI hunted shoots at the boss, and its time between shots.
 @export_range(1.0, 60.0, 1.0, "suffix:m") var ai_fire_range: float = 25.0
 @export_range(0.2, 10.0, 0.1, "suffix:s") var ai_fire_interval: float = 1.4
+## Where it goes (Q17, PreyFighter), chosen every ai_think_interval: a
+## downed teammate when the boss is at least ai_revive_safe from it; a chest
+## (any when unarmed, else within ai_chest_detour with the boss at least
+## ai_chest_safe from it). A goal not reached in ai_goal_time is given up.
+@export_range(0.1, 5.0, 0.1, "suffix:s") var ai_think_interval: float = 0.5
+@export_range(0.0, 50.0, 1.0, "suffix:m") var ai_revive_safe: float = 12.0
+@export_range(0.0, 100.0, 1.0, "suffix:m") var ai_chest_detour: float = 25.0
+@export_range(0.0, 50.0, 1.0, "suffix:m") var ai_chest_safe: float = 8.0
+@export_range(1.0, 120.0, 1.0, "suffix:s") var ai_goal_time: float = 20.0
+## It rolls away from a claw wound up within claw_reach plus this.
+@export_range(0.0, 5.0, 0.1, "suffix:m") var ai_dodge_margin: float = 1.0
 
 @export_group("Arenas")
 ## The arenas (Q24): a game in a map listed here takes place in its arena;
