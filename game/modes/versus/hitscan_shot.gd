@@ -25,8 +25,8 @@ static func directions(
 
 
 ## Damage and poise of a pellet of weapon, in the face or not, as
-## [damage, poise].
-static func hit_of(weapon: VersusWeapon, face: bool) -> Array[float]:
+## [damage, poise]; damage times power (its rarity, T-404).
+static func hit_of(weapon: VersusWeapon, face: bool, power := 1.0) -> Array[float]:
 	if face:
-		return [weapon.damage * weapon.face_multiplier, weapon.face_poise]
-	return [weapon.damage, weapon.poise]
+		return [weapon.damage * weapon.face_multiplier * power, weapon.face_poise]
+	return [weapon.damage * power, weapon.poise]

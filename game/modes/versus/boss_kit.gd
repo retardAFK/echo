@@ -92,11 +92,27 @@ func take_flare(flare: Flare, point: Vector3) -> void:
 	_take(flare.shooter, point, damage, poise, face)
 
 
-## A pellet of shooter's gun hit it at point (S-025, T-403): face or body.
-func take_shot(shooter: Node3D, point: Vector3, gun: VersusWeapon) -> void:
+## A pellet of shooter's gun hit it at point (S-025, T-403): face or body,
+## its damage times power (the gun's rarity, T-404).
+func take_shot(shooter: Node3D, point: Vector3, gun: VersusWeapon, power := 1.0) -> void:
 	var face := is_face(point)
-	var hit := HitscanShot.hit_of(gun, face)
+	var hit := HitscanShot.hit_of(gun, face, power)
 	_take(shooter, point, hit[0], hit[1], face)
+
+
+## A flash grenade went off near it (S-025, T-404): stunned for seconds,
+## its blow broken.
+func stun(seconds: float) -> void:
+	if health.is_dead() or move == Move.LEAPING:
+		return
+	_end_move()
+	move = Move.STUNNED
+	_move_left = seconds
+	hit_taken.emit(false)
+	if view_model != null:
+		view_model.flash(Color.WHITE)
+	if is_local() and mode.hud != null:
+		mode.hud.show_blind(seconds)
 
 
 ## Whether point is on its face (Q13): near its eyes.
@@ -129,7 +145,7 @@ func take_laser(shooter: Node3D, point: Vector3, delta: float) -> void:
 		mode.on_boss_hit(self, shooter, face, taken, point, true)
 
 
-## The sonic cannon's blast from offset's direction (Q13): pushed back
+## The sonic shotgun's blast from offset's direction (S-025): pushed back
 ## distance, its blow broken, poise added.
 func blasted(offset: Vector3, distance: float, poise: float) -> void:
 	var settings := mode.settings

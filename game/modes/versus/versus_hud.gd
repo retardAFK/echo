@@ -28,6 +28,9 @@ var _canvas: Control
 var _hit_left := 0.0
 var _hit_face := false
 var _hurt_left := 0.0
+## Seconds left, and in all, of the boss's white screen (a flash grenade).
+var _blind_left := 0.0
+var _blind_time := 1.0
 var _end_text := ""
 ## The damage numbers on screen: [point, amount, face, age, steady, drift].
 var _numbers: Array = []
@@ -57,11 +60,15 @@ func show_hit(face: bool) -> void:
 
 
 ## A damage number at point (S-025, Q4): taken points, in the face or not;
-## steady hits (the laser's beam) add up into the last steady number.
+## steady hits (the laser's beam) add up into the last steady number, and
+## the pellets of one shot (same frame) into one.
 func show_damage(point: Vector3, taken: float, face: bool, steady := false) -> void:
-	if steady and not _numbers.is_empty():
+	if not _numbers.is_empty():
 		var last: Array = _numbers[-1]
-		if last[4] and last[3] < STEADY_TIME:
+		# The laser's beam adds up for a while; a shotgun's pellets, in the
+		# same frame, make one number.
+		var same_shot: bool = not steady and not last[4] and last[3] == 0.0
+		if (steady and last[4] and last[3] < STEADY_TIME) or same_shot:
 			last[1] += taken
 			last[2] = last[2] or face
 			return
@@ -69,6 +76,13 @@ func show_damage(point: Vector3, taken: float, face: bool, steady := false) -> v
 	_numbers.append([point, taken, face, 0.0, steady, drift])
 	if _numbers.size() > 24:
 		_numbers.pop_front()
+
+
+## The boss played here is blinded by a flash grenade (S-025, T-404): a
+## white screen that fades in seconds.
+func show_blind(seconds: float) -> void:
+	_blind_left = seconds
+	_blind_time = maxf(seconds, 0.01)
 
 
 func show_end(winner: VersusRules.Winner) -> void:
@@ -79,6 +93,7 @@ func show_end(winner: VersusRules.Winner) -> void:
 func _process(delta: float) -> void:
 	_hit_left = maxf(_hit_left - delta, 0.0)
 	_hurt_left = maxf(_hurt_left - delta, 0.0)
+	_blind_left = maxf(_blind_left - delta, 0.0)
 	for number: Array in _numbers:
 		number[3] += delta
 	var life := mode.settings.damage_number_time
@@ -126,6 +141,9 @@ func _draw_hud() -> void:
 			Rect2(size.x - 18, 0, 18, size.y)
 		]:
 			_canvas.draw_rect(rect, edge)
+	if _blind_left > 0.0:
+		var white := Color(1, 1, 1, clampf(_blind_left / _blind_time * 1.3, 0.0, 0.95))
+		_canvas.draw_rect(Rect2(Vector2.ZERO, size), white)
 	if _end_text != "":
 		_canvas.draw_string(
 			font, Vector2(0, size.y * 0.4), _end_text, HORIZONTAL_ALIGNMENT_CENTER, size.x, 32
@@ -207,8 +225,12 @@ func _draw_hunter(hunter: HunterKit, size: Vector2, font: Font) -> void:
 		_canvas.draw_rect(Rect2(8.0 + i * 14.0, size.y - 112.0, 10.0, 10.0), color)
 	_canvas.draw_rect(Rect2(8, size.y - 98, 80, 3), BAR_BACK)
 	_canvas.draw_rect(Rect2(8, size.y - 98, 80 * hunter.stamina.value, 3), STAMINA_COLOR)
-	var right := Vector2(size.x - 208, size.y - 70)
-	_canvas.draw_string(font, right, weapon_line(hunter), HORIZONTAL_ALIGNMENT_RIGHT, 200)
+	var right := Vector2(size.x - 408, size.y - 70)
+	var rarity := mode.rarity_of(hunter.loadout.weapon)
+	var tint := (
+		rarity.color if rarity != null and hunter.loadout.weapon.weapon != null else Color.WHITE
+	)
+	_canvas.draw_string(font, right, weapon_line(hunter), HORIZONTAL_ALIGNMENT_RIGHT, 400, 16, tint)
 	if hunter.laser != null:
 		var battery := Rect2(size.x - 88, size.y - 64, 80, 3)
 		_canvas.draw_rect(battery, BAR_BACK)

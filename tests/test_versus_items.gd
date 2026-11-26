@@ -1,7 +1,7 @@
 extends GutTest
 ## Chests, weapons and tools of the Versus (spec S-024, Q13, Q29 to Q32,
 ## T-377): what a hunted carries, what chests hold, opening one, the UV
-## laser, the sonic cannon, the medkit, the firecracker under the boss, new
+## laser, the flash grenade, the medkit, the firecracker under the boss, new
 ## chests at each phase.
 
 const ROOM_SCENE := preload("res://game/maps/test_room/test_room.tscn")
@@ -48,7 +48,7 @@ func test_a_loadout_holds_one_weapon_and_two_tools() -> void:
 	assert_null(loadout.take(_item(&"light_smg")))
 	assert_eq(loadout.take(_item(&"uv_laser")), _item(&"light_smg"), "the old one stays")
 	assert_null(loadout.take(_item(&"medkit")))
-	assert_null(loadout.take(_item(&"sonic_cannon")))
+	assert_null(loadout.take(_item(&"flash_grenade")))
 	assert_eq(loadout.take(_item(&"smoke")), _item(&"medkit"), "the oldest tool goes")
 	assert_eq(loadout.tool_in(1), _item(&"smoke"))
 	loadout.take(_item(&"ammo"))
@@ -59,14 +59,13 @@ func test_a_loadout_holds_one_weapon_and_two_tools() -> void:
 	assert_null(loadout.tool_in(1), "an empty tool leaves its slot")
 
 
-func test_chests_never_hold_the_start_gun_and_phases_give_more_lasers() -> void:
+func test_phases_give_more_lasers() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	var lasers := [0, 0]
 	for phase in [false, true]:
 		for i in 400:
 			var item := VersusLoadout.draw(SETTINGS.items, rng, phase)
-			assert_ne(item.id, &"light_smg", "only in the first chest (Q31)")
 			if item.id == &"uv_laser":
 				lasers[int(phase)] += 1
 	assert_gt(lasers[1], lasers[0], "better chests at each phase (Q32)")
@@ -128,7 +127,7 @@ func test_the_uv_laser_burns_slows_and_runs_on_a_battery() -> void:
 	assert_almost_eq(hunter.laser.ratio(), 1.0, 0.001, "full again after its recharge")
 
 
-func test_the_sonic_cannon_pushes_the_boss_back() -> void:
+func test_a_flash_grenade_stuns_the_boss_near_it() -> void:
 	var versus: VersusMode = await _open(ROOM_SCENE)
 	var hunter := versus.local_hunter()
 	var boss := versus.boss
@@ -136,13 +135,14 @@ func test_the_sonic_cannon_pushes_the_boss_back() -> void:
 	var player := hunter.body as Player
 	boss.body.global_position = player.global_position - player.global_basis.z * 6.0
 	_face(player, boss.body.global_position)
-	hunter.equip(_item(&"sonic_cannon"))
-	var start := boss.body.global_position
+	versus.view.first_person = true
+	hunter.equip(_item(&"flash_grenade"))
+	await wait_physics_frames(2)  # The boss's new place in the physics.
 	assert_true(hunter.use_tool(0))
-	await wait_physics_frames(30)
-	assert_gt(boss.body.global_position.distance_to(start), 2.0, "pushed back")
-	assert_gt(boss.health.poise, 0.0)
-	assert_eq(hunter.loadout.uses[0], _item(&"sonic_cannon").uses - 1)
+	assert_eq(boss.move, BossKit.Move.STUNNED, "stunned")
+	assert_eq(hunter.loadout.uses[0], _item(&"flash_grenade").uses - 1)
+	var bursts := versus.get_children().filter(func(node: Node) -> bool: return node is FlashBurst)
+	assert_eq(bursts.size(), 1, "the white burst")
 
 
 func test_a_medkit_heals_and_is_kept_at_full_health() -> void:

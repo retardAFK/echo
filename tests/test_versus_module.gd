@@ -35,6 +35,8 @@ const CLASSES: Array[String] = [
 	"VersusWeapon",
 	"HitscanShot",
 	"Tracer",
+	"VersusRarity",
+	"FlashBurst",
 	"VersusArena",
 	"ArenaPiece",
 	"ArenaBuilder",
