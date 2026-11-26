@@ -69,7 +69,7 @@ func _ready() -> void:
 	vitals.out.connect(_on_out)
 	revive.started.connect(_on_revive_started)
 	if is_local():
-		var camera := body.get_viewport().get_camera_3d()
+		var camera: Camera3D = body.get_node("Head/Camera3D")
 		view_model = ViewModel.new(ViewModel.Kind.HUNTER)
 		camera.add_child(view_model)
 		if "breath_hold" in body:
@@ -149,14 +149,19 @@ func eye() -> Vector3:
 	return body.call(&"get_eye_position")
 
 
-## Where it aims: the camera for the player here, its commands' look for
-## one played on the room, the boss for an AI.
+## Where it aims: where the crosshair points (S-025, T-402: the camera's
+## ray, from behind the shoulder) for the player here or, from its commands'
+## look, on the room; the boss for an AI.
 func aim() -> Vector3:
 	if is_local():
-		return -body.get_viewport().get_camera_3d().global_basis.z
+		var head: Node3D = body.get_node("Head")
+		if mode.first_person():
+			return -head.global_basis.z
+		return VersusView.aim_direction(body, eye(), head.global_basis, mode.settings)
 	if is_played():
 		var commands := (body as Player).commands
-		return -Basis.from_euler(Vector3(commands.pitch, commands.yaw, 0.0)).z
+		var look := Basis.from_euler(Vector3(commands.pitch, commands.yaw, 0.0))
+		return VersusView.aim_direction(body, eye(), look, mode.settings)
 	var boss := mode.boss
 	if boss == null:
 		return -body.global_basis.z
@@ -279,7 +284,7 @@ func _physics_process(delta: float) -> void:
 	if view_model != null:
 		view_model.speed = Vector2(body.velocity.x, body.velocity.z).length()
 		view_model.lower(1.0 if not vitals.is_standing() else (0.4 if reloading else 0.0))
-		view_model.visible = not vitals.is_out()
+		view_model.visible = not vitals.is_out() and mode.first_person()
 	var fallen := _fall.update(body.is_on_floor(), body.global_position.y)
 	if fallen > 0.0:
 		land(fallen)
@@ -303,7 +308,7 @@ func _show_mirror(delta: float) -> void:
 	if view_model != null:
 		view_model.speed = Vector2(body.velocity.x, body.velocity.z).length()
 		view_model.lower(1.0 if not vitals.is_standing() else (0.4 if reloading else 0.0))
-		view_model.visible = not vitals.is_out()
+		view_model.visible = not vitals.is_out() and mode.first_person()
 		if keys.pressed(PlayerCommands.FLAG_FIRE) and clip > 0 and not reloading:
 			view_model.kick()
 	if laser != null:

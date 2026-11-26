@@ -40,6 +40,13 @@ extends Resource
 ## Speed multiplier during the Fury (Q9).
 @export_range(1.0, 2.0, 0.05) var fury_speed_scale: float = 1.25
 
+@export_group("View")
+## The camera behind the shoulder (S-025, Q1): its distance behind the head,
+## for a hunted and for the bigger boss; how far the crosshair's ray looks.
+@export_range(1.0, 10.0, 0.1, "suffix:m") var view_distance: float = 3.0
+@export_range(1.0, 15.0, 0.1, "suffix:m") var boss_view_distance: float = 4.5
+@export_range(10.0, 500.0, 5.0, "suffix:m") var aim_reach: float = 150.0
+
 @export_group("Hunted")
 ## Hit points of a hunted (Q14).
 @export_range(1, 10) var hunted_health: int = 3
