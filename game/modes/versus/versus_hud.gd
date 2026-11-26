@@ -205,6 +205,9 @@ func _draw_boss(boss: BossKit, size: Vector2, font: Font) -> void:
 	elif boss.health.rage >= 100.0:
 		rage = Text.t("VERSUS_FURY_READY")
 	_canvas.draw_string(font, Vector2(8, size.y - 86), rage, HORIZONTAL_ALIGNMENT_LEFT)
+	if boss.can_leap():
+		var leap := Text.with_keys("VERSUS_LEAP_READY")
+		_canvas.draw_string(font, Vector2(8, size.y - 100), leap, HORIZONTAL_ALIGNMENT_LEFT)
 	var reach := mode.settings.finish_reach
 	if DownedHold.nearest(mode.hunters, boss.body.global_position, reach) != null:
 		var ratio := boss.finish.ratio(mode.settings.finish_time)
