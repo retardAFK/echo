@@ -49,6 +49,21 @@ const LOW_WALLS := [
 ## boss about 60 m away, between the social centre and the car park.
 const HUNTED_SPAWNS := [Vector2(93, 124), Vector2(96, 124), Vector2(99, 122), Vector2(93, 121)]
 const BOSS_SPAWN := Vector2(150, 90)
+## Chests of the arena (Q32), plan (x, height, y): 4 at the start, then 3
+## at each new phase, the roof of the social centre and the top of the
+## fire escape among them.
+const CHEST_SPOTS := [
+	Vector3(120, 0, 62),
+	Vector3(100, 0, 84),
+	Vector3(136, 0, 108),
+	Vector3(165, 0, 124),
+	Vector3(160, 4.3, 72),
+	Vector3(176, 0, 92),
+	Vector3(128, 0, 124),
+	Vector3(118.4, 12, 100),
+	Vector3(150, 0, 57),
+	Vector3(110, 0, 70),
+]
 
 var _arena := VersusArena.new()
 
@@ -212,6 +227,10 @@ func _add_spawns() -> void:
 	for point: Vector2 in HUNTED_SPAWNS:
 		hunted.append(kit.world(point.x, point.y))
 	_arena.hunted_spawns = hunted
+	var chests := PackedVector3Array()
+	for spot: Vector3 in CHEST_SPOTS:
+		chests.append(kit.world(spot.x, spot.z, spot.y))
+	_arena.chest_spots = chests
 	_arena.boss_spawn = boss
 	_arena.hunted_yaw = _yaw(boss - hunted[0])
 	_arena.boss_yaw = _yaw(hunted[0] - boss)

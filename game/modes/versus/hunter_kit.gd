@@ -1,9 +1,13 @@
 class_name HunterKit
 extends Node
-## A hunted's Versus kit (spec S-024, Q5, Q13 to Q15, T-372): its health
-## (HuntedVitals), stamina, flare launcher and dodge roll, plus, for the
-## player, the first-person arms. A child of a Player or a Prey, added by
-## VersusMode. The player's keys: left click fires, R reloads, Space rolls.
+## A hunted's Versus kit (spec S-024, Q5, Q13 to Q15, Q29 to Q31, T-372,
+## T-377): its health (HuntedVitals), stamina, what it carries
+## (VersusLoadout: a weapon, two tools, spare flares) and its dodge roll,
+## plus, for the player, the first-person arms. A child of a Player or a
+## Prey, added by VersusMode. It starts empty-handed (Q29) and gears up at
+## the chests (VersusChest). The player's keys: left click fires (held for
+## the UV laser), R reloads, Space rolls, gadget_1 and gadget_2 use the
+## tools (HunterTools), interact held opens a chest or takes from it.
 ## An AI prey fires by itself at the boss when it sees it.
 
 signal hurt(damage: int)
@@ -13,6 +17,12 @@ var body: CharacterBody3D
 var vitals: HuntedVitals
 var stamina: Stamina
 var clip := 0
+var loadout := VersusLoadout.new()
+## The UV laser while it is the weapon, else null.
+var laser: UvLaser
+## The chest it holds interact on, and how long it has held it.
+var chest: VersusChest
+var chest_held := 0.0
 ## True while reloading.
 var reloading := false
 var view_model: ViewModel
@@ -34,7 +44,6 @@ func _ready() -> void:
 	body = get_parent()
 	vitals = HuntedVitals.new(mode.settings)
 	stamina = Stamina.new(mode.settings)
-	clip = mode.settings.flare_clip
 	vitals.downed.connect(_on_downed)
 	vitals.revived.connect(_on_revived)
 	if is_local():
@@ -45,6 +54,41 @@ func _ready() -> void:
 			var no_breath := PlayerSettings.new()
 			no_breath.breath_hold_time = 0.0  # R reloads in Versus.
 			body.breath_hold = BreathHold.new(no_breath)
+	if body is Player:
+		Loadout.equip((body as Player).inventory, [])  # Keys 1 and 2: the Versus tools.
+
+
+## Takes item (from a chest, Q31); returns what it leaves in the chest.
+func equip(item: VersusItem) -> VersusItem:
+	var first := loadout.weapon == null
+	var left := loadout.take(item)
+	if item.slot != VersusItem.Slot.WEAPON:
+		return left
+	if item.id == &"flare_launcher":
+		clip = mode.settings.flare_clip
+		if first:
+			loadout.spare_flares += mode.settings.start_spare_flares
+	reloading = false
+	if laser != null:
+		laser.queue_free()
+		laser = null
+	if item.id == &"uv_laser":
+		laser = UvLaser.new(self)
+		add_child(laser)
+	if view_model != null:
+		view_model.set_weapon(item.id)
+	return left
+
+
+## Uses the tool of slot (0 or 1, keys gadget_1 and gadget_2); true if used.
+func use_tool(slot: int) -> bool:
+	var item := loadout.tool_in(slot)
+	if item == null or not vitals.is_standing():
+		return false
+	if not HunterTools.use(self, item):
+		return false
+	loadout.spend(slot)
+	return true
 
 
 ## Whether this machine's player drives it (else an AI prey).
@@ -67,12 +111,15 @@ func aim() -> Vector3:
 	var target := boss.body.global_position + Vector3.UP * 1.2
 	var distance := eye().distance_to(target)
 	var flight := distance / mode.settings.flare_speed
-	target.y += 0.5 * mode.settings.flare_gravity * flight * flight  # Its drop.
+	if laser == null:
+		target.y += 0.5 * mode.settings.flare_gravity * flight * flight  # Its drop.
 	return (target - eye()).normalized()
 
 
 ## Fires a flare if it can; true if one left.
 func fire() -> bool:
+	if not loadout.has_weapon(&"flare_launcher"):
+		return false
 	if not vitals.is_standing() or reloading or _cooldown > 0.0 or _dodge_left > 0.0:
 		return false
 	if clip <= 0:
@@ -96,6 +143,8 @@ func fire() -> bool:
 
 func reload() -> void:
 	if reloading or clip >= mode.settings.flare_clip or not vitals.is_standing():
+		return
+	if not loadout.has_weapon(&"flare_launcher") or loadout.spare_flares <= 0:
 		return
 	reloading = true
 	_reload_left = mode.settings.reload_time
@@ -161,7 +210,7 @@ func _physics_process(delta: float) -> void:
 		_reload_left -= delta
 		if _reload_left <= 0.0:
 			reloading = false
-			clip = mode.settings.flare_clip
+			clip += loadout.draw_flares(mode.settings.flare_clip - clip)
 	if view_model != null:
 		view_model.speed = Vector2(body.velocity.x, body.velocity.z).length()
 		view_model.lower(1.0 if not vitals.is_standing() else (0.4 if reloading else 0.0))
@@ -173,16 +222,24 @@ func _physics_process(delta: float) -> void:
 		_dodge_left -= delta
 		body.move_and_collide(_dodge_velocity * delta)
 	if not vitals.is_standing() or mode.is_over():
+		if laser != null:
+			laser.update(false, delta)
 		return
 	if is_local():
-		_read_keys()
+		_read_keys(delta)
 	else:
 		_think(delta)
 
 
-func _read_keys() -> void:
+func _read_keys(delta: float) -> void:
 	if Input.is_action_just_pressed("throw"):
 		fire()
+	if laser != null:
+		laser.update(Input.is_action_pressed("throw"), delta)
+	for slot in VersusLoadout.TOOL_SLOTS:
+		if Input.is_action_just_pressed("gadget_%d" % (slot + 1)):
+			use_tool(slot)
+	hold_chest(Input.is_action_pressed("interact"), delta)
 	if Input.is_action_just_pressed("hold_breath"):
 		reload()
 	if Input.is_action_just_pressed("dodge"):
@@ -190,19 +247,83 @@ func _read_keys() -> void:
 		dodge(body.global_basis * Vector3(input.x, 0.0, input.y))
 
 
-## An AI prey fires at the boss it sees within range.
+## The chest in reach it aims at (or the nearest, for an AI), or null.
+func chest_in_reach() -> VersusChest:
+	var best: VersusChest
+	var best_score := -INF
+	for node in body.get_tree().get_nodes_in_group(VersusChest.GROUP):
+		var each := node as VersusChest
+		var offset := each.global_position + Vector3.UP * 0.3 - eye()
+		if offset.length() > mode.settings.chest_reach:
+			continue
+		var score := -offset.length() if not is_local() else offset.normalized().dot(aim())
+		if is_local() and score < 0.6:
+			continue
+		if score > best_score:
+			best = each
+			best_score = score
+	return best
+
+
+## One frame of interact held (held) or not, on the chest in reach (Q30):
+## once held long enough, it opens it, then takes what is in it.
+func hold_chest(held: bool, delta: float) -> void:
+	var target := chest_in_reach() if held else null
+	if target != chest or target == null:
+		chest = target
+		chest_held = 0.0
+		if target == null:
+			return
+	if chest.is_open and (chest.item == null or not (is_local() or _ai_wants(chest.item))):
+		chest_held = 0.0
+		return
+	chest_held += delta
+	if chest_held < chest.hold_time(mode.settings):
+		return
+	chest_held = 0.0
+	if not chest.is_open:
+		chest.open(body, mode.settings)
+	elif chest.item != null:
+		chest.set_item(equip(chest.item))
+
+
+## What an AI prey takes from an open chest: a weapon if it has none, the
+## UV laser over the flares, a tool in a free slot, flares.
+func _ai_wants(item: VersusItem) -> bool:
+	match item.slot:
+		VersusItem.Slot.WEAPON:
+			return (
+				loadout.weapon == null
+				or (item.id == &"uv_laser" and not loadout.has_weapon(item.id))
+			)
+		VersusItem.Slot.AMMO:
+			return loadout.has_weapon(&"flare_launcher")
+	return loadout.tools.size() < VersusLoadout.TOOL_SLOTS
+
+
+## An AI prey fires at the boss it sees within range: flares now and
+## then, or the UV laser held while it sees it.
 func _think(delta: float) -> void:
-	_ai_wait -= delta
+	hold_chest(true, delta)
 	var boss := mode.boss
-	if _ai_wait > 0.0 or boss == null or boss.health.is_dead():
+	var alive := boss != null and not boss.health.is_dead()
+	if laser != null:
+		laser.update(alive and _sees_boss(mode.settings.laser_range), delta)
+		return
+	_ai_wait -= delta
+	if _ai_wait > 0.0 or not alive:
 		return
 	_ai_wait = mode.settings.ai_fire_interval
-	var target := boss.body.global_position + Vector3.UP * 1.2
-	if eye().distance_to(target) > mode.settings.ai_fire_range:
-		return
-	var query := PhysicsRayQueryParameters3D.create(eye(), target, 1 | 2)
-	if body.get_world_3d().direct_space_state.intersect_ray(query).is_empty():
+	if _sees_boss(mode.settings.ai_fire_range):
 		fire()
+
+
+func _sees_boss(reach: float) -> bool:
+	var target := mode.boss.body.global_position + Vector3.UP * 1.2
+	if eye().distance_to(target) > reach:
+		return false
+	var query := PhysicsRayQueryParameters3D.create(eye(), target, 1 | 2)
+	return body.get_world_3d().direct_space_state.intersect_ray(query).is_empty()
 
 
 func _on_downed() -> void:

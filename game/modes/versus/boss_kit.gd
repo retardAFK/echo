@@ -28,6 +28,9 @@ var _charge_hits: Array[HunterKit] = []
 var _base_walk := 0.0
 var _base_run := 0.0
 var _fall := FallWatch.new()
+var _slow_left := 0.0
+var _push_velocity := Vector3.ZERO
+var _push_left := 0.0
 
 
 func _init(p_mode: VersusMode) -> void:
@@ -66,6 +69,33 @@ func take_flare(flare: Flare, point: Vector3) -> void:
 	mode.on_boss_hit(self, flare.shooter, face, taken)
 	if view_model != null:
 		view_model.flash(Color.WHITE)
+
+
+## The UV laser of shooter burns it at point for delta seconds (Q13): face
+## or body, and it is slowed while the beam stays on it.
+func take_laser(shooter: Node3D, point: Vector3, delta: float) -> void:
+	var settings := mode.settings
+	var eyes: Vector3 = body.call(&"get_eye_position")
+	var face := point.distance_to(eyes) <= settings.face_radius
+	var damage := settings.laser_damage_per_second * delta * (2.0 if face else 1.0)
+	_slow_left = maxf(_slow_left, delta * 2.0 + 0.1)
+	var taken := health.take_hit(damage, 0.0)
+	if taken > 0.0:
+		mode.on_boss_hit(self, shooter, face, taken)
+
+
+## The sonic cannon's blast from offset's direction (Q13): pushed back
+## distance, its blow broken, poise added.
+func blasted(offset: Vector3, distance: float, poise: float) -> void:
+	var settings := mode.settings
+	offset.y = 0.0
+	if offset.length() > 0.01:
+		_push_velocity = offset.normalized() * distance / settings.sonic_push_time
+		_push_left = settings.sonic_push_time
+	if move in [Move.CLAW_WINDUP, Move.CHARGE_WINDUP, Move.CHARGING]:
+		_end_move()
+	health.take_hit(0.0, poise)
+	hit_taken.emit(false)
 
 
 ## Starts the claw (Q9) if it can.
@@ -128,8 +158,14 @@ func _physics_process(delta: float) -> void:
 	_claw_wait = maxf(_claw_wait - delta, 0.0)
 	_charge_wait = maxf(_charge_wait - delta, 0.0)
 	var settings: MonsterSettings = body.get(&"settings")
-	settings.walk_speed = _base_walk * health.speed_scale()
-	settings.run_speed = _base_run * health.speed_scale()
+	_slow_left = maxf(_slow_left - delta, 0.0)
+	var slow := 1.0 - mode.settings.laser_slow if _slow_left > 0.0 else 1.0
+	settings.walk_speed = _base_walk * health.speed_scale() * slow
+	settings.run_speed = _base_run * health.speed_scale() * slow
+	if _push_left > 0.0:
+		_push_left -= delta
+		body.move_and_collide(_push_velocity * delta)
+		_hold()
 	if health.is_dead() or mode.is_over():
 		_hold()
 		return

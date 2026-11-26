@@ -66,6 +66,14 @@ func revive() -> bool:
 	return true
 
 
+## A medkit gives back points (Q13), up to its full health; true if it did.
+func heal(points: int) -> bool:
+	if not is_standing() or health >= settings.hunted_health:
+		return false
+	health = mini(health + points, settings.hunted_health)
+	return true
+
+
 ## The boss finished it (Q5).
 func finish() -> void:
 	if is_down():
