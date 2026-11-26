@@ -8,9 +8,10 @@ extends Node
 ## held by a downed hunted finishes it (Q5, DownedHold), else interact
 ## leaps onto the noise aimed at (phase 2+, BossLeap). Each new phase starts
 ## with a cry; in phase 3 the claw strikes twice (Q8).
-## AI: claws a hunted in reach, charges one 6 to 14 m away in sight,
-## leaps onto the noise of one farther away (phase 2+),
-## finishes a downed one at its feet when no standing one is in reach.
+## AI (T-382): BossBrain chooses (target, claw, charge, leap onto a lone
+## shooter, backing off before a kneel), the kit does it; it starts the Fury
+## as soon as it can and finishes a downed hunted at its feet when no
+## standing one is in reach.
 ## Any blow that makes it flinch breaks a finish.
 
 signal hit_taken(face: bool)
@@ -30,6 +31,8 @@ var keys := HeldKeys.new()
 var finish := DownedHold.new()
 ## Its leap (phase 2+), and the noises it may leap onto.
 var leap: BossLeap
+## The AI's choices (T-382); unused when a human plays it.
+var brain: BossBrain
 ## A client's copy of its prompt (T-381), as the room says.
 var mirror_prompt: Array = []
 var view_model: ViewModel
@@ -61,6 +64,7 @@ func _ready() -> void:
 	_base_run = settings.run_speed
 	hit_taken.connect(func(_face: bool) -> void: finish.reset())
 	leap = BossLeap.new(mode.settings)
+	brain = BossBrain.new(mode.settings)
 	health.phase_changed.connect(_on_phase_changed)
 	NoiseBus.noise_emitted.connect(_on_noise)
 	if is_local():
@@ -302,10 +306,20 @@ func _read_commands(commands: PlayerCommands, delta: float) -> void:
 		health.start_fury()
 
 
-## The AI boss's choice (Q12, prototype): claw in reach, charge from afar.
+## The AI boss's turn (Q12, T-382): BossBrain chooses, the kit does it.
 func _think(delta: float) -> void:
 	health.start_fury()
-	var target := mode.nearest_standing(body.global_position)
+	brain.update(delta)
+	var standing: Array[HunterKit] = []
+	var places: Array[Vector3] = []
+	var damage: Array[float] = []
+	for kit in mode.hunters:
+		if kit.vitals.is_standing():
+			standing.append(kit)
+			places.append(kit.body.global_position)
+			damage.append(mode.stats.damage_of(kit) if mode.stats != null else 0.0)
+	var index := brain.pick_target(body.global_position, places, damage)
+	var target: HunterKit = standing[index] if index >= 0 else null
 	var offset := Vector3.ZERO
 	if target != null:
 		offset = target.body.global_position - body.global_position
@@ -314,23 +328,36 @@ func _think(delta: float) -> void:
 	hold_finish(distance > mode.settings.claw_reach, delta)
 	if finish.target != null or target == null:
 		return
-	if distance > mode.settings.charge_distance and can_leap():
-		var noise: Variant = leap.pick(
-			body.global_position, Vector3.ZERO, target.body.global_position
-		)
-		if noise != null and (noise as Vector3).distance_to(target.body.global_position) < 4.0:
-			leap_to(noise)
-			return
-	if distance <= mode.settings.claw_reach * 0.9:
-		_face(offset)
-		claw()
-	elif (
-		distance >= mode.settings.charge_min_distance
-		and distance <= mode.settings.charge_distance
-		and _sees(target)
-	):
-		_face(offset)
-		charge(offset)
+	var lone: Variant = _lone_noise(places)
+	var sees := distance <= mode.settings.charge_distance and _sees(target)
+	match brain.choose(distance, sees, lone != null, health.poise / mode.settings.poise_max):
+		BossBrain.Act.CLAW:
+			_face(offset)
+			claw()
+		BossBrain.Act.CHARGE:
+			_face(offset)
+			charge(offset)
+		BossBrain.Act.LEAP:
+			leap_to(lone)
+		BossBrain.Act.RETREAT:
+			if body is Monster:
+				(body as Monster).walk_away(target.body.global_position)
+
+
+## A heard noise next to a lone shooter (phase 2+), its leap target, or null.
+func _lone_noise(places: Array[Vector3]) -> Variant:
+	if not can_leap():
+		return null
+	for i in places.size():
+		if not brain.is_lone(i, places):
+			continue
+		var noise: Variant = leap.pick(body.global_position, Vector3.ZERO, places[i])
+		if (
+			noise != null
+			and (noise as Vector3).distance_to(places[i]) < mode.settings.brain_leap_near
+		):
+			return noise
+	return null
 
 
 func _land_claw() -> void:
