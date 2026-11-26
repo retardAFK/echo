@@ -6,6 +6,9 @@ extends Resource
 ## and the clock. Starting values from the spec, to tune by simulation.
 
 @export_group("Boss")
+## Size of the boss's model (S-025, Q8), and of the hitbox the shots meet
+## (BossLook); its collision with the map stays the monster's.
+@export_range(1.0, 2.0, 0.05) var boss_scale: float = 1.3
 ## Boss health for each hunted at the start (Q7).
 ## 250 after the simulations (T-384; the spec's 400 let the AI boss win
 ## almost every game).

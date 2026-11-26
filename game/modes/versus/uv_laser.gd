@@ -68,7 +68,7 @@ func update(held: bool, delta: float) -> void:
 		NoiseBus.emit_noise(NoiseEvent.Type.SHOT, kit.eye(), settings.laser_noise_range, kit.body)
 	var from := kit.eye()
 	var to := from + kit.aim() * settings.laser_range
-	var query := PhysicsRayQueryParameters3D.create(from, to, 1 | 2 | 8)
+	var query := PhysicsRayQueryParameters3D.create(from, to, Flare.LAYERS)
 	query.exclude = [kit.body.get_rid()]
 	var hit := kit.body.get_world_3d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty():

@@ -8,5 +8,6 @@ name_key = "VERSUS_PHASE_PROWLER"
 start_ratio = 1.0
 speed_scale = 1.0
 damage_taken_scale = 1.0
+glow = 0.35
 can_leap = false
 lights_out = false
