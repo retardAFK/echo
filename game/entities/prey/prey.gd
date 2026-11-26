@@ -41,6 +41,10 @@ const BODY_SETTINGS := preload("res://game/data/hunted_body_settings.tres")
 
 var brain: PreyBrain
 var sees_monster := false
+## Seen or heard, the monster alarms it only within this distance; 0: at
+## any distance. A game mode where the hunted fight back keeps them calm
+## at range (S-024, T-384).
+var alarm_distance := 0.0
 ## The game it plays (S-007), null outside the game loop.
 var game_loop: GameLoop
 ## The objectives besides fuses (S-018, T-268).
@@ -221,6 +225,8 @@ func _physics_process(delta: float) -> void:
 		threat = monster.global_position
 		_update_sight(delta)
 	var alarm := sees_monster or _heard_monster
+	if alarm and alarm_distance > 0.0 and monster != null:
+		alarm = global_position.distance_to(threat) <= alarm_distance
 	_heard_monster = false
 	var arrived := _agent.is_navigation_finished()
 	brain.update(delta, alarm, threat, arrived, is_warned())

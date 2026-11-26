@@ -6,7 +6,13 @@ extends Resource
 
 @export_group("Boss")
 ## Boss health for each hunted at the start (Q7).
-@export_range(50.0, 2000.0, 10.0) var boss_health_per_hunted: float = 400.0
+## 250 after the simulations (T-384; the spec's 400 let the AI boss win
+## almost every game).
+@export_range(50.0, 2000.0, 10.0) var boss_health_per_hunted: float = 250.0
+## That health scaled by the number of hunted: entry n - 1 for n hunted, 1
+## past the end. Tuned by the simulations (T-384, 20 games each): with 2, 3
+## and 4 AI hunted the AI boss then wins about half the games.
+@export var boss_health_scales: PackedFloat32Array = [1.0, 0.8, 0.8, 0.7]
 ## Phases, highest start_ratio first (Q8).
 @export var phases: Array[VersusPhase] = []
 ## Seconds the boss cannot be hurt when a phase starts (Q8, its cry).
@@ -207,6 +213,10 @@ extends Resource
 @export_range(0.0, 100.0, 1.0, "suffix:m") var ai_chest_detour: float = 25.0
 @export_range(0.0, 50.0, 1.0, "suffix:m") var ai_chest_safe: float = 8.0
 @export_range(1.0, 120.0, 1.0, "suffix:s") var ai_goal_time: float = 20.0
+## Armed, the boss alarms it (it flees) only within ai_keep_distance; and
+## it joins its nearest teammate once farther than ai_regroup_distance.
+@export_range(0.0, 50.0, 1.0, "suffix:m") var ai_keep_distance: float = 10.0
+@export_range(0.0, 100.0, 1.0, "suffix:m") var ai_regroup_distance: float = 10.0
 ## It rolls away from a claw wound up within claw_reach plus this.
 @export_range(0.0, 5.0, 0.1, "suffix:m") var ai_dodge_margin: float = 1.0
 

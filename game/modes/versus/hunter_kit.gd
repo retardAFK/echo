@@ -448,10 +448,14 @@ func _steer(delta: float) -> void:
 	if _ai_goal_wait > 0.0:
 		return
 	_ai_goal_wait = mode.settings.ai_think_interval
+	prey.alarm_distance = mode.settings.ai_keep_distance if loadout.weapon != null else 0.0
 	var downed: Array[Vector3] = []
+	var mates: Array[Vector3] = []
 	for kit in mode.hunters:
 		if kit != self and kit.vitals.is_down():
 			downed.append(kit.body.global_position)
+		elif kit != self and kit.vitals.is_standing():
+			mates.append(kit.body.global_position)
 	var chests: Array[Vector3] = []
 	for node in body.get_tree().get_nodes_in_group(VersusChest.GROUP):
 		var each := node as VersusChest
@@ -459,7 +463,7 @@ func _steer(delta: float) -> void:
 			chests.append(each.global_position)
 	var own := body.global_position
 	var goal := fighter.choose(
-		own, mode.boss.body.global_position, downed, chests, loadout.weapon != null
+		own, mode.boss.body.global_position, downed, chests, loadout.weapon != null, mates
 	)
 	if goal == PreyFighter.Goal.NONE:
 		if _sent_to != null and prey.brain.state == PreyBrain.State.SEARCH:

@@ -29,7 +29,11 @@ var _since_attack := 0.0
 
 func _init(versus: VersusSettings, hunted_count: int) -> void:
 	settings = versus
-	max_health = versus.boss_health_per_hunted * maxi(hunted_count, 1)
+	var count := maxi(hunted_count, 1)
+	var scale := 1.0
+	if count <= versus.boss_health_scales.size():
+		scale = versus.boss_health_scales[count - 1]
+	max_health = versus.boss_health_per_hunted * count * scale
 	health = max_health
 
 

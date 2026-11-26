@@ -141,11 +141,12 @@ func add_ai_preys(count: int) -> void:
 		each.rotation.y = marker.global_rotation.y
 		if i > 0:
 			map.add_child(each)
-			map.game_loop.add_hunted(each)
-			each.start_loop(map.game_loop, boxes, map.rng.randi() | 1)
 			map.extra_preys.append(each)
-		else:
-			each.start_loop(map.game_loop, boxes, map.rng.randi() | 1)  # From its new place.
+		if map.game_loop == null:
+			continue  # A game mode without the loop (the Versus, S-024): they wander.
+		if i > 0:
+			map.game_loop.add_hunted(each)
+		each.start_loop(map.game_loop, boxes, map.rng.randi() | 1)  # From its new place.
 
 
 ## An AI prey caught by the AI monster: out of the game, out of the way. The
@@ -176,6 +177,8 @@ func play_ai_against_ai() -> Monster:
 	map.add_child(monster)
 	for each: Prey in [map.prey] + map.extra_preys:
 		each.monster = monster
+	if map.game_loop == null:
+		return monster  # A game mode without the loop (S-024): its own rules.
 	monster.hunted_caught.connect(_on_ai_prey_caught.bind(monster))
 	map.game_loop.exit_opened.connect(
 		monster.guard_exit.bind(Prey.markers_of(map.get_node("GuardPoints")))

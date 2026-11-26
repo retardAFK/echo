@@ -7,11 +7,13 @@ extends RefCounted
 ## - A downed teammate first, when the boss is far from it (ai_revive_safe).
 ## - Unarmed, the nearest chest worth opening; armed, one within
 ##   ai_chest_detour, when the boss is far from it (ai_chest_safe).
+## - Else, with no teammate within ai_regroup_distance, the nearest
+##   standing one: together, they cover each other and revive.
 ## - A goal it does not reach in ai_goal_time is left aside for good (a
 ##   chest it cannot reach, say).
 ## It also says when to roll away: the boss winding up a blow at it.
 
-enum Goal { NONE, REVIVE, CHEST }
+enum Goal { NONE, REVIVE, CHEST, REGROUP }
 
 var settings: VersusSettings
 ## Where it goes, with goal.
@@ -28,10 +30,15 @@ func _init(p_settings: VersusSettings) -> void:
 
 
 ## Chooses its goal from where it is (own), the boss (boss_at), the downed
-## teammates and the chests worth opening, armed or not. Returns the goal;
-## point says where.
+## and the standing teammates (mates) and the chests worth opening, armed or
+## not. Returns the goal; point says where.
 func choose(
-	own: Vector3, boss_at: Vector3, downed: Array[Vector3], chests: Array[Vector3], armed: bool
+	own: Vector3,
+	boss_at: Vector3,
+	downed: Array[Vector3],
+	chests: Array[Vector3],
+	armed: bool,
+	mates: Array[Vector3] = []
 ) -> Goal:
 	var best: Variant = _nearest(own, downed, boss_at, settings.ai_revive_safe, INF)
 	if best != null:
@@ -41,6 +48,9 @@ func choose(
 	best = _nearest(own, chests, boss_at, safe, reach)
 	if best != null:
 		return _go(Goal.CHEST, best)
+	best = _nearest(own, mates, boss_at, 0.0, INF)
+	if best != null and own.distance_to(best) > settings.ai_regroup_distance:
+		return _go(Goal.REGROUP, best)
 	goal = Goal.NONE
 	return goal
 
