@@ -3,7 +3,9 @@ extends CanvasLayer
 ## The Versus HUD (spec S-024, Q21, Q23, T-372 and T-373), drawn by code:
 ## the boss bar and its phase at the bottom, the hit marker on the crosshair,
 ## and for the hunted its hit points, stamina and flares, for the boss its
-## rage. A red edge when hurt, the result at the end.
+## rage. A red edge when hurt, the result at the end. Under the crosshair,
+## what holding interact does (open a chest, revive, finish, Q5 and Q30)
+## and how far along it is.
 
 const THEME := preload("res://game/ui/theme/echo_theme.tres")
 const BAR_COLOR := Color(0.62, 0.08, 0.06)
@@ -127,7 +129,45 @@ func _draw_hunter(hunter: HunterKit, size: Vector2, font: Font) -> void:
 			200,
 			10
 		)
-	_draw_chest_prompt(hunter, size, font)
+	if hunter.vitals.is_out():
+		_draw_prompt(Text.t("VERSUS_OUT"), -1.0, size, font)
+	elif hunter.vitals.is_down():
+		_draw_down(hunter, size, font)
+	elif not _draw_revive_prompt(hunter, size, font):
+		_draw_chest_prompt(hunter, size, font)
+
+
+## Downed (Q5): the seconds left, and a teammate's revive under way.
+func _draw_down(hunter: HunterKit, size: Vector2, font: Font) -> void:
+	var text := Text.t("VERSUS_DOWN_TIME", ceili(hunter.vitals.down_left))
+	var ratio := -1.0
+	for other in mode.hunters:
+		if other.revive.target == hunter:
+			text = Text.t("VERSUS_BEING_REVIVED")
+			ratio = other.revive.ratio(other.revive_time())
+	_draw_prompt(text, ratio, size, font)
+
+
+## A downed teammate in reach (Q5); false if none.
+func _draw_revive_prompt(hunter: HunterKit, size: Vector2, font: Font) -> bool:
+	var reach := mode.settings.revive_reach
+	if DownedHold.nearest(mode.hunters, hunter.body.global_position, reach, hunter) == null:
+		return false
+	var ratio := hunter.revive.ratio(hunter.revive_time())
+	_draw_prompt(Text.with_keys("VERSUS_REVIVE"), ratio, size, font)
+	return true
+
+
+## A text under the crosshair and, if ratio is 0 or more, a progress bar.
+func _draw_prompt(text: String, ratio: float, size: Vector2, font: Font) -> void:
+	var at := Vector2(0, size.y * 0.5 + 24)
+	_canvas.draw_string(font, at, text, HORIZONTAL_ALIGNMENT_CENTER, size.x, 10)
+	if ratio <= 0.0:
+		return
+	var bar := Rect2(size.x * 0.5 - 30, size.y * 0.5 + 30, 60, 3)
+	_canvas.draw_rect(bar, BAR_BACK)
+	bar.size.x *= clampf(ratio, 0.0, 1.0)
+	_canvas.draw_rect(bar, STAMINA_COLOR)
 
 
 ## What the hunted holds, for the HUD: its weapon and flares, or empty hands.
@@ -153,14 +193,7 @@ func _draw_chest_prompt(hunter: HunterKit, size: Vector2, font: Font) -> void:
 	var text := Text.with_keys("VERSUS_CHEST_OPEN")
 	if chest.is_open:
 		text = Text.with_keys("VERSUS_CHEST_TAKE", Text.t(chest.item.name_key))
-	var at := Vector2(0, size.y * 0.5 + 24)
-	_canvas.draw_string(font, at, text, HORIZONTAL_ALIGNMENT_CENTER, size.x, 10)
-	if hunter.chest_held > 0.0:
-		var ratio := hunter.chest_held / chest.hold_time(mode.settings)
-		var bar := Rect2(size.x * 0.5 - 30, size.y * 0.5 + 30, 60, 3)
-		_canvas.draw_rect(bar, BAR_BACK)
-		bar.size.x *= clampf(ratio, 0.0, 1.0)
-		_canvas.draw_rect(bar, STAMINA_COLOR)
+	_draw_prompt(text, hunter.chest_held / chest.hold_time(mode.settings), size, font)
 
 
 func _draw_boss(boss: BossKit, size: Vector2, font: Font) -> void:
@@ -172,3 +205,7 @@ func _draw_boss(boss: BossKit, size: Vector2, font: Font) -> void:
 	elif boss.health.rage >= 100.0:
 		rage = Text.t("VERSUS_FURY_READY")
 	_canvas.draw_string(font, Vector2(8, size.y - 86), rage, HORIZONTAL_ALIGNMENT_LEFT)
+	var reach := mode.settings.finish_reach
+	if DownedHold.nearest(mode.hunters, boss.body.global_position, reach) != null:
+		var ratio := boss.finish.ratio(mode.settings.finish_time)
+		_draw_prompt(Text.with_keys("VERSUS_FINISH"), ratio, size, font)

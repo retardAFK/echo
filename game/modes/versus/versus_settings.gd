@@ -47,6 +47,16 @@ extends Resource
 @export_range(0.5, 10.0, 0.1, "suffix:s") var revive_time: float = 3.0
 ## Seconds of holding E for the boss to finish a downed hunted (Q5).
 @export_range(0.5, 10.0, 0.1, "suffix:s") var finish_time: float = 2.0
+## How close a teammate must be to revive, and the boss to finish (Q5).
+@export_range(0.5, 5.0, 0.1, "suffix:m") var revive_reach: float = 2.0
+@export_range(0.5, 5.0, 0.1, "suffix:m") var finish_reach: float = 2.5
+## The noise of a revive (Q5).
+@export_range(0.0, 30.0, 1.0, "suffix:m") var revive_noise_range: float = 8.0
+## How fast a downed hunted crawls (Q5).
+@export_range(0.0, 3.0, 0.1, "suffix:m/s") var crawl_speed: float = 0.8
+## A medkit in a tool slot shortens a revive to this share of its time,
+## and is spent (Q13).
+@export_range(0.1, 1.0, 0.05) var medkit_revive_factor: float = 0.5
 
 @export_group("Stamina and dodge")
 ## Seconds of stamina refill from empty to full (Q15).

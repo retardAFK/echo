@@ -4,8 +4,11 @@ extends Node
 ## poise and rage (BossHealth), its claw and its charge, each with a signal
 ## before the blow, and, for the played boss, its first-person arms. A child
 ## of a Monster (AI) or a MonsterAvatar (played), added by VersusMode.
-## Played: left click claws, Space charges, R starts the Fury.
-## AI: claws a hunted in reach, charges one 6 to 14 m away in sight.
+## Played: left click claws, Space charges, R starts the Fury, interact
+## held by a downed hunted finishes it (Q5, DownedHold).
+## AI: claws a hunted in reach, charges one 6 to 14 m away in sight,
+## finishes a downed one at its feet when no standing one is in reach.
+## Any blow that makes it flinch breaks a finish.
 
 signal hit_taken(face: bool)
 
@@ -18,6 +21,8 @@ var mode: VersusMode
 var body: CharacterBody3D
 var health: BossHealth
 var move := Move.NONE
+## Holding interact by a downed hunted to finish it (Q5).
+var finish := DownedHold.new()
 var view_model: ViewModel
 var _move_left := 0.0
 var _claw_wait := 0.0
@@ -44,6 +49,7 @@ func _ready() -> void:
 	var settings: MonsterSettings = body.get(&"settings")
 	_base_walk = settings.walk_speed
 	_base_run = settings.run_speed
+	hit_taken.connect(func(_face: bool) -> void: finish.reset())
 	if is_local():
 		view_model = ViewModel.new(ViewModel.Kind.BOSS)
 		(body as MonsterAvatar).get_camera().add_child(view_model)
@@ -195,12 +201,35 @@ func _physics_process(delta: float) -> void:
 				_end_move()
 		Move.NONE:
 			if is_local():
-				_read_keys()
+				_read_keys(delta)
 			else:
-				_think()
+				_think(delta)
+	if move != Move.NONE:
+		finish.reset()
 
 
-func _read_keys() -> void:
+## One frame of interact held (pressed) or not by a downed hunted (Q5): it
+## stands still over it, and once held long enough it is out.
+func hold_finish(pressed: bool, delta: float) -> void:
+	var settings := mode.settings
+	var done := finish.update(
+		mode.hunters,
+		body.global_position,
+		pressed,
+		delta,
+		settings.finish_time,
+		settings.finish_reach
+	)
+	if finish.target != null:
+		_hold()
+	if done != null:
+		done.vitals.finish()
+
+
+func _read_keys(delta: float) -> void:
+	hold_finish(Input.is_action_pressed("interact"), delta)
+	if finish.target != null:
+		return
 	if Input.is_action_just_pressed("throw"):
 		claw()
 	if Input.is_action_just_pressed("dodge"):
@@ -210,14 +239,17 @@ func _read_keys() -> void:
 
 
 ## The AI boss's choice (Q12, prototype): claw in reach, charge from afar.
-func _think() -> void:
+func _think(delta: float) -> void:
 	health.start_fury()
 	var target := mode.nearest_standing(body.global_position)
-	if target == null:
+	var offset := Vector3.ZERO
+	if target != null:
+		offset = target.body.global_position - body.global_position
+		offset.y = 0.0
+	var distance := offset.length() if target != null else INF
+	hold_finish(distance > mode.settings.claw_reach, delta)
+	if finish.target != null or target == null:
 		return
-	var offset := target.body.global_position - body.global_position
-	offset.y = 0.0
-	var distance := offset.length()
 	if distance <= mode.settings.claw_reach * 0.9:
 		_face(offset)
 		claw()

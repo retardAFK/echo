@@ -45,7 +45,9 @@ func hurt(damage: int, through_shield := false) -> bool:
 	if not is_standing() or (shield_left > 0.0 and not through_shield) or damage <= 0:
 		return false
 	health = maxi(health - damage, 0)
-	if health == 0:
+	if health == 0 and revives_left <= 0:
+		_go_out()  # Its third fall: no revive left (Q5).
+	elif health == 0:
 		state = State.DOWN
 		down_left = settings.down_time
 		downed.emit()
@@ -53,6 +55,7 @@ func hurt(damage: int, through_shield := false) -> bool:
 
 
 ## A teammate revived it (Q5): back up, or out after its last revive.
+## A hunted that falls with no revive left is out at once (hurt).
 func revive() -> bool:
 	if not is_down():
 		return false
