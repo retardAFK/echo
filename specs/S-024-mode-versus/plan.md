@@ -18,12 +18,12 @@ Le jeu n'a aujourd'hui qu'une façon de jouer (la Traque). S-024 ajoute la notio
 | `VersusRules` | chrono, « l'aube approche », boss traqué (45 s sans attaquer), qui gagne (Q1 à Q6) |
 | `Stamina` | endurance (course et roulade) |
 | `BossBrain` | choix d'attaque du boss IA |
-| `ShotMath` | trajectoire en arc de la fusée, test de touche (corps ou visage), cône de la lampe |
+| `ShotMath` | trajectoire en arc de la fusée, test de touche (corps ou visage), rayon du lance-laser UV |
 
 ### Les armes et les attaques
 - `VersusWeaponDef` et `BossAttackDef` (`Resource`) : nom, scène, munitions, dégâts, posture, bruit, recharge. Listes dans `game/modes/versus/data/weapons.tres` et `boss_attacks.tres`. Une arme = un fichier `.tres` + une scène ; les outils au choix réutilisent `Loadout` (S-023) avec leur propre liste.
 - **Fusée** (`Flare`) : `Node3D` qui avance par calcul (`ShotMath.step`), pas un corps physique ; touche par un `intersect_ray` par image entre l'ancienne et la nouvelle position, sur les couches du boss et des murs. Le boss a deux zones : corps (capsule) et **visage** (sphère sur la tête). Au sol, elle reste 8 s avec un matériau émissif ; seules les **2 fusées les plus récentes** ont une vraie lumière (budget de 4 lumières dynamiques).
-- **Lampe UV** : test de cône (`ShotMath.in_cone`) plus un rayon pour la vue, à chaque image de la salle.
+- **Lance-laser UV** : un rayon (`intersect_ray`) de 30 m le long de la visée, à chaque image de la salle tant que la gâchette est tenue.
 - Les coups du boss : la griffe est un test d'arc devant lui (distance, angle, hauteur) ; la charge, un déplacement forcé avec un test de contact ; le bond, un saut en arc vers un point puis un test de rayon.
 
 ### La vue à la première personne

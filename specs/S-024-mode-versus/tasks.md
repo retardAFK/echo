@@ -22,7 +22,7 @@ Bloc de numéros : T-370 à T-399.
 ## Après validation de la spec
 - [ ] T-375 — `GameSession.mode` et choix du mode dans le salon et dans « Jouer seul »
 - [ ] T-376 — Arène dans la cité (barrières, murets, caisses de fusées) par fichier d'arène ; budget d'appels de dessin mesuré
-- [ ] T-377 — Outils au choix : lampe UV, canon sonique, trousse ; pétards et fumigène branchés sur la posture
+- [ ] T-377 — Coffres (Q29 à Q33) et ce qu'ils donnent : lance-laser UV, canon sonique, trousse ; pétards et fumigène branchés sur la posture
 - [ ] T-378 — À terre, relevé, achever, hors combat (Q5)
 - [ ] T-379 — Bond, cri et lampadaires éteints, phase 3 (Q8, Q9)
 - [ ] T-380 — Chrono, aube, boss traqué, victoire et écran de fin avec MVP (Q1 à Q4, Q28)
