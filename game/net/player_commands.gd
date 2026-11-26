@@ -36,6 +36,13 @@ const FLAG_SPRINT := 1
 const FLAG_INTERACT := 2
 const FLAG_SCAN := 4
 const FLAG_BREATH := 8
+## Held keys of the Versus mode (S-024, T-381): left click (fire, claw),
+## Space (roll, charge), and the two tool keys. Its kits turn presses into
+## actions themselves, so a remote player plays like a local one.
+const FLAG_FIRE := 16
+const FLAG_DODGE := 32
+const FLAG_TOOL_1 := 64
+const FLAG_TOOL_2 := 128
 ## Bytes before the actions: seq (4), move (2 x 4), yaw (4), pitch (4), flags (1), count (1).
 const HEADER_SIZE := 22
 ## Bytes of one frame in a packet of frames: the header without the count.
@@ -55,6 +62,11 @@ var interact := false
 var scan := false
 ## Holding its breath (S-020, T-311).
 var hold_breath := false
+## Left click, Space and the tool keys held (S-024, T-381).
+var fire := false
+var dodge := false
+var tool_1 := false
+var tool_2 := false
 
 var _actions: Array[Action] = []
 
@@ -86,6 +98,25 @@ func copy_held(other: PlayerCommands) -> void:
 	interact = other.interact
 	scan = other.scan
 	hold_breath = other.hold_breath
+	fire = other.fire
+	dodge = other.dodge
+	tool_1 = other.tool_1
+	tool_2 = other.tool_2
+
+
+## Whether the key of flag (FLAG_*) is held.
+func is_held(flag: int) -> bool:
+	var held := {
+		FLAG_SPRINT: sprint,
+		FLAG_INTERACT: interact,
+		FLAG_SCAN: scan,
+		FLAG_BREATH: hold_breath,
+		FLAG_FIRE: fire,
+		FLAG_DODGE: dodge,
+		FLAG_TOOL_1: tool_1,
+		FLAG_TOOL_2: tool_2,
+	}
+	return held.get(flag, false)
 
 
 ## The queued one-shot actions, oldest first; the queue is emptied.
@@ -171,6 +202,9 @@ func _encode_held(bytes: PackedByteArray, offset: int) -> void:
 		flags |= FLAG_SCAN
 	if hold_breath:
 		flags |= FLAG_BREATH
+	for flag: int in [FLAG_FIRE, FLAG_DODGE, FLAG_TOOL_1, FLAG_TOOL_2]:
+		if is_held(flag):
+			flags |= flag
 	bytes.encode_u8(offset + 20, flags)
 
 
@@ -189,4 +223,8 @@ static func _decode_held(bytes: PackedByteArray, offset: int) -> PlayerCommands:
 	commands.interact = flags & FLAG_INTERACT != 0
 	commands.scan = flags & FLAG_SCAN != 0
 	commands.hold_breath = flags & FLAG_BREATH != 0
+	commands.fire = flags & FLAG_FIRE != 0
+	commands.dodge = flags & FLAG_DODGE != 0
+	commands.tool_1 = flags & FLAG_TOOL_1 != 0
+	commands.tool_2 = flags & FLAG_TOOL_2 != 0
 	return commands

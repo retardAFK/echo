@@ -12,6 +12,9 @@ const MENU_SCENE := "res://game/ui/start_menu.tscn"
 
 ## Tests turn this off to stay on the map after a choice.
 var change_scene := true
+## Online (T-381): no "Rejouer" (the room takes everyone back to the
+## lobby), "Menu" leaves the room.
+var online := false
 ## The text "Copier la carte" copies.
 var card := ""
 var title: Label
@@ -63,26 +66,38 @@ static func title_key(winner: VersusRules.Winner, dawn: bool, as_boss: bool) -> 
 	return "VERSUS_BOSS_WIN" if not as_boss else "VERSUS_BOSS_WIN_YOU"
 
 
-## Shows the end of mode's game and pauses it.
+## Shows the end of mode's game (solo) and pauses it.
 func show_result(mode: VersusMode) -> void:
 	var rules := mode.rules
-	var dawn := rules.time_left() <= 0.0
-	var as_boss := mode.local_hunter() == null
-	title.text = Text.t(title_key(rules.winner, dawn, as_boss))
-	var lines: Array[String] = [Text.t("END_DURATION", EndScreen.format_duration(rules.clock))]
-	lines.append_array(mode.stats.lines(mode.hunters))
-	stats.text = "\n".join(lines)
 	var best := mode.stats.mvp(mode.hunters)
-	mvp_label.text = ""
-	if best != null:
-		mvp_label.text = Text.t("VERSUS_MVP", VersusStats.name_of(mode.hunters, best))
-	card = Text.t("VERSUS_CARD", [title.text, EndScreen.format_duration(rules.clock)])
-	if best != null:
+	show_values(
+		title_key(rules.winner, rules.time_left() <= 0.0, mode.local_hunter() == null),
+		rules.clock,
+		mode.stats.lines(mode.hunters),
+		VersusStats.name_of(mode.hunters, best) if best != null else ""
+	)
+
+
+## Shows an end: its title key, how long it lasted, a line per hunted and
+## the best player's name (empty: none). Paused in solo; online the game
+## goes on behind until the room takes everyone back to the lobby.
+func show_values(key: String, clock: float, lines: Array[String], best: String) -> void:
+	title.text = Text.t(key)
+	var all: Array[String] = [Text.t("END_DURATION", EndScreen.format_duration(clock))]
+	all.append_array(lines)
+	stats.text = "\n".join(all)
+	mvp_label.text = Text.t("VERSUS_MVP", best) if best != "" else ""
+	card = Text.t("VERSUS_CARD", [title.text, EndScreen.format_duration(clock)])
+	if best != "":
 		card += "\n" + mvp_label.text
+	replay_button.visible = not online
 	visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	get_tree().paused = true
-	replay_button.grab_focus()
+	if not online:
+		get_tree().paused = true
+		replay_button.grab_focus()
+	else:
+		menu_button.grab_focus()
 
 
 func copy_card() -> void:
@@ -98,6 +113,8 @@ func replay() -> void:
 
 func go_to_menu() -> void:
 	get_tree().paused = false
+	if online:
+		NetSession.leave()
 	if change_scene:
 		get_tree().change_scene_to_file(MENU_SCENE)
 
