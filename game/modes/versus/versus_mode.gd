@@ -71,6 +71,7 @@ func _setup() -> void:
 		var builder := ArenaBuilder.new(arena)
 		get_parent().add_child(builder)
 		builder.use_navigation(get_parent())
+	_open_doors()
 	leap_shadow = _make_shadow()
 	add_child(leap_shadow)
 	end_screen = VersusEndScreen.new()
@@ -130,6 +131,13 @@ func _setup_mirror() -> void:
 	add_child(link)
 	hud = VersusHud.new(self)
 	add_child(hud)
+
+
+## Every door of the map open for good (S-025, Q5): one passes everywhere,
+## on the room and on each client alike.
+func _open_doors() -> void:
+	for node in get_tree().get_nodes_in_group(Door.GROUP):
+		(node as Door).hold_open()
 
 
 ## The boss's health: its kit's, or on a hunted's client the room's copy.

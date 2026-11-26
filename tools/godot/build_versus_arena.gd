@@ -2,12 +2,17 @@ extends "res://tools/godot/tilleuls_places.gd"
 ## Generates the Versus arena of the cité des Tilleuls (spec S-024, Q24 and
 ## Q34, T-376), "la place de la tour": the tower, the social centre, the car
 ## park's yard and the paths between them, closed by building-site barriers.
-## The buildings stay shut (doors and vaults nailed with boards), but the
-## roofs are the point (Maxime, 26/11/2026): two metal stairs go up to the
-## social centre's roof (4.3 m, no parapet: one can fall off), and the
-## tower's fire escape (up to 12 m) stays open as a lookout. Low concrete
-## walls give cover. Then it bakes the cité's navigation mesh with all that
-## in. Uses the cité's layout constants, so the arena follows the map.
+## Every door is open in the Versus (S-025, T-401: "toutes les portes
+## traversables", Maxime, 26/11/2026): no boards; the buildings, the car park
+## and their cellars are part of the arena, and the navigation mesh goes
+## through every doorway, emergency exits included (VersusMode holds them
+## open). Only the doorways that lead out of the barriers are boarded. The
+## roofs are the point too: two metal stairs go up to the social centre's
+## roof (4.3 m, no parapet: one can fall off), and the tower's fire escape
+## (up to 12 m) is a lookout. Low concrete walls give cover. Then it bakes
+## the cité's navigation mesh with all that in, and checks that nothing
+## reachable from the hunted's start lies outside the barriers. Uses the
+## cité's layout constants, so the arena follows the map.
 ## Run after a change of the cité or of this file, then commit the outputs:
 ##   godot --headless res://tools/godot/build_versus_arena.tscn
 
@@ -73,9 +78,6 @@ func _ready() -> void:
 	var lo := kit.world(BOUNDS.position.x, BOUNDS.position.y)
 	_arena.bounds = Rect2(lo.x, lo.z, BOUNDS.size.x, BOUNDS.size.y)
 	_add_fence()
-	_nail_tower()
-	_nail_social_centre()
-	_close_car_park()
 	_add_roof_stairs()
 	_add_low_walls()
 	_add_spawns()
@@ -110,44 +112,6 @@ func _add_fence() -> void:
 	_box(r.position.x, r.end.y, r.end.x, r.end.y + t, 0, FENCE_HEIGHT, look)
 	_box(r.position.x - t, r.position.y, r.position.x, r.end.y, 0, FENCE_HEIGHT, look)
 	_box(r.end.x, r.position.y, r.end.x + t, r.end.y, 0, FENCE_HEIGHT, look)
-
-
-## The tower: its hall doors, its broken window, the corridor doors onto the
-## fire escape (the escape itself stays: a lookout up to the 4th storey).
-func _nail_tower() -> void:
-	var r := TOWER
-	_boards(true, TOWER_NORTH_DOORS.x, TOWER_NORTH_DOORS.y, r.position.y)
-	_boards(true, TOWER_SOUTH_DOORS.x, TOWER_SOUTH_DOORS.y, r.end.y)
-	_boards(false, TOWER_VAULT_WINDOW.x, TOWER_VAULT_WINDOW.y, r.position.x)
-	for level in range(1, TOWER_VISITED_STOREYS):
-		_boards(false, FIRE_ESCAPE_DOOR.x, FIRE_ESCAPE_DOOR.y, r.end.x, level * STOREY)
-
-
-## The social centre: its doors, and the windows one vaults (F1, F2).
-func _nail_social_centre() -> void:
-	var r := SOCIAL_CENTRE
-	_boards(true, CENTRE_NORTH_DOORS.x, CENTRE_NORTH_DOORS.y, r.position.y)
-	_boards(false, CENTRE_WEST_DOORS.x, CENTRE_WEST_DOORS.y, r.position.x)
-	_boards(true, CENTRE_EMERGENCY_EXIT.x, CENTRE_EMERGENCY_EXIT.y, r.end.y)
-	_boards(true, CENTRE_KITCHEN_DOOR.x, CENTRE_KITCHEN_DOOR.y, r.end.y)
-	_boards(true, 144.0, 146.0, r.end.y, WINDOW_SILL - 1.0)  # F1.
-	_boards(false, 72.0, 73.5, r.end.x, WINDOW_SILL - 1.0)  # F2.
-
-
-## The car park stays shut: lids over its two stairs and across its ramp.
-func _close_car_park() -> void:
-	var look := ArenaPiece.Look.CONCRETE
-	for hole: Rect2 in [CAR_PARK_STAIRS, CAR_PARK_NORTH_STAIRS]:
-		_box(hole.position.x, hole.position.y, hole.end.x, hole.end.y, 0, LID_HEIGHT, look)
-	var ramp := CAR_PARK_RAMP
-	_box(ramp.position.x - 0.6, ramp.position.y, ramp.position.x, ramp.end.y, 0, BOARD_TOP, look)
-	# The technical room's north door, by the barriers.
-	_boards(
-		true,
-		CAR_PARK_TECHNICAL_NORTH_DOOR.x,
-		CAR_PARK_TECHNICAL_NORTH_DOOR.y,
-		CAR_PARK_TECHNICAL.position.y
-	)
 
 
 ## Two metal stairs up to the social centre's roof (Maxime, 26/11/2026):
@@ -246,6 +210,8 @@ func _bake() -> void:
 	var map: Node3D = load(SCENE_PATH).instantiate()
 	map.set_script(null)  # The cité as built, without starting a game.
 	add_child(map)
+	var exits := map.get_node("Doors/EmergencyExits")
+	exits.remove_from_group(&"navigation_source")  # Held open in the Versus.
 	var builder := ArenaBuilder.new(_arena)
 	builder.add_to_group(&"navigation_source")
 	map.add_child(builder)
@@ -257,6 +223,7 @@ func _bake() -> void:
 	var error := ResourceSaver.save(mesh, ARENA_NAVMESH_PATH, ResourceSaver.FLAG_COMPRESS)
 	mesh.take_over_path(ARENA_NAVMESH_PATH)
 	_arena.navigation_mesh = mesh
+	_check_leaks(mesh)
 	var arena_error := ResourceSaver.save(_arena, ARENA_PATH)
 	print(
 		(
@@ -270,3 +237,61 @@ func _bake() -> void:
 			]
 		)
 	)
+
+
+## Prints the reachable places outside the barriers: the navigation mesh's
+## polygons joined by shared vertices, from the one under the hunted's first
+## start (links over walls are not followed: a leak through them shows too
+## at the next run of the access test, test_versus_arena).
+func _check_leaks(mesh: NavigationMesh) -> void:
+	var vertices := mesh.get_vertices()
+	var by_vertex := {}
+	for i in mesh.get_polygon_count():
+		for v in mesh.get_polygon(i):
+			if not by_vertex.has(v):
+				by_vertex[v] = []
+			by_vertex[v].append(i)
+	var start := _polygon_under(mesh, _arena.hunted_spawns[0])
+	var seen := {start: true}
+	var queue := [start]
+	while not queue.is_empty():
+		var i: int = queue.pop_back()
+		for v in mesh.get_polygon(i):
+			for j: int in by_vertex[v]:
+				if not seen.has(j):
+					seen[j] = true
+					queue.append(j)
+	var bounds := _arena.bounds.grow(1.0)
+	var outside := 0
+	for i: int in seen:
+		var centre := _centre(mesh, i, vertices)
+		if not bounds.has_point(Vector2(centre.x, centre.z)):
+			outside += 1
+			if outside <= 30:
+				print(
+					(
+						"  leak: %s (plan %s)"
+						% [centre, Vector2(centre.x + kit.origin.x, centre.z + kit.origin.y)]
+					)
+				)
+	print("Versus arena: %d polygons reachable, %d outside the barriers" % [seen.size(), outside])
+
+
+func _polygon_under(mesh: NavigationMesh, at: Vector3) -> int:
+	var vertices := mesh.get_vertices()
+	var best := 0
+	var best_distance := INF
+	for i in mesh.get_polygon_count():
+		var distance := _centre(mesh, i, vertices).distance_to(at)
+		if distance < best_distance:
+			best = i
+			best_distance = distance
+	return best
+
+
+static func _centre(mesh: NavigationMesh, i: int, vertices: PackedVector3Array) -> Vector3:
+	var sum := Vector3.ZERO
+	var polygon := mesh.get_polygon(i)
+	for v in polygon:
+		sum += vertices[v]
+	return sum / polygon.size()
