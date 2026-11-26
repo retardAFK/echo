@@ -5,7 +5,8 @@ extends CanvasLayer
 ## and for the hunted its hit points, stamina and flares, for the boss its
 ## rage. A red edge when hurt, the result at the end. Under the crosshair,
 ## what holding interact does (open a chest, revive, finish, Q5 and Q30)
-## and how far along it is.
+## and how far along it is. At the top, the clock and dawn near (Q3); a
+## boss that hides too long is shown in red to the hunted (Q4).
 
 const THEME := preload("res://game/ui/theme/echo_theme.tres")
 const BAR_COLOR := Color(0.62, 0.08, 0.06)
@@ -14,6 +15,8 @@ const RAGE_COLOR := Color(0.85, 0.15, 0.4)
 const STAMINA_COLOR := Color(0.75, 0.75, 0.6)
 const FACE_COLOR := Color(1.0, 0.2, 0.15)
 const LASER_COLOR := Color(0.62, 0.3, 1.0)
+const DAWN_COLOR := Color(1.0, 0.6, 0.3)
+const TRACKED_COLOR := Color(1.0, 0.1, 0.05)
 
 var mode: VersusMode
 var _canvas: Control
@@ -75,9 +78,11 @@ func _draw_hud() -> void:
 	if boss.health.is_kneeling():
 		title += "  ·  " + Text.t("VERSUS_KNEEL")
 	_canvas.draw_string(font, bar.position + Vector2(0, -6), title, HORIZONTAL_ALIGNMENT_LEFT)
+	_draw_clock(size, font)
 	var hunter := mode.local_hunter()
 	if hunter != null:
 		_draw_hunter(hunter, size, font)
+		_draw_tracked(boss, size)
 	elif boss.is_local():
 		_draw_boss(boss, size, font)
 	if _hit_left > 0.0:
@@ -98,6 +103,43 @@ func _draw_hud() -> void:
 		_canvas.draw_string(
 			font, Vector2(0, size.y * 0.4), _end_text, HORIZONTAL_ALIGNMENT_CENTER, size.x, 32
 		)
+
+
+## The clock, top middle, and dawn near (Q3).
+func _draw_clock(size: Vector2, font: Font) -> void:
+	var rules := mode.rules
+	if rules == null:
+		return
+	var left := ceili(rules.time_left())
+	var clock := Text.t("VERSUS_CLOCK", [left / 60, left % 60])
+	var color := DAWN_COLOR if rules.dawn_near() else Color.WHITE
+	_canvas.draw_string(font, Vector2(0, 28), clock, HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, color)
+	if rules.dawn_near():
+		var dawn := Text.t("VERSUS_DAWN_NEAR")
+		_canvas.draw_string(
+			font, Vector2(0, 46), dawn, HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, color
+		)
+	elif rules.boss_tracked() and mode.boss.is_local():
+		var tracked := Text.t("VERSUS_TRACKED")
+		_canvas.draw_string(
+			font, Vector2(0, 46), tracked, HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, TRACKED_COLOR
+		)
+
+
+## A boss that has not attacked for long is shown in red (Q4).
+func _draw_tracked(boss: BossKit, size: Vector2) -> void:
+	if mode.rules == null or not mode.rules.boss_tracked():
+		return
+	var camera := _canvas.get_viewport().get_camera_3d()
+	var point := boss.body.global_position + Vector3.UP * 1.2
+	if camera == null or camera.is_position_behind(point):
+		return
+	var at := camera.unproject_position(point)
+	at = at.clamp(Vector2(12, 12), size - Vector2(12, 12))
+	var diamond := PackedVector2Array(
+		[at + Vector2(0, -9), at + Vector2(7, 0), at + Vector2(0, 9), at + Vector2(-7, 0)]
+	)
+	_canvas.draw_colored_polygon(diamond, TRACKED_COLOR)
 
 
 func _draw_hunter(hunter: HunterKit, size: Vector2, font: Font) -> void:

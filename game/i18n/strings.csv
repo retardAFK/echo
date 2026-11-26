@@ -335,6 +335,17 @@ VERSUS_REVIVE,Maintenir {interact} : relever
 VERSUS_BEING_REVIVED,On vous relève
 VERSUS_FINISH,Maintenir {interact} : achever
 VERSUS_LEAP_READY,Bond prêt : {interact} en visant un bruit
+VERSUS_CLOCK,%d:%02d
+VERSUS_DAWN_NEAR,L'aube approche
+VERSUS_TRACKED,Traqué : les chassés vous voient
+VERSUS_END_DAWN,"L'aube se lève, la créature survit"
+VERSUS_BOSS_WIN_YOU,Vous avez gagné : plus aucun chassé debout
+VERSUS_END_LINE,%s : %d dégâts · %d au visage · %d relevés
+VERSUS_MVP,Meilleur joueur : %s
+VERSUS_YOU,Vous
+VERSUS_HUNTED_N,Chassé %d
+VERSUS_CARD,Écho · Versus · %s · %s
+VERSUS_COPY_CARD,Copier la carte
 VERSUS_FLARES,Fusées : %d (+%d)
 VERSUS_RELOADING,Rechargement…
 VERSUS_RAGE,Rage
