@@ -73,14 +73,14 @@ func test_a_client_copies_the_chests() -> void:
 	var link := VersusNet.new(versus, net)
 	add_child(link)
 	var at := Vector3(3, 0, 4)
-	link.apply_net_event([VersusNet.Event.CHESTS, [[at, "uv_laser", true]]])
+	link.apply_net_event([VersusNet.Event.CHESTS, [[at, "uv_laser", true, 0]]])
 	var chests := versus.get_tree().get_nodes_in_group(VersusChest.GROUP)
 	assert_eq(chests.size(), 1)
 	var chest := chests[0] as VersusChest
 	assert_eq(chest.global_position, at)
 	assert_true(chest.is_open)
 	assert_eq(chest.item, versus.item(&"uv_laser"))
-	assert_eq(link.chest_values(), [[at, "uv_laser", true]], "the same values as the room's")
+	assert_eq(link.chest_values(), [[at, "uv_laser", true, 0]], "the same values as the room's")
 	link.free()
 	net.free()
 

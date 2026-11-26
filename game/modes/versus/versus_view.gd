@@ -27,6 +27,8 @@ var _hunted_body: HuntedBody
 var _monster_body: MonsterBody
 ## How hard the camera shakes now (0 to 1), after a shot (S-025, T-403).
 var _shake := 0.0
+## How far zoomed in, 0 to 1 (right click with a gun that zooms, T-404).
+var _zoom := 0.0
 
 
 func _init(p_settings: VersusSettings, p_avatar: CharacterBody3D) -> void:
@@ -75,6 +77,7 @@ func _process(delta: float) -> void:
 	_shake = move_toward(_shake, 0.0, delta * 6.0)
 	camera.h_offset = randf_range(-1.0, 1.0) * _shake * 0.06
 	camera.v_offset = randf_range(-1.0, 1.0) * _shake * 0.06
+	_update_zoom(delta)
 	if first_person:
 		return
 	var speed := Vector2(avatar.velocity.x, avatar.velocity.z).length()
@@ -85,6 +88,27 @@ func _process(delta: float) -> void:
 		_hunted_body.show_state(player.get_gait(), speed, down, player.get_gesture())
 	if _monster_body != null:
 		_monster_body.show_state(speed, (avatar as MonsterAvatar).body_action)
+
+
+## Right click held with a gun that zooms (the precision rifle, T-404): the
+## camera narrows to its zoom_fov and comes close over the shoulder.
+func _update_zoom(delta: float) -> void:
+	var zoom_fov := 0.0
+	var kit := avatar.get_node_or_null("HunterKit") as HunterKit
+	if kit != null and kit.loadout.gun() != null and kit.vitals.is_standing():
+		zoom_fov = kit.loadout.gun().zoom_fov
+	var wanted := 1.0 if zoom_fov > 0.0 and is_zooming() else 0.0
+	_zoom = move_toward(_zoom, wanted, delta * 6.0)
+	if zoom_fov <= 0.0:
+		zoom_fov = _own_camera.fov
+	camera.fov = lerpf(_own_camera.fov, zoom_fov, _zoom)
+	arm.spring_length = lerpf(arm_length(settings, avatar), 1.0, _zoom)
+
+
+## Whether its player holds right click (the scan key, unused by a hunted).
+func is_zooming() -> bool:
+	var player := avatar as Player
+	return player != null and player.commands != null and player.commands.scan
 
 
 ## Where the arm starts, from the head: over the right shoulder.

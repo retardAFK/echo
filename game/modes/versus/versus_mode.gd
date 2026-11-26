@@ -48,6 +48,8 @@ var _mirror_health: BossHealth
 var _leap_shadow_left := 0.0
 var _ended := false
 var _lit: Array[Flare] = []
+## The copies of the guns by rarity (item).
+var _rare_items := {}
 var _slowmo_left := 0.0
 var _end_left := -1.0
 var _orbit: Camera3D
@@ -187,11 +189,38 @@ func kit_of(node: Node) -> HunterKit:
 
 
 ## The item of the settings with id, or null.
-func item(id: StringName) -> VersusItem:
+## The item id of rarity (S-025, T-404): the one of settings.items for
+## common, else its copy of that rarity (one copy each, so that the room and
+## the clients name it alike).
+func item(id: StringName, rarity := 0) -> VersusItem:
+	var base: VersusItem
 	for each in settings.items:
 		if each.id == id:
-			return each
-	return null
+			base = each
+	if base == null or rarity <= 0 or base.slot != VersusItem.Slot.WEAPON:
+		return base
+	var key := "%s:%d" % [id, rarity]
+	if not _rare_items.has(key):
+		var copy: VersusItem = base.duplicate()
+		copy.rarity = mini(rarity, settings.rarities.size() - 1)
+		_rare_items[key] = copy
+	return _rare_items[key]
+
+
+## The rarity of item (S-025, Q3), or null without rarities.
+func rarity_of(given: VersusItem) -> VersusRarity:
+	if given == null or settings.rarities.is_empty():
+		return null
+	return settings.rarities[clampi(given.rarity, 0, settings.rarities.size() - 1)]
+
+
+## What a chest holds (Q31): an item drawn by weight and, for a gun, its
+## rarity (S-025, Q3), better in the chests of a new phase.
+func draw_item(rng: RandomNumberGenerator, phase: bool) -> VersusItem:
+	var drawn := VersusLoadout.draw(settings.items, rng, phase)
+	if drawn == null or drawn.slot != VersusItem.Slot.WEAPON:
+		return drawn
+	return item(drawn.id, VersusRarity.draw(settings.rarities, rng, phase))
 
 
 ## The boss leaps onto target (Q9): its shadow shows there while it flies,
@@ -247,6 +276,7 @@ func _gear_up() -> void:
 ## A chest holding item at point.
 func add_chest(point: Vector3, item: VersusItem) -> VersusChest:
 	var chest := VersusChest.new(item)
+	chest.rarities = settings.rarities
 	add_child(chest)
 	chest.global_position = point
 	return chest
@@ -254,7 +284,7 @@ func add_chest(point: Vector3, item: VersusItem) -> VersusChest:
 
 func _add_arena_chests(from: int, count: int, phase: bool) -> void:
 	for i in range(from, mini(from + count, arena.chest_spots.size())):
-		add_chest(arena.chest_spots[i], VersusLoadout.draw(settings.items, get_parent().rng, phase))
+		add_chest(arena.chest_spots[i], draw_item(get_parent().rng, phase))
 
 
 ## A new phase (Q32): new chests, better ones; the cry of the phase that
@@ -275,7 +305,9 @@ func _on_phase_changed(index: int) -> void:
 ## and the night gets darker. Returns how many went out.
 func put_lights_out() -> int:
 	var map := get_parent()
-	var carriers: Array[Node] = [boss.body]
+	var carriers: Array[Node] = []
+	if boss != null:  # A hunted's client has no boss kit.
+		carriers.append(boss.body)
 	for kit in hunters:
 		carriers.append(kit.body)
 	var count := 0
@@ -343,7 +375,7 @@ func add_flare(flare: Flare, at: Vector3) -> void:
 	add_child(flare)
 	flare.global_position = at
 	if link != null and not mirror:
-		link.send([VersusNet.Event.SHOT, at, flare.velocity])
+		link.send([VersusNet.Event.SHOT, at, flare.velocity, flare.gravity, flare.trail])
 	var lit_now: Array[Flare] = []
 	for each: Variant in _lit:
 		if is_instance_valid(each):  # Flares that went out are freed.
@@ -366,6 +398,15 @@ func on_boss_hit(
 	if hud != null and local_hunter() != null and shooter == local_hunter().body:
 		hud.show_hit(face)
 		hud.show_damage(point, taken, face, steady)
+
+
+## A flash grenade's burst at point (S-025, T-404), here and on the clients.
+func show_flash(point: Vector3) -> void:
+	var burst := FlashBurst.new(settings.flash_radius)
+	add_child(burst)
+	burst.global_position = point
+	if link != null and not mirror:
+		link.send([VersusNet.Event.FLASH, point])
 
 
 ## A shot's tracer from from to to (S-025, T-403), here and on the clients.
@@ -484,7 +525,7 @@ func _on_end() -> void:
 ## A camera turning around the fallen boss, seen by all (Q1).
 func _start_orbit() -> void:
 	var camera := get_viewport().get_camera_3d()
-	if camera == null:
+	if camera == null or boss == null:  # A hunted's client has no boss kit.
 		return
 	_orbit = Camera3D.new()
 	_orbit.name = "OrbitCamera"

@@ -6,6 +6,8 @@ extends StaticBody3D
 ## the boss hears where one gears up) and a red glow comes out. An open chest
 ## stays open; what is in it shows above it, and a hunted takes it by holding
 ## interact again (chest_take_time), leaving its old weapon or tool inside.
+## A gun in an open chest shows its rarity (S-025, Q3, T-404): its name in
+## that color and a beam of light above the chest, seen from afar.
 ## Prototype look: boxes; the real model comes with T-385.
 
 signal opened
@@ -19,13 +21,19 @@ const GLOW := Color(0.9, 0.15, 0.1)
 const LID_OPEN := -1.9
 ## Beyond this, in meters, its meshes are not drawn.
 const VISIBLE_RANGE := 60.0
+## Height of the rarity beam, and how far it is seen.
+const BEAM_HEIGHT := 7.0
+const BEAM_RANGE := 150.0
 const MATERIAL := preload("res://game/modes/versus/data/chest_material.tres")
 
 var item: VersusItem
 var is_open := false
+## The rarities of the guns (settings.rarities), for the beam's color.
+var rarities: Array[VersusRarity] = []
 var _lid: Node3D
 var _glow: MeshInstance3D
 var _label: Label3D
+var _beam: MeshInstance3D
 
 
 func _init(p_item: VersusItem = null) -> void:
@@ -55,6 +63,8 @@ func _ready() -> void:
 	_label.pixel_size = 0.003
 	_label.visible = false
 	add_child(_label)
+	_beam = _build_beam()
+	add_child(_beam)
 
 
 ## Seconds a hunted holds interact on it now: to open it, or to take.
@@ -91,8 +101,40 @@ func set_item(p_item: VersusItem) -> void:
 func _show_item() -> void:
 	_label.visible = is_open and item != null
 	_glow.visible = is_open and item != null
+	var rarity := rarity_of_item()
+	_beam.visible = is_open and rarity != null
+	_label.modulate = rarity.color if rarity != null else Color.WHITE
 	if item != null:
 		_label.text = Text.t(item.name_key)
+	if rarity != null:
+		(_beam.material_override as StandardMaterial3D).albedo_color = Color(rarity.color, 0.45)
+		_label.text += "\n" + Text.t(rarity.name_key)
+
+
+## The rarity of the gun in it, or null: no gun, or no rarities.
+func rarity_of_item() -> VersusRarity:
+	if item == null or item.weapon == null or rarities.is_empty():
+		return null
+	return rarities[clampi(item.rarity, 0, rarities.size() - 1)]
+
+
+## The rarity beam: a tall unshaded column, added over what is behind it.
+static func _build_beam() -> MeshInstance3D:
+	var box := BoxMesh.new()
+	box.size = Vector3(0.18, BEAM_HEIGHT, 0.18)
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	material.albedo_color = Color(1, 1, 1, 0.45)
+	var beam := MeshInstance3D.new()
+	beam.mesh = box
+	beam.material_override = material
+	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	beam.position.y = SIZE.y + BEAM_HEIGHT * 0.5
+	beam.visibility_range_end = BEAM_RANGE
+	beam.visible = false
+	return beam
 
 
 ## One mesh, coloured by vertex, seen up to VISIBLE_RANGE (draw calls).

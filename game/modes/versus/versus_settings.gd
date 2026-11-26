@@ -249,8 +249,11 @@ extends Resource
 @export_group("Chests")
 ## Every weapon and tool (Q13); chests draw among them (Q31).
 @export var items: Array[VersusItem] = []
-## The weapon in each hunted's first chest (Q29).
+## The weapon in each hunted's first chest (Q29), always common.
 @export var first_weapon: VersusItem
+## The rarities of the guns (S-025, Q3), common first; a chest's gun draws
+## one by its weights.
+@export var rarities: Array[VersusRarity] = []
 ## Seconds to hold interact to open a chest, then to take from an open one (Q30).
 @export_range(0.0, 10.0, 0.1, "suffix:s") var chest_open_time: float = 2.0
 @export_range(0.0, 5.0, 0.1, "suffix:s") var chest_take_time: float = 0.5
@@ -275,14 +278,16 @@ extends Resource
 @export_range(0.1, 5.0, 0.1, "suffix:s") var laser_noise_interval: float = 1.0
 
 @export_group("Tools")
-## Sonic cannon (Q13): reach and half angle of its blast, how far it pushes
-## the boss and in how long, the poise it adds, its noise.
-@export_range(1.0, 60.0, 1.0, "suffix:m") var sonic_range: float = 20.0
-@export_range(1.0, 90.0, 1.0, "suffix:°") var sonic_half_angle: float = 15.0
-@export_range(0.0, 20.0, 0.5, "suffix:m") var sonic_push: float = 6.0
+## Seconds a push takes (the sonic shotgun's, S-025: its distance is the
+## gun's push).
 @export_range(0.05, 2.0, 0.05, "suffix:s") var sonic_push_time: float = 0.3
-@export_range(0.0, 200.0, 5.0) var sonic_poise: float = 40.0
-@export_range(0.0, 60.0, 1.0, "suffix:m") var sonic_noise_range: float = 30.0
+## Flash grenade (S-025, Q2): thrown up to flash_throw along the aim (or
+## against what it meets), it stuns the boss within flash_radius of where it
+## goes off for flash_stun, breaking its blow; heard to flash_noise_range.
+@export_range(1.0, 40.0, 0.5, "suffix:m") var flash_throw: float = 14.0
+@export_range(0.5, 20.0, 0.5, "suffix:m") var flash_radius: float = 6.0
+@export_range(0.1, 5.0, 0.1, "suffix:s") var flash_stun: float = 1.5
+@export_range(0.0, 60.0, 1.0, "suffix:m") var flash_noise_range: float = 25.0
 ## Medkit (Q13): points it gives back, and its noise.
 @export_range(1, 3) var medkit_heal: int = 1
 @export_range(0.0, 30.0, 1.0, "suffix:m") var medkit_noise_range: float = 4.0

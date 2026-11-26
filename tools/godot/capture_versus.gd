@@ -27,7 +27,14 @@ const VIEWS := [
 	# The same, firing the light machine gun at the boss (T-403): tracers,
 	# hit marker and damage numbers.
 	["joueur_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	# T-404: the precision rifle zoomed in, the sonic shotgun up close, and
+	# open chests with a gun of each rarity (their beams).
+	["joueur_fusil_tir", Vector3(136, 0, 100), Vector3(152, 1.5, 88)],
+	["joueur_pompe_tir", Vector3(140, 0, 96), Vector3(143.5, 1.5, 94)],
+	["joueur_coffres", Vector3(100, 0, 118), Vector3(130, 1.5, 95)],
 ]
+## The gun a firing view holds, by a word of its name; else the first one.
+const GUNS := {"_fusil": &"precision_rifle", "_pompe": &"sonic_shotgun"}
 ## Views whose name ends with this fire at the boss while they settle.
 const FIRE_SUFFIX := "_tir"
 ## Views whose name starts with this are seen through the player's camera.
@@ -91,9 +98,30 @@ func _stand_player(map: Node, feet: Vector3, target: Vector3, view_name: String)
 		versus.boss.body.global_position = target - Vector3.UP * 1.5  # In view.
 	if view_name.ends_with(FIRE_SUFFIX):
 		versus.boss.body.set_physics_process(false)  # It stays to be shot.
-		var hunter := versus.local_hunter()
-		if hunter.loadout.gun() == null:
-			hunter.equip(versus.settings.first_weapon)
+		var gun := versus.settings.first_weapon
+		for word: String in GUNS:
+			if view_name.contains(word):
+				gun = versus.item(GUNS[word], 2)
+		versus.local_hunter().equip(gun)
+		versus.local_hunter()._cooldown = 0.0  # Fires at once (time is slowed).
+		if gun.weapon.zoom_fov > 0.0:
+			Input.action_press("scan")
+		else:
+			Input.action_release("scan")
+	if view_name == "joueur_coffres":
+		_open_chests(versus, feet, target)
+
+
+## Four open chests between feet and target, a gun of each rarity in them.
+func _open_chests(versus: VersusMode, feet: Vector3, target: Vector3) -> void:
+	var ahead := Vector3(target.x - feet.x, 0.0, target.z - feet.z).normalized()
+	var side := ahead.cross(Vector3.UP)
+	var guns := [&"light_smg", &"sonic_shotgun", &"precision_rifle", &"light_smg"]
+	for rarity in 4:
+		var at := feet + ahead * (6.0 + rarity * 2.0) + side * (rarity - 1.5) * 2.5
+		var chest := versus.add_chest(at, versus.item(guns[rarity], rarity))
+		chest.look_at(feet, Vector3.UP)
+		chest.open(null, versus.settings)
 
 
 ## One shot of the player's gun, as soon as it can fire again.

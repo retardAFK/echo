@@ -8,8 +8,8 @@ extends Resource
 
 enum Slot { WEAPON, TOOL, AMMO }
 
-## &"light_smg", &"uv_laser", &"sonic_cannon", &"medkit",
-## &"firecracker", &"smoke", &"ammo".
+## &"light_smg", &"precision_rifle", &"sonic_shotgun", &"uv_laser",
+## &"medkit", &"flash_grenade", &"firecracker", &"smoke", &"ammo".
 @export var id: StringName
 @export var slot := Slot.TOOL
 ## Key of its name in strings.csv.
@@ -23,6 +23,10 @@ enum Slot { WEAPON, TOOL, AMMO }
 ## For the gadgets of the Traque used as Versus tools (firecracker, smoke):
 ## their Inventory.Kind, else -1.
 @export var gadget_kind := -1
+## Its rarity (S-025, Q3, T-404): its index in rarities of the settings
+## (0: common). A chest's gun is a copy of its item with its rarity drawn
+## (VersusMode.item).
+@export var rarity := 0
 ## For a gun (S-025, T-403): how it shoots, else null (the UV laser has
 ## its own beam, UvLaser).
 @export var weapon: VersusWeapon

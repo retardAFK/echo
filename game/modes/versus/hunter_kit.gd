@@ -101,8 +101,16 @@ func equip(item: VersusItem) -> VersusItem:
 		laser = UvLaser.new(self)
 		add_child(laser)
 	if view_model != null:
-		view_model.set_weapon(item.id)
+		view_model.set_weapon(item.id, _glow_of(item))
 	return left
+
+
+## The color of item's rarity on its gun (S-025), or the common glow.
+func _glow_of(item: VersusItem) -> Color:
+	var rarity := mode.rarity_of(item)
+	if rarity == null or item.rarity <= 0:
+		return ViewModel.SMG_GLOW
+	return rarity.color
 
 
 ## A client (T-381): shows weapon in its hands, as the room says it took it.
@@ -115,7 +123,7 @@ func show_weapon(weapon: VersusItem) -> void:
 		laser = UvLaser.new(self)
 		add_child(laser)
 	if view_model != null:
-		view_model.set_weapon(weapon.id if weapon != null else &"")
+		view_model.set_weapon(weapon.id if weapon != null else &"", _glow_of(weapon))
 
 
 ## What holding interact does now (KitPrompts), or on a client what the room
@@ -174,7 +182,9 @@ func aim() -> Vector3:
 
 ## Fires its gun once if it can (S-025, T-403): each pellet's ray hits at
 ## once (HitscanShot), the boss if it meets it, with a tracer from the
-## muzzle; true if it shot.
+## muzzle; or, for the precision rifle, a straight Flare (T-404). Damage
+## times its rarity's; a gun that pushes (the sonic shotgun) pushes the boss
+## back for the share of pellets that hit it. True if it shot.
 func fire() -> bool:
 	var gun := loadout.gun()
 	if gun == null:
@@ -187,7 +197,32 @@ func fire() -> bool:
 	clip -= 1
 	_cooldown = gun.fire_interval
 	var from := eye()
+	var strength := power()
+	if gun.flare_speed > 0.0:
+		_fire_flare(gun, strength)
+	else:
+		_fire_rays(gun, strength)
+	NoiseBus.emit_noise(NoiseEvent.Type.SHOT, from, gun.noise_range, body)
+	if view_model != null:
+		view_model.kick()
+	if is_local() and mode.view != null:
+		mode.view.shake(gun.shake)
+	if clip == 0:
+		reload()
+	return true
+
+
+## What its gun's damage is multiplied by: its rarity's (S-025, Q3).
+func power() -> float:
+	var rarity := mode.rarity_of(loadout.weapon)
+	return rarity.damage_multiplier if rarity != null else 1.0
+
+
+func _fire_rays(gun: VersusWeapon, strength: float) -> void:
+	var from := eye()
 	var space := body.get_world_3d().direct_space_state
+	var struck: BossKit
+	var hits := 0
 	for direction in HitscanShot.directions(aim(), gun.pellets, gun.spread, _rng):
 		var end := from + direction * gun.reach
 		var query := PhysicsRayQueryParameters3D.create(from, end, Flare.LAYERS)
@@ -197,16 +232,26 @@ func fire() -> bool:
 			end = hit.position
 			var boss := mode.boss_of(hit.collider as Node)
 			if boss != null:
-				boss.take_shot(body, end, gun)
+				boss.take_shot(body, end, gun, strength)
+				struck = boss
+				hits += 1
 		mode.add_tracer(muzzle(), end, gun.tracer_color)
-	NoiseBus.emit_noise(NoiseEvent.Type.SHOT, from, gun.noise_range, body)
-	if view_model != null:
-		view_model.kick()
-	if is_local() and mode.view != null:
-		mode.view.shake(gun.shake)
-	if clip == 0:
-		reload()
-	return true
+	if struck != null and gun.push > 0.0:
+		var share := float(hits) / gun.pellets
+		struck.blasted(struck.body.global_position - body.global_position, gun.push * share, 0.0)
+
+
+func _fire_flare(gun: VersusWeapon, strength: float) -> void:
+	var direction := HitscanShot.directions(aim(), 1, gun.spread, _rng)[0]
+	var flare := Flare.new()
+	flare.mode = mode
+	flare.shooter = body
+	flare.gun = gun
+	flare.power = strength
+	flare.gravity = 0.0
+	flare.trail = gun.tracer_color
+	flare.velocity = direction * gun.flare_speed
+	mode.add_flare(flare, eye() + direction * 0.5)
 
 
 ## Where its tracers leave from: the gun in its hands, right of and below
@@ -440,13 +485,19 @@ func hold_chest(held: bool, delta: float) -> void:
 
 
 ## What an AI prey takes from an open chest: a weapon if it has none, the
-## UV laser over a gun, a tool in a free slot, ammo for its gun.
+## UV laser over a gun, a rarer gun than its own (S-025), a tool in a free
+## slot, ammo for its gun.
 func _ai_wants(item: VersusItem) -> bool:
 	match item.slot:
 		VersusItem.Slot.WEAPON:
 			return (
 				loadout.weapon == null
 				or (item.id == &"uv_laser" and not loadout.has_weapon(item.id))
+				or (
+					item.weapon != null
+					and loadout.gun() != null
+					and item.rarity > loadout.weapon.rarity
+				)
 			)
 		VersusItem.Slot.AMMO:
 			return loadout.gun() != null

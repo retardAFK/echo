@@ -4,10 +4,10 @@
 
 [resource]
 script = ExtResource("1_item")
-id = &"sonic_cannon"
+id = &"flash_grenade"
 slot = 1
-name_key = "VERSUS_ITEM_SONIC_CANNON"
-uses = 3
+name_key = "VERSUS_ITEM_FLASH_GRENADE"
+uses = 2
 weight = 2.0
-phase_weight = 3.0
+phase_weight = 2.0
 gadget_kind = -1
