@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/godot/simulate_versus.gd" id="1_sim"]
+
+[node name="SimulateVersus" type="Node"]
+script = ExtResource("1_sim")
