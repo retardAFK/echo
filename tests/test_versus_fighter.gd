@@ -56,6 +56,22 @@ func test_a_goal_not_reached_in_time_is_given_up() -> void:
 	assert_eq(fighter.choose(Vector3.ZERO, boss, none, chests, false), PreyFighter.Goal.NONE)
 
 
+func test_the_zone_comes_before_all() -> void:
+	var fighter := PreyFighter.new(SETTINGS)
+	var downed: Array[Vector3] = [Vector3(3, 0, 0)]
+	var zone := VersusZone.new(SETTINGS, Rect2(-50, -50, 100, 100))
+	var own := Vector3(60, 0, 0)
+	var clock := SETTINGS.zone_step_times[0]
+	assert_true(zone.must_move_in(own, clock), "outside soon")
+	var inside := zone.inside_point(own, clock)
+	assert_false(zone.is_outside(inside, clock + 30.0))
+	assert_gt(inside.x, 0.0, "on its side")
+	var goal := fighter.choose(own, Vector3(-40, 0, 0), downed, [], true, [], inside)
+	assert_eq(goal, PreyFighter.Goal.ZONE)
+	assert_eq(fighter.point, inside)
+	assert_false(zone.must_move_in(Vector3.ZERO, 0.0), "the centre is safe")
+
+
 func test_it_rolls_away_from_a_blow_wound_up_at_it() -> void:
 	var fighter := PreyFighter.new(SETTINGS)
 	assert_true(fighter.should_dodge(true, false, SETTINGS.claw_reach))

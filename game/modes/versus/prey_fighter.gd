@@ -11,9 +11,11 @@ extends RefCounted
 ##   standing one: together, they cover each other and revive.
 ## - A goal it does not reach in ai_goal_time is left aside for good (a
 ##   chest it cannot reach, say).
+## - Before all, into the zone (S-025, T-408) when it is or soon will be
+##   outside: zone_point says where.
 ## It also says when to roll away: the boss winding up a blow at it.
 
-enum Goal { NONE, REVIVE, CHEST, REGROUP }
+enum Goal { NONE, REVIVE, CHEST, REGROUP, ZONE }
 
 var settings: VersusSettings
 ## Where it goes, with goal.
@@ -38,8 +40,11 @@ func choose(
 	downed: Array[Vector3],
 	chests: Array[Vector3],
 	armed: bool,
-	mates: Array[Vector3] = []
+	mates: Array[Vector3] = [],
+	zone_point: Variant = null
 ) -> Goal:
+	if zone_point != null:
+		return _go(Goal.ZONE, zone_point)
 	var best: Variant = _nearest(own, downed, boss_at, settings.ai_revive_safe, INF)
 	if best != null:
 		return _go(Goal.REVIVE, best)
