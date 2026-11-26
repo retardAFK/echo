@@ -79,6 +79,10 @@ func _setup() -> void:
 	if mirror:
 		_setup_mirror()
 		return
+	var short_clock := OS.get_environment("ECHO_VERSUS_TIME")  # The CI's online test.
+	if short_clock.is_valid_float():
+		settings = settings.duplicate()
+		settings.match_time = float(short_clock)
 	for node in _hunted_nodes():
 		var kit := HunterKit.new(self)
 		hunters.append(kit)
@@ -310,7 +314,11 @@ func add_flare(flare: Flare, at: Vector3) -> void:
 	flare.global_position = at
 	if link != null and not mirror:
 		link.send([VersusNet.Event.SHOT, at, flare.velocity])
-	_lit = _lit.filter(func(lit: Flare) -> bool: return is_instance_valid(lit))
+	var lit_now: Array[Flare] = []
+	for each: Variant in _lit:
+		if is_instance_valid(each):  # Flares that went out are freed.
+			lit_now.append(each)
+	_lit = lit_now
 	_lit.append(flare)
 	while _lit.size() > settings.flare_lights:
 		_lit.pop_front().light.visible = false
@@ -402,10 +410,7 @@ func show_online_end(winner: int, dawn: bool, clock: float, rows: Array, mvp_sea
 	Engine.time_scale = 1.0
 	if hud != null:
 		hud.visible = false
-	var own_seat := -1
-	var lobby := GameSession.online_lobby
-	if lobby != null and NetSession.link != null:
-		own_seat = lobby.seat_of(NetSession.link.place)
+	var own_seat := GameSession.online_seat
 	end_screen.show_values(
 		VersusEndScreen.title_key(winner as VersusRules.Winner, dawn, boss != null),
 		clock,
