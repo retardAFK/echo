@@ -1,7 +1,8 @@
 extends GutTest
 ## The Versus online (spec S-024, T-381): what the room sends of a kit and
 ## how a client copies it, the chests copied, the prompts as data, the mode
-## events of the network.
+## events of the network; the arcade's (S-025, T-407): rarities, tracers,
+## damage numbers, flash bursts, banners.
 
 const ROOM_SCENE := preload("res://game/maps/test_room/test_room.tscn")
 
@@ -51,6 +52,10 @@ func test_a_client_copies_the_kit_the_room_sends() -> void:
 	assert_not_null(copy.laser)
 	assert_eq(copy.loadout.tool_in(0), versus.item(&"medkit"))
 	assert_eq(copy.loadout.uses[0], room_kit.loadout.uses[0])
+	room_kit.equip(versus.item(&"precision_rifle", 3))
+	link.apply_hunter_state(copy, VersusNet.hunter_state(room_kit))
+	assert_eq(copy.loadout.weapon, versus.item(&"precision_rifle", 3), "the same legendary rifle")
+	assert_eq(copy.clip, room_kit.clip)
 	link.free()
 	net.free()
 
@@ -97,4 +102,36 @@ func test_the_network_carries_mode_events_to_a_seat_or_all() -> void:
 	assert_eq(net.sent_events.size(), 2, "to everyone")
 	for node: Node in net.avatars.values():
 		node.free()
+	net.free()
+
+
+func test_a_client_shows_the_arcade_events() -> void:
+	var versus := await _open()
+	var net := NetGame.new()
+	var link := VersusNet.new(versus, net)
+	add_child(link)
+	var count := func(type: Variant) -> int:
+		return (
+			versus
+			. get_children()
+			. filter(func(node: Node) -> bool: return is_instance_of(node, type))
+			. size()
+		)
+	link.apply_net_event([VersusNet.Event.TRACER, Vector3.ZERO, Vector3(0, 0, -10), Color.CYAN])
+	assert_eq(count.call(Tracer), 1, "the tracer")
+	link.apply_net_event([VersusNet.Event.FLASH, Vector3(0, 1, -5)])
+	assert_eq(count.call(FlashBurst), 1, "the white burst")
+	link.apply_net_event([VersusNet.Event.HIT, true, Vector3(0, 2, -5), 12.0, false])
+	assert_true(versus.hud._hit_face)
+	assert_eq(versus.hud._numbers.size(), 1, "the damage number")
+	link.apply_net_event([VersusNet.Event.BANNER, "VERSUS_PHASE_BANNER", [2, "VERSUS_PHASE_ECHO"]])
+	assert_eq(
+		versus.hud._banners[-1], Text.t("VERSUS_PHASE_BANNER", [2, Text.t("VERSUS_PHASE_ECHO")])
+	)
+	link.apply_net_event(
+		[VersusNet.Event.SHOT, Vector3(0, 1, 0), Vector3(0, 0, -160), 0.0, Color.ORANGE]
+	)
+	var flares := versus.get_children().filter(func(node: Node) -> bool: return node is Flare)
+	assert_eq((flares[-1] as Flare).gravity, 0.0, "the rifle's straight flare")
+	link.free()
 	net.free()
