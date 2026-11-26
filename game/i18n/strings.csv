@@ -323,3 +323,6 @@ PING_HERE,Ici · %d m
 TIP_HIDING_SPOT,"Une cachette : maintiens {interact} devant pour t'y glisser. Le monstre peut l'ouvrir, ne t'y cache pas sous ses yeux."
 TIP_TERMINAL,"Un terminal du réseau de la cité : maintiens {interact} pour t'y installer, puis choisis une action dans son menu."
 TIP_FUSE_BOX,"Un boîtier électrique : une petite lumière rouge veut dire qu'il a un fusible. Maintiens {interact} pour le prendre."
+VERSUS_PHASE_PROWLER,Le rôdeur
+VERSUS_PHASE_ECHO,L'écho
+VERSUS_PHASE_ENRAGED,L'enragé

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="VersusPhase" format=3]
+
+[ext_resource type="Script" path="res://game/modes/versus/versus_phase.gd" id="1_phase"]
+
+[resource]
+script = ExtResource("1_phase")
+name_key = "VERSUS_PHASE_ENRAGED"
+start_ratio = 0.33
+speed_scale = 1.2
+damage_taken_scale = 1.25
+can_leap = true
+lights_out = false

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="VersusSettings" format=3]
+
+[ext_resource type="Script" path="res://game/modes/versus/versus_settings.gd" id="1_settings"]
+[ext_resource type="Script" path="res://game/modes/versus/versus_phase.gd" id="5_phase"]
+[ext_resource type="Resource" path="res://game/modes/versus/data/phases/phase_1_prowler.tres" id="2_p1"]
+[ext_resource type="Resource" path="res://game/modes/versus/data/phases/phase_2_echo.tres" id="3_p2"]
+[ext_resource type="Resource" path="res://game/modes/versus/data/phases/phase_3_enraged.tres" id="4_p3"]
+
+[resource]
+script = ExtResource("1_settings")
+phases = Array[ExtResource("5_phase")]([ExtResource("2_p1"), ExtResource("3_p2"), ExtResource("4_p3")])
