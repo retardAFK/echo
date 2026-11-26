@@ -29,6 +29,8 @@ var boss: BossKit
 var hunters: Array[HunterKit] = []
 var hud: VersusHud
 var stats: VersusStats
+## The view from behind this machine's player (S-025, T-402), or null.
+var view: VersusView
 var end_screen: VersusEndScreen
 ## Whether dawn near was announced (Q3).
 var dawn_announced := false
@@ -113,6 +115,7 @@ func _setup() -> void:
 	if net == null or not net.is_room:
 		hud = VersusHud.new(self)
 		add_child(hud)
+		_add_view()
 
 
 ## A client (T-381): a kit on its own avatar, the rest from the room.
@@ -131,6 +134,25 @@ func _setup_mirror() -> void:
 	add_child(link)
 	hud = VersusHud.new(self)
 	add_child(hud)
+	_add_view()
+
+
+## The view from behind this machine's player (S-025, Q1), hunted or boss.
+func _add_view() -> void:
+	var own: CharacterBody3D = null
+	var kit := local_hunter()
+	if kit != null:
+		own = kit.body
+	elif boss != null and boss.is_local():
+		own = boss.body
+	if own != null:
+		view = VersusView.new(settings, own)
+		add_child(view)
+
+
+## Whether this machine's player sees through its own eyes (its arms show).
+func first_person() -> bool:
+	return view == null or view.first_person
 
 
 ## Every door of the map open for good (S-025, Q5): one passes everywhere,
