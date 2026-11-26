@@ -36,6 +36,8 @@ var brain: BossBrain
 ## A client's copy of its prompt (T-381), as the room says.
 var mirror_prompt: Array = []
 var view_model: ViewModel
+## Its look (S-025): bigger, glowing, with the hitbox the shots meet.
+var look: BossLook
 var _move_left := 0.0
 var _claw_wait := 0.0
 var _charge_wait := 0.0
@@ -117,8 +119,14 @@ func stun(seconds: float) -> void:
 
 ## Whether point is on its face (Q13): near its eyes.
 func is_face(point: Vector3) -> bool:
-	var eyes: Vector3 = body.call(&"get_eye_position")
-	return point.distance_to(eyes) <= mode.settings.face_radius
+	return point.distance_to(eyes()) <= mode.settings.face_radius * mode.settings.boss_scale
+
+
+## Where its eyes are on its model, made bigger (S-025, BossLook).
+func eyes() -> Vector3:
+	var own: Vector3 = body.call(&"get_eye_position")
+	var feet := body.global_position
+	return feet + (own - feet) * mode.settings.boss_scale
 
 
 func _take(shooter: Node3D, point: Vector3, damage: float, poise: float, face: bool) -> void:

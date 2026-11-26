@@ -130,8 +130,12 @@ static func aim_direction(
 	var forward := -look.z
 	var from := eye + look * shoulder(body) + look.z * arm_length(values, body)
 	var to := from + forward * values.aim_reach
-	var query := PhysicsRayQueryParameters3D.create(from, to, WORLD_LAYERS | 1 << 3)
-	query.exclude = [body.get_rid()]
+	var query := PhysicsRayQueryParameters3D.create(from, to, Flare.LAYERS)
+	var excluded: Array[RID] = [body.get_rid()]
+	var hitbox := body.get_node_or_null("BossHitbox") as CollisionObject3D
+	if hitbox != null:
+		excluded.append(hitbox.get_rid())  # The boss's own, when it aims.
+	query.exclude = excluded
 	var hit := body.get_world_3d().direct_space_state.intersect_ray(query)
 	var target: Vector3 = hit.get("position", to)
 	if (target - from).dot(forward) < (eye - from).dot(forward) + 0.5:

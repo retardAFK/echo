@@ -37,6 +37,8 @@ const CLASSES: Array[String] = [
 	"Tracer",
 	"VersusRarity",
 	"FlashBurst",
+	"BossLook",
+	"VersusDaylight",
 	"VersusArena",
 	"ArenaPiece",
 	"ArenaBuilder",

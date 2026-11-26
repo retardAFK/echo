@@ -91,13 +91,22 @@ func _lamps(versus: VersusMode, inside: bool) -> int:
 	return count
 
 
-func test_phase_2_cries_and_puts_the_arena_lights_out() -> void:
+func test_phase_2_cries_and_the_boss_glows_brighter() -> void:
 	var versus: VersusMode = await _open(CITE_SCENE)
-	assert_gt(_lamps(versus, true), 0, "lamps lit at the start")
-	var outside := _lamps(versus, false)
+	var lit := _lamps(versus, true)
+	assert_gt(lit, 0, "lamps lit at the start")
+	var glow := versus.boss.look.glow()
 	watch_signals(NoiseBus)
 	_to_ratio(versus.boss, 0.6)
 	assert_signal_emitted(NoiseBus, "noise_emitted", "the cry")
+	assert_eq(_lamps(versus, true), lit, "daylight: the lamps stay (S-025)")
+	assert_gt(versus.boss.look.glow(), glow, "its cracks shine more")
+
+
+func test_the_arena_lights_can_still_go_out() -> void:
+	var versus: VersusMode = await _open(CITE_SCENE)
+	var outside := _lamps(versus, false)
+	versus.put_lights_out()
 	assert_eq(_lamps(versus, true), 0, "the arena is dark")
 	assert_eq(_lamps(versus, false), outside, "the rest of the cité keeps its lamps")
 
