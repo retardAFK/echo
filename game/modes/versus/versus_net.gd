@@ -22,12 +22,14 @@ extends Node
 ##   [HIT, face, point, damage, steady]: to the shooter, its hit marker
 ##   (Q21) and its damage number (S-025);
 ##   [TRACER, from, to, color]: a gun's shot (S-025), its tracer;
+##   [GUN, seat, item id, rarity]: the gun in that seat's hands, "" for
+##   none (HeldGuns, T-409);
 ##   [LIGHTS_OUT]: the cry of phase 2 (Q8);
 ##   [LEAP, target]: the boss leaps, its shadow shows there (Q9);
 ##   [END, winner, dawn, clock, rows, mvp seat]: the end screen (Q28), rows
 ##   as VersusStats.rows gives them.
 
-enum Event { CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END, TRACER, FLASH, BANNER }
+enum Event { CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END, TRACER, FLASH, BANNER, GUN }
 
 var mode: VersusMode
 var net: NetGame
@@ -101,7 +103,10 @@ static func hunter_state(kit: HunterKit) -> Array:
 
 ## The events a player whose map is ready needs: the chests as they are.
 func net_ready_events() -> Array:
-	return [[Event.CHESTS, chest_values()]]
+	var events: Array = [[Event.CHESTS, chest_values()]]
+	if mode.held_guns != null:
+		events.append_array(mode.held_guns.events())
+	return events
 
 
 func chest_values() -> Array:
@@ -224,6 +229,8 @@ func apply_net_event(payload: Array) -> void:
 			mode.show_flash(payload[1])
 		Event.BANNER when payload.size() == 3 and mode.hud != null:
 			mode.hud.show_banner(payload[1], payload[2])
+		Event.GUN when payload.size() == 4 and mode.held_guns != null:
+			mode.held_guns.apply(payload[1], payload[2], payload[3])
 		Event.LIGHTS_OUT:
 			mode.put_lights_out()
 		Event.LEAP when payload.size() == 2:

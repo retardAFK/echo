@@ -54,6 +54,11 @@ func _ready() -> void:
 	add_to_group(TensionMusic.PUPPETS_GROUP)  # The hunted's music follows it (S-012).
 
 
+## The body showing a hunted (null for the monster's puppet, S-025 T-409).
+func hunted_body() -> HuntedBody:
+	return _character
+
+
 ## Moves to where the buffer has it at time (seconds).
 func show_at(time: float, max_extrapolation: float) -> void:
 	if buffer.is_empty():

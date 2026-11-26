@@ -32,6 +32,10 @@ const VIEWS := [
 	["joueur_fusil_tir", Vector3(136, 0, 100), Vector3(152, 1.5, 88)],
 	["joueur_pompe_tir", Vector3(140, 0, 96), Vector3(143.5, 1.5, 94)],
 	["joueur_coffres", Vector3(100, 0, 118), Vector3(130, 1.5, 95)],
+	# T-409: the gun models in the hands, in the first person.
+	["joueur_1p_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	["joueur_1p_fusil_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	["joueur_1p_pompe_tir", Vector3(140, 0, 96), Vector3(143.5, 1.5, 94)],
 	# T-406: the zone after its second step, the player outside it.
 	["joueur_zone", Vector3(96, 0, 132), Vector3(110, 3.0, 110)],
 ]
@@ -39,6 +43,8 @@ const VIEWS := [
 const GUNS := {"_fusil": &"precision_rifle", "_pompe": &"sonic_shotgun"}
 ## Views whose name ends with this fire at the boss while they settle.
 const FIRE_SUFFIX := "_tir"
+## Views whose name has this are seen in the first person (T-409).
+const FIRST_PERSON := "_1p"
 ## Views whose name starts with this are seen through the player's camera.
 const PLAYER_PREFIX := "joueur_"
 
@@ -94,7 +100,10 @@ func _stand_player(map: Node, feet: Vector3, target: Vector3, view_name: String)
 	player.set_look(atan2(-gap.x, -gap.z), atan2(gap.y, Vector2(gap.x, gap.z).length()))
 	var versus := map.get_node("VersusMode") as VersusMode
 	if versus.view != null:
-		versus.view.camera.make_current()
+		versus.view.first_person = view_name.contains(FIRST_PERSON)
+		versus.view.call(&"_apply")  # As the V key does.
+		if not versus.view.first_person:
+			versus.view.camera.make_current()
 	var at_boss := view_name.ends_with("_boss") or view_name.ends_with(FIRE_SUFFIX)
 	if versus.boss != null and at_boss:
 		versus.boss.body.global_position = target - Vector3.UP * 1.5  # In view.
