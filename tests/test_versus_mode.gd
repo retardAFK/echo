@@ -175,3 +175,14 @@ func test_a_long_fall_hurts_and_stuns_the_boss() -> void:
 	boss.land(9.0)
 	assert_lt(boss.health.health, boss.health.max_health)
 	assert_eq(boss.move, BossKit.Move.STUNNED)
+
+
+func test_the_kits_see_presses_in_the_held_keys() -> void:
+	var commands := PlayerCommands.new()
+	commands.fire = true
+	var keys := HeldKeys.new()
+	keys.update(commands)
+	assert_true(keys.pressed(PlayerCommands.FLAG_FIRE))
+	keys.update(commands)
+	assert_false(keys.pressed(PlayerCommands.FLAG_FIRE), "held, not pressed again")
+	assert_true(keys.held(PlayerCommands.FLAG_FIRE))

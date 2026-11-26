@@ -24,6 +24,8 @@ var mode: VersusMode
 var body: CharacterBody3D
 var health: BossHealth
 var move := Move.NONE
+## The keys of its player, held and pressed (T-381).
+var keys := HeldKeys.new()
 ## Holding interact by a downed hunted to finish it (Q5).
 var finish := DownedHold.new()
 ## Its leap (phase 2+), and the noises it may leap onto.
@@ -68,9 +70,15 @@ func _ready() -> void:
 		(body as MonsterAvatar).get_camera().add_child(view_model)
 
 
-## Whether this machine's player drives it (else the AI).
+## Whether this machine's player drives it (its arms and HUD show here).
 func is_local() -> bool:
 	return body is MonsterAvatar and (body as MonsterAvatar).local_controls
+
+
+## Whether a human plays it through its commands: here, or on the room
+## (T-381). Else the AI (or a client's mirror of its own avatar).
+func is_played() -> bool:
+	return body is MonsterAvatar and not (body as MonsterAvatar).mirror_world
 
 
 ## A flare hit it at point (Q13): face or body, damage and poise.
@@ -190,6 +198,8 @@ func leap_to(target: Vector3) -> bool:
 
 
 func _physics_process(delta: float) -> void:
+	if is_played():
+		keys.update((body as MonsterAvatar).commands)
 	health.update(delta)
 	leap.update(delta)
 	var fallen := _fall.update(body.is_on_floor(), body.global_position.y)
@@ -239,9 +249,9 @@ func _physics_process(delta: float) -> void:
 			if _move_left <= 0.0:
 				_end_move()
 		Move.NONE:
-			if is_local():
-				_read_keys(delta)
-			else:
+			if is_played():
+				_read_commands((body as MonsterAvatar).commands, delta)
+			elif not body is MonsterAvatar:
 				_think(delta)
 	if move != Move.NONE:
 		finish.reset()
@@ -265,22 +275,25 @@ func hold_finish(pressed: bool, delta: float) -> void:
 		done.vitals.finish()
 
 
-func _read_keys(delta: float) -> void:
-	hold_finish(Input.is_action_pressed("interact"), delta)
+## The player's keys (T-381), from its commands: the same on this machine
+## and on the room. Left click claws, Space charges, R starts the Fury,
+## interact finishes or leaps.
+func _read_commands(commands: PlayerCommands, delta: float) -> void:
+	hold_finish(keys.held(PlayerCommands.FLAG_INTERACT), delta)
 	if finish.target != null:
 		return
-	if Input.is_action_just_pressed("interact") and can_leap():
+	if keys.pressed(PlayerCommands.FLAG_INTERACT) and can_leap():
 		var eyes: Vector3 = body.call(&"get_eye_position")
-		var aim := -(body as MonsterAvatar).get_camera().global_basis.z
+		var aim := -Basis.from_euler(Vector3(commands.pitch, commands.yaw, 0.0)).z
 		var target: Variant = leap.pick(eyes, aim)
 		if target != null:
 			leap_to(target)
 			return
-	if Input.is_action_just_pressed("throw"):
+	if keys.pressed(PlayerCommands.FLAG_FIRE):
 		claw()
-	if Input.is_action_just_pressed("dodge"):
+	if keys.pressed(PlayerCommands.FLAG_DODGE):
 		charge(-body.global_basis.z)
-	if Input.is_action_just_pressed("hold_breath"):
+	if keys.pressed(PlayerCommands.FLAG_BREATH):
 		health.start_fury()
 
 

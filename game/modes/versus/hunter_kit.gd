@@ -25,6 +25,8 @@ var laser: UvLaser
 ## The chest it holds interact on, and how long it has held it.
 var chest: VersusChest
 var chest_held := 0.0
+## The keys of its player, held and pressed (T-381).
+var keys := HeldKeys.new()
 ## Holding interact by a downed teammate to revive it (Q5).
 var revive := DownedHold.new()
 ## Teammates it revived, for the end screen.
@@ -102,9 +104,16 @@ func use_tool(slot: int) -> bool:
 	return true
 
 
-## Whether this machine's player drives it (else an AI prey).
+## Whether this machine's player drives it (its arms and HUD show here).
 func is_local() -> bool:
 	return body is Player and (body as Player).local_controls
+
+
+## Whether a human plays it through its commands: on this machine, or on
+## the room for a player online (T-381). Else an AI prey (or a client's
+## mirror of its own player, which only shows what the room says).
+func is_played() -> bool:
+	return body is Player and not (body as Player).mirror_world
 
 
 ## Its eyes, where its flares leave from.
@@ -112,10 +121,14 @@ func eye() -> Vector3:
 	return body.call(&"get_eye_position")
 
 
-## Where it aims: the camera for the player, the boss for an AI.
+## Where it aims: the camera for the player here, its commands' look for
+## one played on the room, the boss for an AI.
 func aim() -> Vector3:
 	if is_local():
 		return -body.get_viewport().get_camera_3d().global_basis.z
+	if is_played():
+		var commands := (body as Player).commands
+		return -Basis.from_euler(Vector3(commands.pitch, commands.yaw, 0.0)).z
 	var boss := mode.boss
 	if boss == null:
 		return -body.global_basis.z
@@ -222,6 +235,8 @@ func reset_fall() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if is_played():
+		keys.update((body as Player).commands)
 	vitals.update(delta)
 	stamina.update(delta)
 	_cooldown = maxf(_cooldown - delta, 0.0)
@@ -244,26 +259,27 @@ func _physics_process(delta: float) -> void:
 		if laser != null:
 			laser.update(false, delta)
 		return
-	if is_local():
-		_read_keys(delta)
-	else:
+	if is_played():
+		_read_commands((body as Player).commands, delta)
+	elif not body is Player:
 		_think(delta)
 
 
-func _read_keys(delta: float) -> void:
-	if Input.is_action_just_pressed("throw"):
+## The player's keys (T-381), from its commands: the same on this machine
+## and on the room.
+func _read_commands(commands: PlayerCommands, delta: float) -> void:
+	if keys.pressed(PlayerCommands.FLAG_FIRE):
 		fire()
 	if laser != null:
-		laser.update(Input.is_action_pressed("throw"), delta)
+		laser.update(keys.held(PlayerCommands.FLAG_FIRE), delta)
 	for slot in VersusLoadout.TOOL_SLOTS:
-		if Input.is_action_just_pressed("gadget_%d" % (slot + 1)):
+		if keys.pressed(PlayerCommands.FLAG_TOOL_1 if slot == 0 else PlayerCommands.FLAG_TOOL_2):
 			use_tool(slot)
-	_hold_interact(Input.is_action_pressed("interact"), delta)
-	if Input.is_action_just_pressed("hold_breath"):
+	_hold_interact(keys.held(PlayerCommands.FLAG_INTERACT), delta)
+	if keys.pressed(PlayerCommands.FLAG_BREATH):
 		reload()
-	if Input.is_action_just_pressed("dodge"):
-		var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-		dodge(body.global_basis * Vector3(input.x, 0.0, input.y))
+	if keys.pressed(PlayerCommands.FLAG_DODGE):
+		dodge(body.global_basis * Vector3(commands.move.x, 0.0, commands.move.y))
 
 
 ## The chest in reach it aims at (or the nearest, for an AI), or null.
@@ -275,8 +291,8 @@ func chest_in_reach() -> VersusChest:
 		var offset := each.global_position + Vector3.UP * 0.3 - eye()
 		if offset.length() > mode.settings.chest_reach:
 			continue
-		var score := -offset.length() if not is_local() else offset.normalized().dot(aim())
-		if is_local() and score < 0.6:
+		var score := -offset.length() if not is_played() else offset.normalized().dot(aim())
+		if is_played() and score < 0.6:
 			continue
 		if score > best_score:
 			best = each
@@ -327,7 +343,7 @@ func hold_chest(held: bool, delta: float) -> void:
 		chest_held = 0.0
 		if target == null:
 			return
-	if chest.is_open and (chest.item == null or not (is_local() or _ai_wants(chest.item))):
+	if chest.is_open and (chest.item == null or not (is_played() or _ai_wants(chest.item))):
 		chest_held = 0.0
 		return
 	chest_held += delta

@@ -5,6 +5,7 @@ extends GutTest
 const MODULE := "res://game/modes/versus/"
 const CLASSES: Array[String] = [
 	"VersusMode",
+	"HeldKeys",
 	"VersusStats",
 	"VersusEndScreen",
 	"BossLeap",
