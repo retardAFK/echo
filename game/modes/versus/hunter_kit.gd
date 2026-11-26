@@ -2,17 +2,18 @@ class_name HunterKit
 extends Node
 ## A hunted's Versus kit (spec S-024, Q5, Q13 to Q15, Q29 to Q31, T-372,
 ## T-377): its health (HuntedVitals), stamina, what it carries
-## (VersusLoadout: a weapon, two tools, spare flares) and its dodge roll,
+## (VersusLoadout: a weapon, two tools, spare ammo) and its dodge roll,
 ## plus, for the player, the first-person arms. A child of a Player or a
 ## Prey, added by VersusMode. It starts empty-handed (Q29) and gears up at
-## the chests (VersusChest). The player's keys: left click fires (held for
-## the UV laser), R reloads, Space rolls, gadget_1 and gadget_2 use the
-## tools (HunterTools), interact held revives a downed teammate (Q5,
-## DownedHold), else opens a chest or takes from it. Downed, it crawls;
+## the chests (VersusChest). The player's keys: left click fires (held: a
+## machine gun keeps firing, the UV laser burns; S-025), R reloads, Space
+## rolls, gadget_1 and gadget_2 use the tools (HunterTools), interact
+## held revives a downed teammate (Q5, DownedHold), else opens a chest or
+## takes from it. Downed, it crawls;
 ## out, it stays where it fell.
 ## An AI prey (T-383) goes where PreyFighter says (a downed teammate, a
-## chest), rolls away from the boss's blows and fires by itself at the boss
-## when it sees it.
+## chest), rolls away from the boss's blows and fires bursts by itself at
+## the boss when it sees it.
 
 signal hurt(damage: int)
 
@@ -45,6 +46,8 @@ var _reload_left := 0.0
 var _dodge_left := 0.0
 var _dodge_velocity := Vector3.ZERO
 var _ai_wait := 0.0
+var _ai_burst_left := 0.0
+var _rng := RandomNumberGenerator.new()
 var _ai_goal_wait := 0.0
 var _sent_to: Variant = null
 var _down_label: Label3D
@@ -86,10 +89,10 @@ func equip(item: VersusItem) -> VersusItem:
 	var left := loadout.take(item)
 	if item.slot != VersusItem.Slot.WEAPON:
 		return left
-	if item.id == &"flare_launcher":
-		clip = mode.settings.flare_clip
+	if item.weapon != null:
+		clip = item.weapon.clip
 		if first:
-			loadout.spare_flares += mode.settings.start_spare_flares
+			loadout.spare_ammo += mode.settings.start_spare_ammo
 	reloading = false
 	if laser != null:
 		laser.queue_free()
@@ -144,7 +147,7 @@ func is_played() -> bool:
 	return body is Player and not (body as Player).mirror_world
 
 
-## Its eyes, where its flares leave from.
+## Its eyes, where its shots leave from.
 func eye() -> Vector3:
 	return body.call(&"get_eye_position")
 
@@ -166,16 +169,15 @@ func aim() -> Vector3:
 	if boss == null:
 		return -body.global_basis.z
 	var target := boss.body.global_position + Vector3.UP * 1.2
-	var distance := eye().distance_to(target)
-	var flight := distance / mode.settings.flare_speed
-	if laser == null:
-		target.y += 0.5 * mode.settings.flare_gravity * flight * flight  # Its drop.
 	return (target - eye()).normalized()
 
 
-## Fires a flare if it can; true if one left.
+## Fires its gun once if it can (S-025, T-403): each pellet's ray hits at
+## once (HitscanShot), the boss if it meets it, with a tracer from the
+## muzzle; true if it shot.
 func fire() -> bool:
-	if not loadout.has_weapon(&"flare_launcher"):
+	var gun := loadout.gun()
+	if gun == null:
 		return false
 	if not vitals.is_standing() or reloading or _cooldown > 0.0 or _dodge_left > 0.0:
 		return false
@@ -183,28 +185,46 @@ func fire() -> bool:
 		reload()
 		return false
 	clip -= 1
-	_cooldown = mode.settings.flare_cooldown
-	var direction := aim()
-	var flare := Flare.new()
-	flare.mode = mode
-	flare.shooter = body
-	flare.velocity = direction * mode.settings.flare_speed
-	mode.add_flare(flare, eye() + direction * 0.5)
-	NoiseBus.emit_noise(NoiseEvent.Type.SHOT, eye(), mode.settings.shot_noise_range, body)
+	_cooldown = gun.fire_interval
+	var from := eye()
+	var space := body.get_world_3d().direct_space_state
+	for direction in HitscanShot.directions(aim(), gun.pellets, gun.spread, _rng):
+		var end := from + direction * gun.reach
+		var query := PhysicsRayQueryParameters3D.create(from, end, Flare.LAYERS)
+		query.exclude = [body.get_rid()]
+		var hit := space.intersect_ray(query)
+		if not hit.is_empty():
+			end = hit.position
+			var boss := mode.boss_of(hit.collider as Node)
+			if boss != null:
+				boss.take_shot(body, end, gun)
+		mode.add_tracer(muzzle(), end, gun.tracer_color)
+	NoiseBus.emit_noise(NoiseEvent.Type.SHOT, from, gun.noise_range, body)
 	if view_model != null:
 		view_model.kick()
+	if is_local() and mode.view != null:
+		mode.view.shake(gun.shake)
 	if clip == 0:
 		reload()
 	return true
 
 
+## Where its tracers leave from: the gun in its hands, right of and below
+## its eyes, a step ahead.
+func muzzle() -> Vector3:
+	var head: Node3D = body.get_node_or_null("Head")
+	var look := head.global_basis if head != null else body.global_basis
+	return eye() + look * Vector3(0.25, -0.3, -0.6)
+
+
 func reload() -> void:
-	if reloading or clip >= mode.settings.flare_clip or not vitals.is_standing():
+	var gun := loadout.gun()
+	if gun == null or reloading or clip >= gun.clip or not vitals.is_standing():
 		return
-	if not loadout.has_weapon(&"flare_launcher") or loadout.spare_flares <= 0:
+	if loadout.spare_ammo <= 0:
 		return
 	reloading = true
-	_reload_left = mode.settings.reload_time
+	_reload_left = gun.reload_time
 
 
 ## Rolls toward direction (flat) if it has the stamina (Q15).
@@ -280,7 +300,9 @@ func _physics_process(delta: float) -> void:
 		_reload_left -= delta
 		if _reload_left <= 0.0:
 			reloading = false
-			clip += loadout.draw_flares(mode.settings.flare_clip - clip)
+			var gun := loadout.gun()
+			if gun != null:
+				clip += loadout.draw_ammo(gun.clip - clip)
 	if view_model != null:
 		view_model.speed = Vector2(body.velocity.x, body.velocity.z).length()
 		view_model.lower(1.0 if not vitals.is_standing() else (0.4 if reloading else 0.0))
@@ -309,7 +331,7 @@ func _show_mirror(delta: float) -> void:
 		view_model.speed = Vector2(body.velocity.x, body.velocity.z).length()
 		view_model.lower(1.0 if not vitals.is_standing() else (0.4 if reloading else 0.0))
 		view_model.visible = not vitals.is_out() and mode.first_person()
-		if keys.pressed(PlayerCommands.FLAG_FIRE) and clip > 0 and not reloading:
+		if _fires_now() and clip > 0 and not reloading:
 			view_model.kick()
 	if laser != null:
 		var battery := laser.battery
@@ -320,7 +342,7 @@ func _show_mirror(delta: float) -> void:
 ## The player's keys (T-381), from its commands: the same on this machine
 ## and on the room.
 func _read_commands(commands: PlayerCommands, delta: float) -> void:
-	if keys.pressed(PlayerCommands.FLAG_FIRE):
+	if _fires_now():
 		fire()
 	if laser != null:
 		laser.update(keys.held(PlayerCommands.FLAG_FIRE), delta)
@@ -332,6 +354,15 @@ func _read_commands(commands: PlayerCommands, delta: float) -> void:
 		reload()
 	if keys.pressed(PlayerCommands.FLAG_DODGE):
 		dodge(body.global_basis * Vector3(commands.move.x, 0.0, commands.move.y))
+
+
+## Whether its player's fire key shoots this frame: held for an automatic
+## gun (and its cooldown spaces the shots), pressed for the others.
+func _fires_now() -> bool:
+	var gun := loadout.gun()
+	if gun != null and gun.automatic:
+		return keys.held(PlayerCommands.FLAG_FIRE)
+	return keys.pressed(PlayerCommands.FLAG_FIRE)
 
 
 ## The chest in reach it aims at (or the nearest, for an AI), or null.
@@ -409,7 +440,7 @@ func hold_chest(held: bool, delta: float) -> void:
 
 
 ## What an AI prey takes from an open chest: a weapon if it has none, the
-## UV laser over the flares, a tool in a free slot, flares.
+## UV laser over a gun, a tool in a free slot, ammo for its gun.
 func _ai_wants(item: VersusItem) -> bool:
 	match item.slot:
 		VersusItem.Slot.WEAPON:
@@ -418,13 +449,13 @@ func _ai_wants(item: VersusItem) -> bool:
 				or (item.id == &"uv_laser" and not loadout.has_weapon(item.id))
 			)
 		VersusItem.Slot.AMMO:
-			return loadout.has_weapon(&"flare_launcher")
+			return loadout.gun() != null
 	return loadout.tools.size() < VersusLoadout.TOOL_SLOTS
 
 
 ## An AI prey: it goes where PreyFighter says, rolls away from a blow,
-## and fires at the boss it sees within range: flares now and then, or the
-## UV laser held while it sees it.
+## and fires at the boss it sees within range: bursts of its gun (S-025),
+## or the UV laser held while it sees it.
 func _think(delta: float) -> void:
 	_hold_interact(true, delta)
 	_steer(delta)
@@ -434,11 +465,18 @@ func _think(delta: float) -> void:
 	if laser != null:
 		laser.update(alive and _sees_boss(mode.settings.laser_range), delta)
 		return
+	if not alive:
+		return
+	if _ai_burst_left > 0.0:
+		_ai_burst_left -= delta
+		fire()  # Its cooldown spaces the shots.
+		return
 	_ai_wait -= delta
-	if _ai_wait > 0.0 or not alive:
+	if _ai_wait > 0.0:
 		return
 	_ai_wait = mode.settings.ai_fire_interval
 	if _sees_boss(mode.settings.ai_fire_range):
+		_ai_burst_left = mode.settings.ai_burst_time
 		fire()
 
 

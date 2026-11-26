@@ -1,7 +1,7 @@
 class_name ViewModel
 extends Node3D
 ## What a Versus player sees of itself (spec S-024, Q18, Q19, Q22, T-372 and
-## T-373): the hunted's two forearms holding the flare launcher, or the
+## T-373): the hunted's two forearms holding its weapon, or the
 ## boss's two clawed arms. A child of the player's camera. Prototype: built
 ## from boxes in one mesh per arm (no skeleton), animated by code: sway while
 ## walking, recoil, reload, claw swipe, charge. The real models come with
@@ -14,12 +14,13 @@ const SHADER := preload("res://game/modes/versus/viewmodel.gdshader")
 const HUNTER_SCALE := 0.8
 const SLEEVE := Color(0.22, 0.27, 0.32)
 const GLOVE := Color(0.12, 0.11, 0.1)
-const LAUNCHER := Color(0.55, 0.1, 0.08)
 const METAL := Color(0.25, 0.26, 0.27)
 const SKIN := Color(0.3, 0.33, 0.28)
 const CLAW := Color(0.78, 0.74, 0.62)
 const LASER_BODY := Color(0.17, 0.18, 0.2)
 const LASER_TUBE := Color(0.6, 0.3, 1.0)
+const SMG_BODY := Color(0.85, 0.88, 0.9)
+const SMG_GLOW := Color(0.4, 1.0, 0.95)
 ## Sway: meters and radians per meter per second of speed.
 const SWAY := 0.012
 const SWAY_RATE := 1.6
@@ -31,7 +32,7 @@ const SWIPE_TIME := 0.22
 const SWIPE_ANGLE := 1.6
 
 var kind := Kind.HUNTER
-## The hunted's weapon in hand (T-377): &"" (empty hands), &"flare_launcher"
+## The hunted's weapon in hand (T-377): &"" (empty hands), &"light_smg"
 ## or &"uv_laser".
 var weapon := &""
 ## Speed of its body, for the sway, set by its kit.
@@ -118,17 +119,18 @@ func _process(delta: float) -> void:
 
 
 ## The hunted's right forearm and glove, with its weapon (T-377): the
-## flare launcher, the UV laser, or nothing.
-static func build_hunter_right(held := &"flare_launcher") -> ArrayMesh:
+## light machine gun (S-025), the UV laser, or nothing.
+static func build_hunter_right(held := &"light_smg") -> ArrayMesh:
 	var tool := BoxTool.start()
 	BoxTool.box(tool, Vector3(0.2, -0.27, -0.12), Vector3(0.09, 0.09, 0.32), SLEEVE, -0.25)
 	BoxTool.box(tool, Vector3(0.17, -0.22, -0.32), Vector3(0.08, 0.1, 0.1), GLOVE)
 	match held:
-		&"flare_launcher":
-			BoxTool.box(tool, Vector3(0.17, -0.17, -0.43), Vector3(0.07, 0.08, 0.34), LAUNCHER)
-			BoxTool.box(tool, Vector3(0.17, -0.155, -0.62), Vector3(0.09, 0.09, 0.06), METAL)
+		&"light_smg":
+			BoxTool.box(tool, Vector3(0.17, -0.17, -0.42), Vector3(0.07, 0.1, 0.3), SMG_BODY)
+			BoxTool.box(tool, Vector3(0.17, -0.165, -0.62), Vector3(0.04, 0.04, 0.12), METAL)
+			BoxTool.box(tool, Vector3(0.17, -0.115, -0.44), Vector3(0.075, 0.02, 0.24), SMG_GLOW)
+			BoxTool.box(tool, Vector3(0.17, -0.26, -0.47), Vector3(0.04, 0.14, 0.05), METAL)
 			BoxTool.box(tool, Vector3(0.17, -0.25, -0.36), Vector3(0.04, 0.12, 0.05), GLOVE)
-			BoxTool.box(tool, Vector3(0.17, -0.12, -0.36), Vector3(0.02, 0.02, 0.04), METAL)
 		&"uv_laser":
 			BoxTool.box(tool, Vector3(0.17, -0.17, -0.47), Vector3(0.08, 0.09, 0.44), LASER_BODY)
 			BoxTool.box(tool, Vector3(0.17, -0.11, -0.45), Vector3(0.04, 0.04, 0.3), LASER_TUBE)

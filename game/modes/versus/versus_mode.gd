@@ -1,7 +1,7 @@
 class_name VersusMode
 extends Node
 ## The Versus mode (spec S-024, T-372 to T-374): the monster becomes a boss
-## with a health bar, the hunted fight it with flares. A child of the map,
+## with a health bar, the hunted fight it with guns (S-025). A child of the map,
 ## added by GameMap when GameSession.mode is VERSUS (the only line outside
 ## this folder that knows it). It gives each hunted (Player, Prey) a
 ## HunterKit and each monster (Monster, MonsterAvatar) a BossKit, runs the
@@ -354,13 +354,25 @@ func add_flare(flare: Flare, at: Vector3) -> void:
 		_lit.pop_front().light.visible = false
 
 
-## A flare of shooter hit the boss (Q21): the shooter's hit marker.
-func on_boss_hit(_kit: BossKit, shooter: Node3D, face: bool, taken: float) -> void:
+## A shot of shooter hit the boss at point (Q21, S-025): the shooter's hit
+## marker and damage number (steady: the UV laser's beam, whose numbers
+## add up).
+func on_boss_hit(
+	_kit: BossKit, shooter: Node3D, face: bool, taken: float, point := Vector3.ZERO, steady := false
+) -> void:
 	stats.on_hit(shooter, face, taken)
 	if link != null and shooter != null and link.seat_of(shooter) > 0:
-		link.send([VersusNet.Event.HIT, face], link.seat_of(shooter))
+		link.send([VersusNet.Event.HIT, face, point, taken, steady], link.seat_of(shooter))
 	if hud != null and local_hunter() != null and shooter == local_hunter().body:
 		hud.show_hit(face)
+		hud.show_damage(point, taken, face, steady)
+
+
+## A shot's tracer from from to to (S-025, T-403), here and on the clients.
+func add_tracer(from: Vector3, to: Vector3, color: Color) -> void:
+	add_child(Tracer.between(from, to, color))
+	if link != null and not mirror:
+		link.send([VersusNet.Event.TRACER, from, to, color])
 
 
 func is_over() -> bool:

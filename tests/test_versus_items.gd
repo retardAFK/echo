@@ -45,28 +45,28 @@ func _face(player: Player, point: Vector3) -> void:
 
 func test_a_loadout_holds_one_weapon_and_two_tools() -> void:
 	var loadout := VersusLoadout.new()
-	assert_null(loadout.take(_item(&"flare_launcher")))
-	assert_eq(loadout.take(_item(&"uv_laser")), _item(&"flare_launcher"), "the old one stays")
+	assert_null(loadout.take(_item(&"light_smg")))
+	assert_eq(loadout.take(_item(&"uv_laser")), _item(&"light_smg"), "the old one stays")
 	assert_null(loadout.take(_item(&"medkit")))
 	assert_null(loadout.take(_item(&"sonic_cannon")))
 	assert_eq(loadout.take(_item(&"smoke")), _item(&"medkit"), "the oldest tool goes")
 	assert_eq(loadout.tool_in(1), _item(&"smoke"))
-	loadout.take(_item(&"flares"))
-	assert_eq(loadout.spare_flares, _item(&"flares").uses)
-	assert_eq(loadout.draw_flares(100), _item(&"flares").uses)
+	loadout.take(_item(&"ammo"))
+	assert_eq(loadout.spare_ammo, _item(&"ammo").uses)
+	assert_eq(loadout.draw_ammo(1000), _item(&"ammo").uses)
 	for i in _item(&"smoke").uses:
 		assert_true(loadout.spend(1))
 	assert_null(loadout.tool_in(1), "an empty tool leaves its slot")
 
 
-func test_chests_never_hold_the_launcher_and_phases_give_more_lasers() -> void:
+func test_chests_never_hold_the_start_gun_and_phases_give_more_lasers() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	var lasers := [0, 0]
 	for phase in [false, true]:
 		for i in 400:
 			var item := VersusLoadout.draw(SETTINGS.items, rng, phase)
-			assert_ne(item.id, &"flare_launcher", "only in the first chest (Q31)")
+			assert_ne(item.id, &"light_smg", "only in the first chest (Q31)")
 			if item.id == &"uv_laser":
 				lasers[int(phase)] += 1
 	assert_gt(lasers[1], lasers[0], "better chests at each phase (Q32)")
@@ -89,11 +89,11 @@ func test_the_hunted_starts_empty_handed_by_a_chest_and_opens_it() -> void:
 	assert_true(chest.is_open)
 	assert_signal_emitted(NoiseBus, "noise_emitted", "the lid bangs")
 	hunter.hold_chest(true, versus.settings.chest_take_time + 0.01)
-	assert_true(hunter.loadout.has_weapon(&"flare_launcher"))
+	assert_true(hunter.loadout.has_weapon(&"light_smg"))
 	assert_null(chest.item, "empty now")
-	assert_eq(hunter.clip, versus.settings.flare_clip)
-	assert_eq(hunter.loadout.spare_flares, versus.settings.start_spare_flares)
-	assert_eq(hunter.view_model.weapon, &"flare_launcher")
+	assert_eq(hunter.clip, hunter.loadout.gun().clip)
+	assert_eq(hunter.loadout.spare_ammo, versus.settings.start_spare_ammo)
+	assert_eq(hunter.view_model.weapon, &"light_smg")
 
 
 func test_new_chests_come_with_each_phase() -> void:
@@ -110,7 +110,7 @@ func test_the_uv_laser_burns_slows_and_runs_on_a_battery() -> void:
 	var hunter := versus.local_hunter()
 	hunter.equip(_item(&"uv_laser"))
 	assert_not_null(hunter.laser)
-	assert_false(hunter.fire(), "no flares with the laser")
+	assert_false(hunter.fire(), "no shots with the laser")
 	var boss := versus.boss
 	var settings: MonsterSettings = boss.body.get(&"settings")
 	var walk := settings.walk_speed

@@ -7,18 +7,18 @@
 [ext_resource type="Resource" path="res://game/modes/versus/data/phases/phase_3_enraged.tres" id="4_p3"]
 [ext_resource type="Script" path="res://game/modes/versus/versus_arena.gd" id="6_arena"]
 [ext_resource type="Script" path="res://game/modes/versus/versus_item.gd" id="8_item"]
-[ext_resource type="Resource" path="res://game/modes/versus/data/items/flare_launcher.tres" id="i_flare_launcher"]
+[ext_resource type="Resource" path="res://game/modes/versus/data/items/light_smg.tres" id="i_light_smg"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/uv_laser.tres" id="i_uv_laser"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/sonic_cannon.tres" id="i_sonic_cannon"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/medkit.tres" id="i_medkit"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/firecracker.tres" id="i_firecracker"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/smoke.tres" id="i_smoke"]
-[ext_resource type="Resource" path="res://game/modes/versus/data/items/flares.tres" id="i_flares"]
+[ext_resource type="Resource" path="res://game/modes/versus/data/items/ammo.tres" id="i_ammo"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/arenas/tilleuls_tour.tres" id="7_tour"]
 
 [resource]
 script = ExtResource("1_settings")
 phases = Array[ExtResource("5_phase")]([ExtResource("2_p1"), ExtResource("3_p2"), ExtResource("4_p3")])
 arenas = Array[ExtResource("6_arena")]([ExtResource("7_tour")])
-items = Array[ExtResource("8_item")]([ExtResource("i_flare_launcher"), ExtResource("i_uv_laser"), ExtResource("i_sonic_cannon"), ExtResource("i_medkit"), ExtResource("i_firecracker"), ExtResource("i_smoke"), ExtResource("i_flares")])
-first_weapon = ExtResource("i_flare_launcher")
+items = Array[ExtResource("8_item")]([ExtResource("i_light_smg"), ExtResource("i_uv_laser"), ExtResource("i_sonic_cannon"), ExtResource("i_medkit"), ExtResource("i_firecracker"), ExtResource("i_smoke"), ExtResource("i_ammo")])
+first_weapon = ExtResource("i_light_smg")

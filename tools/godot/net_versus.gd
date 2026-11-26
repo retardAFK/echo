@@ -105,7 +105,7 @@ func _play_fighter(delta: float) -> void:
 	if not kit.vitals.is_standing():
 		_phase = "down"
 		return
-	if kit.loadout.has_weapon(&"flare_launcher"):
+	if kit.loadout.has_weapon(&"light_smg"):
 		_armed = true
 	if not _armed:
 		_phase = "chest"
@@ -124,7 +124,7 @@ func _play_fighter(delta: float) -> void:
 	_shot_left -= delta
 	if _shot_left <= 0.0:
 		_shot_left = SHOT_TIME
-		_fire = true  # A press: one flare (released the next frame).
+		_fire = true  # A press: one shot (released the next frame).
 
 
 func _play_boss(delta: float) -> void:

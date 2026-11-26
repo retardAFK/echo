@@ -24,7 +24,12 @@ const VIEWS := [
 	["joueur_place", Vector3(100, 0, 118), Vector3(130, 1.5, 95)],
 	["joueur_porte_tour", Vector3(108, 0, 116), Vector3(108, 1.4, 104)],
 	["joueur_boss", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	# The same, firing the light machine gun at the boss (T-403): tracers,
+	# hit marker and damage numbers.
+	["joueur_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
 ]
+## Views whose name ends with this fire at the boss while they settle.
+const FIRE_SUFFIX := "_tir"
 ## Views whose name starts with this are seen through the player's camera.
 const PLAYER_PREFIX := "joueur_"
 
@@ -58,7 +63,13 @@ func _ready() -> void:
 		else:
 			camera.make_current()
 			camera.look_at_from_position(eye, target)
+		var firing := String(view[0]).ends_with(FIRE_SUFFIX)
+		# Slow time while it fires: a tracer lasts a tenth of a second, less
+		# than a frame of this slow renderer.
+		Engine.time_scale = 0.15 if firing else 1.0
 		for i in SETTLE_FRAMES:
+			if firing:
+				_fire(map)
 			await get_tree().process_frame
 		var draws := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 		get_viewport().get_texture().get_image().save_png(out_dir.path_join("%s.png" % view[0]))
@@ -75,5 +86,17 @@ func _stand_player(map: Node, feet: Vector3, target: Vector3, view_name: String)
 	var versus := map.get_node("VersusMode") as VersusMode
 	if versus.view != null:
 		versus.view.camera.make_current()
-	if versus.boss != null and String(view_name).ends_with("_boss"):
+	var at_boss := view_name.ends_with("_boss") or view_name.ends_with(FIRE_SUFFIX)
+	if versus.boss != null and at_boss:
 		versus.boss.body.global_position = target - Vector3.UP * 1.5  # In view.
+	if view_name.ends_with(FIRE_SUFFIX):
+		versus.boss.body.set_physics_process(false)  # It stays to be shot.
+		var hunter := versus.local_hunter()
+		if hunter.loadout.gun() == null:
+			hunter.equip(versus.settings.first_weapon)
+
+
+## One shot of the player's gun, as soon as it can fire again.
+func _fire(map: Node) -> void:
+	var hunter := (map.get_node("VersusMode") as VersusMode).local_hunter()
+	hunter.fire()
