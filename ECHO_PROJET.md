@@ -2,7 +2,7 @@
 
 > Document de référence du projet. Tout le travail, humain ou IA, part d'ici. Un agent IA commence par [`AGENTS.md`](AGENTS.md).
 > Si une décision n'est pas écrite ici ou dans une spec, elle n'est pas prise.
-> À placer à la racine du dépôt Git. Version 0.1 du 29 octobre 2026, tenue à jour par le journal des décisions (dernière : D-022, 19 novembre 2026).
+> À placer à la racine du dépôt Git. Version 0.1 du 29 octobre 2026, tenue à jour par le journal des décisions (dernière : D-023, 26 novembre 2026).
 
 ---
 
@@ -87,7 +87,7 @@ Toute fonctionnalité qui dépasse un budget doit être simplifiée ou faire l'o
 - **Polygones** : objet décoratif 50 à 500 triangles, bâtiment 500 à 3 000, personnage 800 à 2 500.
 - **Palette** : gris béton, ocre des lampadaires au sodium, vert néon d'hôpital, noir. Accent réservé au gameplay : **orange = bruit**. Cette couleur ne sert jamais pour le décor.
 - **Éclairage** : précalculé (baking) partout où c'est possible, brouillard obligatoire en extérieur.
-- **Le monstre ne se montre pas** côté chassé plus de 2 secondes d'affilée.
+- **Le monstre ne se montre pas** côté chassé plus de 2 secondes d'affilée (sauf en mode Versus, où on le combat en face : D-023).
 
 ### 2.4 Règles de code
 
@@ -533,6 +533,7 @@ Points vérifiés, et écarts éventuels à faire valider.
 | D-020 | 15/11/2026 | Les chassés attrapés vont dans une **prison** (cages du parking) d'où un coéquipier les libère sur place ou à distance depuis un terminal ; un **réseau de terminaux** (caméras, haut-parleurs, rideaux métalliques) sert de ruse à distance, et la sortie s'ouvre après **3 objectifs tirés au sort** à chaque partie, dont au moins un fusible (spec S-018). Remplace la règle de Q-003 (relevé sur place une fois) | Demande de Maxime : le monstre n'avait qu'à rester à côté du prisonnier, le chassé attrapé n'avait plus rien à faire, et les quêtes étaient toujours les mêmes |
 | D-021 | 15/11/2026 | Les intérieurs de la cité prennent l'ambiance de l'hôpital : des HLM qui ont été habités puis abandonnés (revêtement par pièce, tubes et hublots presque tous morts, traces de vie), sans changer leur disposition (spec S-019) | Retour de Maxime : la tour ressemblait à un parking à étages ; planche d'ambiance validée (« magnifique ») |
 | D-022 | 19/11/2026 | Modularité et reprise par tout agent (spec S-022) : `AGENTS.md` est le point d'entrée de tout agent, avec `docs/ARCHITECTURE.md`, `docs/MODULES.md` (ajouter ou retirer un module) et `docs/PIEGES.md`. Les règles de travail données par Maxime entrent dans la constitution (2.6, règles 8 à 10) : l'agent fusionne lui-même ses PR quand toute la CI est verte (règle du 30/10/2026), et il ne demande pas à Maxime de tester (règle du 10/11/2026) | Demande de Maxime : le code doit être le plus modulaire possible et compréhensible par n'importe quel LLM ; ces règles n'existaient que dans la mémoire de Claude |
+| D-023 | 26/11/2026 | Un **second mode de jeu, le Versus** (spec S-024) : le monstre devient un boss à barre de vie, joué par un humain (l'IA le remplace), contre 2 à 4 chassés armés de lumière et de son trouvés dans des **coffres** (lance-fusées, lance-laser UV, canon sonique). Les chassés gagnent en vidant sa barre, le boss quand plus aucun chassé n'est debout ou **à l'aube** (fin des 10 minutes). Arène dans la cité, **toits accessibles avec dégâts de chute**. Le mode est un module retirable (`game/modes/versus/`, liste `GameModes`). Écart à la règle 2.3 : en Versus, le monstre se montre (on le combat en face) | Demande de Maxime du 26/11/2026 (« un mode Versus façon boss de Dark Souls, jouissif, avec des attaques à distance, le boss jouable aussi ») ; spec validée le 26/11/2026 (« go ») |
 
 ### 10.2 Questions ouvertes
 

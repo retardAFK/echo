@@ -336,7 +336,15 @@ VERSUS_FURY,FUREUR
 VERSUS_FURY_READY,Fureur prête : R
 VERSUS_HUNTED_WIN,Les chassés ont vaincu le monstre
 VERSUS_BOSS_WIN,Le monstre a gagné
-MENU_VERSUS_TEST,Versus (prototype)
-VERSUS_TEST_GOAL,"Prototype du mode Versus : les chassés tirent des fusées sur le monstre, qui griffe et charge. Vide sa barre avant qu'il te mette à terre. F6 : jouer le monstre."
 VERSUS_TEST_HINT,Versus (prototype) · clic gauche : tirer · R : recharger · Espace : roulade · F6 : jouer le monstre · Échap : quitter
 VERSUS_TEST_HINT_BOSS,Versus (prototype) · clic gauche : griffe · Espace : charge · R : fureur · F6 : jouer un chassé · Échap : quitter
+MENU_VERSUS_HUNTED,Versus : chassé
+MENU_VERSUS_MONSTER,Versus : boss
+MODE_HUNT,Traque
+MODE_VERSUS,Versus
+LOBBY_MODE,Mode : %s
+OPTIONS_KEY_DODGE,Roulade (Versus)
+VERSUS_GOAL_HUNTED,"Mode Versus : ensemble, videz la barre de vie du monstre avant l'aube (10 minutes). Lisez ses attaques et esquivez. Chaque tir fait du bruit : il sait d'où vous tirez."
+VERSUS_GOAL_BOSS,"Mode Versus : tu es le boss. Mets tous les chassés à terre, ou tiens jusqu'à l'aube (10 minutes). Leurs tirs s'affichent en orange."
+VERSUS_CONTROLS_HUNTED,"{move} : se déplacer · souris : viser\nClic gauche : tirer · {hold_breath} : recharger\n{dodge} : roulade (endurance)\n{interact} : ouvrir un coffre, relever un coéquipier"
+VERSUS_CONTROLS_BOSS,"{move} : se déplacer · souris : regarder\nClic gauche : griffe · {dodge} : charge\n{hold_breath} : Fureur quand la rage est pleine\nMaintenir clic droit : scanner"

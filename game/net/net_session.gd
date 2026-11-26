@@ -144,7 +144,14 @@ func set_ready(is_ready: bool) -> void:
 ## Client side, leader only: how many play, monster included (2 to 4).
 func set_game_size(wanted: int) -> void:
 	if mode == Mode.CLIENT:
-		link.ask_game_size(wanted)
+		link.ask_choice(&"game_size", wanted)
+
+
+## Client side, leader only: the game mode, among GameModes.online()
+## (S-024, Q26).
+func set_game_mode(wanted: StringName) -> void:
+	if mode == Mode.CLIENT:
+		link.ask_choice(&"mode", wanted)
 
 
 ## Client side, leader only: launch the game once everyone is ready.

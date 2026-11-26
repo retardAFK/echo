@@ -45,6 +45,7 @@ const TABS := [
 			["sprint", OptionRow.Kind.KEY, "OPTIONS_KEY_SPRINT"],
 			["crouch", OptionRow.Kind.KEY, "OPTIONS_KEY_CROUCH"],
 			["hold_breath", OptionRow.Kind.KEY, "OPTIONS_KEY_HOLD_BREATH"],
+			["dodge", OptionRow.Kind.KEY, "OPTIONS_KEY_DODGE"],
 			["gadget_1", OptionRow.Kind.KEY, "OPTIONS_KEY_GADGET_1"],
 			["gadget_2", OptionRow.Kind.KEY, "OPTIONS_KEY_GADGET_2"],
 			["second_wind", OptionRow.Kind.KEY, "OPTIONS_KEY_SECOND_WIND"],
@@ -55,13 +56,16 @@ const TABS := [
 	],
 ]
 
+## More lines than this in a tab: two columns, so they fit above the buttons.
+const MAX_ROWS := 8
+
 var tab := 0
 
 var _tab_buttons: Array[MenuItem] = []
 var _rows: Array[OptionRow] = []
 
 @onready var _tabs: HBoxContainer = %Tabs
-@onready var _lines: VBoxContainer = %Lines
+@onready var _lines: GridContainer = %Lines
 @onready var _actions: MenuList = %Actions
 
 
@@ -106,11 +110,29 @@ func show_tab(index: int) -> void:
 		_lines.remove_child(row)
 		row.queue_free()
 	_rows.clear()
-	for line: Array in TABS[index][1]:
+	# A long tab (the keys) goes on two columns, read top to bottom (S-024).
+	var lines: Array = TABS[index][1]
+	_lines.columns = 1 if lines.size() <= MAX_ROWS else 2
+	for line: Array in column_order(lines, _lines.columns):
 		var row := OptionRow.make(line[0], line[1], line[2])
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_lines.add_child(row)
 		_rows.append(row)
 	_link_focus()
+
+
+## lines in the order a grid of columns fills them (row by row), so that
+## they read down the first column, then down the second.
+static func column_order(lines: Array, columns: int) -> Array:
+	if columns < 2:
+		return lines
+	var half := ceili(lines.size() / 2.0)
+	var ordered := []
+	for row in half:
+		ordered.append(lines[row])
+		if row + half < lines.size():
+			ordered.append(lines[row + half])
+	return ordered
 
 
 ## The lines of the tab shown, for tests.
@@ -120,14 +142,21 @@ func get_rows() -> Array[OptionRow]:
 
 func _link_focus() -> void:
 	var first_action := _actions.item("OPTIONS_RESET")
+	var columns := _lines.columns
 	for index in _rows.size():
 		var row := _rows[index]
-		var above: Control = _tab_buttons[tab] if index == 0 else _rows[index - 1]
-		var below: Control = first_action if index == _rows.size() - 1 else _rows[index + 1]
+		var above: Control = _tab_buttons[tab] if index < columns else _rows[index - columns]
+		var below: Control = (
+			first_action if index + columns >= _rows.size() else _rows[index + columns]
+		)
+		var left: Control = _rows[index - 1] if index % columns > 0 else row
+		var right: Control = (
+			_rows[index + 1] if index % columns < columns - 1 and index + 1 < _rows.size() else row
+		)
 		row.focus_neighbor_top = row.get_path_to(above)
 		row.focus_neighbor_bottom = row.get_path_to(below)
-		row.focus_neighbor_left = row.get_path()
-		row.focus_neighbor_right = row.get_path()
+		row.focus_neighbor_left = row.get_path_to(left)
+		row.focus_neighbor_right = row.get_path_to(right)
 	for button in _tab_buttons:
 		button.focus_neighbor_bottom = button.get_path_to(_rows[0])
 		button.focus_neighbor_top = button.get_path()

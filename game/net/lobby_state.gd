@@ -5,7 +5,8 @@ extends RefCounted
 ## the leader. A seat nobody sits in is played by an AI. Players are the
 ## numbers RoomLink gives them (1 to room_size). Pure, so tests need no network.
 ## The leader sets how many play (2 to 4: the monster and 1 to 3 hunted); the
-## roles are drawn at random at launch, a player always the monster.
+## roles are drawn at random at launch, a player always the monster. The
+## leader also picks the game mode among GameModes.online() (S-024, T-375).
 
 const MONSTER_SEAT := 0
 const SEATS := 4
@@ -22,6 +23,8 @@ var started := false
 ## How many humans may join, monster included. The game always has 3 hunted:
 ## the seats left free are played by AI preys (S-020, T-314).
 var game_size := SEATS
+## The game mode (S-024, Q26): GameModes.HUNT or a mode that plays online.
+var mode := GameModes.HUNT
 ## The gadgets each player picked (S-023, Q3 and Q4, T-352): player ->
 ## indexes in the GadgetList (Loadout.to_indexes). Kept by the room only: the
 ## roles are drawn at launch, so a client that saw them could be the monster
@@ -117,6 +120,17 @@ func set_game_size(by: int, wanted: int) -> bool:
 	return true
 
 
+## The leader picks the game mode, among those that play online (S-024,
+## Q26). Everyone is to say again they are ready.
+func set_mode(by: int, wanted: StringName) -> bool:
+	if started or by != leader or by == 0 or not GameModes.plays_online(wanted):
+		return false
+	mode = wanted
+	for player in players():
+		_ready[player] = false
+	return true
+
+
 ## Draws the roles: a player at random is the monster, the others the hunted
 ## seats from 1 on; the hunted seats left are played by AIs.
 func deal() -> void:
@@ -170,6 +184,7 @@ func to_dict(with_loadouts := false) -> Dictionary:
 		"code": code,
 		"started": started,
 		"game_size": game_size,
+		"mode": String(mode),
 	}
 
 
@@ -183,6 +198,7 @@ static func from_dict(data: Dictionary) -> LobbyState:
 	state.code = str(data.get("code", ""))
 	state.started = bool(data.get("started", false))
 	state.game_size = clampi(int(data.get("game_size", SEATS)), MIN_GAME_SIZE, SEATS)
+	state.mode = GameModes.sanitize(data.get("mode", GameModes.HUNT))
 	var picked: Variant = data.get("loadouts", {})
 	if picked is Dictionary:
 		for player in state.players():
