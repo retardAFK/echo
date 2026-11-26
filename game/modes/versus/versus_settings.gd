@@ -166,3 +166,48 @@ extends Resource
 @export_range(0.0, 60.0, 1.0, "suffix:m") var fall_noise_range: float = 15.0
 ## Points a dodge roll at the landing takes off a hunted's fall (Q34).
 @export_range(0, 3) var fall_roll_saving: int = 1
+
+@export_group("Chests")
+## Every weapon and tool (Q13); chests draw among them (Q31).
+@export var items: Array[VersusItem] = []
+## The weapon in each hunted's first chest (Q29).
+@export var first_weapon: VersusItem
+## Seconds to hold interact to open a chest, then to take from an open one (Q30).
+@export_range(0.0, 10.0, 0.1, "suffix:s") var chest_open_time: float = 2.0
+@export_range(0.0, 5.0, 0.1, "suffix:s") var chest_take_time: float = 0.5
+## How close a hunted opens a chest, and the range of the lid's noise (Q30).
+@export_range(0.5, 5.0, 0.1, "suffix:m") var chest_reach: float = 2.5
+@export_range(0.0, 60.0, 1.0, "suffix:m") var chest_noise_range: float = 10.0
+## Chests of the arena at the start, and new ones at each phase (Q32).
+@export_range(0, 20) var arena_chests: int = 4
+@export_range(0, 20) var phase_chests: int = 3
+## Spare flares a hunted has when it gets its launcher.
+@export_range(0, 60) var start_spare_flares: int = 12
+
+@export_group("UV laser")
+## The lance-laser UV (Q13): reach, damage per second (twice in the face),
+## how much it slows the boss, its battery and its recharge, its hum.
+@export_range(1.0, 100.0, 1.0, "suffix:m") var laser_range: float = 30.0
+@export_range(0.0, 100.0, 1.0) var laser_damage_per_second: float = 15.0
+@export_range(0.0, 1.0, 0.05) var laser_slow: float = 0.3
+@export_range(0.1, 30.0, 0.5, "suffix:s") var laser_battery: float = 6.0
+@export_range(0.1, 60.0, 0.5, "suffix:s") var laser_recharge: float = 10.0
+@export_range(0.0, 60.0, 1.0, "suffix:m") var laser_noise_range: float = 6.0
+@export_range(0.1, 5.0, 0.1, "suffix:s") var laser_noise_interval: float = 1.0
+
+@export_group("Tools")
+## Sonic cannon (Q13): reach and half angle of its blast, how far it pushes
+## the boss and in how long, the poise it adds, its noise.
+@export_range(1.0, 60.0, 1.0, "suffix:m") var sonic_range: float = 20.0
+@export_range(1.0, 90.0, 1.0, "suffix:°") var sonic_half_angle: float = 15.0
+@export_range(0.0, 20.0, 0.5, "suffix:m") var sonic_push: float = 6.0
+@export_range(0.05, 2.0, 0.05, "suffix:s") var sonic_push_time: float = 0.3
+@export_range(0.0, 200.0, 5.0) var sonic_poise: float = 40.0
+@export_range(0.0, 60.0, 1.0, "suffix:m") var sonic_noise_range: float = 30.0
+## Medkit (Q13): points it gives back, and its noise.
+@export_range(1, 3) var medkit_heal: int = 1
+@export_range(0.0, 30.0, 1.0, "suffix:m") var medkit_noise_range: float = 4.0
+## A firecracker going off within this of the boss hurts it (Q13).
+@export_range(0.0, 10.0, 0.1, "suffix:m") var firecracker_radius: float = 2.5
+@export_range(0.0, 200.0, 5.0) var firecracker_damage: float = 40.0
+@export_range(0.0, 200.0, 5.0) var firecracker_poise: float = 35.0

@@ -329,7 +329,7 @@ VERSUS_PHASE_ENRAGED,L'enragé
 VERSUS_BOSS_NAME,LE MONSTRE
 VERSUS_KNEEL,À genoux !
 VERSUS_DOWN,À terre
-VERSUS_FLARES,Fusées : %d / %d
+VERSUS_FLARES,Fusées : %d (+%d)
 VERSUS_RELOADING,Rechargement…
 VERSUS_RAGE,Rage
 VERSUS_FURY,FUREUR
@@ -346,5 +346,16 @@ LOBBY_MODE,Mode : %s
 OPTIONS_KEY_DODGE,Roulade (Versus)
 VERSUS_GOAL_HUNTED,"Mode Versus : ensemble, videz la barre de vie du monstre avant l'aube (10 minutes). Lisez ses attaques et esquivez. Chaque tir fait du bruit : il sait d'où vous tirez."
 VERSUS_GOAL_BOSS,"Mode Versus : tu es le boss. Mets tous les chassés à terre, ou tiens jusqu'à l'aube (10 minutes). Leurs tirs s'affichent en orange."
-VERSUS_CONTROLS_HUNTED,"{move} : se déplacer · souris : viser\nClic gauche : tirer · {hold_breath} : recharger\n{dodge} : roulade (endurance)\n{interact} : ouvrir un coffre, relever un coéquipier"
+VERSUS_CONTROLS_HUNTED,"{move} : se déplacer · souris : viser\nClic gauche : tirer (maintenu : laser) · {hold_breath} : recharger\n{gadget_1} et {gadget_2} : outils · {dodge} : roulade\nMaintenir {interact} : ouvrir un coffre, relever un coéquipier"
 VERSUS_CONTROLS_BOSS,"{move} : se déplacer · souris : regarder\nClic gauche : griffe · {dodge} : charge\n{hold_breath} : Fureur quand la rage est pleine\nMaintenir clic droit : scanner"
+VERSUS_NO_WEAPON,Sans arme
+VERSUS_CHEST_OPEN,Maintenir {interact} : ouvrir le coffre
+VERSUS_CHEST_TAKE,Maintenir {interact} : prendre %s
+VERSUS_TOOL_LINE,%s : %s ×%d
+VERSUS_ITEM_FLARE_LAUNCHER,Lance-fusées
+VERSUS_ITEM_UV_LASER,Lance-laser UV
+VERSUS_ITEM_SONIC_CANNON,Canon sonique
+VERSUS_ITEM_MEDKIT,Trousse
+VERSUS_ITEM_FIRECRACKER,Pétards
+VERSUS_ITEM_SMOKE,Fumigène
+VERSUS_ITEM_FLARES,Boîte de fusées

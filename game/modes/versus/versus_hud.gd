@@ -11,6 +11,7 @@ const BAR_BACK := Color(0, 0, 0, 0.6)
 const RAGE_COLOR := Color(0.85, 0.15, 0.4)
 const STAMINA_COLOR := Color(0.75, 0.75, 0.6)
 const FACE_COLOR := Color(1.0, 0.2, 0.15)
+const LASER_COLOR := Color(0.62, 0.3, 1.0)
 
 var mode: VersusMode
 var _canvas: Control
@@ -103,14 +104,63 @@ func _draw_hunter(hunter: HunterKit, size: Vector2, font: Font) -> void:
 		_canvas.draw_rect(Rect2(8.0 + i * 14.0, size.y - 112.0, 10.0, 10.0), color)
 	_canvas.draw_rect(Rect2(8, size.y - 98, 80, 3), BAR_BACK)
 	_canvas.draw_rect(Rect2(8, size.y - 98, 80 * hunter.stamina.value, 3), STAMINA_COLOR)
-	var ammo := Text.t("VERSUS_FLARES", [hunter.clip, mode.settings.flare_clip])
-	if hunter.reloading:
-		ammo = Text.t("VERSUS_RELOADING")
+	var right := Vector2(size.x - 208, size.y - 70)
+	_canvas.draw_string(font, right, weapon_line(hunter), HORIZONTAL_ALIGNMENT_RIGHT, 200)
+	if hunter.laser != null:
+		var battery := Rect2(size.x - 88, size.y - 64, 80, 3)
+		_canvas.draw_rect(battery, BAR_BACK)
+		battery.size.x *= hunter.laser.ratio()
+		_canvas.draw_rect(battery, LASER_COLOR)
+	for slot in VersusLoadout.TOOL_SLOTS:
+		var item := hunter.loadout.tool_in(slot)
+		if item == null:
+			continue
+		var line := Text.with_keys(
+			"VERSUS_TOOL_LINE",
+			["{gadget_%d}" % (slot + 1), Text.t(item.name_key), hunter.loadout.uses[slot]]
+		)
+		_canvas.draw_string(
+			font,
+			Vector2(size.x - 208, size.y - 44 + slot * 12),
+			line,
+			HORIZONTAL_ALIGNMENT_RIGHT,
+			200,
+			10
+		)
+	_draw_chest_prompt(hunter, size, font)
+
+
+## What the hunted holds, for the HUD: its weapon and flares, or empty hands.
+static func weapon_line(hunter: HunterKit) -> String:
 	if hunter.vitals.is_down():
-		ammo = Text.t("VERSUS_DOWN")
-	_canvas.draw_string(
-		font, Vector2(size.x - 208, size.y - 70), ammo, HORIZONTAL_ALIGNMENT_RIGHT, 200
-	)
+		return Text.t("VERSUS_DOWN")
+	var weapon := hunter.loadout.weapon
+	if weapon == null:
+		return Text.t("VERSUS_NO_WEAPON")
+	if weapon.id == &"flare_launcher":
+		if hunter.reloading:
+			return Text.t("VERSUS_RELOADING")
+		return Text.t("VERSUS_FLARES", [hunter.clip, hunter.loadout.spare_flares])
+	return Text.t(weapon.name_key)
+
+
+## Under the crosshair: what holding interact on the chest in sight does,
+## and how far along it is (Q30).
+func _draw_chest_prompt(hunter: HunterKit, size: Vector2, font: Font) -> void:
+	var chest := hunter.chest if hunter.chest != null else hunter.chest_in_reach()
+	if chest == null or (chest.is_open and chest.item == null):
+		return
+	var text := Text.with_keys("VERSUS_CHEST_OPEN")
+	if chest.is_open:
+		text = Text.with_keys("VERSUS_CHEST_TAKE", Text.t(chest.item.name_key))
+	var at := Vector2(0, size.y * 0.5 + 24)
+	_canvas.draw_string(font, at, text, HORIZONTAL_ALIGNMENT_CENTER, size.x, 10)
+	if hunter.chest_held > 0.0:
+		var ratio := hunter.chest_held / chest.hold_time(mode.settings)
+		var bar := Rect2(size.x * 0.5 - 30, size.y * 0.5 + 30, 60, 3)
+		_canvas.draw_rect(bar, BAR_BACK)
+		bar.size.x *= clampf(ratio, 0.0, 1.0)
+		_canvas.draw_rect(bar, STAMINA_COLOR)
 
 
 func _draw_boss(boss: BossKit, size: Vector2, font: Font) -> void:

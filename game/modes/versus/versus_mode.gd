@@ -15,6 +15,8 @@ signal finished(winner: VersusRules.Winner)
 const MODE := GameModes.VERSUS
 const SETTINGS := preload("res://game/modes/versus/data/versus_settings.tres")
 const START_MENU := "res://game/ui/start_menu.tscn"
+## How far in front of a hunted's start its first chest stands, in meters.
+const FIRST_CHEST_DISTANCE := 2.0
 
 var settings: VersusSettings = SETTINGS
 var rules: VersusRules
@@ -59,6 +61,9 @@ func _setup() -> void:
 		return
 	if arena != null:
 		_place_everyone()
+	_gear_up()
+	boss.health.phase_changed.connect(_on_phase_changed)
+	NoiseBus.noise_emitted.connect(_on_noise)
 	rules = VersusRules.new(settings, boss.health)
 	for kit in hunters:
 		rules.hunted.append(kit.vitals)
@@ -88,6 +93,51 @@ func _place(body: Node3D, point: Vector3, yaw: float) -> void:
 	body.rotation.y = yaw
 	if body is CharacterBody3D:
 		(body as CharacterBody3D).velocity = Vector3.ZERO
+
+
+## The start (Q29): in an arena, a chest with the launcher by each player
+## hunted and the arena's first chests; the AI preys (until they look for
+## chests, T-383) and the test room get their launcher at once.
+func _gear_up() -> void:
+	for kit in hunters:
+		if arena == null or not kit.is_local():
+			kit.equip(settings.first_weapon)
+			continue
+		var start := kit.body.global_position
+		var toward := arena.boss_spawn - start
+		toward.y = 0.0
+		add_chest(start + toward.normalized() * FIRST_CHEST_DISTANCE, settings.first_weapon)
+	if arena != null:
+		_add_arena_chests(0, settings.arena_chests, false)
+
+
+## A chest holding item at point.
+func add_chest(point: Vector3, item: VersusItem) -> VersusChest:
+	var chest := VersusChest.new(item)
+	add_child(chest)
+	chest.global_position = point
+	return chest
+
+
+func _add_arena_chests(from: int, count: int, phase: bool) -> void:
+	for i in range(from, mini(from + count, arena.chest_spots.size())):
+		add_chest(arena.chest_spots[i], VersusLoadout.draw(settings.items, get_parent().rng, phase))
+
+
+## A new phase (Q32): new chests, better ones.
+func _on_phase_changed(index: int) -> void:
+	if arena != null and index > 0:
+		var from := settings.arena_chests + (index - 1) * settings.phase_chests
+		_add_arena_chests(from, settings.phase_chests, true)
+
+
+## A firecracker going off by the boss hurts it (Q13).
+func _on_noise(event: NoiseEvent) -> void:
+	if event.type != NoiseEvent.Type.FIRECRACKER or boss == null or is_over():
+		return
+	if event.position.distance_to(boss.body.global_position) <= settings.firecracker_radius:
+		boss.health.take_hit(settings.firecracker_damage, settings.firecracker_poise)
+		boss.hit_taken.emit(false)
 
 
 ## The kit of the hunted played on this machine, or null.
@@ -181,6 +231,8 @@ func _on_end() -> void:
 
 func _exit_tree() -> void:
 	Engine.time_scale = 1.0
+	if NoiseBus.noise_emitted.is_connected(_on_noise):
+		NoiseBus.noise_emitted.disconnect(_on_noise)
 
 
 func _hunted_nodes() -> Array[Node]:

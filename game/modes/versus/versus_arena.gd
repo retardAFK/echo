@@ -18,6 +18,11 @@ extends Resource
 ## Where the boss starts, about 60 m away (Q29), facing boss_yaw.
 @export var boss_spawn := Vector3.ZERO
 @export var boss_yaw := 0.0
+## Chests of the arena (Q32): the first arena_chests at the start, then
+## phase_chests more at each new phase of the boss, in this order (higher
+## places later: the roof, the fire escape). Each hunted also gets its own
+## first chest by its start.
+@export var chest_spots: PackedVector3Array = []
 ## The map's navigation mesh baked with the pieces (closed doors, stairs).
 @export var navigation_mesh: NavigationMesh
 
