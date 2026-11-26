@@ -166,9 +166,20 @@ extends Resource
 ## Time scale of the slow motion on the killing blow, and its real length (Q1).
 @export_range(0.05, 1.0, 0.05) var kill_slowmo_scale: float = 0.25
 @export_range(0.0, 5.0, 0.1, "suffix:s") var kill_slowmo_time: float = 1.5
-## Seconds the result stays on screen before the end (prototype: the test
-## room starts again).
+## Seconds the result stays on screen before the end screen (the test
+## room starts again instead).
 @export_range(0.0, 20.0, 0.5, "suffix:s") var end_delay: float = 4.0
+## The camera turning around the fallen boss (Q1): distance, height, and
+## turns per second.
+@export_range(1.0, 20.0, 0.5, "suffix:m") var orbit_distance: float = 6.0
+@export_range(0.0, 10.0, 0.5, "suffix:m") var orbit_height: float = 3.0
+@export_range(0.0, 1.0, 0.01) var orbit_turns: float = 0.08
+## The best player (Q28): points per revive and per hit in the face, on top
+## of the damage dealt.
+@export_range(0.0, 500.0, 5.0) var mvp_revive_points: float = 100.0
+@export_range(0.0, 100.0, 1.0) var mvp_face_points: float = 10.0
+## The siren of dawn near (Q3).
+@export_range(0.0, 200.0, 5.0, "suffix:m") var dawn_siren_range: float = 100.0
 
 @export_group("AI hunted")
 ## Farthest the AI hunted shoots at the boss, and its time between shots.
