@@ -62,6 +62,8 @@ const BODIES_LAYERS := (1 << 2) | (1 << 3)
 @export var indoor := false
 
 var is_open := false
+## Kept open for good (hold_open): nobody closes it, it never closes itself.
+var held_open := false
 ## The last one who opened or closed it, or null.
 var last_user: Node
 
@@ -96,7 +98,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if kind != Kind.FIRE or not is_open or NoiseBus.mirror:
+	if kind != Kind.FIRE or not is_open or held_open or NoiseBus.mirror:
 		return  # On an online client, the room closes it (S-010).
 	_open_for += delta
 	if _open_for >= settings.fire_close_delay and not _doorway_busy():
@@ -165,6 +167,8 @@ func get_prompt_for(user: Node) -> String:
 ## Whether this one may open or close it now: an emergency exit opens from
 ## inside only (the monster may smash it from outside) and is never closed.
 func can_use(user: Node) -> bool:
+	if held_open:
+		return false
 	if kind != Kind.EMERGENCY:
 		return true
 	if is_open:
@@ -218,6 +222,14 @@ func get_hold_ratio() -> float:
 	if _wait_release or _holder == null or not sneaks(_holder):
 		return 0.0
 	return clampf(_progress / settings.quiet_time, 0.0, 1.0)
+
+
+## Opens it for good, at once and silently: a game mode where every door
+## is passable (S-025, T-401). It no longer offers to be used.
+func hold_open() -> void:
+	held_open = true
+	if not is_open:
+		_set_open(true, false)
 
 
 ## Opens it if closed, closes it if open, with a noise of this range.

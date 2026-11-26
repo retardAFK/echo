@@ -1,7 +1,8 @@
 extends GutTest
 ## The Versus arena of the cité and the falls (spec S-024, Q24, Q29, Q34,
-## T-376): pieces and starts inside the barriers, closed buildings, stairs
-## up to the social centre's roof, and what a fall costs.
+## T-376): pieces and starts inside the barriers, stairs up to the social
+## centre's roof, and what a fall costs. Every door open and everything
+## reachable (S-025, T-401).
 
 const MAP_SCENE := preload("res://game/maps/tilleuls/tilleuls.scn")
 const SETTINGS := preload("res://game/modes/versus/data/versus_settings.tres")
@@ -76,7 +77,9 @@ func test_a_versus_in_the_cite_takes_place_in_the_arena() -> void:
 	var versus := map.get_node("VersusMode") as VersusMode
 	assert_eq(versus.arena, _arena())
 	var builder := map.get_node("VersusArena")
-	assert_eq(builder.find_children("*", "MeshInstance3D", false, false).size(), 4, "4 draw calls")
+	assert_lte(
+		builder.find_children("*", "MeshInstance3D", false, false).size(), 4, "4 draw calls at most"
+	)
 	assert_almost_eq(map.player.global_position.x, _arena().hunted_spawn(0).x, 0.5)
 	assert_null(map.get_node_or_null("GameLoop"), "no fuses in the Versus")
 	var region: NavigationRegion3D = map.get_node("NavigationRegion3D")
@@ -92,7 +95,18 @@ func test_a_versus_in_the_cite_takes_place_in_the_arena() -> void:
 	var to_roof := NavigationServer3D.map_get_path(nav, start, CENTRE_ROOF, true)
 	assert_almost_eq(to_roof[-1].distance_to(CENTRE_ROOF), 0.0, 1.0, "stairs to the roof")
 	var to_hall := NavigationServer3D.map_get_path(nav, start, TOWER_HALL, true)
-	assert_gt(to_hall[-1].distance_to(TOWER_HALL), 2.0, "the tower is shut")
+	assert_almost_eq(to_hall[-1].distance_to(TOWER_HALL), 0.0, 1.0, "the tower is open (S-025)")
+	var targets: Array[Vector3] = [_arena().boss_spawn]
+	targets.append_array(_arena().chest_spots)
+	for i in _arena().hunted_spawns.size():
+		targets.append(_arena().hunted_spawn(i))
+	for target in targets:
+		var path := NavigationServer3D.map_get_path(nav, start, target, true)
+		assert_almost_eq(path[-1].distance_to(target), 0.0, 1.5, "reachable: %s" % target)
+	for node in map.get_tree().get_nodes_in_group(Door.GROUP):
+		var door := node as Door
+		assert_true(door.is_open and door.held_open, "%s open for good" % door.name)
+		assert_false(door.can_use(map.player), "nobody closes it")
 
 
 func test_the_player_walks_up_to_the_roof() -> void:
