@@ -27,6 +27,7 @@ var _charged := 0.0
 var _charge_hits: Array[HunterKit] = []
 var _base_walk := 0.0
 var _base_run := 0.0
+var _fall := FallWatch.new()
 
 
 func _init(p_mode: VersusMode) -> void:
@@ -97,8 +98,33 @@ func charge(direction: Vector3) -> bool:
 	return true
 
 
+## Lands after a fall of height meters (Q34): a noise, and from high up a
+## share of its health and a short stun.
+func land(height: float) -> void:
+	var settings := mode.settings
+	if FallRules.is_loud(settings, height):
+		NoiseBus.emit_noise(
+			NoiseEvent.Type.FOOTSTEP, body.global_position, settings.fall_noise_range, body
+		)
+	var damage := FallRules.boss_damage(settings, height, health.max_health)
+	if damage <= 0.0:
+		return
+	health.take_hit(damage, 0.0)
+	if move == Move.NONE:
+		move = Move.STUNNED
+		_move_left = settings.boss_fall_stun
+
+
+## Forgets the fall under way: it was moved to its start (Q29).
+func reset_fall() -> void:
+	_fall.reset()
+
+
 func _physics_process(delta: float) -> void:
 	health.update(delta)
+	var fallen := _fall.update(body.is_on_floor(), body.global_position.y)
+	if fallen > 0.0:
+		land(fallen)
 	_claw_wait = maxf(_claw_wait - delta, 0.0)
 	_charge_wait = maxf(_charge_wait - delta, 0.0)
 	var settings: MonsterSettings = body.get(&"settings")

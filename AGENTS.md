@@ -32,6 +32,7 @@ godot --headless -s addons/gut/gut_cmdln.gd                       # tous les tes
 godot --headless -s addons/gut/gut_cmdln.gd -gselect=test_car_alarm   # un fichier (-gtest ajoute, ne filtre pas)
 
 godot --headless tools/godot/build_tilleuls.tscn     # regénère la cité (puis commiter .scn et navmesh)
+godot --headless res://tools/godot/build_versus_arena.tscn   # regénère l'arène Versus de la cité (après la cité)
 godot --headless res://tools/godot/simulate_games.tscn   # parties IA contre IA en accéléré
 python3 tools/dev/module_map.py [--sizes | --refs Classe]   # carte des modules
 ```

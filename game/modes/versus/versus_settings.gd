@@ -145,3 +145,24 @@ extends Resource
 ## Farthest the AI hunted shoots at the boss, and its time between shots.
 @export_range(1.0, 60.0, 1.0, "suffix:m") var ai_fire_range: float = 25.0
 @export_range(0.2, 10.0, 0.1, "suffix:s") var ai_fire_interval: float = 1.4
+
+@export_group("Arenas")
+## The arenas (Q24): a game in a map listed here takes place in its arena;
+## elsewhere (the test room), on the whole map.
+@export var arenas: Array[VersusArena] = []
+
+@export_group("Falls")
+## A fall shorter than this does nothing, in meters (Q34).
+@export_range(0.0, 20.0, 0.5, "suffix:m") var fall_safe_height: float = 4.0
+## From fall_safe_height to this, a hunted loses 1 point; beyond, 2 (Q34).
+@export_range(0.0, 30.0, 0.5, "suffix:m") var fall_hurt_height: float = 7.0
+## A fall longer than this puts a hunted down at once (Q34).
+@export_range(0.0, 60.0, 0.5, "suffix:m") var fall_down_height: float = 10.0
+## Share of its full health the boss loses past fall_hurt_height (Q34).
+@export_range(0.0, 0.5, 0.01) var boss_fall_ratio: float = 0.05
+## Seconds the boss is stunned after such a fall (Q34).
+@export_range(0.0, 5.0, 0.1, "suffix:s") var boss_fall_stun: float = 1.0
+## Range of the noise of a fall past fall_safe_height (Q34).
+@export_range(0.0, 60.0, 1.0, "suffix:m") var fall_noise_range: float = 15.0
+## Points a dodge roll at the landing takes off a hunted's fall (Q34).
+@export_range(0, 3) var fall_roll_saving: int = 1

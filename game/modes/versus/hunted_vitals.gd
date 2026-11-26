@@ -39,9 +39,10 @@ func is_out() -> bool:
 	return state == State.OUT
 
 
-## Takes damage hit points; true if it was hurt.
-func hurt(damage: int) -> bool:
-	if not is_standing() or shield_left > 0.0 or damage <= 0:
+## Takes damage hit points; true if it was hurt. A dodge shields it, but
+## not from a fall (through_shield, Q34).
+func hurt(damage: int, through_shield := false) -> bool:
+	if not is_standing() or (shield_left > 0.0 and not through_shield) or damage <= 0:
 		return false
 	health = maxi(health - damage, 0)
 	if health == 0:

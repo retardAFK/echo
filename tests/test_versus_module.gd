@@ -16,6 +16,11 @@ const CLASSES: Array[String] = [
 	"ShotMath",
 	"ViewModel",
 	"Flare",
+	"VersusArena",
+	"ArenaPiece",
+	"ArenaBuilder",
+	"FallRules",
+	"FallWatch",
 ]
 ## The only files outside the module allowed to name it (docs/MODULES.md).
 const ALLOWED: Array[String] = [

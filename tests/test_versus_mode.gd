@@ -150,3 +150,28 @@ func test_the_boss_wins_when_no_hunted_stands() -> void:
 		hunter.take_blow(versus.settings.hunted_health)
 	await wait_physics_frames(2)
 	assert_eq(versus.rules.winner, VersusRules.Winner.BOSS)
+
+
+func test_a_fall_hurts_a_hunted_unless_it_rolls() -> void:
+	var map := _open(GameSession.Role.HUNTED)
+	await wait_physics_frames(3)
+	var hunter := _versus(map).local_hunter()
+	var full := hunter.vitals.health
+	hunter.land(4.3)
+	assert_eq(hunter.vitals.health, full - 1, "off the social centre's roof")
+	assert_true(hunter.dodge(Vector3.FORWARD))
+	hunter.land(4.3)
+	assert_eq(hunter.vitals.health, full - 1, "a roll at the landing saves it")
+	hunter.land(12.0)
+	assert_true(hunter.vitals.is_down(), "from the fire escape's top: down")
+
+
+func test_a_long_fall_hurts_and_stuns_the_boss() -> void:
+	var map := _open(GameSession.Role.HUNTED)
+	await wait_physics_frames(3)
+	var boss := _versus(map).boss
+	boss.land(3.0)
+	assert_eq(boss.health.health, boss.health.max_health, "a short fall: nothing")
+	boss.land(9.0)
+	assert_lt(boss.health.health, boss.health.max_health)
+	assert_eq(boss.move, BossKit.Move.STUNNED)
