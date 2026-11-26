@@ -1,8 +1,8 @@
 class_name HunterTools
 extends RefCounted
 ## What a Versus hunted's tools do (spec S-024, Q13, T-377), used with the
-## keys gadget_1 and gadget_2 by HunterKit.use_tool(): the sonic cannon
-## pushes the boss back and breaks its blow, the medkit gives back a point,
+## keys gadget_1 and gadget_2 by HunterKit.use_tool(): the flash grenade
+## stuns the boss (S-025), the medkit gives back a point,
 ## the firecracker and the smoke are the Traque's gadgets (S-020, S-023),
 ## put down by the player. Each returns true if the tool was used (one use
 ## spent).
@@ -10,8 +10,8 @@ extends RefCounted
 
 static func use(kit: HunterKit, item: VersusItem) -> bool:
 	match item.id:
-		&"sonic_cannon":
-			return sonic(kit)
+		&"flash_grenade":
+			return flash(kit)
 		&"medkit":
 			return medkit(kit)
 	if item.gadget_kind >= 0:
@@ -19,28 +19,31 @@ static func use(kit: HunterKit, item: VersusItem) -> bool:
 	return false
 
 
-## The sonic cannon (Q13): a blast in a cone; the boss in it, in sight, is
-## pushed back sonic_push, its blow broken, its poise filled. Heard far.
-static func sonic(kit: HunterKit) -> bool:
+## The flash grenade (S-025, Q2): thrown along the aim, it goes off up to
+## flash_throw away (or against what it meets first, the boss too) in a
+## white burst; the boss within flash_radius of it, in its line, is stunned
+## flash_stun.
+static func flash(kit: HunterKit) -> bool:
 	var settings := kit.mode.settings
-	NoiseBus.emit_noise(NoiseEvent.Type.SHOT, kit.eye(), settings.sonic_noise_range, kit.body)
-	if kit.view_model != null:
-		kit.view_model.kick(2.0)
+	var from := kit.eye()
+	var to := from + kit.aim() * settings.flash_throw
+	var space := kit.body.get_world_3d().direct_space_state
+	var query := PhysicsRayQueryParameters3D.create(from, to, Flare.LAYERS)
+	query.exclude = [kit.body.get_rid()]
+	var hit := space.intersect_ray(query)  # It goes off on the boss too.
+	var point: Vector3 = to if hit.is_empty() else hit.position - kit.aim() * 0.3
+	kit.mode.show_flash(point)
+	NoiseBus.emit_noise(NoiseEvent.Type.SHOT, point, settings.flash_noise_range, kit.body)
 	var boss := kit.mode.boss
 	if boss == null:
 		return true
 	var target := boss.body.global_position + Vector3.UP * 1.2
-	var offset := target - kit.eye()
-	if offset.length() > settings.sonic_range:
+	if target.distance_to(point) > settings.flash_radius:
 		return true
-	if rad_to_deg(offset.angle_to(kit.aim())) > settings.sonic_half_angle:
-		return true
-	var query := PhysicsRayQueryParameters3D.create(kit.eye(), target, 1 | 2)
-	query.exclude = [kit.body.get_rid(), boss.body.get_rid()]
-	if not kit.body.get_world_3d().direct_space_state.intersect_ray(query).is_empty():
-		return true
-	boss.blasted(offset, settings.sonic_push, settings.sonic_poise)
-	kit.mode.on_boss_hit(boss, kit.body, false, 0.0)
+	var line := PhysicsRayQueryParameters3D.create(point, target, 1 | 2)
+	line.exclude = [boss.body.get_rid()]
+	if space.intersect_ray(line).is_empty():
+		boss.stun(settings.flash_stun)
 	return true
 
 

@@ -9,11 +9,15 @@ extends Node
 ##   if tracked (Q4) else null, winner, you, boss max health], with you,
 ##   for a hunted:
 ##   [health, state, down left, weapon id, clip, spare ammo, reloading,
-##   battery, tools [[id, uses], ...], prompt, revives done]; for the boss:
+##   battery, tools [[id, uses], ...], prompt, revives done, weapon rarity];
+##   for the boss:
 ##   [move, leap wait, prompt]; prompt as KitPrompts gives it.
 ## Events (send_mode_event), as [Event, ...]:
-##   [CHESTS, [[position, item id, open], ...]]: the chests, when they change;
-##   [SHOT, position, velocity]: a flare fired, the clients show their copy;
+##   [CHESTS, [[position, item id, open, rarity], ...]]: the chests, when
+##   they change;
+##   [SHOT, position, velocity, gravity, trail]: a flare fired (the
+##   precision rifle's: no gravity, a trail), the clients show their copy;
+##   [FLASH, point]: a flash grenade went off there (S-025);
 ##   [HIT, face, point, damage, steady]: to the shooter, its hit marker
 ##   (Q21) and its damage number (S-025);
 ##   [TRACER, from, to, color]: a gun's shot (S-025), its tracer;
@@ -22,7 +26,7 @@ extends Node
 ##   [END, winner, dawn, clock, rows, mvp seat]: the end screen (Q28), rows
 ##   as VersusStats.rows gives them.
 
-enum Event { CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END, TRACER }
+enum Event { CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END, TRACER, FLASH }
 
 var mode: VersusMode
 var net: NetGame
@@ -90,6 +94,7 @@ static func hunter_state(kit: HunterKit) -> Array:
 		tools,
 		KitPrompts.of_hunter(kit),
 		kit.revives_done,
+		weapon.rarity if weapon != null else 0,
 	]
 
 
@@ -103,7 +108,8 @@ func chest_values() -> Array:
 	for node in get_tree().get_nodes_in_group(VersusChest.GROUP):
 		var chest := node as VersusChest
 		var id := String(chest.item.id) if chest.item != null else ""
-		values.append([chest.global_position, id, chest.is_open])
+		var rarity := chest.item.rarity if chest.item != null else 0
+		values.append([chest.global_position, id, chest.is_open, rarity])
 	return values
 
 
@@ -155,7 +161,7 @@ func apply_net_snapshot(value: Variant) -> void:
 		mode.boss.move = you[0]
 		mode.boss.leap.wait = you[1]
 		mode.boss.mirror_prompt = you[2]
-	elif not mode.hunters.is_empty() and you.size() >= 11:
+	elif not mode.hunters.is_empty() and you.size() >= 12:
 		apply_hunter_state(mode.hunters[0], you)
 
 
@@ -176,7 +182,7 @@ func apply_hunter_state(kit: HunterKit, you: Array) -> void:
 				vitals.revived.emit()
 			HuntedVitals.State.OUT:
 				vitals.out.emit()
-	var weapon := mode.item(StringName(you[3]))
+	var weapon := mode.item(StringName(you[3]), you[11])
 	if weapon != kit.loadout.weapon:
 		kit.show_weapon(weapon)
 	kit.clip = you[4]
@@ -201,16 +207,20 @@ func apply_net_event(payload: Array) -> void:
 	match payload[0]:
 		Event.CHESTS when payload.size() == 2:
 			_mirror_chests(payload[1])
-		Event.SHOT when payload.size() == 3:
+		Event.SHOT when payload.size() == 5:
 			var flare := Flare.new()
 			flare.mode = mode
 			flare.velocity = payload[2]
+			flare.gravity = payload[3]
+			flare.trail = payload[4]
 			mode.add_flare(flare, payload[1])
 		Event.HIT when payload.size() == 5 and mode.hud != null:
 			mode.hud.show_hit(payload[1])
 			mode.hud.show_damage(payload[2], payload[3], payload[1], payload[4])
 		Event.TRACER when payload.size() == 4:
 			mode.add_tracer(payload[1], payload[2], payload[3])
+		Event.FLASH when payload.size() == 2:
+			mode.show_flash(payload[1])
 		Event.LIGHTS_OUT:
 			mode.put_lights_out()
 		Event.LEAP when payload.size() == 2:
@@ -230,4 +240,4 @@ func _mirror_chests(values: Array) -> void:
 		else:
 			chest = mode.add_chest(entry[0], null)
 		chest.global_position = entry[0]
-		chest.mirror(entry[2], mode.item(StringName(entry[1])))
+		chest.mirror(entry[2], mode.item(StringName(entry[1]), entry[3]))

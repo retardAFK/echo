@@ -4,7 +4,7 @@ extends Resource
 ## data/weapons/, referenced by its VersusItem (weapon). HunterKit.fire
 ## shoots it: rays that hit at once (HitscanShot), one per pellet, spread
 ## at random within spread degrees, each with its tracer (Tracer) and its
-## damage number on the boss. To add a gun: docs/MODULES.md, "Le mode
+## damage number on the boss; or a Flare (flare_speed). To add a gun: docs/MODULES.md, "Le mode
 ## Versus".
 
 ## Held fire keeps shooting (a machine gun), else one shot per click.
@@ -33,3 +33,12 @@ extends Resource
 @export var tracer_color := Color(0.4, 1.0, 0.95)
 ## How much a shot shakes the camera (0 to 1).
 @export_range(0.0, 1.0, 0.05) var shake: float = 0.15
+## 0: its rays hit at once. Else it fires a Flare that flies straight at this
+## speed, in meters per second, with its trail (the precision rifle, T-404).
+@export_range(0.0, 400.0, 5.0, "suffix:m/s") var flare_speed: float = 0.0
+## The camera's field of view while the player holds right click, else 0:
+## no zoom (T-404).
+@export_range(0.0, 90.0, 1.0, "suffix:°") var zoom_fov: float = 0.0
+## How far a shot of all its pellets pushes the boss back, in meters (the
+## sonic shotgun, T-404); a share of it for a share of the pellets.
+@export_range(0.0, 20.0, 0.5, "suffix:m") var push: float = 0.0

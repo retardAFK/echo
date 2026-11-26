@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="VersusRarity" format=3]
+
+[ext_resource type="Script" path="res://game/modes/versus/versus_rarity.gd" id="1_rarity"]
+
+[resource]
+script = ExtResource("1_rarity")
+name_key = "VERSUS_RARITY_COMMON"
+color = Color(0.72, 0.74, 0.76, 1)
+damage_multiplier = 1.0
+weight = 60.0
+phase_weight = 25.0

@@ -1,7 +1,8 @@
 extends GutTest
 ## The Versus guns (spec S-025, Q2, Q4, T-403): rays that hit at once,
 ## spread within the gun's cone, the light machine gun held down, its clip
-## and reload, the damage numbers and tracers.
+## and reload, the damage numbers and tracers; the rarities, the precision
+## rifle and its zoom, the sonic shotgun (T-404).
 
 const ROOM_SCENE := preload("res://game/maps/test_room/test_room.tscn")
 const SMG := preload("res://game/modes/versus/data/weapons/light_smg.tres")
@@ -129,3 +130,102 @@ func test_laser_hits_add_up_into_one_number() -> void:
 	assert_almost_eq(versus.hud._numbers[0][1], 3.0, 0.01)
 	versus.hud.show_damage(Vector3.ZERO, 6.0, false)
 	assert_eq(versus.hud._numbers.size(), 2, "a gun's shot has its own")
+	versus.hud.show_damage(Vector3.ZERO, 6.0, false)
+	assert_eq(versus.hud._numbers.size(), 2, "pellets of the same shot add up")
+	assert_almost_eq(versus.hud._numbers[1][1], 12.0, 0.01)
+	await wait_frames(2)
+	versus.hud.show_damage(Vector3.ZERO, 6.0, false)
+	assert_eq(versus.hud._numbers.size(), 3, "the next shot has its own")
+
+
+func test_rarer_guns_deal_more_and_phase_chests_are_rarer() -> void:
+	var versus: VersusMode = await _open()
+	var settings := versus.settings
+	var multipliers: Array[float] = []
+	for rarity in settings.rarities:
+		multipliers.append(rarity.damage_multiplier)
+	assert_eq(multipliers, [1.0, 1.1, 1.2, 1.35] as Array[float], "Q3")
+	var epic := versus.item(&"light_smg", 2)
+	assert_eq(epic.rarity, 2)
+	assert_eq(versus.item(&"light_smg", 2), epic, "one copy each")
+	assert_eq(versus.item(&"light_smg"), settings.first_weapon, "common: the item itself")
+	assert_eq(versus.item(&"medkit", 3).rarity, 0, "tools have no rarity")
+	var hit := HitscanShot.hit_of(SMG, false, versus.rarity_of(epic).damage_multiplier)
+	assert_almost_eq(hit[0], SMG.damage * 1.2, 0.001)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var rare := [0, 0]
+	for phase in [false, true]:
+		for i in 400:
+			if VersusRarity.draw(settings.rarities, rng, phase) > 0:
+				rare[int(phase)] += 1
+	assert_gt(rare[1], rare[0], "rare and better more often in phase chests")
+
+
+func test_a_rare_gun_in_an_open_chest_shows_its_beam() -> void:
+	var versus: VersusMode = await _open()
+	var chest := versus.add_chest(Vector3(0, 0, 30), versus.item(&"sonic_shotgun", 3))
+	assert_false(chest._beam.visible, "closed")
+	chest.open(null, versus.settings)
+	assert_true(chest._beam.visible)
+	assert_eq(chest._label.modulate, versus.settings.rarities[3].color, "golden")
+	chest.set_item(versus.item(&"medkit"))
+	assert_false(chest._beam.visible, "no beam for a tool")
+
+
+func test_the_precision_rifle_fires_a_straight_flare_that_hits_hard() -> void:
+	var versus: VersusMode = await _open()
+	var boss := versus.boss
+	boss.body.set_physics_process(false)
+	var hunter := versus.local_hunter()
+	hunter.equip(versus.item(&"precision_rifle"))
+	var gun := hunter.loadout.gun()
+	assert_false(gun.automatic)
+	assert_gt(gun.zoom_fov, 0.0, "it zooms")
+	var player: Player = hunter.body
+	boss.body.global_position = player.global_position - player.global_basis.z * 10.0
+	_aim_at(versus, boss.body.global_position + Vector3.UP * 1.0)  # The body.
+	await wait_physics_frames(1)
+	var before := boss.health.health
+	assert_true(hunter.fire())
+	var flares := versus.get_children().filter(func(node: Node) -> bool: return node is Flare)
+	assert_eq(flares.size(), 1, "a flare, not a ray")
+	assert_eq((flares[0] as Flare).gravity, 0.0, "straight")
+	await wait_physics_frames(10)
+	assert_almost_eq(before - boss.health.health, gun.damage, 0.01, "its own damage")
+
+
+func test_the_sonic_shotgun_hits_hard_up_close_and_pushes_the_boss_back() -> void:
+	var versus: VersusMode = await _open()
+	var boss := versus.boss
+	boss.body.set_physics_process(false)
+	var hunter := versus.local_hunter()
+	hunter.equip(versus.item(&"sonic_shotgun"))
+	var gun := hunter.loadout.gun()
+	var player: Player = hunter.body
+	boss.body.global_position = player.global_position - player.global_basis.z * 3.0
+	_aim_at(versus, boss.body.global_position + Vector3.UP * 1.0)
+	await wait_physics_frames(1)
+	var start := boss.body.global_position
+	var before := boss.health.health
+	assert_true(hunter.fire())
+	assert_gt(before - boss.health.health, gun.damage * 4.0, "most pellets hit")
+	var tracers := versus.get_children().filter(func(node: Node) -> bool: return node is Tracer)
+	assert_eq(tracers.size(), gun.pellets, "a tracer per pellet")
+	await wait_physics_frames(30)
+	assert_gt(boss.body.global_position.distance_to(start), 1.5, "pushed back")
+
+
+func test_right_click_zooms_with_the_rifle_only() -> void:
+	var versus: VersusMode = await _open()
+	var hunter := versus.local_hunter()
+	var normal := versus.view.camera.fov
+	Input.action_press("scan")
+	await wait_seconds(0.4)
+	assert_almost_eq(versus.view.camera.fov, normal, 0.1, "no zoom with the machine gun")
+	hunter.equip(versus.item(&"precision_rifle"))
+	await wait_seconds(0.4)
+	assert_almost_eq(versus.view.camera.fov, hunter.loadout.gun().zoom_fov, 0.5, "zoomed")
+	Input.action_release("scan")
+	await wait_seconds(0.4)
+	assert_almost_eq(versus.view.camera.fov, normal, 0.5)

@@ -32,9 +32,11 @@ const SWIPE_TIME := 0.22
 const SWIPE_ANGLE := 1.6
 
 var kind := Kind.HUNTER
-## The hunted's weapon in hand (T-377): &"" (empty hands), &"light_smg"
-## or &"uv_laser".
+## The hunted's weapon in hand (T-377): &"" (empty hands), &"light_smg",
+## &"precision_rifle", &"sonic_shotgun" or &"uv_laser".
 var weapon := &""
+## The color of its rarity (S-025, T-404), on the gun's glowing parts.
+var weapon_color := SMG_GLOW
 ## Speed of its body, for the sway, set by its kit.
 var speed := 0.0
 var _left: MeshInstance3D
@@ -66,7 +68,7 @@ func _ready() -> void:
 	if kind == Kind.HUNTER:
 		scale = Vector3.ONE * HUNTER_SCALE
 		_left.mesh = build_hunter_left()
-		_right.mesh = build_hunter_right(weapon)
+		_right.mesh = build_hunter_right(weapon, weapon_color)
 	else:
 		_left.mesh = build_boss_arm(-1.0)
 		_right.mesh = build_boss_arm(1.0)
@@ -75,10 +77,11 @@ func _ready() -> void:
 
 
 ## The weapon in its hand changes (a chest, T-377).
-func set_weapon(id: StringName) -> void:
+func set_weapon(id: StringName, color := SMG_GLOW) -> void:
 	weapon = id
+	weapon_color = color
 	if _right != null and kind == Kind.HUNTER:
-		_right.mesh = build_hunter_right(weapon)
+		_right.mesh = build_hunter_right(weapon, weapon_color)
 
 
 ## Recoil of a shot (Q18).
@@ -119,8 +122,9 @@ func _process(delta: float) -> void:
 
 
 ## The hunted's right forearm and glove, with its weapon (T-377): the
-## light machine gun (S-025), the UV laser, or nothing.
-static func build_hunter_right(held := &"light_smg") -> ArrayMesh:
+## light machine gun, the precision rifle, the sonic shotgun (S-025; glow,
+## the color of its rarity), the UV laser, or nothing.
+static func build_hunter_right(held := &"light_smg", glow := SMG_GLOW) -> ArrayMesh:
 	var tool := BoxTool.start()
 	BoxTool.box(tool, Vector3(0.2, -0.27, -0.12), Vector3(0.09, 0.09, 0.32), SLEEVE, -0.25)
 	BoxTool.box(tool, Vector3(0.17, -0.22, -0.32), Vector3(0.08, 0.1, 0.1), GLOVE)
@@ -128,8 +132,22 @@ static func build_hunter_right(held := &"light_smg") -> ArrayMesh:
 		&"light_smg":
 			BoxTool.box(tool, Vector3(0.17, -0.17, -0.42), Vector3(0.07, 0.1, 0.3), SMG_BODY)
 			BoxTool.box(tool, Vector3(0.17, -0.165, -0.62), Vector3(0.04, 0.04, 0.12), METAL)
-			BoxTool.box(tool, Vector3(0.17, -0.115, -0.44), Vector3(0.075, 0.02, 0.24), SMG_GLOW)
+			BoxTool.box(tool, Vector3(0.17, -0.115, -0.44), Vector3(0.075, 0.02, 0.24), glow)
 			BoxTool.box(tool, Vector3(0.17, -0.26, -0.47), Vector3(0.04, 0.14, 0.05), METAL)
+			BoxTool.box(tool, Vector3(0.17, -0.25, -0.36), Vector3(0.04, 0.12, 0.05), GLOVE)
+		&"precision_rifle":
+			BoxTool.box(tool, Vector3(0.17, -0.17, -0.5), Vector3(0.06, 0.08, 0.56), SMG_BODY)
+			BoxTool.box(tool, Vector3(0.17, -0.165, -0.86), Vector3(0.035, 0.035, 0.2), METAL)
+			BoxTool.box(tool, Vector3(0.17, -0.1, -0.46), Vector3(0.05, 0.05, 0.18), METAL)
+			BoxTool.box(tool, Vector3(0.17, -0.1, -0.56), Vector3(0.035, 0.035, 0.02), glow)
+			BoxTool.box(tool, Vector3(0.17, -0.205, -0.6), Vector3(0.065, 0.02, 0.3), glow)
+			BoxTool.box(tool, Vector3(0.17, -0.25, -0.36), Vector3(0.04, 0.12, 0.05), GLOVE)
+		&"sonic_shotgun":
+			BoxTool.box(tool, Vector3(0.17, -0.18, -0.44), Vector3(0.1, 0.11, 0.36), SMG_BODY)
+			for i in 3:
+				var ring_z := -0.66 - i * 0.05
+				BoxTool.box(tool, Vector3(0.17, -0.18, ring_z), Vector3(0.13, 0.13, 0.02), glow)
+			BoxTool.box(tool, Vector3(0.17, -0.18, -0.68), Vector3(0.07, 0.07, 0.16), METAL)
 			BoxTool.box(tool, Vector3(0.17, -0.25, -0.36), Vector3(0.04, 0.12, 0.05), GLOVE)
 		&"uv_laser":
 			BoxTool.box(tool, Vector3(0.17, -0.17, -0.47), Vector3(0.08, 0.09, 0.44), LASER_BODY)
