@@ -237,6 +237,7 @@ func _on_game_started(state: LobbyState) -> void:
 static func enter_game(tree: SceneTree, state: LobbyState) -> void:
 	var seat := state.seat_of(NetSession.get_place())
 	GameSession.online_seat = seat
+	GameSession.mode = &"hunt"  # Online plays the Traque (S-024: Versus later).
 	GameSession.role = (
 		GameSession.Role.MONSTER if seat == LobbyState.MONSTER_SEAT else GameSession.Role.HUNTED
 	)

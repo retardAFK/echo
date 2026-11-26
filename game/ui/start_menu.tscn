@@ -119,7 +119,7 @@ offset_top = 100.0
 offset_right = 204.0
 offset_bottom = 220.0
 script = ExtResource("5_list")
-keys = PackedStringArray("MENU_PLAY_HUNTED", "MENU_GADGET_1", "MENU_GADGET_2", "MENU_PLAY_MONSTER", "MENU_TEST_ROOM", "MENU_BACK")
+keys = PackedStringArray("MENU_PLAY_HUNTED", "MENU_GADGET_1", "MENU_GADGET_2", "MENU_PLAY_MONSTER", "MENU_TEST_ROOM", "MENU_VERSUS_TEST", "MENU_BACK")
 
 [node name="RoleInfo" type="PanelContainer" parent="Solo"]
 layout_mode = 0

@@ -326,3 +326,17 @@ TIP_FUSE_BOX,"Un boîtier électrique : une petite lumière rouge veut dire qu'i
 VERSUS_PHASE_PROWLER,Le rôdeur
 VERSUS_PHASE_ECHO,L'écho
 VERSUS_PHASE_ENRAGED,L'enragé
+VERSUS_BOSS_NAME,LE MONSTRE
+VERSUS_KNEEL,À genoux !
+VERSUS_DOWN,À terre
+VERSUS_FLARES,Fusées : %d / %d
+VERSUS_RELOADING,Rechargement…
+VERSUS_RAGE,Rage
+VERSUS_FURY,FUREUR
+VERSUS_FURY_READY,Fureur prête : R
+VERSUS_HUNTED_WIN,Les chassés ont vaincu le monstre
+VERSUS_BOSS_WIN,Le monstre a gagné
+MENU_VERSUS_TEST,Versus (prototype)
+VERSUS_TEST_GOAL,"Prototype du mode Versus : les chassés tirent des fusées sur le monstre, qui griffe et charge. Vide sa barre avant qu'il te mette à terre. F6 : jouer le monstre."
+VERSUS_TEST_HINT,Versus (prototype) · clic gauche : tirer · R : recharger · Espace : roulade · F6 : jouer le monstre · Échap : quitter
+VERSUS_TEST_HINT_BOSS,Versus (prototype) · clic gauche : griffe · Espace : charge · R : fureur · F6 : jouer un chassé · Échap : quitter

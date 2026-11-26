@@ -60,6 +60,7 @@ func _ready() -> void:
 		_role_list.item(key).focus_entered.connect(_preview_gadget.bind(key))
 	LoadoutItems.refresh(_role_list)
 	_role_list.item("MENU_TEST_ROOM").focus_entered.connect(_preview_test_room)
+	_role_list.item("MENU_VERSUS_TEST").focus_entered.connect(_preview_versus_test)
 	var version := str(ProjectSettings.get_setting("application/config/version", ""))
 	_version.text = Text.t("MENU_VERSION", version if version != "" else "dev")
 	show_home()
@@ -109,6 +110,7 @@ func preview(role: GameSession.Role) -> void:
 
 ## Picks a role and starts the game alone.
 func choose(role: GameSession.Role) -> void:
+	GameSession.mode = &"hunt"
 	GameSession.role = role
 	GameSession.online_seat = -1
 	role_chosen.emit(role)
@@ -150,12 +152,21 @@ func _preview_test_room() -> void:
 	_controls.text = ""
 
 
+## What the Versus prototype is (S-024, T-374).
+func _preview_versus_test() -> void:
+	_goal.text = Text.t("VERSUS_TEST_GOAL")
+	_controls.text = ""
+
+
 func _on_role_chosen(key: String) -> void:
 	if LoadoutItems.choose(_role_list, key):
 		_preview_gadget(key)
 	elif key == "MENU_TEST_ROOM":
 		if change_scene:
 			TestRoom.open(get_tree(), GameSession.Role.HUNTED)  # S-023, T-356.
+	elif key == "MENU_VERSUS_TEST":
+		if change_scene:
+			TestRoom.open_versus(get_tree(), GameSession.Role.HUNTED)  # S-024, T-374.
 	elif ROLES.has(key):
 		choose(ROLES[key])
 	else:

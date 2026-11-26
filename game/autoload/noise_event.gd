@@ -43,6 +43,7 @@ enum Type {
 	SCREAM,
 	FIRECRACKER,
 	CANS,
+	SHOT,  # S-024, T-372: a Versus shot.
 }
 
 var type: Type

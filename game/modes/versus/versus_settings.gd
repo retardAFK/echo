@@ -100,3 +100,48 @@ extends Resource
 @export_range(0.0, 600.0, 5.0, "suffix:s") var dawn_warning: float = 120.0
 ## Seconds without attacking before the boss is shown to the hunted (Q4).
 @export_range(5.0, 300.0, 1.0, "suffix:s") var hunted_boss_time: float = 45.0
+
+@export_group("Hits")
+## Distance from the boss's eyes within which a flare is in the face (Q13).
+@export_range(0.1, 1.5, 0.05, "suffix:m") var face_radius: float = 0.45
+## Flares that light the scene for real at once (budget of 4 lights, plan).
+@export_range(0, 4) var flare_lights: int = 2
+## Range of a flare's light, in meters.
+@export_range(1.0, 30.0, 0.5, "suffix:m") var flare_light_range: float = 9.0
+## Seconds the hit marker stays on the crosshair (Q21).
+@export_range(0.05, 1.0, 0.05, "suffix:s") var hit_marker_time: float = 0.25
+
+@export_group("Boss blows")
+## Claw reach, half angle and height (Q9).
+@export_range(0.5, 6.0, 0.1, "suffix:m") var claw_reach: float = 2.5
+@export_range(5.0, 180.0, 5.0, "suffix:°") var claw_half_angle: float = 45.0
+@export_range(0.2, 4.0, 0.1, "suffix:m") var claw_height: float = 1.5
+## Seconds of the raised arm before the claw lands (Q9, the signal).
+@export_range(0.0, 2.0, 0.05, "suffix:s") var claw_windup: float = 0.35
+@export_range(0.1, 5.0, 0.05, "suffix:s") var claw_cooldown: float = 0.8
+@export_range(1, 5) var claw_damage: int = 1
+## Seconds the boss crouches and roars before charging (Q9, the signal).
+@export_range(0.0, 3.0, 0.05, "suffix:s") var charge_windup: float = 0.6
+@export_range(2.0, 40.0, 0.5, "suffix:m") var charge_distance: float = 14.0
+@export_range(2.0, 40.0, 0.5, "suffix:m/s") var charge_speed: float = 16.0
+## Nearest target the AI boss charges, in meters.
+@export_range(0.0, 20.0, 0.5, "suffix:m") var charge_min_distance: float = 6.0
+@export_range(0.5, 60.0, 0.5, "suffix:s") var charge_cooldown: float = 8.0
+@export_range(1, 5) var charge_damage: int = 2
+## Distance at which the charge hits a hunted, in meters.
+@export_range(0.3, 3.0, 0.1, "suffix:m") var charge_hit_radius: float = 1.2
+## Seconds the boss is stunned after charging into a wall (Q9).
+@export_range(0.0, 10.0, 0.1, "suffix:s") var charge_stun: float = 2.0
+
+@export_group("End")
+## Time scale of the slow motion on the killing blow, and its real length (Q1).
+@export_range(0.05, 1.0, 0.05) var kill_slowmo_scale: float = 0.25
+@export_range(0.0, 5.0, 0.1, "suffix:s") var kill_slowmo_time: float = 1.5
+## Seconds the result stays on screen before the end (prototype: the test
+## room starts again).
+@export_range(0.0, 20.0, 0.5, "suffix:s") var end_delay: float = 4.0
+
+@export_group("AI hunted")
+## Farthest the AI hunted shoots at the boss, and its time between shots.
+@export_range(1.0, 60.0, 1.0, "suffix:m") var ai_fire_range: float = 25.0
+@export_range(0.2, 10.0, 0.1, "suffix:s") var ai_fire_interval: float = 1.4

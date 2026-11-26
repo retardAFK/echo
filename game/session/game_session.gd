@@ -7,6 +7,10 @@ enum Role { HUNTED, MONSTER }
 
 static var role := Role.HUNTED
 
+## The game mode (spec S-024, T-374): &"hunt" (the Traque, the game as it
+## was) or the name of a mode module of game/modes/ (&"versus").
+static var mode := &"hunt"
+
 ## Seed of the next game (spawn, fuses, decoys), 0 for a new draw each time.
 ## The bench mode (S-009, T-075) fixes it so every run plays the same game.
 static var game_seed := 0
