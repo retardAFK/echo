@@ -30,183 +30,84 @@ look = 3
 
 [sub_resource type="Resource" id="Resource_ppoc4"]
 script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.4, -22)
-size = Vector3(4.3999996, 2.8, 0.5999985)
-look = 2
-
-[sub_resource type="Resource" id="Resource_vienn"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.4, 2)
-size = Vector3(4.3999996, 2.8, 0.5999999)
-look = 2
-
-[sub_resource type="Resource" id="Resource_88enb"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 1.4, -8.5)
-size = Vector3(0.5999985, 2.8, 1.5999966)
-look = 2
-
-[sub_resource type="Resource" id="Resource_sdaj1"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 4.4, -10)
-size = Vector3(0.6000004, 2.8000002, 1.5999966)
-look = 2
-
-[sub_resource type="Resource" id="Resource_m7cjo"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 7.4, -10)
-size = Vector3(0.6000004, 2.8000002, 1.5999966)
-look = 2
-
-[sub_resource type="Resource" id="Resource_dam3p"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 10.4, -10)
-size = Vector3(0.6000004, 2.8000002, 1.5999966)
-look = 2
-
-[sub_resource type="Resource" id="Resource_g54we"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 13.4, -10)
-size = Vector3(0.6000004, 2.8000002, 1.5999966)
-look = 2
-
-[sub_resource type="Resource" id="Resource_c8bja"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.5, 1.4, -50)
-size = Vector3(2.6000137, 2.8, 0.5999985)
-look = 2
-
-[sub_resource type="Resource" id="Resource_yace5"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 1.4, -38.5)
-size = Vector3(0.5999985, 2.8, 3.4000015)
-look = 2
-
-[sub_resource type="Resource" id="Resource_8ksj2"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.5, 1.4, -26)
-size = Vector3(2.6000137, 2.8, 0.5999985)
-look = 2
-
-[sub_resource type="Resource" id="Resource_gn6x4"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.6, 1.4, -26)
-size = Vector3(1.5999985, 2.8, 0.5999985)
-look = 2
-
-[sub_resource type="Resource" id="Resource_3g8md"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 1.4, -26)
-size = Vector3(2.4000015, 2.8, 0.5999985)
-look = 2
-
-[sub_resource type="Resource" id="Resource_xeaxh"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68, 1.4, -37.25)
-size = Vector3(0.6000061, 2.8, 1.9000015)
-look = 2
-
-[sub_resource type="Resource" id="Resource_4sapx"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65, 0.55, 3.25)
-size = Vector3(6, 1.1, 2.5)
-
-[sub_resource type="Resource" id="Resource_v3bf0"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 63, 0.55, -13.349998)
-size = Vector3(6, 1.1, 2.5)
-
-[sub_resource type="Resource" id="Resource_j4gap"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.7, 1.4, -8)
-size = Vector3(0.6000004, 2.8, 4)
-
-[sub_resource type="Resource" id="Resource_fv8ex"]
-script = ExtResource("2_nf1vf")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69, 1.4, -8)
-size = Vector3(1.6000061, 2.8, 0.6000004)
-look = 2
-
-[sub_resource type="Resource" id="Resource_ue5ya"]
-script = ExtResource("2_nf1vf")
 transform = Transform3D(0, 0.57357645, 0.81915206, 0, 0.8191521, -0.5735764, -1, 0, 0, 62.872124, 2.068085, -25.300003)
 size = Vector3(1.4, 0.2, 7.496822)
 look = 1
 
-[sub_resource type="Resource" id="Resource_rcdms"]
+[sub_resource type="Resource" id="Resource_vienn"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 59.108963, 4.15, -25.45)
 size = Vector3(1.5, 0.3000002, 1.6999989)
 look = 1
 
-[sub_resource type="Resource" id="Resource_1id67"]
+[sub_resource type="Resource" id="Resource_88enb"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 0.8191521, -0.5735764, 0, 0.57357645, 0.81915206, 29.300003, 2.068085, -31.127876)
 size = Vector3(1.4, 0.2, 7.496822)
 look = 1
 
-[sub_resource type="Resource" id="Resource_51dg8"]
+[sub_resource type="Resource" id="Resource_sdaj1"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.45, 4.15, -34.891037)
 size = Vector3(1.6999989, 0.3000002, 1.5)
 look = 1
 
-[sub_resource type="Resource" id="Resource_717h4"]
+[sub_resource type="Resource" id="Resource_m7cjo"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.55, -44)
 size = Vector3(5, 1.1, 0.40000153)
 
-[sub_resource type="Resource" id="Resource_y5mqk"]
+[sub_resource type="Resource" id="Resource_dam3p"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.55, -46)
 size = Vector3(0.39999962, 1.1, 4)
 
-[sub_resource type="Resource" id="Resource_he8pf"]
+[sub_resource type="Resource" id="Resource_g54we"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.55, -34)
 size = Vector3(5, 1.1, 0.40000153)
 
-[sub_resource type="Resource" id="Resource_uvjqq"]
+[sub_resource type="Resource" id="Resource_c8bja"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0.55, -22)
 size = Vector3(0.40000153, 1.1, 5)
 
-[sub_resource type="Resource" id="Resource_po6mj"]
+[sub_resource type="Resource" id="Resource_yace5"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0.55, 0)
 size = Vector3(4, 1.1, 0.4)
 
-[sub_resource type="Resource" id="Resource_bjtia"]
+[sub_resource type="Resource" id="Resource_8ksj2"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.55, 15)
 size = Vector3(5, 1.1, 0.39999962)
 
-[sub_resource type="Resource" id="Resource_qmr4r"]
+[sub_resource type="Resource" id="Resource_gn6x4"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.55, 16)
 size = Vector3(0.39999962, 1.1, 4)
 
-[sub_resource type="Resource" id="Resource_s1by7"]
+[sub_resource type="Resource" id="Resource_3g8md"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.55, 16)
 size = Vector3(6, 1.1, 0.40000057)
 
-[sub_resource type="Resource" id="Resource_4ej5q"]
+[sub_resource type="Resource" id="Resource_xeaxh"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56, 0.55, 16)
 size = Vector3(4, 1.1, 0.40000057)
 
-[sub_resource type="Resource" id="Resource_yx1hr"]
+[sub_resource type="Resource" id="Resource_4sapx"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0.55, -6)
 size = Vector3(0.40000153, 1.1, 5)
 
-[sub_resource type="Resource" id="Resource_h6t4i"]
+[sub_resource type="Resource" id="Resource_v3bf0"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 0.55, 2)
 size = Vector3(4, 1.1, 0.4000001)
 
-[sub_resource type="Resource" id="Resource_w6ybf"]
+[sub_resource type="Resource" id="Resource_j4gap"]
 script = ExtResource("2_nf1vf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.55, -14)
 size = Vector3(0.40000153, 1.1, 5)
@@ -215,7 +116,7 @@ size = Vector3(0.40000153, 1.1, 5)
 script = ExtResource("3_1quay")
 map_path = "res://game/maps/tilleuls/tilleuls.scn"
 bounds = Rect2(-24, -56, 94, 76)
-pieces = Array[ExtResource("2_nf1vf")]([SubResource("Resource_m45vk"), SubResource("Resource_nf1vf"), SubResource("Resource_1quay"), SubResource("Resource_7mlpy"), SubResource("Resource_ppoc4"), SubResource("Resource_vienn"), SubResource("Resource_88enb"), SubResource("Resource_sdaj1"), SubResource("Resource_m7cjo"), SubResource("Resource_dam3p"), SubResource("Resource_g54we"), SubResource("Resource_c8bja"), SubResource("Resource_yace5"), SubResource("Resource_8ksj2"), SubResource("Resource_gn6x4"), SubResource("Resource_3g8md"), SubResource("Resource_xeaxh"), SubResource("Resource_4sapx"), SubResource("Resource_v3bf0"), SubResource("Resource_j4gap"), SubResource("Resource_fv8ex"), SubResource("Resource_ue5ya"), SubResource("Resource_rcdms"), SubResource("Resource_1id67"), SubResource("Resource_51dg8"), SubResource("Resource_717h4"), SubResource("Resource_y5mqk"), SubResource("Resource_he8pf"), SubResource("Resource_uvjqq"), SubResource("Resource_po6mj"), SubResource("Resource_bjtia"), SubResource("Resource_qmr4r"), SubResource("Resource_s1by7"), SubResource("Resource_4ej5q"), SubResource("Resource_yx1hr"), SubResource("Resource_h6t4i"), SubResource("Resource_w6ybf")])
+pieces = Array[ExtResource("2_nf1vf")]([SubResource("Resource_m45vk"), SubResource("Resource_nf1vf"), SubResource("Resource_1quay"), SubResource("Resource_7mlpy"), SubResource("Resource_ppoc4"), SubResource("Resource_vienn"), SubResource("Resource_88enb"), SubResource("Resource_sdaj1"), SubResource("Resource_m7cjo"), SubResource("Resource_dam3p"), SubResource("Resource_g54we"), SubResource("Resource_c8bja"), SubResource("Resource_yace5"), SubResource("Resource_8ksj2"), SubResource("Resource_gn6x4"), SubResource("Resource_3g8md"), SubResource("Resource_xeaxh"), SubResource("Resource_4sapx"), SubResource("Resource_v3bf0"), SubResource("Resource_j4gap")])
 hunted_spawns = PackedVector3Array(-17, 0, 14, -14, 0, 14, -11, 0, 12, -17, 0, 11)
 hunted_yaw = -1.032960800101468
 boss_spawn = Vector3(40, 0, -20)

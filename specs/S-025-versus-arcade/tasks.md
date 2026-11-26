@@ -3,7 +3,7 @@
 Bloc de numéros : T-400 à T-429.
 
 - [x] T-400 — Spec S-025, plan, tâches, D-024, ligne du backlog
-- [ ] T-401 — Portes toutes ouvertes en Versus, arène sans planches, test d'accès (chemins + robot vers chaque coffre, toit, départ)
+- [x] T-401 — Portes toutes ouvertes en Versus, arène sans planches, test d'accès (chemins + robot vers chaque coffre, toit, départ)
 - [ ] T-402 — Vue à la 3e personne (chassé et boss), réticule, tir depuis le centre de l'écran, V pour la 1re personne
 - [ ] T-403 — Armes à impact immédiat (`VersusWeapon`, `HitscanShot`, traçantes), mitraillette à lumière, chiffres de dégâts, croix de touche, secousse
 - [ ] T-404 — Fusil à fusées de précision (zoom), fusil à pompe sonique, grenades flash, raretés (couleurs, rayon au-dessus des coffres)
@@ -16,3 +16,4 @@ Bloc de numéros : T-400 à T-429.
 - [ ] T-411 — Guide du jeu, docs, vérification finale (budgets, critères)
 
 ## Compte rendu
+- T-401 (26/11/2026) : en Versus, `VersusMode` tient ouvertes toutes les portes de la map (`Door.hold_open`, générique : ouverte pour de bon, plus personne ne la ferme, la porte coupe-feu ne se referme plus). L'arène n'a plus de planches ni de couvercles : la tour (étages, caves), le centre social et le parking souterrain en font partie ; le maillage de navigation est recuit sorties de secours ouvertes. Le générateur vérifie que rien d'atteignable depuis le départ des chassés n'est hors des barrières (1963 polygones atteignables, 0 dehors). Test : le hall de la tour, le départ du boss, chaque coffre et chaque départ des chassés ont un chemin depuis le départ, chaque porte est ouverte et ne s'utilise plus. Captures (`tools/godot/capture_versus.tscn`) : porte de la tour ouverte, 174 à 231 appels de dessin selon la vue.
