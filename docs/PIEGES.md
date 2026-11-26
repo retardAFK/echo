@@ -38,3 +38,7 @@
 
 - Le serveur de jeu tourne sur un VPS IONOS (`echo404.duckdns.org`, D-016). Le déploiement passe par la CI sur `main` (`tools/server/deploy.sh`). Voir [`tools/server/README.md`](../tools/server/README.md). Ne jamais écrire de clé ou de mot de passe dans le dépôt.
 - Le `Caddyfile` installé dans `/etc/caddy` sur le serveur peut être en retard sur celui du dépôt : `deploy.sh` recharge Caddy par son API locale, un redémarrage de la machine perd la route web jusqu'au prochain déploiement.
+
+## Rendu
+
+- **Profondeur inversée, même en Compatibility** (S-024, T-372) : depuis Godot 4.3, le plan proche est à `z = w` dans l'espace de découpe, dans tous les rendus. Pour dessiner les bras à la première personne devant le décor, `viewmodel.gdshader` tire `POSITION.z` vers `POSITION.w`, pas vers `-POSITION.w` (sinon les bras disparaissent, sans erreur).

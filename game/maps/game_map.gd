@@ -85,6 +85,8 @@ func _ready() -> void:
 		hunted_role.setup()
 	for spot in get_hiding_spots():
 		spot.found.connect(_on_hidden_found)
+	if VersusMode.is_on():
+		add_child(VersusMode.new())  # S-024: the Versus module, game/modes/versus/.
 	_setup_game_loop()
 	pause_menu = PAUSE_MENU_SCENE.instantiate()
 	add_child(pause_menu)

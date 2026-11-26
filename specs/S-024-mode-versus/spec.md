@@ -1,6 +1,6 @@
 # S-024 — Mode Versus : le monstre devient un boss
 
-**Statut** : proposée par Claude le 26/11/2026, à valider par Maxime. Le **prototype** dans la salle d'essai (T-371 à T-374) est lancé avec son accord du 26/11/2026 (« je veux bien ») ; le reste attend la validation de la spec.
+**Statut** : proposée par Claude le 26/11/2026, à valider par Maxime. Le **prototype** dans la salle d'essai (T-371 à T-374) est lancé avec son accord du 26/11/2026 (« je veux bien ») et jouable depuis « Jouer seul › Versus (prototype) » ; le reste attend la validation de la spec.
 **Piliers servis** : P1 (le son trahit : chaque tir fait du bruit et guide le boss), P2 (le dilemme permanent : tirer, c'est se montrer)
 **Phase** : hors feuille de route, demandée par Maxime le 26/11/2026 (« un mode Versus où les chassés affrontent le chasseur en mode boss de Dark Souls, jouissif, avec des attaques à distance, le boss jouable aussi, penser à la modélisation du mode FPS et à qui gagne comment »).
 **Exigence transverse** : modulaire au maximum (D-022). Le mode Versus est un **module** : retirer le dossier `game/modes/versus/`, ses réglages et sa ligne dans la liste des modes rend le jeu exactement tel qu'avant. Une arme, une attaque du boss ou une phase s'ajoute par **un fichier de données et une scène**, sans toucher au joueur, au réseau ni aux IA. `docs/MODULES.md` dit comment.
@@ -17,7 +17,7 @@ En vue à la première personne, je vois mes **deux mains** : la gauche tient la
 
 Il charge : un rugissement, il se baisse, ses griffes s'écartent (1 s pour réagir). Espace : je fais une roulade sur le côté (endurance), il passe à côté et percute un muret : il est sonné 2 s, on vide nos chargeurs dans son dos. À 66 %, il pousse un cri : les lampadaires de l'arène s'éteignent, il ne reste que nos fusées et nos lampes. À 33 %, il devient **enragé** : plus rapide, il enchaîne, mais il encaisse plus. Camille est à terre : je cours, je maintiens E 3 s pour la relever pendant que Hugo l'occupe au canon sonique. La dernière fusée le touche : ralenti, la caméra tourne autour du boss qui s'effondre. Écran de fin : « Les chassés ont vaincu », carte du meilleur joueur.
 
-**En boss.** Je vois mes **deux bras griffus** devant moi. Clic gauche : coup de griffe. Clic droit maintenu puis relâché : **charge**. Les tirs des chassés apparaissent en orange comme les bruits du mode Traque. Chaque coup encaissé remplit ma **jauge de rage** ; pleine, j'appuie sur R : **Fureur** 10 s, je cours plus vite et mes coups ne s'interrompent plus. En phase 2, je peux **bondir** sur un bruit orange à portée. Un chassé à terre près de moi : je maintiens E pour l'**achever** (il ne pourra plus être relevé), pendant que les autres me tirent dessus pour m'en empêcher. Je gagne quand plus aucun chassé n'est debout, ou si je tiens jusqu'à l'aube (fin du chrono).
+**En boss.** Je vois mes **deux bras griffus** devant moi. Clic gauche : coup de griffe. Espace : **charge** (le clic droit garde le scan). Les tirs des chassés apparaissent en orange comme les bruits du mode Traque. Chaque coup encaissé remplit ma **jauge de rage** ; pleine, j'appuie sur R : **Fureur** 10 s, je cours plus vite et mes coups ne s'interrompent plus. En phase 2, je peux **bondir** sur un bruit orange à portée. Un chassé à terre près de moi : je maintiens E pour l'**achever** (il ne pourra plus être relevé), pendant que les autres me tirent dessus pour m'en empêcher. Je gagne quand plus aucun chassé n'est debout, ou si je tiens jusqu'à l'aube (fin du chrono).
 
 ## Récits utilisateur
 - En tant que chassé, je veux tirer à distance sur le boss avec des armes de lumière et de son, afin de me défouler à plusieurs.
@@ -50,7 +50,7 @@ Toutes les réponses ci-dessous sont des **propositions de Claude**, à valider 
   | Attaque | Touche | Signal | Effet | Recharge |
   |---|---|---|---|---|
   | Griffe | clic gauche | bras levé 0,35 s | 1 point de vie, 2,5 m, arc de 90° | 0,8 s |
-  | Charge | clic droit maintenu 0,6 s puis relâché | rugissement, il se baisse | ligne droite de 14 m, 2 points de vie ; contre un mur, il est **sonné 2 s** | 8 s |
+  | Charge | Espace (le clic droit reste au scan) | rugissement, il se baisse 0,6 s | ligne droite de 14 m, 2 points de vie ; contre un mur, il est **sonné 2 s** | 8 s |
   | Bond (phase 2+) | E en visant un bruit orange à moins de 25 m | ombre au sol pendant 1 s à l'arrivée | onde de 3 m, 1 point de vie et renverse | 12 s |
   | Achever | E maintenu 2 s sur un chassé à terre | il se penche, grognement | le chassé est hors combat | — |
   | Fureur | R quand la rage est pleine | yeux rouges, souffle | 10 s : +25 % de vitesse, ses attaques ne sont plus interrompues | rage vide |

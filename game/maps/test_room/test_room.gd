@@ -9,6 +9,9 @@ extends Node
 ## - F6 (switch_test_role) plays the other role: the monster, with an AI prey
 ##   as the hunted dummy that walks and hides, to try the scan.
 ## - The noise rings (F4) are shown from the start.
+## - Versus (spec S-024, T-374): open_versus() opens it with the Versus mode
+##   prototype; no refill (the Versus has its own weapons), and the room
+##   starts again when someone wins.
 ## To add a station: docs/MODULES.md, "Un poste de la salle d'essai".
 
 const PATH := "res://game/maps/test_room/test_room.tscn"
@@ -23,8 +26,19 @@ var _refill_left := 0.0
 @onready var map: GameMap = get_parent()
 
 
-## Opens the test room as role (the menu, and F6).
+## Opens the test room as role (the menu, and F6), in the Traque.
 static func open(tree: SceneTree, role: GameSession.Role) -> void:
+	GameSession.mode = &"hunt"
+	_open(tree, role)
+
+
+## Opens the test room as role with the Versus prototype (S-024, T-374).
+static func open_versus(tree: SceneTree, role: GameSession.Role) -> void:
+	GameSession.mode = VersusMode.MODE
+	_open(tree, role)
+
+
+static func _open(tree: SceneTree, role: GameSession.Role) -> void:
 	GameSession.role = role
 	GameSession.online_seat = -1
 	LoadingScreen.open(tree, PATH)
@@ -44,7 +58,7 @@ func _setup() -> void:
 		(debug as NoiseDebug).set_enabled(true)
 	var hint := Label.new()
 	hint.name = "TestRoomHint"
-	hint.text = Text.t("TEST_ROOM_HINT")
+	hint.text = Text.t(_hint_key())
 	hint.theme = THEME
 	hint.theme_type_variation = &"HudLabel"
 	hint.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
@@ -53,6 +67,22 @@ func _setup() -> void:
 	var layer := CanvasLayer.new()
 	layer.add_child(hint)
 	add_child(layer)
+	var versus := map.get_node_or_null("VersusMode") as VersusMode
+	if versus != null:
+		versus.finished.connect(func(_winner: VersusRules.Winner) -> void: _again())
+
+
+func _hint_key() -> String:
+	if not VersusMode.is_on():
+		return "TEST_ROOM_HINT"
+	if GameSession.role == GameSession.Role.MONSTER:
+		return "VERSUS_TEST_HINT_BOSS"
+	return "VERSUS_TEST_HINT"
+
+
+## Starts the room again in the same role and mode (a Versus game ended).
+func _again() -> void:
+	_open(get_tree(), GameSession.role)
 
 
 func _add_station(station: TestStation) -> void:
@@ -79,7 +109,7 @@ func _physics_process(delta: float) -> void:
 		return
 	_refill_left = REFILL_TIME
 	var player := map.player if is_instance_valid(map.player) else null
-	if player != null and player.inventory != null:
+	if player != null and player.inventory != null and not VersusMode.is_on():
 		refill(player)
 
 
@@ -95,4 +125,4 @@ func _unhandled_input(event: InputEvent) -> void:
 		var other := GameSession.Role.HUNTED
 		if GameSession.role == GameSession.Role.HUNTED:
 			other = GameSession.Role.MONSTER
-		open(get_tree(), other)
+		_open(get_tree(), other)  # Same mode (S-024).
