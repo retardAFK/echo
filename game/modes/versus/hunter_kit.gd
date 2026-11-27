@@ -48,6 +48,8 @@ var _dodge_velocity := Vector3.ZERO
 var _ai_wait := 0.0
 var _ai_burst_left := 0.0
 var _rng := RandomNumberGenerator.new()
+## The AI's miss for the current burst (ai_aim_error).
+var _aim_error := Basis.IDENTITY
 var _ai_goal_wait := 0.0
 var _sent_to: Variant = null
 var _down_label: Label3D
@@ -177,7 +179,7 @@ func aim() -> Vector3:
 	if boss == null:
 		return -body.global_basis.z
 	var target := boss.body.global_position + Vector3.UP * 1.2
-	return (target - eye()).normalized()
+	return _aim_error * (target - eye()).normalized()
 
 
 ## Fires its gun once if it can (S-025, T-403): each pellet's ray hits at
@@ -528,6 +530,10 @@ func _think(delta: float) -> void:
 	_ai_wait = mode.settings.ai_fire_interval
 	if _sees_boss(mode.settings.ai_fire_range):
 		_ai_burst_left = mode.settings.ai_burst_time
+		var error := deg_to_rad(mode.settings.ai_aim_error)
+		_aim_error = Basis.from_euler(
+			Vector3(_rng.randf_range(-error, error), _rng.randf_range(-error, error), 0.0)
+		)
 		fire()
 
 
@@ -556,8 +562,21 @@ func _steer(delta: float) -> void:
 		if not each.is_open or (each.item != null and _ai_wants(each.item)):
 			chests.append(each.global_position)
 	var own := body.global_position
+	var zone_point: Variant = null
+	var zone := mode.zone
+	if zone != null and zone.must_move_in(own, mode.rules.clock):
+		zone_point = zone.inside_point(own, mode.rules.clock + 10.0)
+	if zone != null:  # Only what is still inside the zone in a while.
+		downed = _inside(downed)
+		chests = _inside(chests)
 	var goal := fighter.choose(
-		own, mode.boss.body.global_position, downed, chests, loadout.weapon != null, mates
+		own,
+		mode.boss.body.global_position,
+		downed,
+		chests,
+		loadout.weapon != null,
+		mates,
+		zone_point
 	)
 	if goal == PreyFighter.Goal.NONE:
 		if _sent_to != null and prey.brain.state == PreyBrain.State.SEARCH:
@@ -565,7 +584,8 @@ func _steer(delta: float) -> void:
 		_sent_to = null
 		return
 	if prey.brain.state in [PreyBrain.State.FLEE, PreyBrain.State.HIDE]:
-		return  # Away from the boss first.
+		if goal != PreyFighter.Goal.ZONE:
+			return  # Away from the boss first, unless out of the zone.
 	var side := own - fighter.point
 	side.y = 0.0
 	var spot := fighter.point + side.normalized() * 0.9 if side.length() > 0.9 else own
@@ -573,6 +593,15 @@ func _steer(delta: float) -> void:
 		_sent_to = spot
 	if prey.brain.state != PreyBrain.State.SEARCH or prey.brain.target != _sent_to:
 		prey.brain.send_to(_sent_to)
+
+
+## The points of points the zone will still hold in a while.
+func _inside(points: Array[Vector3]) -> Array[Vector3]:
+	var kept: Array[Vector3] = []
+	for each in points:
+		if not mode.zone.must_move_in(each, mode.rules.clock, 15.0, 2.0):
+			kept.append(each)
+	return kept
 
 
 ## Rolls away, sideways, from a blow the boss winds up at it.

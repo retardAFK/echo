@@ -10,13 +10,13 @@ extends Resource
 ## (BossLook); its collision with the map stays the monster's.
 @export_range(1.0, 2.0, 0.05) var boss_scale: float = 1.3
 ## Boss health for each hunted at the start (Q7).
-## 250 after the simulations (T-384; the spec's 400 let the AI boss win
-## almost every game).
-@export_range(50.0, 2000.0, 10.0) var boss_health_per_hunted: float = 250.0
+## 250 after the simulations (T-384, flares); 500 with the hitscan guns
+## (T-408, the boss melted in a minute at 250).
+@export_range(50.0, 2000.0, 10.0) var boss_health_per_hunted: float = 500.0
 ## That health scaled by the number of hunted: entry n - 1 for n hunted, 1
-## past the end. Tuned by the simulations (T-384, 20 games each): with 2, 3
-## and 4 AI hunted the AI boss then wins about half the games.
-@export var boss_health_scales: PackedFloat32Array = [1.0, 0.8, 0.8, 0.7]
+## past the end. Tuned by the simulations (T-408, 8 to 12 games each): with
+## 2, 3 and 4 AI hunted the AI boss then wins 62, 33 and 50 % of the games.
+@export var boss_health_scales: PackedFloat32Array = [1.0, 0.8, 0.7, 0.45]
 ## Phases, highest start_ratio first (Q8).
 @export var phases: Array[VersusPhase] = []
 ## Seconds the boss cannot be hurt when a phase starts (Q8, its cry).
@@ -227,6 +227,9 @@ extends Resource
 @export_range(1.0, 60.0, 1.0, "suffix:m") var ai_fire_range: float = 25.0
 @export_range(0.2, 10.0, 0.1, "suffix:s") var ai_fire_interval: float = 1.4
 @export_range(0.1, 5.0, 0.1, "suffix:s") var ai_burst_time: float = 1.0
+## Its aim misses the boss's chest by up to this angle, drawn per burst: an
+## AI hunted is not a perfect gun (T-408).
+@export_range(0.0, 20.0, 0.5, "suffix:°") var ai_aim_error: float = 5.0
 ## Where it goes (Q17, PreyFighter), chosen every ai_think_interval: a
 ## downed teammate when the boss is at least ai_revive_safe from it; a chest
 ## (any when unarmed, else within ai_chest_detour with the boss at least

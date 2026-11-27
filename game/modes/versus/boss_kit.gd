@@ -48,6 +48,7 @@ var _base_walk := 0.0
 var _base_run := 0.0
 var _fall := FallWatch.new()
 var _slow_left := 0.0
+var _zone_wait := 0.0
 var _push_velocity := Vector3.ZERO
 var _push_left := 0.0
 var _second_claw := false
@@ -352,6 +353,7 @@ func _read_commands(commands: PlayerCommands, delta: float) -> void:
 func _think(delta: float) -> void:
 	health.start_fury()
 	brain.update(delta)
+	_keep_in_zone(delta)
 	var standing: Array[HunterKit] = []
 	var places: Array[Vector3] = []
 	var damage: Array[float] = []
@@ -384,6 +386,19 @@ func _think(delta: float) -> void:
 		BossBrain.Act.RETREAT:
 			if body is Monster:
 				(body as Monster).walk_away(target.body.global_position)
+
+
+## The AI boss heads back into the zone (S-025, T-408) when it is or soon
+## will be outside it, as if it heard something there.
+func _keep_in_zone(delta: float) -> void:
+	_zone_wait -= delta
+	var zone := mode.zone
+	if zone == null or _zone_wait > 0.0 or not body is Monster:
+		return
+	_zone_wait = 1.0
+	var clock := mode.rules.clock
+	if zone.must_move_in(body.global_position, clock):
+		(body as Monster).brain.hear(zone.inside_point(body.global_position, clock + 10.0))
 
 
 ## A heard noise next to a lone shooter (phase 2+), its leap target, or null.
