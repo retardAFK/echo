@@ -30,14 +30,21 @@ const DAMPING := 14.0
 ## Where a gun's model (GunModel) sits, its grip in the glove, and its
 ## scale in the hands, by item id (T-409).
 const GUN_GRIP := Vector3(0.17, -0.21, -0.34)
-const GUN_SCALES := {&"light_smg": 0.62, &"precision_rifle": 0.5, &"sonic_shotgun": 0.55}
+const GUN_SCALES := {
+	&"light_smg": 0.62, &"precision_rifle": 0.5, &"sonic_shotgun": 0.55, &"assault_rifle": 0.52
+}
+## Aiming (T-412): how fast the gun comes up to the eye (per second), how
+## much closer it comes, and how much less it sways.
+const AIM_RATE := 7.0
+const AIM_PULL := -0.1
+const AIM_STEADY := 0.85
 ## Claw swipe: seconds and swing angle in radians.
 const SWIPE_TIME := 0.22
 const SWIPE_ANGLE := 1.6
 
 var kind := Kind.HUNTER
 ## The hunted's weapon in hand (T-377): &"" (empty hands), &"light_smg",
-## &"precision_rifle", &"sonic_shotgun" or &"uv_laser".
+## &"precision_rifle", &"sonic_shotgun", &"assault_rifle" or &"uv_laser".
 var weapon := &""
 ## The color of its rarity (S-025, T-404), on the gun's glowing parts.
 var weapon_color := SMG_GLOW
@@ -53,6 +60,11 @@ var _swipe_left := 0.0
 var _raise := 0.0
 var _raise_target := 0.0
 var _flash := 0.0
+## Up at the eye while aiming (T-412), 0 to 1, and where the gun's sight
+## then is (the HUD draws the holographic sight over it).
+var _aim := 0.0
+var _aim_target := 0.0
+var _aim_offset := Vector3.ZERO
 
 
 func _init(p_kind := Kind.HUNTER) -> void:
@@ -93,6 +105,21 @@ func kick(strength := 1.0) -> void:
 	_kick_speed += strength * 3.0
 
 
+## Raises the gun of item id to the eye, or lowers it (T-412).
+func aim(on: bool, id := &"") -> void:
+	_aim_target = 1.0 if on else 0.0
+	if on:
+		_aim_offset = aim_offset(id)
+
+
+## How far the arms move for the sight of the gun of item id to be in the
+## middle of the screen.
+static func aim_offset(id: StringName) -> Vector3:
+	var scale_of: float = GUN_SCALES.get(id, 1.0)
+	var sight: Vector3 = GUN_GRIP + Vector3.UP * GunModel.SIGHTS.get(id, 0.15) * scale_of
+	return -HUNTER_SCALE * Vector3(sight.x, sight.y, 0.0) + Vector3.BACK * AIM_PULL
+
+
 ## The boss's claw swipe (Q19).
 func swipe() -> void:
 	_swipe_left = SWIPE_TIME
@@ -115,8 +142,12 @@ func _process(delta: float) -> void:
 	_kick_speed += (-SPRING * _kick - DAMPING * _kick_speed) * delta
 	_kick += _kick_speed * delta
 	_raise = move_toward(_raise, _raise_target, delta * 3.0)
+	_aim = move_toward(_aim, _aim_target, delta * AIM_RATE)
+	var up := smoothstep(0.0, 1.0, _aim)
+	sway *= 1.0 - AIM_STEADY * up
 	position = Vector3(sin(_phase) * sway, -absf(cos(_phase)) * sway + _raise * 0.35, _kick * 0.08)
-	rotation = Vector3(_kick * 0.25 + _raise * 0.6, 0.0, sin(_phase) * sway * 0.5)
+	position += _aim_offset * up
+	rotation = Vector3(_kick * (0.25 - 0.15 * up) + _raise * 0.6, 0.0, sin(_phase) * sway * 0.5)
 	if kind == Kind.BOSS:
 		_swipe_left = maxf(_swipe_left - delta, 0.0)
 		var t := 1.0 - _swipe_left / SWIPE_TIME if _swipe_left > 0.0 else 0.0

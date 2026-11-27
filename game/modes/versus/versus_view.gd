@@ -9,12 +9,17 @@ extends Node
 ## aim_direction casts the camera's ray, then aims from the eyes to what it
 ## meets. The room computes the same from the player's yaw and pitch, so a
 ## shot lands at the same place here and online.
+## Aiming, right click held (T-412, HunterKit.aiming), narrows the field of
+## view to the gun's zoom_fov, in both views, and brings the camera close
+## behind the head.
 
 const HUNTED_BODY := preload("res://game/entities/hunted_body/hunted_body.tscn")
 const MONSTER_BODY := preload("res://game/entities/monster_body/monster_body.tscn")
 ## Physics layers 1 and 2, the ground and the walls: what the arm and the
 ## aim ray stop on.
 const WORLD_LAYERS := 1 | 2
+## How fast the view zooms in and out while aiming (T-412), per second.
+const ZOOM_RATE := 7.0
 
 var settings: VersusSettings
 ## The avatar seen: a Player or a MonsterAvatar.
@@ -27,8 +32,10 @@ var _hunted_body: HuntedBody
 var _monster_body: MonsterBody
 ## How hard the camera shakes now (0 to 1), after a shot (S-025, T-403).
 var _shake := 0.0
-## How far zoomed in, 0 to 1 (right click with a gun that zooms, T-404).
+## How far zoomed in, 0 to 1 (aiming, T-412), and the field of view of the
+## options (what it zooms from).
 var _zoom := 0.0
+var _base_fov := 75.0
 
 
 func _init(p_settings: VersusSettings, p_avatar: CharacterBody3D) -> void:
@@ -90,25 +97,28 @@ func _process(delta: float) -> void:
 		_monster_body.show_state(speed, (avatar as MonsterAvatar).body_action)
 
 
-## Right click held with a gun that zooms (the precision rifle, T-404): the
-## camera narrows to its zoom_fov and comes close over the shoulder.
+## Aiming (T-412): both cameras narrow to the gun's zoom_fov and the arm
+## comes close behind the head; back to the options' field of view after.
 func _update_zoom(delta: float) -> void:
-	var zoom_fov := 0.0
 	var kit := avatar.get_node_or_null("HunterKit") as HunterKit
-	if kit != null and kit.loadout.gun() != null and kit.vitals.is_standing():
+	var aiming := kit != null and kit.aiming
+	if _zoom <= 0.0 and not aiming:
+		_base_fov = _own_camera.fov  # The options may change it.
+		camera.fov = _base_fov
+		return
+	_zoom = move_toward(_zoom, 1.0 if aiming else 0.0, delta * ZOOM_RATE)
+	var zoom_fov := _base_fov
+	if kit.loadout.gun() != null and kit.loadout.gun().zoom_fov > 0.0:
 		zoom_fov = kit.loadout.gun().zoom_fov
-	var wanted := 1.0 if zoom_fov > 0.0 and is_zooming() else 0.0
-	_zoom = move_toward(_zoom, wanted, delta * 6.0)
-	if zoom_fov <= 0.0:
-		zoom_fov = _own_camera.fov
-	camera.fov = lerpf(_own_camera.fov, zoom_fov, _zoom)
-	arm.spring_length = lerpf(arm_length(settings, avatar), 1.0, _zoom)
+	var up := smoothstep(0.0, 1.0, _zoom)
+	camera.fov = lerpf(_base_fov, zoom_fov, up)
+	_own_camera.fov = camera.fov
+	arm.spring_length = lerpf(arm_length(settings, avatar), settings.aim_view_distance, up)
 
 
-## Whether its player holds right click (the scan key, unused by a hunted).
-func is_zooming() -> bool:
-	var player := avatar as Player
-	return player != null and player.commands != null and player.commands.scan
+## How far zoomed in, 0 (not aiming) to 1 (T-412).
+func zoom() -> float:
+	return _zoom
 
 
 ## Where the arm starts, from the head: over the right shoulder.

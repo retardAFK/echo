@@ -36,9 +36,18 @@ extends Resource
 ## 0: its rays hit at once. Else it fires a Flare that flies straight at this
 ## speed, in meters per second, with its trail (the precision rifle, T-404).
 @export_range(0.0, 400.0, 5.0, "suffix:m/s") var flare_speed: float = 0.0
-## The camera's field of view while the player holds right click, else 0:
-## no zoom (T-404).
+## The camera's field of view while the player aims, right click held
+## (T-412), else 0: it cannot aim.
 @export_range(0.0, 90.0, 1.0, "suffix:°") var zoom_fov: float = 0.0
+## How far its shots stray while aiming, in degrees (spread is from the
+## hip).
+@export_range(0.0, 20.0, 0.1, "suffix:°") var aim_spread: float = 0.0
 ## How far a shot of all its pellets pushes the boss back, in meters (the
 ## sonic shotgun, T-404); a share of it for a share of the pellets.
 @export_range(0.0, 20.0, 0.5, "suffix:m") var push: float = 0.0
+
+
+## How far its shots stray, in degrees: aim_spread while aiming (T-412),
+## else spread.
+func spread_when(aiming: bool) -> float:
+	return aim_spread if aiming else spread

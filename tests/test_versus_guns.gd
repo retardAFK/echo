@@ -218,16 +218,79 @@ func test_the_sonic_shotgun_hits_hard_up_close_and_pushes_the_boss_back() -> voi
 	assert_gt(boss.body.global_position.distance_to(start), 1.5, "pushed back")
 
 
-func test_right_click_zooms_with_the_rifle_only() -> void:
+func test_right_click_aims_every_gun_closer_steadier_and_slower() -> void:
 	var versus: VersusMode = await _open()
 	var hunter := versus.local_hunter()
+	var player: Player = hunter.body
 	var normal := versus.view.camera.fov
+	var walk := player.settings.walk_speed
+	var gun := hunter.loadout.gun()
+	assert_gt(gun.spread, gun.spread_when(true), "the machine gun strays less aimed")
 	Input.action_press("scan")
-	await wait_seconds(0.4)
-	assert_almost_eq(versus.view.camera.fov, normal, 0.1, "no zoom with the machine gun")
-	hunter.equip(versus.item(&"precision_rifle"))
-	await wait_seconds(0.4)
-	assert_almost_eq(versus.view.camera.fov, hunter.loadout.gun().zoom_fov, 0.5, "zoomed")
+	await wait_seconds(0.5)
+	assert_true(hunter.aiming)
+	assert_almost_eq(versus.view.camera.fov, gun.zoom_fov, 0.5, "zoomed in")
+	assert_almost_eq(versus.view.arm.spring_length, versus.settings.aim_view_distance, 0.05)
+	assert_almost_eq(
+		player.settings.walk_speed, walk * versus.settings.aim_speed_scale, 0.01, "walks slower"
+	)
+	versus.view.first_person = true
+	await wait_seconds(0.1)
+	var own: Camera3D = player.get_node("Head/Camera3D")
+	assert_almost_eq(own.fov, gun.zoom_fov, 0.5, "the first person zooms too")
 	Input.action_release("scan")
-	await wait_seconds(0.4)
+	await wait_seconds(0.5)
+	assert_false(hunter.aiming)
 	assert_almost_eq(versus.view.camera.fov, normal, 0.5)
+	assert_almost_eq(player.settings.walk_speed, walk, 0.01, "its pace back")
+
+
+func test_the_precision_rifle_aims_closest() -> void:
+	var versus: VersusMode = await _open()
+	var hunter := versus.local_hunter()
+	hunter.equip(versus.item(&"precision_rifle"))
+	var gun := hunter.loadout.gun()
+	assert_eq(gun.spread_when(true), 0.0, "dead on")
+	for id: StringName in [&"light_smg", &"assault_rifle", &"sonic_shotgun"]:
+		assert_lt(gun.zoom_fov, versus.item(id).weapon.zoom_fov, "closer than %s" % id)
+	versus.view.first_person = true
+	Input.action_press("scan")
+	await wait_seconds(0.5)
+	assert_almost_eq(versus.view.camera.fov, gun.zoom_fov, 0.5)
+	var arms := hunter.view_model.get_children().filter(
+		func(node: Node) -> bool: return node is MeshInstance3D and node.visible
+	)
+	assert_eq(arms.size(), 2, "the gun stays in sight under the holographic sight")
+	Input.action_release("scan")
+	await wait_seconds(0.3)
+
+
+func test_downed_while_aiming_it_crawls() -> void:
+	var versus: VersusMode = await _open()
+	var hunter := versus.local_hunter()
+	var player: Player = hunter.body
+	Input.action_press("scan")
+	await wait_seconds(0.3)
+	assert_true(hunter.aiming)
+	hunter.take_blow(hunter.vitals.health)
+	await wait_physics_frames(2)
+	Input.action_release("scan")
+	assert_false(hunter.aiming, "no aiming on the ground")
+	assert_almost_eq(player.settings.walk_speed, versus.settings.crawl_speed, 0.01)
+	hunter.vitals.revive()
+	await wait_physics_frames(2)
+	assert_gt(player.settings.walk_speed, versus.settings.crawl_speed * 2.0, "back on its feet")
+
+
+func test_the_assault_rifle_is_an_automatic_gun_of_the_chests() -> void:
+	var versus: VersusMode = await _open()
+	var rifle := versus.item(&"assault_rifle")
+	assert_not_null(rifle.weapon)
+	assert_true(rifle.weapon.automatic)
+	assert_true(
+		versus.settings.items.any(
+			func(item: VersusItem) -> bool: return item.id == &"assault_rifle"
+		)
+	)
+	assert_gt(rifle.weight, 0.0, "found in the chests of the start")
+	assert_lt(rifle.weapon.spread_when(true), versus.item(&"light_smg").weapon.spread_when(true))

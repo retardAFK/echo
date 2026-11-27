@@ -6,7 +6,8 @@ extends Node
 ## plus, for the player, the first-person arms. A child of a Player or a
 ## Prey, added by VersusMode. It starts empty-handed (Q29) and gears up at
 ## the chests (VersusChest). The player's keys: left click fires (held: a
-## machine gun keeps firing, the UV laser burns; S-025), R reloads, Space
+## machine gun keeps firing, the UV laser burns; S-025), right click held
+## aims (T-412: the view zooms in, the shots stray less, it walks slower), R reloads, Space
 ## rolls, gadget_1 and gadget_2 use the tools (HunterTools), interact
 ## held revives a downed teammate (Q5, DownedHold), else opens a chest or
 ## takes from it. Downed, it crawls;
@@ -38,6 +39,8 @@ var revive := DownedHold.new()
 var revives_done := 0
 ## True while reloading.
 var reloading := false
+## True while its player aims, right click held with a gun (T-412).
+var aiming := false
 var view_model: ViewModel
 ## Where an AI prey goes (T-383).
 var fighter: PreyFighter
@@ -56,6 +59,8 @@ var _down_label: Label3D
 var _fall := FallWatch.new()
 ## The player's own settings while it crawls (downed).
 var _standing_settings: PlayerSettings
+## The player's own settings while it aims (it walks slower).
+var _hip_settings: PlayerSettings
 var _crouched_by_fall := false
 
 
@@ -96,6 +101,7 @@ func equip(item: VersusItem) -> VersusItem:
 		if first:
 			loadout.spare_ammo += mode.settings.start_spare_ammo
 	reloading = false
+	_let_go_aim()  # Aims again next frame, with the new gun, if still held.
 	if laser != null:
 		laser.queue_free()
 		laser = null
@@ -118,6 +124,7 @@ func _glow_of(item: VersusItem) -> Color:
 ## A client (T-381): shows weapon in its hands, as the room says it took it.
 func show_weapon(weapon: VersusItem) -> void:
 	loadout.weapon = weapon
+	_let_go_aim()
 	if laser != null:
 		laser.queue_free()
 		laser = null
@@ -225,7 +232,7 @@ func _fire_rays(gun: VersusWeapon, strength: float) -> void:
 	var space := body.get_world_3d().direct_space_state
 	var struck: BossKit
 	var hits := 0
-	for direction in HitscanShot.directions(aim(), gun.pellets, gun.spread, _rng):
+	for direction in HitscanShot.directions(aim(), gun.pellets, gun.spread_when(aiming), _rng):
 		var end := from + direction * gun.reach
 		var query := PhysicsRayQueryParameters3D.create(from, end, Flare.LAYERS)
 		query.exclude = [body.get_rid()]
@@ -244,7 +251,7 @@ func _fire_rays(gun: VersusWeapon, strength: float) -> void:
 
 
 func _fire_flare(gun: VersusWeapon, strength: float) -> void:
-	var direction := HitscanShot.directions(aim(), 1, gun.spread, _rng)[0]
+	var direction := HitscanShot.directions(aim(), 1, gun.spread_when(aiming), _rng)[0]
 	var flare := Flare.new()
 	flare.mode = mode
 	flare.shooter = body
@@ -254,6 +261,48 @@ func _fire_flare(gun: VersusWeapon, strength: float) -> void:
 	flare.trail = gun.tracer_color
 	flare.velocity = direction * gun.flare_speed
 	mode.add_flare(flare, eye() + direction * 0.5)
+
+
+## Aims while its player holds right click with a gun that aims, standing,
+## neither reloading nor rolling (T-412): it walks, and its mouse turns,
+## slower; VersusView zooms, ViewModel raises the gun to the eye.
+func _update_aim() -> void:
+	var gun := loadout.gun()
+	var now := (
+		body is Player
+		and gun != null
+		and gun.zoom_fov > 0.0
+		and vitals.is_standing()
+		and not reloading
+		and _dodge_left <= 0.0
+		and keys.held(PlayerCommands.FLAG_SCAN)
+	)
+	if now == aiming:
+		return
+	if not now:
+		_let_go_aim()
+		return
+	aiming = true
+	var player := body as Player
+	_hip_settings = player.settings
+	var slow: PlayerSettings = player.settings.duplicate()
+	var slower := mode.settings.aim_speed_scale
+	slow.walk_speed *= slower
+	slow.sprint_speed = slow.walk_speed
+	slow.crouch_speed *= slower
+	slow.mouse_sensitivity *= clampf(gun.zoom_fov / mode.settings.view_fov, 0.2, 1.0)
+	player.settings = slow
+	if view_model != null:
+		view_model.aim(true, loadout.weapon.id)
+
+
+func _let_go_aim() -> void:
+	aiming = false
+	if _hip_settings != null:
+		(body as Player).settings = _hip_settings
+		_hip_settings = null
+	if view_model != null:
+		view_model.aim(false)
 
 
 ## Where its tracers leave from: the gun in its hands, right of and below
@@ -340,6 +389,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if is_played():
 		keys.update((body as Player).commands)
+	_update_aim()
 	vitals.update(delta)
 	stamina.update(delta)
 	_cooldown = maxf(_cooldown - delta, 0.0)
@@ -374,6 +424,7 @@ func _physics_process(delta: float) -> void:
 ## show here, at once.
 func _show_mirror(delta: float) -> void:
 	keys.update((body as Player).commands)
+	_update_aim()  # It walks as slowly as the room makes it.
 	if view_model != null:
 		view_model.speed = Vector2(body.velocity.x, body.velocity.z).length()
 		view_model.lower(1.0 if not vitals.is_standing() else (0.4 if reloading else 0.0))
@@ -627,6 +678,7 @@ func _sees_boss(reach: float) -> bool:
 
 ## Downed (Q5): a player crawls, an AI prey lies still.
 func _on_downed() -> void:
+	_let_go_aim()  # Its walking settings back before it crawls.
 	revive.reset()
 	chest = null
 	chest_held = 0.0

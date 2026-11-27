@@ -20,3 +20,4 @@ tracer_color = Color(1, 0.45, 0.15, 1)
 shake = 0.5
 flare_speed = 160.0
 zoom_fov = 30.0
+aim_spread = 0.0

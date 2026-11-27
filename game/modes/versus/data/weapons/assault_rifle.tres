@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="VersusWeapon" format=3]
+
+[ext_resource type="Script" path="res://game/modes/versus/versus_weapon.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+automatic = true
+fire_interval = 0.13
+damage = 8.0
+face_multiplier = 2.0
+poise = 1.0
+face_poise = 4.0
+pellets = 1
+spread = 1.6
+clip = 25
+reload_time = 1.8
+reach = 150.0
+noise_range = 25.0
+tracer_color = Color(1, 0.82, 0.35, 1)
+shake = 0.2
+zoom_fov = 45.0
+aim_spread = 0.3
