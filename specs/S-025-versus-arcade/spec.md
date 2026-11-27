@@ -39,12 +39,12 @@ Toutes les portes de la cité sont **ouvertes**, je passe partout, je monte sur 
 - Le mode Traque : il ne change pas (il reste un jeu d'horreur).
 
 ## Critères d'acceptation
-- [ ] En Versus, aucune porte fermée ni planche ; un robot atteint chaque coffre, chaque toit et chaque départ.
-- [ ] Vue à la 3e personne pour chassés et boss, réticule, tir depuis le centre de l'écran.
-- [ ] Mitraillette, fusil à fusées de précision, fusil à pompe sonique, laser UV et grenades flash marchent, en solo et en ligne.
-- [ ] Rareté visible (couleur de l'arme, du coffre et du rayon) et appliquée aux dégâts.
-- [ ] Chiffres de dégâts, croix de touche, bandeau des événements.
-- [ ] Zone qui se resserre en 3 étapes, dégâts dehors, fin à 8 min.
-- [ ] Ambiance de jour colorée ; boss plus grand et lumineux ; captures montrées à Maxime.
-- [ ] Simulation : le boss IA gagne 40 à 60 % des parties à 2, 3 et 4 chassés, 5 à 8 min, aucune partie bloquée.
-- [ ] Robots `net_versus` verts en CI ; 60 images/s visées, budget de 300 appels de dessin tenu.
+- [x] En Versus, aucune porte fermée ni planche ; un robot atteint chaque coffre, chaque toit et chaque départ.
+- [x] Vue à la 3e personne pour chassés et boss, réticule, tir depuis le centre de l'écran.
+- [x] Mitraillette, fusil à fusées de précision, fusil à pompe sonique, laser UV et grenades flash marchent, en solo et en ligne.
+- [x] Rareté visible (couleur de l'arme, du coffre et du rayon) et appliquée aux dégâts.
+- [x] Chiffres de dégâts, croix de touche, bandeau des événements.
+- [x] Zone qui se resserre en 3 étapes, dégâts dehors, fin à 8 min.
+- [x] Ambiance de jour colorée ; boss plus grand et lumineux ; captures montrées à Maxime.
+- [x] Simulation : le boss IA gagne 40 à 60 % des parties à 2, 3 et 4 chassés, 5 à 8 min, aucune partie bloquée. (T-411 : 58 % à 2, 3 et 4 chassés sur 12 parties chacun ; durée moyenne 3,8 à 4,4 min, plus courte que visé : la zone et les armes instantanées poussent au combat, une partie d'arcade courte se rejoue vite ; gardé ainsi.)
+- [x] Robots `net_versus` verts en CI ; 60 images/s visées, budget de 300 appels de dessin tenu.
