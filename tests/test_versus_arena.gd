@@ -116,6 +116,9 @@ func test_the_player_walks_up_to_the_roof() -> void:
 	add_child_autofree(map)
 	await wait_physics_frames(4)
 	var player := map.player
+	var versus: VersusMode = map.get_node("VersusMode")
+	versus.boss.set_physics_process(false)  # No blow or fireball on the way (T-413).
+	versus.boss.body.set_physics_process(false)
 	player.global_position = ROOF_STAIRS_FOOT
 	player.set_look(PI / 2.0, 0.0)  # West.
 	Input.action_press("move_forward")
