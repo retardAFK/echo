@@ -76,6 +76,7 @@ func _setup() -> void:
 		get_parent().add_child(builder)
 		builder.use_navigation(get_parent())
 	_open_doors()
+	add_child(VersusDaylight.new(self))
 	leap_shadow = _make_shadow()
 	add_child(leap_shadow)
 	end_screen = VersusEndScreen.new()
@@ -100,6 +101,7 @@ func _setup() -> void:
 		boss = BossKit.new(self)
 		node.add_child(boss)
 		break
+	_dress_bosses()
 	if boss == null:
 		push_warning("Versus: no monster in the map")
 		return
@@ -131,12 +133,25 @@ func _setup_mirror() -> void:
 		boss = BossKit.new(self)
 		own.add_child(boss)
 	_mirror_health = boss.health if boss != null else BossHealth.new(settings, LobbyState.SEATS - 1)
+	_dress_bosses()
 	rules = VersusRules.new(settings, boss_health())
 	link = VersusNet.new(self, net)
 	add_child(link)
 	hud = VersusHud.new(self)
 	add_child(hud)
 	_add_view()
+
+
+## The boss's look (S-025, Q8) on each monster of the map: its own kit's,
+## or on a client the room's boss as shown here.
+func _dress_bosses() -> void:
+	for node in get_tree().get_nodes_in_group(Prison.MONSTERS_GROUP):
+		if node.is_queued_for_deletion() or node.has_node("BossLook"):
+			continue
+		var look := BossLook.new(self)
+		node.add_child(look)
+		if boss != null and node == boss.body:
+			boss.look = look
 
 
 ## The view from behind this machine's player (S-025, Q1), hunted or boss.
@@ -347,8 +362,11 @@ func local_hunter() -> HunterKit:
 
 
 ## The boss's kit if node is the boss (a flare hit it), else null.
+## The boss kit whose body (or hitbox, BossLook) node is, or null.
 func boss_of(node: Node) -> BossKit:
-	if boss != null and node == boss.body and not mirror:
+	if boss == null or mirror or node == null:
+		return null
+	if node == boss.body or (boss.look != null and node == boss.look.hitbox):
 		return boss
 	return null
 

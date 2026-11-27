@@ -8,6 +8,7 @@ name_key = "VERSUS_PHASE_ENRAGED"
 start_ratio = 0.33
 speed_scale = 1.2
 damage_taken_scale = 1.25
+glow = 1.1
 can_leap = true
 lights_out = false
 double_claw = true

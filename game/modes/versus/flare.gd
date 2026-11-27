@@ -7,7 +7,8 @@ extends Node3D
 ## body: one ray per frame between its last and its new position. Only the
 ## newest settings.flare_lights flares have a real light (VersusMode.add_flare).
 
-const LAYERS := 1 | 2 | 8  # Walls, props, monsters.
+## Walls, props, monsters, the boss's hitbox (BossLook, S-025).
+const LAYERS := 1 | 2 | 8 | BossLook.HITBOX_LAYER
 const COLOR := Color(1.0, 0.25, 0.2)
 const SIZE := 0.07
 

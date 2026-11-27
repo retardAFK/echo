@@ -107,7 +107,7 @@ func _show_item() -> void:
 	if item != null:
 		_label.text = Text.t(item.name_key)
 	if rarity != null:
-		(_beam.material_override as StandardMaterial3D).albedo_color = Color(rarity.color, 0.45)
+		(_beam.material_override as StandardMaterial3D).albedo_color = Color(rarity.color, 0.6)
 		_label.text += "\n" + Text.t(rarity.name_key)
 
 
@@ -118,15 +118,14 @@ func rarity_of_item() -> VersusRarity:
 	return rarities[clampi(item.rarity, 0, rarities.size() - 1)]
 
 
-## The rarity beam: a tall unshaded column, added over what is behind it.
+## The rarity beam: a tall unshaded column, see-through (seen by day too).
 static func _build_beam() -> MeshInstance3D:
 	var box := BoxMesh.new()
-	box.size = Vector3(0.18, BEAM_HEIGHT, 0.18)
+	box.size = Vector3(0.3, BEAM_HEIGHT, 0.3)
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	material.albedo_color = Color(1, 1, 1, 0.45)
+	material.albedo_color = Color(1, 1, 1, 0.6)
 	var beam := MeshInstance3D.new()
 	beam.mesh = box
 	beam.material_override = material

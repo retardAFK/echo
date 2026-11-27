@@ -55,7 +55,7 @@ func test_a_flare_in_the_face_hurts_more_and_shows_a_red_marker() -> void:
 	var boss := versus.boss
 	map.monster.set_physics_process(false)  # Stands still for the test.
 	var hunter := versus.local_hunter()
-	var eyes: Vector3 = map.monster.get_eye_position()
+	var eyes := boss.eyes()
 	var toward := map.player.global_position - map.monster.global_position
 	toward.y = 0.0
 	var from := eyes + toward.normalized() * 6.0  # The open side, not a wall.

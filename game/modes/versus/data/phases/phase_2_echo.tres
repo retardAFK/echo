@@ -8,5 +8,6 @@ name_key = "VERSUS_PHASE_ECHO"
 start_ratio = 0.66
 speed_scale = 1.0
 damage_taken_scale = 1.0
+glow = 0.7
 can_leap = true
-lights_out = true
+lights_out = false

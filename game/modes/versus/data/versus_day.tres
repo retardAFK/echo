@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="VisualSettings" format=3]
+
+[ext_resource type="Script" path="res://game/data/visual_settings.gd" id="1_settings"]
+
+[resource]
+script = ExtResource("1_settings")
+fog_color = Color(0.56, 0.76, 0.96, 1)
+fog_density = 0.006
+monster_fog_density = 0.006
+view_distance = 90.0
+ambient_color = Color(0.92, 0.9, 1, 1)
+ambient_energy = 0.75
+moon_color = Color(1, 0.94, 0.82, 1)
+moon_energy = 1.2
+indoor_fog_density = 0.02
+indoor_fog_color = Color(0.5, 0.55, 0.62, 1)
+indoor_fog_time = 1.5
+color_levels = 256
+dither_strength = 0.0
+grain_strength = 0.0
+grain_rate = 12.0
+vertex_snap = Vector2(0, 0)
+scan_dim = 0.7
+scan_desaturation = 0.8
+scan_edge_color = Color(0.8, 0.84, 0.88, 1)
+scan_edge_width = 0.15
+scan_wave_interval = 1.0
+scan_wave_reach = 12.0
+scan_wave_width = 0.4
+scan_fade_time = 0.3

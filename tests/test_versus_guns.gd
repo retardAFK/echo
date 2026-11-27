@@ -87,7 +87,7 @@ func test_a_shot_in_the_face_hits_at_once_with_a_yellow_number_and_a_tracer() ->
 	var toward := player.global_position - boss.body.global_position
 	toward.y = 0.0
 	player.global_position = boss.body.global_position + toward.normalized() * 6.0  # Open side.
-	var eyes: Vector3 = boss.body.get_eye_position()
+	var eyes := boss.eyes()
 	_aim_at(versus, eyes)
 	await wait_physics_frames(1)
 	var before := boss.health.health

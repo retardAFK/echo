@@ -15,7 +15,10 @@ extends Resource
 @export_range(0.5, 2.0, 0.05) var damage_taken_scale: float = 1.0
 ## Whether the boss may leap on a noise during the phase (Q9).
 @export var can_leap := false
-## Whether entering the phase puts the arena lights out (Q8, phase 2).
+## How strongly its glowing cracks shine (S-025, Q8: stronger each phase).
+@export_range(0.0, 2.0, 0.05) var glow: float = 0.4
+## Whether entering the phase puts the arena lights out (Q8, phase 2; the
+## daylight Versus of S-025 no longer does).
 @export var lights_out := false
 ## Whether its claw strikes twice during the phase (Q8, phase 3).
 @export var double_claw := false
