@@ -25,7 +25,7 @@ const FORE_GRIPS := {
 ## red dot.
 const SIGHTS := {
 	&"light_smg": 0.165,
-	&"precision_rifle": 0.155,
+	&"precision_rifle": 0.205,
 	&"sonic_shotgun": 0.17,
 	&"assault_rifle": 0.205,
 }

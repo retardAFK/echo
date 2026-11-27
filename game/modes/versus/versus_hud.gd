@@ -9,8 +9,8 @@ extends CanvasLayer
 ## what holding interact does (open a chest, revive, finish, Q5 and Q30)
 ## and how far along it is. At the top, the clock and dawn near (Q3); a
 ## boss that hides too long is shown in red to the hunted (Q4).
-## Aiming (T-412): a red dot in a ring in the middle, or, with a scope, its
-## lens: the screen dark around a circle, a fine cross and a red dot.
+## Aiming (T-412): a holographic sight in the middle, a glass pane in its
+## frame with a glowing red ring, ticks and dot.
 
 const THEME := preload("res://game/ui/theme/echo_theme.tres")
 const BAR_COLOR := Color(0.62, 0.08, 0.06)
@@ -24,11 +24,12 @@ const TRACKED_COLOR := Color(1.0, 0.1, 0.05)
 const NUMBER_FACE := Color(1.0, 0.86, 0.15)
 const BANNER_BACK := Color(0.08, 0.05, 0.2, 0.75)
 const ZONE_COLOR := Color(0.75, 0.45, 1.0)
-const SIGHT_DOT := Color(1.0, 0.18, 0.12)
-const SIGHT_RING := Color(1.0, 1.0, 1.0, 0.85)
-const SCOPE_DARK := Color(0.02, 0.02, 0.03)
-## The lens of a scope: its radius, as a share of the screen's height.
-const SCOPE_RADIUS := 0.44
+const HOLO_RED := Color(1.0, 0.16, 0.1)
+const HOLO_GLASS := Color(0.55, 0.85, 1.0, 0.07)
+const HOLO_FRAME := Color(0.1, 0.11, 0.13, 0.9)
+## The holographic sight's window (pixels at 720 lines high) and its ring.
+const HOLO_SIZE := Vector2(230, 150)
+const HOLO_RING := 34.0
 ## Seconds a banner stays.
 const BANNER_TIME := 2.5
 ## Steady hits (the UV laser) add up into the same number for this long.
@@ -140,7 +141,7 @@ func _draw_hud() -> void:
 		return
 	var hunter := mode.local_hunter()
 	if hunter != null:
-		_draw_sight(hunter, size)  # Under the rest: a scope's lens hides the world only.
+		_draw_sight(size)  # Under the rest of the HUD.
 	# The boss bar (Q7, Q8), bottom middle.
 	var width := size.x * 0.5
 	var bar := Rect2(Vector2((size.x - width) * 0.5, size.y - 56.0), Vector2(width, 10.0))
@@ -185,41 +186,43 @@ func _draw_hud() -> void:
 		)
 
 
-## While it aims (T-412): a red dot in a ring, or a scope's lens.
-func _draw_sight(hunter: HunterKit, size: Vector2) -> void:
+## While it aims (T-412): a holographic sight that fades in as the gun
+## comes up: a glass pane in a dark frame (thicker at the bottom, its
+## housing), a glowing red ring with four ticks and a dot in the middle.
+func _draw_sight(size: Vector2) -> void:
 	var zoom := mode.view.zoom() if mode.view != null else 0.0
-	var gun := hunter.loadout.gun()
-	if zoom <= 0.0 or gun == null:
+	if zoom <= 0.0:
 		return
+	var alpha := smoothstep(0.2, 0.9, zoom)
+	var unit := size.y / 720.0
 	var c := size * 0.5
-	if gun.scope:
-		_draw_scope(c, size, clampf((zoom - 0.6) / 0.3, 0.0, 1.0))
-		return
-	var alpha := smoothstep(0.3, 1.0, zoom)
-	_canvas.draw_arc(c, 13.0, 0.0, TAU, 32, Color(SIGHT_RING, SIGHT_RING.a * alpha), 1.5, true)
-	_canvas.draw_circle(c, 3.0, Color(SIGHT_DOT, alpha))
-
-
-## A scope's lens: dark all around a circle, a fine black cross with its
-## thick ends, a red dot in the middle; it fades in as the gun comes up.
-func _draw_scope(c: Vector2, size: Vector2, alpha: float) -> void:
-	if alpha <= 0.0:
-		return
-	var radius := size.y * SCOPE_RADIUS
-	var dark := Color(SCOPE_DARK, alpha)
-	# One thick ring from the lens's edge to past the screen's corners.
-	var reach := size.length() * 0.5
-	_canvas.draw_arc(c, radius + reach * 0.5, 0.0, TAU, 128, dark, reach + 2.0, true)
-	var line := Color(0.0, 0.0, 0.0, 0.9 * alpha)
-	for axis: Vector2 in [Vector2.RIGHT, Vector2.DOWN]:
-		_canvas.draw_line(c - axis * radius, c + axis * radius, line, 1.5)
-		for side in [-1.0, 1.0]:
-			var thick_from: Vector2 = c + axis * side * radius * 0.35
-			_canvas.draw_line(thick_from, c + axis * side * radius, line, 5.0)
-	for mark in range(1, 4):
-		var tick := Vector2(0, mark * radius * 0.08)
-		_canvas.draw_line(c + tick + Vector2(-5, 0), c + tick + Vector2(5, 0), line, 1.5)
-	_canvas.draw_circle(c, 2.5, Color(SIGHT_DOT, alpha))
+	var pane := Rect2(c - HOLO_SIZE * unit * 0.5, HOLO_SIZE * unit)
+	_canvas.draw_rect(pane, Color(HOLO_GLASS, HOLO_GLASS.a * alpha))
+	var frame := Color(HOLO_FRAME, HOLO_FRAME.a * alpha)
+	var edge := Color(0.32, 0.34, 0.38, alpha)  # The lit rim of the frame.
+	var p := pane.position
+	var w := pane.size.x
+	var h := pane.size.y
+	for part: Rect2 in [
+		Rect2(p + Vector2(-12, -7) * unit, Vector2(w + 24 * unit, 7 * unit)),  # Hood.
+		Rect2(p + Vector2(-12, 0) * unit, Vector2(12 * unit, h)),  # Sides.
+		Rect2(p + Vector2(w, 0), Vector2(12 * unit, h)),
+		Rect2(p + Vector2(-12 * unit, h), Vector2(w + 24 * unit, 26 * unit)),  # Housing.
+	]:
+		_canvas.draw_rect(part, frame)
+	_canvas.draw_rect(pane.grow(1.0), edge, false, 1.5 * unit)
+	var button := Rect2(p + Vector2(w - 34 * unit, h + 8 * unit), Vector2(18, 8) * unit)
+	_canvas.draw_rect(button, edge)
+	var ring := HOLO_RING * unit
+	for glow in 3:  # A soft glow, then the sharp ring.
+		var color := Color(HOLO_RED, 0.12 * alpha)
+		_canvas.draw_arc(c, ring, 0.0, TAU, 48, color, (9.0 - glow * 3.0) * unit, true)
+	var red := Color(HOLO_RED, alpha)
+	_canvas.draw_arc(c, ring, 0.0, TAU, 48, red, 2.0 * unit, true)
+	for axis: Vector2 in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
+		_canvas.draw_line(c + axis * ring, c + axis * (ring - 8.0 * unit), red, 2.0 * unit)
+	_canvas.draw_circle(c, 5.0 * unit, Color(HOLO_RED, 0.25 * alpha))
+	_canvas.draw_circle(c, 2.5 * unit, red)
 
 
 ## The damage numbers (S-025, Q4): they jump up from where the shot hit,

@@ -232,7 +232,7 @@ func _fire_rays(gun: VersusWeapon, strength: float) -> void:
 	var space := body.get_world_3d().direct_space_state
 	var struck: BossKit
 	var hits := 0
-	for direction in HitscanShot.directions(aim(), gun.pellets, gun.spread_when(_steady()), _rng):
+	for direction in HitscanShot.directions(aim(), gun.pellets, gun.spread_when(aiming), _rng):
 		var end := from + direction * gun.reach
 		var query := PhysicsRayQueryParameters3D.create(from, end, Flare.LAYERS)
 		query.exclude = [body.get_rid()]
@@ -251,7 +251,7 @@ func _fire_rays(gun: VersusWeapon, strength: float) -> void:
 
 
 func _fire_flare(gun: VersusWeapon, strength: float) -> void:
-	var direction := HitscanShot.directions(aim(), 1, gun.spread_when(_steady()), _rng)[0]
+	var direction := HitscanShot.directions(aim(), 1, gun.spread_when(aiming), _rng)[0]
 	var flare := Flare.new()
 	flare.mode = mode
 	flare.shooter = body
@@ -266,15 +266,6 @@ func _fire_flare(gun: VersusWeapon, strength: float) -> void:
 ## Aims while its player holds right click with a gun that aims, standing,
 ## neither reloading nor rolling (T-412): it walks, and its mouse turns,
 ## slower; VersusView zooms, ViewModel raises the gun to the eye.
-## Whether its shots stray as little as when aiming: a player aiming, or an
-## AI prey with a scope (it takes its time; ai_aim_error makes it miss).
-func _steady() -> bool:
-	if body is Player:
-		return aiming
-	var gun := loadout.gun()
-	return gun != null and gun.scope
-
-
 func _update_aim() -> void:
 	var gun := loadout.gun()
 	var now := (
@@ -302,7 +293,7 @@ func _update_aim() -> void:
 	slow.mouse_sensitivity *= clampf(gun.zoom_fov / mode.settings.view_fov, 0.2, 1.0)
 	player.settings = slow
 	if view_model != null:
-		view_model.aim(true, loadout.weapon.id, gun.scope)
+		view_model.aim(true, loadout.weapon.id)
 
 
 func _let_go_aim() -> void:

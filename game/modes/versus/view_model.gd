@@ -61,11 +61,10 @@ var _raise := 0.0
 var _raise_target := 0.0
 var _flash := 0.0
 ## Up at the eye while aiming (T-412), 0 to 1, and where the gun's sight
-## then is; with a scope, the arms hide once it is up (the HUD shows the lens).
+## then is (the HUD draws the holographic sight over it).
 var _aim := 0.0
 var _aim_target := 0.0
 var _aim_offset := Vector3.ZERO
-var _scope := false
 
 
 func _init(p_kind := Kind.HUNTER) -> void:
@@ -106,13 +105,11 @@ func kick(strength := 1.0) -> void:
 	_kick_speed += strength * 3.0
 
 
-## Raises the gun of item id to the eye, or lowers it (T-412); scope: the
-## arms hide at the eye.
-func aim(on: bool, id := &"", scope := false) -> void:
+## Raises the gun of item id to the eye, or lowers it (T-412).
+func aim(on: bool, id := &"") -> void:
 	_aim_target = 1.0 if on else 0.0
 	if on:
 		_aim_offset = aim_offset(id)
-		_scope = scope
 
 
 ## How far the arms move for the sight of the gun of item id to be in the
@@ -151,9 +148,6 @@ func _process(delta: float) -> void:
 	position = Vector3(sin(_phase) * sway, -absf(cos(_phase)) * sway + _raise * 0.35, _kick * 0.08)
 	position += _aim_offset * up
 	rotation = Vector3(_kick * (0.25 - 0.15 * up) + _raise * 0.6, 0.0, sin(_phase) * sway * 0.5)
-	var at_scope := _scope and _aim > 0.6
-	_left.visible = not at_scope
-	_right.visible = not at_scope
 	if kind == Kind.BOSS:
 		_swipe_left = maxf(_swipe_left - delta, 0.0)
 		var t := 1.0 - _swipe_left / SWIPE_TIME if _swipe_left > 0.0 else 0.0
