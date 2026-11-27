@@ -44,6 +44,9 @@ var mirror := false
 var link: VersusNet
 ## The guns in the hunted's hands (T-409), or null.
 var held_guns: HeldGuns
+## Its sounds and its music (T-410), or null.
+var sounds: VersusSounds
+var music: VersusMusic
 ## Client side: where the room says the tracked boss is (Q4), or null.
 var tracked_at: Variant = null
 ## The boss's shadow where it lands (Q9).
@@ -96,6 +99,10 @@ func _setup() -> void:
 	add_child(end_screen)
 	held_guns = HeldGuns.new(self)
 	add_child(held_guns)
+	sounds = VersusSounds.new(self)
+	add_child(sounds)
+	music = VersusMusic.new(self)
+	add_child(music)
 	if mirror:
 		_setup_mirror()
 		return
@@ -404,6 +411,8 @@ func nearest_standing(point: Vector3) -> HunterKit:
 func add_flare(flare: Flare, at: Vector3) -> void:
 	add_child(flare)
 	flare.global_position = at
+	if sounds != null and flare.trail:
+		sounds.shot(&"precision_rifle", at)  # The rifle's flare (T-410).
 	if link != null and not mirror:
 		link.send([VersusNet.Event.SHOT, at, flare.velocity, flare.gravity, flare.trail])
 	var lit_now: Array[Flare] = []
@@ -428,6 +437,8 @@ func on_boss_hit(
 	if hud != null and local_hunter() != null and shooter == local_hunter().body:
 		hud.show_hit(face)
 		hud.show_damage(point, taken, face, steady)
+		if sounds != null and not steady:
+			sounds.hit(face)
 
 
 ## A flash grenade's burst at point (S-025, T-404), here and on the clients.
@@ -435,15 +446,20 @@ func show_flash(point: Vector3) -> void:
 	var burst := FlashBurst.new(settings.flash_radius)
 	add_child(burst)
 	burst.global_position = point
+	if sounds != null:
+		sounds.at_point(&"flash", point)
 	if link != null and not mirror:
 		link.send([VersusNet.Event.FLASH, point])
 
 
-## A shot's tracer from from to to (S-025, T-403), here and on the clients.
-func add_tracer(from: Vector3, to: Vector3, color: Color) -> void:
+## A shot's tracer from from to to (S-025, T-403), here and on the clients,
+## with the shot of the gun of item id gun_id (T-410).
+func add_tracer(from: Vector3, to: Vector3, color: Color, gun_id := &"") -> void:
 	add_child(Tracer.between(from, to, color))
+	if sounds != null and gun_id != &"":
+		sounds.shot(gun_id, from)
 	if link != null and not mirror:
-		link.send([VersusNet.Event.TRACER, from, to, color])
+		link.send([VersusNet.Event.TRACER, from, to, color, String(gun_id)])
 
 
 func is_over() -> bool:
@@ -572,6 +588,8 @@ func _announce_zone() -> void:
 func announce(key: String, values: Array = []) -> void:
 	if hud != null:
 		hud.show_banner(key, values)
+	if sounds != null:
+		sounds.banner(key)
 	if link != null and not mirror:
 		link.send([VersusNet.Event.BANNER, key, values])
 

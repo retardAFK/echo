@@ -21,7 +21,8 @@ extends Node
 ##   [BANNER, text key, values]: the banner of an event (S-025, Q4);
 ##   [HIT, face, point, damage, steady]: to the shooter, its hit marker
 ##   (Q21) and its damage number (S-025);
-##   [TRACER, from, to, color]: a gun's shot (S-025), its tracer;
+##   [TRACER, from, to, color, gun id]: a gun's shot (S-025), its tracer
+##   and its sound (T-410);
 ##   [GUN, seat, item id, rarity]: the gun in that seat's hands, "" for
 ##   none (HeldGuns, T-409);
 ##   [LIGHTS_OUT]: the cry of phase 2 (Q8);
@@ -223,12 +224,16 @@ func apply_net_event(payload: Array) -> void:
 		Event.HIT when payload.size() == 5 and mode.hud != null:
 			mode.hud.show_hit(payload[1])
 			mode.hud.show_damage(payload[2], payload[3], payload[1], payload[4])
-		Event.TRACER when payload.size() == 4:
-			mode.add_tracer(payload[1], payload[2], payload[3])
+			if mode.sounds != null and not payload[4]:
+				mode.sounds.hit(payload[1])
+		Event.TRACER when payload.size() == 5:
+			mode.add_tracer(payload[1], payload[2], payload[3], StringName(payload[4]))
 		Event.FLASH when payload.size() == 2:
 			mode.show_flash(payload[1])
 		Event.BANNER when payload.size() == 3 and mode.hud != null:
 			mode.hud.show_banner(payload[1], payload[2])
+			if mode.sounds != null:
+				mode.sounds.banner(payload[1])
 		Event.GUN when payload.size() == 4 and mode.held_guns != null:
 			mode.held_guns.apply(payload[1], payload[2], payload[3])
 		Event.LIGHTS_OUT:

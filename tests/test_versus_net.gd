@@ -117,7 +117,9 @@ func test_a_client_shows_the_arcade_events() -> void:
 			. filter(func(node: Node) -> bool: return is_instance_of(node, type))
 			. size()
 		)
-	link.apply_net_event([VersusNet.Event.TRACER, Vector3.ZERO, Vector3(0, 0, -10), Color.CYAN])
+	link.apply_net_event(
+		[VersusNet.Event.TRACER, Vector3.ZERO, Vector3(0, 0, -10), Color.CYAN, "light_smg"]
+	)
 	assert_eq(count.call(Tracer), 1, "the tracer")
 	link.apply_net_event([VersusNet.Event.FLASH, Vector3(0, 1, -5)])
 	assert_eq(count.call(FlashBurst), 1, "the white burst")
