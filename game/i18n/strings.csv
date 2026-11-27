@@ -336,9 +336,17 @@ VERSUS_BEING_REVIVED,On vous relève
 VERSUS_FINISH,Maintenir {interact} : achever
 VERSUS_LEAP_READY,Bond prêt : {interact} en visant un bruit
 VERSUS_CLOCK,%d:%02d
-VERSUS_DAWN_NEAR,L'aube approche
+VERSUS_DAWN_NEAR,Dernière minute !
+VERSUS_ZONE_SOON,La zone se resserre dans %d s
+VERSUS_ZONE_SHRINKS,La zone se resserre !
+VERSUS_ZONE_NEXT,Zone : %d:%02d
+VERSUS_OUTSIDE_ZONE,Hors de la zone ! (%d m)
+VERSUS_PHASE_BANNER,Le monstre passe en phase %d : %s
+VERSUS_DOWN_BANNER,Un chassé est à terre !
+VERSUS_REVIVED_BANNER,Un chassé est relevé
+VERSUS_OUT_BANNER,Un chassé est éliminé
 VERSUS_TRACKED,Traqué : les chassés vous voient
-VERSUS_END_DAWN,"L'aube se lève, la créature survit"
+VERSUS_END_DAWN,"Le temps est écoulé, la créature survit"
 VERSUS_BOSS_WIN_YOU,Vous avez gagné : plus aucun chassé debout
 VERSUS_END_LINE,%s : %d dégâts · %d au visage · %d relevés
 VERSUS_MVP,Meilleur joueur : %s

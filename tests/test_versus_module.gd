@@ -39,6 +39,8 @@ const CLASSES: Array[String] = [
 	"FlashBurst",
 	"BossLook",
 	"VersusDaylight",
+	"VersusZone",
+	"ZoneWall",
 	"VersusArena",
 	"ArenaPiece",
 	"ArenaBuilder",
