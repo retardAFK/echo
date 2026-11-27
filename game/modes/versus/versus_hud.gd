@@ -19,6 +19,8 @@ const RAGE_COLOR := Color(0.85, 0.15, 0.4)
 const STAMINA_COLOR := Color(0.75, 0.75, 0.6)
 const FACE_COLOR := Color(1.0, 0.2, 0.15)
 const LASER_COLOR := Color(0.62, 0.3, 1.0)
+## The "right click: aim" reminder under the weapon (T-416).
+const HINT_COLOR := Color(0.55, 0.95, 1.0, 0.85)
 const DAWN_COLOR := Color(1.0, 0.6, 0.3)
 const TRACKED_COLOR := Color(1.0, 0.1, 0.05)
 const NUMBER_FACE := Color(1.0, 0.86, 0.15)
@@ -369,6 +371,17 @@ func _draw_hunter(hunter: HunterKit, size: Vector2, font: Font) -> void:
 		rarity.color if rarity != null and hunter.loadout.weapon.weapon != null else Color.WHITE
 	)
 	_canvas.draw_string(font, right, weapon_line(hunter), HORIZONTAL_ALIGNMENT_RIGHT, 400, 16, tint)
+	if shows_aim_hint(hunter):
+		var hint_at := Vector2(size.x - 408, size.y - 54)
+		_canvas.draw_string(
+			font,
+			hint_at,
+			Text.t("VERSUS_AIM_HINT"),
+			HORIZONTAL_ALIGNMENT_RIGHT,
+			400,
+			10,
+			HINT_COLOR
+		)
 	if hunter.laser != null:
 		var battery := Rect2(size.x - 88, size.y - 64, 80, 3)
 		_canvas.draw_rect(battery, BAR_BACK)
@@ -409,6 +422,19 @@ func _draw_prompt(text: String, ratio: float, size: Vector2, font: Font) -> void
 	_canvas.draw_rect(bar, BAR_BACK)
 	bar.size.x *= clampf(ratio, 0.0, 1.0)
 	_canvas.draw_rect(bar, STAMINA_COLOR)
+
+
+## True when the HUD reminds the player that right click aims (T-416): a
+## gun that aims in hand, standing, not aiming yet.
+static func shows_aim_hint(hunter: HunterKit) -> bool:
+	var gun := hunter.loadout.gun()
+	return (
+		hunter.body is Player
+		and gun != null
+		and gun.zoom_fov > 0.0
+		and hunter.vitals.is_standing()
+		and not hunter.aiming
+	)
 
 
 ## What the hunted holds, for the HUD: its weapon and ammo (clip / spare),
