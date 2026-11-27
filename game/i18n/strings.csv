@@ -331,6 +331,11 @@ VERSUS_KNEEL,À genoux !
 VERSUS_DOWN,À terre
 VERSUS_DOWN_TIME,À terre : %d s
 VERSUS_OUT,Hors combat
+VERSUS_OUT_TERMINAL,"Hors combat : un coéquipier peut te ramener à une borne de retour"
+VERSUS_DOWN_SYRINGE_1,"À terre : %d s, {gadget_1} : seringue"
+VERSUS_DOWN_SYRINGE_2,"À terre : %d s, {gadget_2} : seringue"
+VERSUS_SYRINGE_GOING,Seringue d'adrénaline…
+VERSUS_TERMINAL,Maintenir {interact} : ramener un coéquipier
 VERSUS_REVIVE,Maintenir {interact} : relever
 VERSUS_BEING_REVIVED,On vous relève
 VERSUS_FINISH,Maintenir {interact} : achever
@@ -345,6 +350,7 @@ VERSUS_PHASE_BANNER,Le monstre passe en phase %d : %s
 VERSUS_DOWN_BANNER,Un chassé est à terre !
 VERSUS_REVIVED_BANNER,Un chassé est relevé
 VERSUS_OUT_BANNER,Un chassé est éliminé
+VERSUS_BACK_BANNER,Un chassé revient au combat
 VERSUS_TRACKED,Traqué : les chassés vous voient
 VERSUS_END_DAWN,"Le temps est écoulé, la créature survit"
 VERSUS_BOSS_WIN_YOU,Vous avez gagné : plus aucun chassé debout
@@ -390,6 +396,7 @@ VERSUS_RARITY_RARE,Rare
 VERSUS_RARITY_EPIC,Épique
 VERSUS_RARITY_LEGENDARY,Légendaire
 VERSUS_ITEM_MEDKIT,Trousse
+VERSUS_ITEM_SYRINGE,Seringue d'adrénaline
 VERSUS_ITEM_FIRECRACKER,Pétards
 VERSUS_ITEM_SMOKE,Fumigène
 VERSUS_ITEM_AMMO,Boîte de munitions

@@ -8,20 +8,23 @@ extends RefCounted
 ## the room) and sent as it is to a client (VersusNet).
 
 
-## A hunted's prompt: out, down (being revived?), a teammate to revive, a
-## chest to open or take from.
+## A hunted's prompt: out (a terminal left?), down (being revived? a
+## syringe?), a teammate to revive, a return terminal to work, a chest to
+## open or take from.
 static func of_hunter(kit: HunterKit) -> Array:
 	var mode := kit.mode
+	var terminals := mode.terminals
 	if kit.vitals.is_out():
+		if terminals != null and terminals.ready_count() > 0:
+			return ["VERSUS_OUT_TERMINAL", null, -1.0]
 		return ["VERSUS_OUT", null, -1.0]
 	if kit.vitals.is_down():
-		for other in mode.hunters:
-			if other.revive.target == kit:
-				return ["VERSUS_BEING_REVIVED", null, other.revive.ratio(other.revive_time())]
-		return ["VERSUS_DOWN_TIME", ceili(kit.vitals.down_left), -1.0]
+		return _of_downed(kit)
 	var reach := mode.settings.revive_reach
 	if DownedHold.nearest(mode.hunters, kit.body.global_position, reach, kit) != null:
 		return ["VERSUS_REVIVE", null, kit.revive.ratio(kit.revive_time())]
+	if terminals != null and terminals.first_out() != null and terminals.in_reach(kit) != null:
+		return ["VERSUS_TERMINAL", null, maxf(terminals.ratio_of(kit), 0.0)]
 	var chest := kit.chest if kit.chest != null else kit.chest_in_reach()
 	if chest == null or (chest.is_open and chest.item == null):
 		return []
@@ -29,6 +32,21 @@ static func of_hunter(kit: HunterKit) -> Array:
 	if chest.is_open:
 		return ["VERSUS_CHEST_TAKE", chest.item.name_key, ratio]
 	return ["VERSUS_CHEST_OPEN", null, ratio]
+
+
+## A downed hunted's prompt: being revived, its syringe (T-414), the time
+## it has left.
+static func _of_downed(kit: HunterKit) -> Array:
+	for other in kit.mode.hunters:
+		if other.revive.target == kit:
+			return ["VERSUS_BEING_REVIVED", null, other.revive.ratio(other.revive_time())]
+	if kit.syringe.is_going():
+		return ["VERSUS_SYRINGE_GOING", null, kit.syringe.ratio(kit.mode.settings)]
+	var slot := SyringeShot.slot_of(kit)
+	if slot >= 0:
+		var key := "VERSUS_DOWN_SYRINGE_1" if slot == 0 else "VERSUS_DOWN_SYRINGE_2"
+		return [key, ceili(kit.vitals.down_left), -1.0]
+	return ["VERSUS_DOWN_TIME", ceili(kit.vitals.down_left), -1.0]
 
 
 ## The boss's prompt: a downed hunted to finish.

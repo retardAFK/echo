@@ -48,6 +48,10 @@ const VIEWS := [
 	# T-413: the boss's fireball flying at the player, then bursting by it.
 	["joueur_feu", Vector3(140, 0, 96), Vector3(152, 1.5, 88)],
 	["joueur_feu_boum", Vector3(140, 0, 96), Vector3(152, 1.5, 88)],
+	# T-414: a teammate out, the return terminal lit before the player; the
+	# player downed with a syringe.
+	["joueur_borne", Vector3(113.4, 0, 114.5), Vector3(112, 1.2, 116)],
+	["joueur_seringue", Vector3(100, 0, 118), Vector3(130, 1.5, 95)],
 	# T-406: the zone after its second step, the player outside it.
 	["joueur_zone", Vector3(96, 0, 132), Vector3(110, 3.0, 110)],
 ]
@@ -143,6 +147,8 @@ func _stand_player(map: Node, feet: Vector3, target: Vector3, view_name: String)
 			Input.action_release("scan")
 	if view_name == "joueur_coffres":
 		_open_chests(versus, feet, target)
+	if view_name.contains("_borne") or view_name.contains("_seringue"):
+		_second_chances(versus, view_name)
 	if view_name == "joueur_zone" and versus.zone != null:
 		var settings := versus.settings
 		versus.rules.clock = settings.zone_step_times[1] + settings.zone_shrink_time + 1.0
@@ -158,6 +164,35 @@ func _open_chests(versus: VersusMode, feet: Vector3, target: Vector3) -> void:
 		var chest := versus.add_chest(at, versus.item(guns[rarity], rarity))
 		chest.look_at(feet, Vector3.UP)
 		chest.open(null, versus.settings)
+
+
+## T-414: an AI teammate out (the terminals light up), or the player
+## downed with a syringe in its first tool slot.
+func _second_chances(versus: VersusMode, view_name: String) -> void:
+	versus.boss.body.global_position = Vector3(60, 0, 0)  # Out of the way.
+	versus.boss.body.set_physics_process(false)
+	versus.boss.set_physics_process(false)
+	if view_name.contains("_seringue"):
+		var player := versus.local_hunter()
+		player.equip(versus.item(&"syringe"))
+		versus.rules.hunted.append(HuntedVitals.new(versus.settings))  # Not over.
+		player.take_blow(versus.settings.hunted_health)
+		return
+	var mate: HunterKit
+	for kit in versus.hunters:
+		if kit != versus.local_hunter():
+			mate = kit
+	if mate == null:  # Solo: a teammate of its own, out of sight.
+		var body := CharacterBody3D.new()
+		versus.add_child(body)
+		body.global_position = Vector3(0, -40, 0)
+		mate = HunterKit.new(versus)
+		body.add_child(mate)
+		mate.set_physics_process(false)
+		versus.hunters.append(mate)
+		versus.rules.hunted.append(mate.vitals)
+	mate.vitals.revives_left = 0
+	mate.vitals.hurt(99)
 
 
 ## The boss throws a fireball at the player (T-413): aimed at its chest,

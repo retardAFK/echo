@@ -98,6 +98,7 @@ func test_a_versus_in_the_cite_takes_place_in_the_arena() -> void:
 	assert_almost_eq(to_hall[-1].distance_to(TOWER_HALL), 0.0, 1.0, "the tower is open (S-025)")
 	var targets: Array[Vector3] = [_arena().boss_spawn]
 	targets.append_array(_arena().chest_spots)
+	targets.append_array(_arena().terminal_spots)
 	for i in _arena().hunted_spawns.size():
 		targets.append(_arena().hunted_spawn(i))
 	for target in targets:

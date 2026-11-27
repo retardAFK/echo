@@ -33,7 +33,10 @@ const GUN_SOUNDS := {
 	&"assault_rifle": &"ar_shot",
 }
 ## The banners that come with a sound (VersusMode.announce).
-const BANNER_SOUNDS := {"VERSUS_ZONE_SOON": &"zone_warning"}
+const BANNER_SOUNDS := {
+	"VERSUS_ZONE_SOON": &"zone_warning",
+	"VERSUS_BACK_BANNER": &"chest_open",  # A teammate back (T-414).
+}
 ## How far a sound in the world carries (meters), and how many play at once.
 const RANGE := 70.0
 const VOICES := 12
