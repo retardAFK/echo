@@ -359,6 +359,8 @@ VERSUS_RELOADING,Rechargement…
 VERSUS_RAGE,Rage
 VERSUS_FURY,FUREUR
 VERSUS_FURY_READY,Fureur prête : R
+VERSUS_FIREBALL_READY,Boule de feu prête : clic droit
+VERSUS_FIREBALL_WAIT,Boule de feu : %d s
 VERSUS_HUNTED_WIN,Les chassés ont vaincu le monstre
 VERSUS_BOSS_WIN,Le monstre a gagné
 VERSUS_TEST_HINT,Versus (prototype) · clic gauche : tirer · R : recharger · Espace : roulade · F6 : jouer le monstre · Échap : quitter

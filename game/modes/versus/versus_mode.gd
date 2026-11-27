@@ -46,6 +46,8 @@ var link: VersusNet
 var held_guns: HeldGuns
 ## Its sounds and its music (T-410), or null.
 var sounds: VersusSounds
+## The boss's fireballs (T-413), or null.
+var fire: BossFire
 var music: VersusMusic
 ## Client side: where the room says the tracked boss is (Q4), or null.
 var tracked_at: Variant = null
@@ -101,6 +103,8 @@ func _setup() -> void:
 	add_child(held_guns)
 	sounds = VersusSounds.new(self)
 	add_child(sounds)
+	fire = BossFire.new(self)
+	add_child(fire)
 	music = VersusMusic.new(self)
 	add_child(music)
 	if mirror:

@@ -50,6 +50,8 @@ const CLASSES: Array[String] = [
 	"ArenaBuilder",
 	"FallRules",
 	"FallWatch",
+	"BossFire",
+	"Fireball",
 ]
 ## The only files outside the module allowed to name it (docs/MODULES.md).
 const ALLOWED: Array[String] = [
