@@ -50,6 +50,12 @@ extends Resource
 @export_range(1.0, 10.0, 0.1, "suffix:m") var view_distance: float = 3.0
 @export_range(1.0, 15.0, 0.1, "suffix:m") var boss_view_distance: float = 4.5
 @export_range(10.0, 500.0, 5.0, "suffix:m") var aim_reach: float = 150.0
+## Aiming, right click held (T-412): the camera comes this close behind the
+## head, the hunted walks this much slower, and the mouse turns this much
+## slower for each degree of zoom (the gun's zoom_fov over view_fov).
+@export_range(0.3, 3.0, 0.1, "suffix:m") var aim_view_distance: float = 1.6
+@export_range(0.2, 1.0, 0.05) var aim_speed_scale: float = 0.6
+@export_range(30.0, 120.0, 1.0, "suffix:°") var view_fov: float = 75.0
 
 @export_group("Hunted")
 ## Hit points of a hunted (Q14).

@@ -36,15 +36,28 @@ const VIEWS := [
 	["joueur_1p_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
 	["joueur_1p_fusil_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
 	["joueur_1p_pompe_tir", Vector3(140, 0, 96), Vector3(143.5, 1.5, 94)],
+	# T-412 and T-413: aiming (right click held), the assault rifle.
+	["joueur_assaut_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	["joueur_vise_assaut_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	["joueur_1p_assaut_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	["joueur_1p_vise_assaut_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	["joueur_1p_vise_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	["joueur_1p_vise_pompe_tir", Vector3(140, 0, 96), Vector3(143.5, 1.5, 94)],
+	["joueur_vise_fusil_tir", Vector3(130, 0, 104), Vector3(152, 1.5, 88)],
+	["joueur_1p_vise_fusil_tir", Vector3(130, 0, 104), Vector3(152, 1.5, 88)],
 	# T-406: the zone after its second step, the player outside it.
 	["joueur_zone", Vector3(96, 0, 132), Vector3(110, 3.0, 110)],
 ]
 ## The gun a firing view holds, by a word of its name; else the first one.
-const GUNS := {"_fusil": &"precision_rifle", "_pompe": &"sonic_shotgun"}
+const GUNS := {
+	"_fusil": &"precision_rifle", "_pompe": &"sonic_shotgun", "_assaut": &"assault_rifle"
+}
 ## Views whose name ends with this fire at the boss while they settle.
 const FIRE_SUFFIX := "_tir"
 ## Views whose name has this are seen in the first person (T-409).
 const FIRST_PERSON := "_1p"
+## Views whose name has this aim, right click held (T-412).
+const AIMING := "_vise"
 ## Views whose name starts with this are seen through the player's camera.
 const PLAYER_PREFIX := "joueur_"
 
@@ -115,7 +128,7 @@ func _stand_player(map: Node, feet: Vector3, target: Vector3, view_name: String)
 				gun = versus.item(GUNS[word], 2)
 		versus.local_hunter().equip(gun)
 		versus.local_hunter()._cooldown = 0.0  # Fires at once (time is slowed).
-		if gun.weapon.zoom_fov > 0.0:
+		if view_name.contains(AIMING):
 			Input.action_press("scan")
 		else:
 			Input.action_release("scan")

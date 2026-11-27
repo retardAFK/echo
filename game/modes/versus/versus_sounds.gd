@@ -13,6 +13,7 @@ const STREAMS := {
 	&"smg_shot": preload("res://assets/audio/versus/smg_shot.wav"),
 	&"rifle_shot": preload("res://assets/audio/versus/rifle_shot.wav"),
 	&"shotgun_shot": preload("res://assets/audio/versus/shotgun_shot.wav"),
+	&"ar_shot": preload("res://assets/audio/versus/ar_shot.wav"),
 	&"hit": preload("res://assets/audio/versus/hit.wav"),
 	&"hit_face": preload("res://assets/audio/versus/hit_face.wav"),
 	&"reload": preload("res://assets/audio/versus/reload.wav"),
@@ -26,6 +27,7 @@ const GUN_SOUNDS := {
 	&"light_smg": &"smg_shot",
 	&"precision_rifle": &"rifle_shot",
 	&"sonic_shotgun": &"shotgun_shot",
+	&"assault_rifle": &"ar_shot",
 }
 ## The banners that come with a sound (VersusMode.announce).
 const BANNER_SOUNDS := {"VERSUS_ZONE_SOON": &"zone_warning"}
