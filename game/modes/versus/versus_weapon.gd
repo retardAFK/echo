@@ -42,9 +42,6 @@ extends Resource
 ## How far its shots stray while aiming, in degrees (spread is from the
 ## hip).
 @export_range(0.0, 20.0, 0.1, "suffix:°") var aim_spread: float = 0.0
-## Aiming looks through a scope (the precision rifle): the HUD's lens in
-## place of the gun.
-@export var scope := false
 ## How far a shot of all its pellets pushes the boss back, in meters (the
 ## sonic shotgun, T-404); a share of it for a share of the pellets.
 @export_range(0.0, 20.0, 0.5, "suffix:m") var push: float = 0.0

@@ -245,14 +245,14 @@ func test_right_click_aims_every_gun_closer_steadier_and_slower() -> void:
 	assert_almost_eq(player.settings.walk_speed, walk, 0.01, "its pace back")
 
 
-func test_the_precision_rifle_aims_through_a_scope() -> void:
+func test_the_precision_rifle_aims_closest() -> void:
 	var versus: VersusMode = await _open()
 	var hunter := versus.local_hunter()
 	hunter.equip(versus.item(&"precision_rifle"))
 	var gun := hunter.loadout.gun()
-	assert_true(gun.scope)
-	assert_eq(gun.spread_when(true), 0.0, "dead on through the scope")
-	assert_gt(gun.spread, 0.0, "not from the hip")
+	assert_eq(gun.spread_when(true), 0.0, "dead on")
+	for id: StringName in [&"light_smg", &"assault_rifle", &"sonic_shotgun"]:
+		assert_lt(gun.zoom_fov, versus.item(id).weapon.zoom_fov, "closer than %s" % id)
 	versus.view.first_person = true
 	Input.action_press("scan")
 	await wait_seconds(0.5)
@@ -260,13 +260,9 @@ func test_the_precision_rifle_aims_through_a_scope() -> void:
 	var arms := hunter.view_model.get_children().filter(
 		func(node: Node) -> bool: return node is MeshInstance3D and node.visible
 	)
-	assert_eq(arms.size(), 0, "the gun hides behind the lens")
+	assert_eq(arms.size(), 2, "the gun stays in sight under the holographic sight")
 	Input.action_release("scan")
-	await wait_seconds(0.5)
-	arms = hunter.view_model.get_children().filter(
-		func(node: Node) -> bool: return node is MeshInstance3D and node.visible
-	)
-	assert_eq(arms.size(), 2)
+	await wait_seconds(0.3)
 
 
 func test_downed_while_aiming_it_crawls() -> void:
