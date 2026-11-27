@@ -18,3 +18,5 @@ reach = 120.0
 noise_range = 20.0
 tracer_color = Color(0.4, 1, 0.95, 1)
 shake = 0.15
+zoom_fov = 58.0
+aim_spread = 0.8

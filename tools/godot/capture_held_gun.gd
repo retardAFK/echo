@@ -6,7 +6,9 @@ extends Node
 ##     res://tools/godot/capture_held_gun.tscn -- [out_dir]
 
 const HUNTED_BODY := preload("res://game/entities/hunted_body/hunted_body.tscn")
-const GUNS: Array[StringName] = [&"light_smg", &"precision_rifle", &"sonic_shotgun"]
+const GUNS: Array[StringName] = [
+	&"light_smg", &"precision_rifle", &"sonic_shotgun", &"assault_rifle"
+]
 ## Camera eye, by view name (the body stands at the origin, facing -Z).
 const VIEWS := {
 	"face": Vector3(1.6, 1.5, -2.2),

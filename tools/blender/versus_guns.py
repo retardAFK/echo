@@ -1,5 +1,5 @@
 """The Versus arcade guns (spec S-025, T-409): light machine gun, precision
-flare rifle, sonic shotgun. Chunky, bright, toy-like shapes (an arcade
+flare rifle, sonic shotgun, and the assault rifle (T-413). Chunky, bright, toy-like shapes (an arcade
 shooter, not horror), low poly with small bevels. Each gun is exported as a
 glTF to assets/models/versus/<id>.glb and rendered for review.
 
@@ -11,7 +11,7 @@ Conventions, read by game/modes/versus/gun_model.gd:
 - An empty named "muzzle" marks the end of the barrel (where tracers start).
 
 Run (bpy from pip, see tools/blender/README or the asset pipeline notes):
-  python tools/blender/versus_guns.py <render_dir> [export_dir]
+  python tools/blender/versus_guns.py <render_dir> [export_dir] [gun_id]
 """
 
 import math
@@ -196,10 +196,46 @@ def sonic_shotgun(color):
     muzzle(0.47, z)
 
 
+def assault_rifle(color):
+    """Mid-length, coral and graphite, a red dot sight to aim down (T-413)."""
+    coral = mat("coral", (0.95, 0.3, 0.26), 0.4)
+    dark = mat("dark", (0.12, 0.13, 0.16), 0.55)
+    grey = mat("grey", (0.62, 0.64, 0.68), 0.35, 0.5)
+    lens = mat("lens", (1.0, 0.15, 0.1), 0.2, 0.0, 2.0)
+    lit = glow(color)
+    z = 0.075
+    box((0, 0.08, z), (0.064, 0.3, 0.08), coral, bevel=0.016)  # Receiver.
+    box((0, 0.06, z + 0.046), (0.03, 0.22, 0.014), dark, bevel=0.003)  # Top rail.
+    box((0, 0.33, z), (0.07, 0.22, 0.07), dark, bevel=0.014)  # Handguard.
+    for y in (0.27, 0.32, 0.37):
+        for side in (-1, 1):
+            box((side * 0.036, y, z), (0.004, 0.03, 0.014), lit, bevel=0)  # Vents.
+    box((0, 0.33, z + 0.036), (0.022, 0.2, 0.006), lit, bevel=0)  # Top glow strip.
+    cyl((0, 0.5, z), 0.016, 0.14, grey)  # Barrel.
+    cyl((0, 0.575, z), 0.026, 0.04, dark)  # Flash hider.
+    cyl((0, 0.597, z), 0.02, 0.006, lit, bevel=0)
+    # Red dot sight: a short tube on the rail, its lens glowing red.
+    box((0, 0.06, z + 0.062), (0.04, 0.06, 0.018), dark, bevel=0.004)
+    cyl((0, 0.06, z + 0.095), 0.024, 0.07, dark, verts=14)
+    cyl((0, 0.097, z + 0.095), 0.018, 0.004, lens, verts=14, bevel=0)
+    cyl((0, 0.024, z + 0.095), 0.026, 0.008, lit, verts=14, bevel=0)
+    # A long curved magazine, in two tilted pieces.
+    box((0, 0.15, 0.005), (0.038, 0.062, 0.1), dark, rot=(0.15, 0, 0), bevel=0.008)
+    box((0, 0.165, -0.065), (0.038, 0.062, 0.07), dark, rot=(0.4, 0, 0), bevel=0.008)
+    box((0, 0.18, -0.1), (0.042, 0.066, 0.016), coral, rot=(0.4, 0, 0), bevel=0.004)
+    box((0, 0.0, -0.01), (0.042, 0.05, 0.11), dark, rot=(-0.28, 0, 0), bevel=0.01)  # Grip.
+    box((0, 0.05, 0.018), (0.012, 0.05, 0.03), dark, bevel=0.003)  # Trigger guard.
+    box((0, -0.13, z - 0.005), (0.05, 0.16, 0.06), dark, bevel=0.012)  # Stock.
+    box((0, -0.22, z - 0.02), (0.056, 0.03, 0.1), coral, bevel=0.01)  # Butt pad.
+    box((0, 0.36, z - 0.06), (0.03, 0.04, 0.07), dark, rot=(-0.15, 0, 0), bevel=0.006)  # Fore grip.
+    muzzle(0.6, z)
+
+
 GUNS = {
     "light_smg": (light_smg, 1.0, "base", 0.12),
     "precision_rifle": (precision_rifle, 1.8, "legendaire", 0.22),
     "sonic_shotgun": (sonic_shotgun, 1.3, "epique", 0.17),
+    "assault_rifle": (assault_rifle, 1.5, "rare", 0.18),
 }
 
 
@@ -266,7 +302,10 @@ def export(gun_id):
 
 
 def main():
+    only = sys.argv[3] if len(sys.argv) > 3 else None  # One gun id, or all.
     for gun_id, (build, dist, rarity, middle) in GUNS.items():
+        if only and gun_id != only:
+            continue
         reset()
         build(RARITY[rarity])
         print("TRIS", gun_id, tris())
@@ -276,6 +315,8 @@ def main():
             reset()
             build(RARITY["base"])
             export(gun_id)
+    if only:
+        return
     # The light machine gun in each rarity, side by side.
     reset()
     for i, rarity in enumerate(("commune", "rare", "epique", "legendaire")):

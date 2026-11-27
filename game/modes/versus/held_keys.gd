@@ -19,6 +19,7 @@ func update(commands: PlayerCommands) -> void:
 		PlayerCommands.FLAG_DODGE,
 		PlayerCommands.FLAG_TOOL_1,
 		PlayerCommands.FLAG_TOOL_2,
+		PlayerCommands.FLAG_SCAN,  # Right click: aims (T-412).
 	]:
 		if commands.is_held(flag):
 			_now |= flag

@@ -9,6 +9,8 @@ extends CanvasLayer
 ## what holding interact does (open a chest, revive, finish, Q5 and Q30)
 ## and how far along it is. At the top, the clock and dawn near (Q3); a
 ## boss that hides too long is shown in red to the hunted (Q4).
+## Aiming (T-412): a red dot in a ring in the middle, or, with a scope, its
+## lens: the screen dark around a circle, a fine cross and a red dot.
 
 const THEME := preload("res://game/ui/theme/echo_theme.tres")
 const BAR_COLOR := Color(0.62, 0.08, 0.06)
@@ -22,6 +24,11 @@ const TRACKED_COLOR := Color(1.0, 0.1, 0.05)
 const NUMBER_FACE := Color(1.0, 0.86, 0.15)
 const BANNER_BACK := Color(0.08, 0.05, 0.2, 0.75)
 const ZONE_COLOR := Color(0.75, 0.45, 1.0)
+const SIGHT_DOT := Color(1.0, 0.18, 0.12)
+const SIGHT_RING := Color(1.0, 1.0, 1.0, 0.85)
+const SCOPE_DARK := Color(0.02, 0.02, 0.03)
+## The lens of a scope: its radius, as a share of the screen's height.
+const SCOPE_RADIUS := 0.44
 ## Seconds a banner stays.
 const BANNER_TIME := 2.5
 ## Steady hits (the UV laser) add up into the same number for this long.
@@ -131,6 +138,9 @@ func _draw_hud() -> void:
 	var health := mode.boss_health()
 	if health == null:
 		return
+	var hunter := mode.local_hunter()
+	if hunter != null:
+		_draw_sight(hunter, size)  # Under the rest: a scope's lens hides the world only.
 	# The boss bar (Q7, Q8), bottom middle.
 	var width := size.x * 0.5
 	var bar := Rect2(Vector2((size.x - width) * 0.5, size.y - 56.0), Vector2(width, 10.0))
@@ -146,7 +156,6 @@ func _draw_hud() -> void:
 	_draw_clock(size, font)
 	_draw_banner(size, font)
 	_draw_zone(size, font)
-	var hunter := mode.local_hunter()
 	if hunter != null:
 		_draw_hunter(hunter, size, font)
 		_draw_tracked(size)
@@ -174,6 +183,43 @@ func _draw_hud() -> void:
 		_canvas.draw_string(
 			font, Vector2(0, size.y * 0.4), _end_text, HORIZONTAL_ALIGNMENT_CENTER, size.x, 32
 		)
+
+
+## While it aims (T-412): a red dot in a ring, or a scope's lens.
+func _draw_sight(hunter: HunterKit, size: Vector2) -> void:
+	var zoom := mode.view.zoom() if mode.view != null else 0.0
+	var gun := hunter.loadout.gun()
+	if zoom <= 0.0 or gun == null:
+		return
+	var c := size * 0.5
+	if gun.scope:
+		_draw_scope(c, size, clampf((zoom - 0.6) / 0.3, 0.0, 1.0))
+		return
+	var alpha := smoothstep(0.3, 1.0, zoom)
+	_canvas.draw_arc(c, 13.0, 0.0, TAU, 32, Color(SIGHT_RING, SIGHT_RING.a * alpha), 1.5, true)
+	_canvas.draw_circle(c, 3.0, Color(SIGHT_DOT, alpha))
+
+
+## A scope's lens: dark all around a circle, a fine black cross with its
+## thick ends, a red dot in the middle; it fades in as the gun comes up.
+func _draw_scope(c: Vector2, size: Vector2, alpha: float) -> void:
+	if alpha <= 0.0:
+		return
+	var radius := size.y * SCOPE_RADIUS
+	var dark := Color(SCOPE_DARK, alpha)
+	# One thick ring from the lens's edge to past the screen's corners.
+	var reach := size.length() * 0.5
+	_canvas.draw_arc(c, radius + reach * 0.5, 0.0, TAU, 128, dark, reach + 2.0, true)
+	var line := Color(0.0, 0.0, 0.0, 0.9 * alpha)
+	for axis: Vector2 in [Vector2.RIGHT, Vector2.DOWN]:
+		_canvas.draw_line(c - axis * radius, c + axis * radius, line, 1.5)
+		for side in [-1.0, 1.0]:
+			var thick_from: Vector2 = c + axis * side * radius * 0.35
+			_canvas.draw_line(thick_from, c + axis * side * radius, line, 5.0)
+	for mark in range(1, 4):
+		var tick := Vector2(0, mark * radius * 0.08)
+		_canvas.draw_line(c + tick + Vector2(-5, 0), c + tick + Vector2(5, 0), line, 1.5)
+	_canvas.draw_circle(c, 2.5, Color(SIGHT_DOT, alpha))
 
 
 ## The damage numbers (S-025, Q4): they jump up from where the shot hit,

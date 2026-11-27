@@ -76,6 +76,32 @@ def rifle_shot(seconds=1.0):
     return 1.0 * crack + 1.0 * boom + 1.6 * whoosh + hiss + zing
 
 
+def ar_shot(seconds=0.3):
+    """The assault rifle (T-413): heavier than the machine gun, a short tail."""
+    crack = noise(seconds) * decay(seconds, 0.008)
+    zap = sweep(seconds, 1500, 260, 4) * decay(seconds, 0.05)
+    thump = sweep(seconds, 130, 50, 4) * decay(seconds, 0.07)
+    tail = lowpass(noise(seconds), 1200) * decay(seconds, 0.09) * 0.5
+    return 0.8 * crack + 0.6 * zap + 1.1 * thump + tail
+
+
+def fireball_cast(seconds=0.6):
+    """The boss throws a fireball (T-413): a roaring whoosh that rises."""
+    t = time(seconds)
+    roar = lowpass(noise(seconds), 900) * np.minimum(1, t / 0.08) * decay(seconds, 0.22)
+    rise = sweep(seconds, 90, 260, 1.5) * np.minimum(1, t / 0.05) * decay(seconds, 0.25)
+    crackle = (noise(seconds) - lowpass(noise(seconds), 2500)) * decay(seconds, 0.3) * 0.25
+    return 1.4 * roar + 0.6 * rise + crackle
+
+
+def fireball_boom(seconds=1.3):
+    """A fireball bursts: a deep boom, then fire crackling out."""
+    boom = sweep(seconds, 120, 35, 3) * decay(seconds, 0.25)
+    blast = lowpass(noise(seconds), 600) * decay(seconds, 0.18)
+    crackle = (noise(seconds) - lowpass(noise(seconds), 2000)) * decay(seconds, 0.45) * 0.35
+    return 1.2 * boom + 1.3 * blast + crackle
+
+
 def shotgun_shot(seconds=0.7):
     t = time(seconds)
     wobble = 1 + 0.35 * np.sin(2 * np.pi * 22 * t)
@@ -153,6 +179,10 @@ SOUNDS = {
     "chest_open": (chest_open, 0.6),
     "flash": (flash, 0.8),
     "zone_warning": (zone_warning, 0.6),
+    # Last: the sounds above keep their random draws.
+    "ar_shot": (ar_shot, 0.85),
+    "fireball_cast": (fireball_cast, 0.8),
+    "fireball_boom": (fireball_boom, 0.95),
 }
 
 
