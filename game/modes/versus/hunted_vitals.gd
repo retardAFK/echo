@@ -1,12 +1,14 @@
 class_name HuntedVitals
 extends RefCounted
 ## A hunted's health in the Versus mode (spec S-024, Q5 and Q14, T-371):
-## hit points, downed, revived, finished, out. Pure; the hunted's node holds
-## one and calls update() each frame.
+## hit points, downed, revived, finished, out, brought back (T-414). Pure;
+## the hunted's node holds one and calls update() each frame.
 
 signal downed
 signal revived
 signal out
+## Back from out, at a return terminal (T-414).
+signal back
 
 enum State { STANDING, DOWN, OUT }
 
@@ -74,6 +76,19 @@ func heal(points: int) -> bool:
 	if not is_standing() or health >= settings.hunted_health:
 		return false
 	health = mini(health + points, settings.hunted_health)
+	return true
+
+
+## A teammate brought it back at a return terminal (T-414): out, it
+## stands again with terminal_health points and terminal_revives revives.
+func bring_back() -> bool:
+	if not is_out():
+		return false
+	state = State.STANDING
+	health = settings.terminal_health
+	revives_left = settings.terminal_revives
+	down_left = 0.0
+	back.emit()
 	return true
 
 

@@ -10,7 +10,7 @@ enum Slot { WEAPON, TOOL, AMMO }
 
 ## &"light_smg", &"precision_rifle", &"sonic_shotgun", &"assault_rifle",
 ## &"uv_laser",
-## &"medkit", &"flash_grenade", &"firecracker", &"smoke", &"ammo".
+## &"medkit", &"syringe", &"flash_grenade", &"firecracker", &"smoke", &"ammo".
 @export var id: StringName
 @export var slot := Slot.TOOL
 ## Key of its name in strings.csv.

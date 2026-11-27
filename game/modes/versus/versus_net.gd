@@ -28,12 +28,16 @@ extends Node
 ##   [FIREBALL, position, velocity]: the boss threw a fireball (T-413),
 ##   the clients show a harmless copy;
 ##   [BLAST, point]: a fireball burst there (BossFire.burst);
+##   [TERMINALS, [[used, lit], ...]]: the return terminals (T-414), when
+##   they change;
 ##   [LIGHTS_OUT]: the cry of phase 2 (Q8);
 ##   [LEAP, target]: the boss leaps, its shadow shows there (Q9);
 ##   [END, winner, dawn, clock, rows, mvp seat]: the end screen (Q28), rows
 ##   as VersusStats.rows gives them.
 
-enum Event { CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END, TRACER, FLASH, BANNER, GUN, FIREBALL, BLAST }
+enum Event {
+	CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END, TRACER, FLASH, BANNER, GUN, FIREBALL, BLAST, TERMINALS
+}
 
 var mode: VersusMode
 var net: NetGame
@@ -106,11 +110,14 @@ static func hunter_state(kit: HunterKit) -> Array:
 	]
 
 
-## The events a player whose map is ready needs: the chests as they are.
+## The events a player whose map is ready needs: the chests, the guns in
+## hands and the return terminals as they are.
 func net_ready_events() -> Array:
 	var events: Array = [[Event.CHESTS, chest_values()]]
 	if mode.held_guns != null:
 		events.append_array(mode.held_guns.events())
+	if mode.terminals != null:
+		events.append([Event.TERMINALS, mode.terminals.values()])
 	return events
 
 
@@ -246,6 +253,8 @@ func apply_net_event(payload: Array) -> void:
 			mode.fire.cast(payload[1], payload[2])
 		Event.BLAST when payload.size() == 2 and mode.fire != null:
 			mode.fire.burst(payload[1])
+		Event.TERMINALS when payload.size() == 2 and mode.terminals != null:
+			mode.terminals.mirror(payload[1])
 		Event.LIGHTS_OUT:
 			mode.put_lights_out()
 		Event.LEAP when payload.size() == 2:

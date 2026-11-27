@@ -16,7 +16,7 @@ extends Resource
 ## That health scaled by the number of hunted: entry n - 1 for n hunted, 1
 ## past the end. Tuned by the simulations (T-408 and T-411, 12 games each):
 ## with 2, 3 and 4 AI hunted the AI boss then wins 58 % of the games.
-@export var boss_health_scales: PackedFloat32Array = [1.0, 0.8, 0.75, 0.45]
+@export var boss_health_scales: PackedFloat32Array = [1.0, 0.7, 0.72, 0.55]
 ## Phases, highest start_ratio first (Q8).
 @export var phases: Array[VersusPhase] = []
 ## Seconds the boss cannot be hurt when a phase starts (Q8, its cry).
@@ -80,6 +80,22 @@ extends Resource
 ## A medkit in a tool slot shortens a revive to this share of its time,
 ## and is spent (Q13).
 @export_range(0.1, 1.0, 0.05) var medkit_revive_factor: float = 0.5
+
+@export_group("Second chances")
+## The adrenaline syringe (T-414): a downed hunted with one in a tool slot
+## presses its key and gets up alone after syringe_time (one revive used,
+## the syringe spent).
+@export_range(0.1, 10.0, 0.1, "suffix:s") var syringe_time: float = 1.5
+## The return terminals (T-414): a standing hunted holds interact
+## terminal_time within terminal_reach of one to bring back a teammate who
+## is out, at the terminal, with terminal_health points and terminal_revives
+## revives; each terminal works once. Its hum is heard terminal_noise_range
+## away.
+@export_range(0.5, 20.0, 0.5, "suffix:s") var terminal_time: float = 4.0
+@export_range(0.5, 5.0, 0.1, "suffix:m") var terminal_reach: float = 2.2
+@export_range(1, 10) var terminal_health: int = 3
+@export_range(0, 5) var terminal_revives: int = 1
+@export_range(0.0, 60.0, 1.0, "suffix:m") var terminal_noise_range: float = 20.0
 
 @export_group("Stamina and dodge")
 ## Seconds of stamina refill from empty to full (Q15).

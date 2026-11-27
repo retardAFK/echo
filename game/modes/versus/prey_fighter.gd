@@ -4,7 +4,8 @@ extends RefCounted
 ## nodes. Its Prey keeps its own legs (it walks, flees the boss and hides as
 ## in the Hunt); HunterKit asks this where to go now and sends it there, and
 ## shoots by itself when it sees the boss.
-## - A downed teammate first, when the boss is far from it (ai_revive_safe).
+## - A downed teammate first, when the boss is far from it (ai_revive_safe);
+##   a lit return terminal counts as one (HunterKit passes it, T-414).
 ## - Unarmed, the nearest chest worth opening; armed, one within
 ##   ai_chest_detour, when the boss is far from it (ai_chest_safe).
 ## - Else, with no teammate within ai_regroup_distance, the nearest
