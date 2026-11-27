@@ -12,6 +12,9 @@
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/precision_rifle.tres" id="i_precision_rifle"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/sonic_shotgun.tres" id="i_sonic_shotgun"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/assault_rifle.tres" id="i_assault_rifle"]
+[ext_resource type="Resource" path="res://game/modes/versus/data/items/pulse_pistol.tres" id="i_pulse_pistol"]
+[ext_resource type="Resource" path="res://game/modes/versus/data/items/burst_rifle.tres" id="i_burst_rifle"]
+[ext_resource type="Resource" path="res://game/modes/versus/data/items/neon_minigun.tres" id="i_neon_minigun"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/flash_grenade.tres" id="i_flash_grenade"]
 [ext_resource type="Script" path="res://game/modes/versus/versus_rarity.gd" id="9_rarity"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/rarities/common.tres" id="r_common"]
@@ -29,6 +32,6 @@
 script = ExtResource("1_settings")
 phases = Array[ExtResource("5_phase")]([ExtResource("2_p1"), ExtResource("3_p2"), ExtResource("4_p3")])
 arenas = Array[ExtResource("6_arena")]([ExtResource("7_tour")])
-items = Array[ExtResource("8_item")]([ExtResource("i_light_smg"), ExtResource("i_precision_rifle"), ExtResource("i_sonic_shotgun"), ExtResource("i_assault_rifle"), ExtResource("i_uv_laser"), ExtResource("i_medkit"), ExtResource("i_syringe"), ExtResource("i_flash_grenade"), ExtResource("i_firecracker"), ExtResource("i_smoke"), ExtResource("i_ammo")])
+items = Array[ExtResource("8_item")]([ExtResource("i_light_smg"), ExtResource("i_precision_rifle"), ExtResource("i_sonic_shotgun"), ExtResource("i_assault_rifle"), ExtResource("i_pulse_pistol"), ExtResource("i_burst_rifle"), ExtResource("i_neon_minigun"), ExtResource("i_uv_laser"), ExtResource("i_medkit"), ExtResource("i_syringe"), ExtResource("i_flash_grenade"), ExtResource("i_firecracker"), ExtResource("i_smoke"), ExtResource("i_ammo")])
 rarities = Array[ExtResource("9_rarity")]([ExtResource("r_common"), ExtResource("r_rare"), ExtResource("r_epic"), ExtResource("r_legendary")])
 first_weapon = ExtResource("i_light_smg")

@@ -49,6 +49,8 @@ var view_model: ViewModel
 ## Where an AI prey goes (T-383).
 var fighter: PreyFighter
 var _cooldown := 0.0
+## Shots of the burst under way still to fire (a burst gun, T-415).
+var _burst_left := 0
 var _reload_left := 0.0
 var _dodge_left := 0.0
 var _dodge_velocity := Vector3.ZERO
@@ -106,6 +108,7 @@ func equip(item: VersusItem) -> VersusItem:
 		if first:
 			loadout.spare_ammo += mode.settings.start_spare_ammo
 	reloading = false
+	_burst_left = 0
 	_let_go_aim()  # Aims again next frame, with the new gun, if still held.
 	if laser != null:
 		laser.queue_free()
@@ -210,6 +213,12 @@ func fire() -> bool:
 		return false
 	clip -= 1
 	_cooldown = gun.fire_interval
+	if gun.burst > 1:  # A burst (T-415): its shots, then a pause.
+		if _burst_left <= 0:
+			_burst_left = gun.burst
+		_burst_left -= 1
+		if _burst_left == 0:
+			_cooldown = gun.burst_pause
 	var from := eye()
 	var strength := power()
 	if gun.flare_speed > 0.0:
@@ -222,6 +231,7 @@ func fire() -> bool:
 	if is_local() and mode.view != null:
 		mode.view.shake(gun.shake)
 	if clip == 0:
+		_burst_left = 0
 		reload()
 	return true
 
@@ -325,6 +335,7 @@ func reload() -> void:
 	if loadout.spare_ammo <= 0:
 		return
 	reloading = true
+	_burst_left = 0
 	_reload_left = gun.reload_time
 
 
@@ -467,6 +478,8 @@ func _fires_now() -> bool:
 	var gun := loadout.gun()
 	if gun != null and gun.automatic:
 		return keys.held(PlayerCommands.FLAG_FIRE)
+	if gun != null and _burst_left > 0:
+		return true  # The rest of the burst goes on its own.
 	return keys.pressed(PlayerCommands.FLAG_FIRE)
 
 

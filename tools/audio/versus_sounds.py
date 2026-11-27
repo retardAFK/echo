@@ -169,6 +169,30 @@ def zone_warning(seconds=1.6):
     return lowpass(out, 3000)
 
 
+def pistol_shot(seconds=0.35):
+    """The pulse pistol (T-415): a bright laser zap that rings."""
+    zap = sweep(seconds, 3200, 600, 3) * decay(seconds, 0.06)
+    ring = sweep(seconds, 1400, 1300, 1) * decay(seconds, 0.1) * 0.3
+    click = noise(seconds) * decay(seconds, 0.005)
+    return 0.9 * zap + ring + 0.5 * click
+
+
+def minigun_shot(seconds=0.12):
+    """The neon minigun (T-415): a short buzzing tick, many a second."""
+    buzz = sweep(seconds, 900, 300, 3) * decay(seconds, 0.03)
+    thump = sweep(seconds, 110, 60, 3) * decay(seconds, 0.03)
+    click = noise(seconds) * decay(seconds, 0.004)
+    return 0.6 * buzz + 0.9 * thump + 0.4 * click
+
+
+def burst_shot(seconds=0.25):
+    """The burst rifle (T-415): a crisp, mid zap."""
+    zap = sweep(seconds, 2600, 420, 4) * decay(seconds, 0.04)
+    thump = sweep(seconds, 150, 60, 4) * decay(seconds, 0.05)
+    crack = noise(seconds) * decay(seconds, 0.006)
+    return 0.8 * zap + 0.9 * thump + 0.6 * crack
+
+
 SOUNDS = {
     "smg_shot": (smg_shot, 0.8),
     "rifle_shot": (rifle_shot, 0.9),
@@ -183,6 +207,9 @@ SOUNDS = {
     "ar_shot": (ar_shot, 0.85),
     "fireball_cast": (fireball_cast, 0.8),
     "fireball_boom": (fireball_boom, 0.95),
+    "pistol_shot": (pistol_shot, 0.8),
+    "minigun_shot": (minigun_shot, 0.7),
+    "burst_shot": (burst_shot, 0.85),
 }
 
 

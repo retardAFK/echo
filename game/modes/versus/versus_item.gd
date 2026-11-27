@@ -9,6 +9,7 @@ extends Resource
 enum Slot { WEAPON, TOOL, AMMO }
 
 ## &"light_smg", &"precision_rifle", &"sonic_shotgun", &"assault_rifle",
+## &"pulse_pistol", &"burst_rifle", &"neon_minigun",
 ## &"uv_laser",
 ## &"medkit", &"syringe", &"flash_grenade", &"firecracker", &"smoke", &"ammo".
 @export var id: StringName

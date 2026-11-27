@@ -48,6 +48,13 @@ const VIEWS := [
 	# T-413: the boss's fireball flying at the player, then bursting by it.
 	["joueur_feu", Vector3(140, 0, 96), Vector3(152, 1.5, 88)],
 	["joueur_feu_boum", Vector3(140, 0, 96), Vector3(152, 1.5, 88)],
+	# T-415: the new guns firing, and chests inside the buildings.
+	["joueur_rafale_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	["joueur_1p_minigun_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	["joueur_1p_vise_pistolet_tir", Vector3(140, 0, 96), Vector3(150, 1.5, 90)],
+	["joueur_coffre_tour", Vector3(103, 0, 103), Vector3(98, 0.4, 100)],
+	["joueur_coffre_centre", Vector3(145, 0, 76), Vector3(150, 0.4, 70)],
+	["joueur_coffre_parking", Vector3(145, -3, 101), Vector3(150, -2.6, 106)],
 	# T-414: a teammate out, the return terminal lit before the player; the
 	# player downed with a syringe.
 	["joueur_borne", Vector3(113.4, 0, 114.5), Vector3(112, 1.2, 116)],
@@ -57,7 +64,12 @@ const VIEWS := [
 ]
 ## The gun a firing view holds, by a word of its name; else the first one.
 const GUNS := {
-	"_fusil": &"precision_rifle", "_pompe": &"sonic_shotgun", "_assaut": &"assault_rifle"
+	"_fusil": &"precision_rifle",
+	"_pompe": &"sonic_shotgun",
+	"_assaut": &"assault_rifle",
+	"_pistolet": &"pulse_pistol",
+	"_rafale": &"burst_rifle",
+	"_minigun": &"neon_minigun",
 }
 ## Views whose name ends with this fire at the boss while they settle.
 const FIRE_SUFFIX := "_tir"
@@ -133,6 +145,8 @@ func _stand_player(map: Node, feet: Vector3, target: Vector3, view_name: String)
 	)
 	if versus.boss != null and at_boss:
 		versus.boss.body.global_position = target - Vector3.UP * 1.5  # In view.
+	if not view_name.contains(AIMING):
+		Input.action_release("scan")
 	if view_name.ends_with(FIRE_SUFFIX):
 		versus.boss.body.set_physics_process(false)  # It stays to be shot.
 		var gun := versus.settings.first_weapon
