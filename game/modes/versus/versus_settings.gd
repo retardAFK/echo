@@ -14,9 +14,9 @@ extends Resource
 ## (T-408, the boss melted in a minute at 250).
 @export_range(50.0, 2000.0, 10.0) var boss_health_per_hunted: float = 500.0
 ## That health scaled by the number of hunted: entry n - 1 for n hunted, 1
-## past the end. Tuned by the simulations (T-408, 8 to 12 games each): with
-## 2, 3 and 4 AI hunted the AI boss then wins 62, 33 and 50 % of the games.
-@export var boss_health_scales: PackedFloat32Array = [1.0, 0.8, 0.7, 0.45]
+## past the end. Tuned by the simulations (T-408 and T-411, 12 games each):
+## with 2, 3 and 4 AI hunted the AI boss then wins 58 % of the games.
+@export var boss_health_scales: PackedFloat32Array = [1.0, 0.8, 0.75, 0.45]
 ## Phases, highest start_ratio first (Q8).
 @export var phases: Array[VersusPhase] = []
 ## Seconds the boss cannot be hurt when a phase starts (Q8, its cry).
