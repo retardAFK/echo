@@ -231,11 +231,84 @@ def assault_rifle(color):
     muzzle(0.6, z)
 
 
+def pulse_pistol(color):
+    """Small, white and magenta, a glowing coil on the slide (T-415)."""
+    white = mat("white", (0.92, 0.92, 0.95), 0.35)
+    magenta = mat("magenta", (0.95, 0.2, 0.65), 0.4)
+    dark = mat("dark", (0.12, 0.12, 0.15), 0.55)
+    lit = glow(color)
+    z = 0.06
+    box((0, 0.1, z), (0.045, 0.2, 0.05), white, bevel=0.012)  # Slide.
+    box((0, 0.1, z + 0.028), (0.02, 0.16, 0.008), magenta, bevel=0.002)
+    for y in (0.06, 0.1, 0.14):
+        cyl((0, y, z), 0.027, 0.012, lit, bevel=0)  # Coil rings.
+    cyl((0, 0.215, z), 0.013, 0.04, dark)  # Muzzle.
+    cyl((0, 0.236, z), 0.016, 0.006, lit, bevel=0)
+    box((0, 0.0, -0.02), (0.04, 0.05, 0.11), magenta, rot=(-0.25, 0, 0), bevel=0.012)  # Grip.
+    box((0, 0.045, 0.012), (0.01, 0.045, 0.025), dark, bevel=0.003)  # Trigger guard.
+    box((0, 0.02, z + 0.035), (0.012, 0.012, 0.01), lit, bevel=0)  # Rear sight.
+    muzzle(0.24, z)
+
+
+def neon_minigun(color):
+    """Heavy, black and lime, six barrels around a glowing hub, a drum (T-415)."""
+    lime = mat("lime", (0.55, 0.95, 0.15), 0.4)
+    dark = mat("dark", (0.1, 0.11, 0.12), 0.5)
+    grey = mat("grey", (0.6, 0.62, 0.66), 0.3, 0.6)
+    lit = glow(color)
+    z = 0.07
+    box((0, 0.08, z), (0.1, 0.22, 0.1), dark, bevel=0.02)  # Body.
+    box((0, 0.08, z + 0.055), (0.06, 0.18, 0.012), lime, bevel=0.004)
+    cyl((0, 0.22, z), 0.05, 0.06, lime, verts=16)  # Front collar.
+    for k in range(6):
+        a = k * math.pi / 3
+        cyl((math.cos(a) * 0.028, 0.38, z + math.sin(a) * 0.028), 0.009, 0.3, grey, verts=8)
+    cyl((0, 0.38, z), 0.012, 0.3, lit, verts=8, bevel=0)  # Glowing hub.
+    for y in (0.3, 0.5):
+        cyl((0, y, z), 0.046, 0.012, dark, verts=16)  # Barrel clamps.
+    cyl((0, 0.535, z), 0.044, 0.008, lit, verts=16, bevel=0)
+    cyl((0.07, 0.06, z - 0.04), 0.06, 0.05, lime, verts=18)  # Drum, on the side.
+    cyl((0.097, 0.06, z - 0.04), 0.04, 0.004, lit, verts=18, bevel=0)
+    box((0, 0.0, -0.02), (0.044, 0.05, 0.11), dark, rot=(-0.25, 0, 0), bevel=0.01)  # Grip.
+    box((0, 0.24, z - 0.07), (0.03, 0.04, 0.08), dark, rot=(-0.1, 0, 0), bevel=0.006)  # Fore grip.
+    box((0, 0.08, z + 0.09), (0.02, 0.2, 0.02), dark, bevel=0.004)  # Carry handle.
+    for y in (0.0, 0.16):
+        box((0, y, z + 0.068), (0.02, 0.02, 0.04), dark, bevel=0.003)
+    muzzle(0.54, z)
+
+
+def burst_rifle(color):
+    """Sleek, teal and white, three lights for its three-shot burst (T-415)."""
+    teal = mat("teal", (0.1, 0.65, 0.7), 0.4)
+    white = mat("white", (0.9, 0.92, 0.94), 0.35)
+    dark = mat("dark", (0.12, 0.13, 0.15), 0.55)
+    lit = glow(color)
+    z = 0.075
+    box((0, 0.12, z), (0.06, 0.38, 0.085), white, bevel=0.02)  # Long body.
+    box((0, 0.2, z + 0.045), (0.07, 0.2, 0.02), teal, bevel=0.008)  # Top cover.
+    for y in (0.1, 0.14, 0.18):
+        for side in (-1, 1):
+            box((side * 0.031, y, z), (0.004, 0.022, 0.022), lit, bevel=0)  # Burst lights.
+    cyl((0, 0.37, z), 0.017, 0.14, dark)  # Barrel.
+    cyl((0, 0.45, z), 0.024, 0.03, teal)
+    cyl((0, 0.467, z), 0.018, 0.005, lit, bevel=0)
+    box((0, 0.03, z + 0.056), (0.035, 0.1, 0.03), dark, bevel=0.006)  # Sight block.
+    box((0, 0.03, z + 0.074), (0.012, 0.012, 0.008), lit, bevel=0)
+    box((0, 0.13, 0.0), (0.036, 0.06, 0.09), teal, rot=(0.2, 0, 0), bevel=0.008)  # Magazine.
+    box((0, 0.0, -0.01), (0.042, 0.05, 0.11), dark, rot=(-0.28, 0, 0), bevel=0.01)  # Grip.
+    box((0, -0.13, z - 0.01), (0.055, 0.14, 0.07), white, bevel=0.014)  # Stock.
+    box((0, -0.2, z - 0.01), (0.058, 0.02, 0.09), teal, bevel=0.006)
+    muzzle(0.47, z)
+
+
 GUNS = {
     "light_smg": (light_smg, 1.0, "base", 0.12),
     "precision_rifle": (precision_rifle, 1.8, "legendaire", 0.22),
     "sonic_shotgun": (sonic_shotgun, 1.3, "epique", 0.17),
     "assault_rifle": (assault_rifle, 1.5, "rare", 0.18),
+    "pulse_pistol": (pulse_pistol, 0.7, "epique", 0.08),
+    "neon_minigun": (neon_minigun, 1.5, "legendaire", 0.2),
+    "burst_rifle": (burst_rifle, 1.4, "rare", 0.16),
 }
 
 

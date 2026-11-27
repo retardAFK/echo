@@ -5,7 +5,13 @@ extends GutTest
 const ROOM_SCENE := preload("res://game/maps/test_room/test_room.tscn")
 const HUNTED_BODY := preload("res://game/entities/hunted_body/hunted_body.tscn")
 const GUNS: Array[StringName] = [
-	&"light_smg", &"precision_rifle", &"sonic_shotgun", &"assault_rifle"
+	&"light_smg",
+	&"precision_rifle",
+	&"sonic_shotgun",
+	&"assault_rifle",
+	&"pulse_pistol",
+	&"burst_rifle",
+	&"neon_minigun",
 ]
 
 var _saved_role: GameSession.Role

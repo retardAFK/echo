@@ -121,6 +121,6 @@ hunted_spawns = PackedVector3Array(-17, 0, 14, -14, 0, 14, -11, 0, 12, -17, 0, 1
 hunted_yaw = -1.032960800101468
 boss_spawn = Vector3(40, 0, -20)
 boss_yaw = 2.1086318534883253
-chest_spots = PackedVector3Array(10, 0, -48, -10, 0, -26, 26, 0, -2, 55, 0, 14, 50, 4.3, -38, 66, 0, -18, 18, 0, 14, 8.400002, 12, -10, 40, 0, -53, 0, 0, -40)
+chest_spots = PackedVector3Array(10, 0, -48, -10, 0, -26, 26, 0, -2, 55, 0, 14, -12, 0, -10, 40, 0, -40, 40, -3, -4, 50, 4.3, -38, 66, 0, -18, -12, 3, -10, 60, -3, 0, 18, 0, 14, 8.4, 12, -10, 60, 0, -44, 40, 0, -53, 0, 0, -40)
 navigation_mesh = ExtResource("1_m45vk")
 terminal_spots = PackedVector3Array(2, 0, 6, 58, 0, -40)

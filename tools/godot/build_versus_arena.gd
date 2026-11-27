@@ -54,18 +54,26 @@ const LOW_WALLS := [
 ## boss about 60 m away, between the social centre and the car park.
 const HUNTED_SPAWNS := [Vector2(93, 124), Vector2(96, 124), Vector2(99, 122), Vector2(93, 121)]
 const BOSS_SPAWN := Vector2(150, 90)
-## Chests of the arena (Q32), plan (x, height, y): 4 at the start, then 3
+## Chests of the arena (Q32), plan (x, height, y): 7 at the start, then 4
 ## at each new phase, the roof of the social centre and the top of the
-## fire escape among them.
+## fire escape among them; inside the buildings too (T-415, Maxime: « plus
+## de coffres dans les zones, dans les bâtiments »): the tower's ground and
+## first floors, the social centre's great hall and office, the car park.
 const CHEST_SPOTS := [
 	Vector3(120, 0, 62),
 	Vector3(100, 0, 84),
 	Vector3(136, 0, 108),
 	Vector3(165, 0, 124),
+	Vector3(98, 0, 100),
+	Vector3(150, 0, 70),
+	Vector3(150, -3, 106),
 	Vector3(160, 4.3, 72),
 	Vector3(176, 0, 92),
+	Vector3(98, 3, 100),
+	Vector3(170, -3, 110),
 	Vector3(128, 0, 124),
 	Vector3(118.4, 12, 100),
+	Vector3(170, 0, 66),
 	Vector3(150, 0, 57),
 	Vector3(110, 0, 70),
 ]
