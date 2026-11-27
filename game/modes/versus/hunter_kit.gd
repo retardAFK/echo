@@ -237,7 +237,7 @@ func _fire_rays(gun: VersusWeapon, strength: float) -> void:
 				boss.take_shot(body, end, gun, strength)
 				struck = boss
 				hits += 1
-		mode.add_tracer(muzzle(), end, gun.tracer_color)
+		mode.add_tracer(muzzle(), end, gun.tracer_color, loadout.weapon.id)
 	if struck != null and gun.push > 0.0:
 		var share := float(hits) / gun.pellets
 		struck.blasted(struck.body.global_position - body.global_position, gun.push * share, 0.0)
