@@ -123,3 +123,4 @@ boss_spawn = Vector3(40, 0, -20)
 boss_yaw = 2.1086318534883253
 chest_spots = PackedVector3Array(10, 0, -48, -10, 0, -26, 26, 0, -2, 55, 0, 14, 50, 4.3, -38, 66, 0, -18, 18, 0, 14, 8.400002, 12, -10, 40, 0, -53, 0, 0, -40)
 navigation_mesh = ExtResource("1_m45vk")
+terminal_spots = PackedVector3Array(2, 0, 6, 58, 0, -40)

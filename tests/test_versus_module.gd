@@ -52,6 +52,9 @@ const CLASSES: Array[String] = [
 	"FallWatch",
 	"BossFire",
 	"Fireball",
+	"SyringeShot",
+	"ReturnTerminal",
+	"ReturnTerminals",
 ]
 ## The only files outside the module allowed to name it (docs/MODULES.md).
 const ALLOWED: Array[String] = [

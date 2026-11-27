@@ -98,6 +98,7 @@ func test_a_versus_in_the_cite_takes_place_in_the_arena() -> void:
 	assert_almost_eq(to_hall[-1].distance_to(TOWER_HALL), 0.0, 1.0, "the tower is open (S-025)")
 	var targets: Array[Vector3] = [_arena().boss_spawn]
 	targets.append_array(_arena().chest_spots)
+	targets.append_array(_arena().terminal_spots)
 	for i in _arena().hunted_spawns.size():
 		targets.append(_arena().hunted_spawn(i))
 	for target in targets:
@@ -115,6 +116,9 @@ func test_the_player_walks_up_to_the_roof() -> void:
 	add_child_autofree(map)
 	await wait_physics_frames(4)
 	var player := map.player
+	var versus: VersusMode = map.get_node("VersusMode")
+	versus.boss.set_physics_process(false)  # No blow or fireball on the way (T-413).
+	versus.boss.body.set_physics_process(false)
 	player.global_position = ROOF_STAIRS_FOOT
 	player.set_look(PI / 2.0, 0.0)  # West.
 	Input.action_press("move_forward")

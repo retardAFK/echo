@@ -19,6 +19,7 @@
 [ext_resource type="Resource" path="res://game/modes/versus/data/rarities/epic.tres" id="r_epic"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/rarities/legendary.tres" id="r_legendary"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/medkit.tres" id="i_medkit"]
+[ext_resource type="Resource" path="res://game/modes/versus/data/items/syringe.tres" id="i_syringe"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/firecracker.tres" id="i_firecracker"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/smoke.tres" id="i_smoke"]
 [ext_resource type="Resource" path="res://game/modes/versus/data/items/ammo.tres" id="i_ammo"]
@@ -28,6 +29,6 @@
 script = ExtResource("1_settings")
 phases = Array[ExtResource("5_phase")]([ExtResource("2_p1"), ExtResource("3_p2"), ExtResource("4_p3")])
 arenas = Array[ExtResource("6_arena")]([ExtResource("7_tour")])
-items = Array[ExtResource("8_item")]([ExtResource("i_light_smg"), ExtResource("i_precision_rifle"), ExtResource("i_sonic_shotgun"), ExtResource("i_assault_rifle"), ExtResource("i_uv_laser"), ExtResource("i_medkit"), ExtResource("i_flash_grenade"), ExtResource("i_firecracker"), ExtResource("i_smoke"), ExtResource("i_ammo")])
+items = Array[ExtResource("8_item")]([ExtResource("i_light_smg"), ExtResource("i_precision_rifle"), ExtResource("i_sonic_shotgun"), ExtResource("i_assault_rifle"), ExtResource("i_uv_laser"), ExtResource("i_medkit"), ExtResource("i_syringe"), ExtResource("i_flash_grenade"), ExtResource("i_firecracker"), ExtResource("i_smoke"), ExtResource("i_ammo")])
 rarities = Array[ExtResource("9_rarity")]([ExtResource("r_common"), ExtResource("r_rare"), ExtResource("r_epic"), ExtResource("r_legendary")])
 first_weapon = ExtResource("i_light_smg")

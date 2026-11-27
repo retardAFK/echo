@@ -9,9 +9,11 @@ extends Node
 ## machine gun keeps firing, the UV laser burns; S-025), right click held
 ## aims (T-412: the view zooms in, the shots stray less, it walks slower), R reloads, Space
 ## rolls, gadget_1 and gadget_2 use the tools (HunterTools), interact
-## held revives a downed teammate (Q5, DownedHold), else opens a chest or
-## takes from it. Downed, it crawls;
-## out, it stays where it fell.
+## held revives a downed teammate (Q5, DownedHold), else works a return
+## terminal while a teammate is out (ReturnTerminals, T-414), else opens a
+## chest or takes from it. Downed, it crawls, and can get up alone with a
+## syringe (SyringeShot, T-414); out, it stays where it fell until a
+## teammate brings it back at a terminal.
 ## An AI prey (T-383) goes where PreyFighter says (a downed teammate, a
 ## chest), rolls away from the boss's blows and fires bursts by itself at
 ## the boss when it sees it.
@@ -37,6 +39,8 @@ var mirror_prompt: Array = []
 var revive := DownedHold.new()
 ## Teammates it revived, for the end screen.
 var revives_done := 0
+## The adrenaline syringe it may use on itself while down (T-414).
+var syringe := SyringeShot.new()
 ## True while reloading.
 var reloading := false
 ## True while its player aims, right click held with a gun (T-412).
@@ -77,6 +81,7 @@ func _ready() -> void:
 	vitals.downed.connect(_on_downed)
 	vitals.revived.connect(_on_revived)
 	vitals.out.connect(_on_out)
+	vitals.back.connect(_on_back)
 	revive.started.connect(_on_revive_started)
 	if is_local():
 		var camera: Camera3D = body.get_node("Head/Camera3D")
@@ -410,6 +415,8 @@ func _physics_process(delta: float) -> void:
 	if _dodge_left > 0.0:
 		_dodge_left -= delta
 		body.move_and_collide(_dodge_velocity * delta)
+	if vitals.is_down() and not mode.is_over():
+		syringe.update(self, delta)
 	if not vitals.is_standing() or mode.is_over():
 		if laser != null:
 			laser.update(false, delta)
@@ -487,7 +494,8 @@ func revive_time() -> float:
 	return mode.settings.revive_time * factor
 
 
-## Interact held: a downed teammate in reach first (Q5), else the chests.
+## Interact held: a downed teammate in reach first (Q5), else a return
+## terminal while a teammate is out (T-414), else the chests.
 func _hold_interact(held: bool, delta: float) -> void:
 	var settings := mode.settings
 	var done := revive.update(
@@ -498,7 +506,11 @@ func _hold_interact(held: bool, delta: float) -> void:
 		var slot := _medkit_slot()
 		if slot >= 0:
 			loadout.spend(slot)
-	hold_chest(held and revive.target == null and done == null, delta)
+	var free := held and revive.target == null and done == null
+	if mode.terminals != null and mode.terminals.hold(self, free, delta):
+		hold_chest(false, delta)  # At a return terminal (T-414).
+		return
+	hold_chest(free, delta)
 
 
 func _medkit_slot() -> int:
@@ -617,6 +629,8 @@ func _steer(delta: float) -> void:
 	var zone := mode.zone
 	if zone != null and zone.must_move_in(own, mode.rules.clock):
 		zone_point = zone.inside_point(own, mode.rules.clock + 10.0)
+	if mode.terminals != null:  # A teammate out: to a return terminal (T-414).
+		downed.append_array(mode.terminals.lit_points())
 	if zone != null:  # Only what is still inside the zone in a while.
 		downed = _inside(downed)
 		chests = _inside(chests)
@@ -724,6 +738,18 @@ func _on_out() -> void:
 	if _down_label == null:
 		_on_downed()  # Out at once: lies still like a downed one.
 	_down_label.text = Text.t("VERSUS_OUT")
+
+
+## Brought back at a return terminal (T-414): it plays on.
+func _on_back() -> void:
+	revive.reset()
+	if body is Player:
+		(body as Player).held = false
+		return
+	body.set_physics_process(true)
+	if _down_label != null:
+		_down_label.queue_free()
+		_down_label = null
 
 
 func _stand_up(player: Player) -> void:

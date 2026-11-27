@@ -48,6 +48,8 @@ var held_guns: HeldGuns
 var sounds: VersusSounds
 ## The boss's fireballs (T-413), or null.
 var fire: BossFire
+## The return terminals (T-414), or null.
+var terminals: ReturnTerminals
 var music: VersusMusic
 ## Client side: where the room says the tracked boss is (Q4), or null.
 var tracked_at: Variant = null
@@ -105,6 +107,8 @@ func _setup() -> void:
 	add_child(sounds)
 	fire = BossFire.new(self)
 	add_child(fire)
+	terminals = ReturnTerminals.new(self)
+	add_child(terminals)
 	music = VersusMusic.new(self)
 	add_child(music)
 	if mirror:

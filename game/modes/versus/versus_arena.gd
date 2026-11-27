@@ -25,6 +25,9 @@ extends Resource
 @export var chest_spots: PackedVector3Array = []
 ## The map's navigation mesh baked with the pieces (closed doors, stairs).
 @export var navigation_mesh: NavigationMesh
+## The return terminals (T-414, ReturnTerminals), each screen facing the
+## centre of the arena.
+@export var terminal_spots: PackedVector3Array = []
 
 
 ## Whether point (world) is inside the barriers.
@@ -37,3 +40,11 @@ func hunted_spawn(n: int) -> Vector3:
 	if hunted_spawns.is_empty():
 		return Vector3.ZERO
 	return hunted_spawns[n % hunted_spawns.size()]
+
+
+## The rotation.y of the n-th terminal: its screen towards the centre.
+func terminal_yaw(n: int) -> float:
+	var centre := bounds.get_center()
+	var spot := terminal_spots[n]
+	var toward := Vector2(centre.x - spot.x, centre.y - spot.z)
+	return atan2(toward.x, toward.y)

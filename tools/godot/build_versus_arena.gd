@@ -69,6 +69,11 @@ const CHEST_SPOTS := [
 	Vector3(150, 0, 57),
 	Vector3(110, 0, 70),
 ]
+## The return terminals (T-414), x, height, z as CHEST_SPOTS.
+const TERMINAL_SPOTS := [
+	Vector3(112, 0, 116),
+	Vector3(168, 0, 70),
+]
 
 var _arena := VersusArena.new()
 
@@ -195,6 +200,10 @@ func _add_spawns() -> void:
 	for spot: Vector3 in CHEST_SPOTS:
 		chests.append(kit.world(spot.x, spot.z, spot.y))
 	_arena.chest_spots = chests
+	var terminals := PackedVector3Array()
+	for spot: Vector3 in TERMINAL_SPOTS:
+		terminals.append(kit.world(spot.x, spot.z, spot.y))
+	_arena.terminal_spots = terminals
 	_arena.boss_spawn = boss
 	_arena.hunted_yaw = _yaw(boss - hunted[0])
 	_arena.boss_yaw = _yaw(hunted[0] - boss)
