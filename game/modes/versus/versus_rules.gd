@@ -5,7 +5,8 @@ extends RefCounted
 ## - The hunted win when the boss's health reaches 0 (Q1), even in the same
 ##   frame as their last one falls (Q6).
 ## - The boss wins when no hunted stands (all down or out), or at the end of
-##   the clock: dawn (Q2, Q3).
+##   the clock (Q2, Q3; "dawn" in S-024, "time's up" since S-025, whose
+##   zone, VersusZone, pushes everyone together before it).
 ## - Q4: a boss that has not attacked for hunted_boss_time is shown.
 
 enum Winner { NONE, HUNTED, BOSS }

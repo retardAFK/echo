@@ -32,6 +32,8 @@ const VIEWS := [
 	["joueur_fusil_tir", Vector3(136, 0, 100), Vector3(152, 1.5, 88)],
 	["joueur_pompe_tir", Vector3(140, 0, 96), Vector3(143.5, 1.5, 94)],
 	["joueur_coffres", Vector3(100, 0, 118), Vector3(130, 1.5, 95)],
+	# T-406: the zone after its second step, the player outside it.
+	["joueur_zone", Vector3(96, 0, 132), Vector3(110, 3.0, 110)],
 ]
 ## The gun a firing view holds, by a word of its name; else the first one.
 const GUNS := {"_fusil": &"precision_rifle", "_pompe": &"sonic_shotgun"}
@@ -110,6 +112,9 @@ func _stand_player(map: Node, feet: Vector3, target: Vector3, view_name: String)
 			Input.action_release("scan")
 	if view_name == "joueur_coffres":
 		_open_chests(versus, feet, target)
+	if view_name == "joueur_zone" and versus.zone != null:
+		var settings := versus.settings
+		versus.rules.clock = settings.zone_step_times[1] + settings.zone_shrink_time + 1.0
 
 
 ## Four open chests between feet and target, a gun of each rarity in them.

@@ -115,9 +115,24 @@ extends Resource
 
 @export_group("Clock")
 ## Length of a Versus game, in seconds (Q3).
-@export_range(30.0, 3600.0, 10.0, "suffix:s") var match_time: float = 600.0
-## Seconds before the end when dawn is announced (Q3).
-@export_range(0.0, 600.0, 5.0, "suffix:s") var dawn_warning: float = 120.0
+@export_range(30.0, 3600.0, 10.0, "suffix:s") var match_time: float = 480.0
+## Seconds before the end when its last minutes are announced (Q3; called
+## "dawn" in the code since S-024): a siren, the boss's last phase.
+@export_range(0.0, 600.0, 5.0, "suffix:s") var dawn_warning: float = 60.0
+
+@export_group("Zone")
+## The zone (S-025, Q6, VersusZone): when each step starts shrinking, in
+## seconds of play, and the share of the start radius it shrinks to.
+@export var zone_step_times := PackedFloat32Array([120.0, 240.0, 360.0])
+@export var zone_step_ratios := PackedFloat32Array([0.65, 0.4, 0.18])
+## Seconds a step takes to shrink.
+@export_range(1.0, 120.0, 1.0, "suffix:s") var zone_shrink_time: float = 30.0
+## Outside: a hunted loses a point every zone_hunted_tick seconds, the boss
+## this share of its health each second.
+@export_range(0.5, 30.0, 0.5, "suffix:s") var zone_hunted_tick: float = 4.0
+@export_range(0.0, 0.2, 0.005) var zone_boss_share: float = 0.02
+## Seconds before a step when the banner warns of it.
+@export_range(0.0, 60.0, 1.0, "suffix:s") var zone_warning: float = 20.0
 ## Seconds without attacking before the boss is shown to the hunted (Q4).
 @export_range(5.0, 300.0, 1.0, "suffix:s") var hunted_boss_time: float = 45.0
 
