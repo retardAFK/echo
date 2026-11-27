@@ -46,6 +46,21 @@ func distance_out(point: Vector3, clock: float) -> float:
 	return Vector2(point.x, point.z).distance_to(centre) - radius(clock)
 
 
+## Whether from is outside the zone, or will be in ahead seconds of play,
+## with margin meters to spare: time for an AI to move in (S-025, T-408).
+func must_move_in(from: Vector3, clock: float, ahead := 10.0, margin := 3.0) -> bool:
+	return distance_out(from, clock + ahead) > -margin
+
+
+## A point well inside the zone at clock, on from's side of the centre
+## (share of the radius from it), at from's height: where an AI goes.
+func inside_point(from: Vector3, clock: float, share := 0.5) -> Vector3:
+	var flat := Vector2(from.x, from.z) - centre
+	var direction := flat.normalized() if flat.length() > 0.01 else Vector2.RIGHT
+	var point := centre + direction * radius(clock) * share
+	return Vector3(point.x, from.y, point.y)
+
+
 ## The step under way or next at clock (0 to steps), and seconds until its
 ## shrinking starts (0 while it shrinks, -1 when no step is left).
 func next_step(clock: float) -> Array:
