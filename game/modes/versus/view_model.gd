@@ -27,6 +27,10 @@ const SWAY_RATE := 1.6
 ## Recoil spring: how hard it comes back, and how fast it settles.
 const SPRING := 140.0
 const DAMPING := 14.0
+## Where a gun's model (GunModel) sits, its grip in the glove, and its
+## scale in the hands, by item id (T-409).
+const GUN_GRIP := Vector3(0.17, -0.21, -0.34)
+const GUN_SCALES := {&"light_smg": 0.62, &"precision_rifle": 0.5, &"sonic_shotgun": 0.55}
 ## Claw swipe: seconds and swing angle in radians.
 const SWIPE_TIME := 0.22
 const SWIPE_ANGLE := 1.6
@@ -123,11 +127,16 @@ func _process(delta: float) -> void:
 
 ## The hunted's right forearm and glove, with its weapon (T-377): the
 ## light machine gun, the precision rifle, the sonic shotgun (S-025; glow,
-## the color of its rarity), the UV laser, or nothing.
+## the color of its rarity), the UV laser, or nothing. A gun with a model
+## (GunModel, T-409) shows it; the boxes below are the others' and stand in
+## without a display.
 static func build_hunter_right(held := &"light_smg", glow := SMG_GLOW) -> ArrayMesh:
 	var tool := BoxTool.start()
 	BoxTool.box(tool, Vector3(0.2, -0.27, -0.12), Vector3(0.09, 0.09, 0.32), SLEEVE, -0.25)
 	BoxTool.box(tool, Vector3(0.17, -0.22, -0.32), Vector3(0.08, 0.1, 0.1), GLOVE)
+	var place := Transform3D(Basis.from_scale(Vector3.ONE * GUN_SCALES.get(held, 1.0)), GUN_GRIP)
+	if GunModel.append(tool, held, glow, place):
+		return tool.commit()
 	match held:
 		&"light_smg":
 			BoxTool.box(tool, Vector3(0.17, -0.17, -0.42), Vector3(0.07, 0.1, 0.3), SMG_BODY)

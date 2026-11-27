@@ -42,6 +42,8 @@ var zone: VersusZone
 var net: NetGame
 var mirror := false
 var link: VersusNet
+## The guns in the hunted's hands (T-409), or null.
+var held_guns: HeldGuns
 ## Client side: where the room says the tracked boss is (Q4), or null.
 var tracked_at: Variant = null
 ## The boss's shadow where it lands (Q9).
@@ -92,6 +94,8 @@ func _setup() -> void:
 	end_screen = VersusEndScreen.new()
 	end_screen.online = net != null
 	add_child(end_screen)
+	held_guns = HeldGuns.new(self)
+	add_child(held_guns)
 	if mirror:
 		_setup_mirror()
 		return
