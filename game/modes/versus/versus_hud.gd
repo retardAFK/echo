@@ -439,4 +439,12 @@ func _draw_boss(boss: BossKit, size: Vector2, font: Font) -> void:
 	if boss.can_leap():
 		var leap := Text.with_keys("VERSUS_LEAP_READY")
 		_canvas.draw_string(font, Vector2(8, size.y - 100), leap, HORIZONTAL_ALIGNMENT_LEFT)
+	var fire := Text.t("VERSUS_FIREBALL_READY")  # T-413.
+	var fire_color := Color(1.0, 0.55, 0.15)
+	if boss.fire_wait > 0.0:
+		fire = Text.t("VERSUS_FIREBALL_WAIT", [ceili(boss.fire_wait)])
+		fire_color = Color(1, 1, 1, 0.6)
+	_canvas.draw_string(
+		font, Vector2(8, size.y - 114), fire, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, fire_color
+	)
 	_draw_kit_prompt(boss.shown_prompt(), size, font)

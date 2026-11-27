@@ -4,19 +4,20 @@ extends Node
 ## poise and rage (BossHealth), its claw and its charge, each with a signal
 ## before the blow, and, for the played boss, its first-person arms. A child
 ## of a Monster (AI) or a MonsterAvatar (played), added by VersusMode.
-## Played: left click claws, Space charges, R starts the Fury, interact
+## Played: left click claws, right click throws a fireball (S-025, T-413,
+## BossFire), Space charges, R starts the Fury, interact
 ## held by a downed hunted finishes it (Q5, DownedHold), else interact
 ## leaps onto the noise aimed at (phase 2+, BossLeap). Each new phase starts
 ## with a cry; in phase 3 the claw strikes twice (Q8).
 ## AI (T-382): BossBrain chooses (target, claw, charge, leap onto a lone
-## shooter, backing off before a kneel), the kit does it; it starts the Fury
+## shooter, a fireball at range, backing off before a kneel), the kit does it; it starts the Fury
 ## as soon as it can and finishes a downed hunted at its feet when no
 ## standing one is in reach.
 ## Any blow that makes it flinch breaks a finish.
 
 signal hit_taken(face: bool)
 
-enum Move { NONE, CLAW_WINDUP, CHARGE_WINDUP, CHARGING, STUNNED, LEAPING }
+enum Move { NONE, CLAW_WINDUP, CHARGE_WINDUP, CHARGING, STUNNED, LEAPING, CASTING }
 
 ## Seconds the body is held still each frame while a move or a kneel lasts.
 const HOLD := 0.1
@@ -38,6 +39,8 @@ var mirror_prompt: Array = []
 var view_model: ViewModel
 ## Its look (S-025): bigger, glowing, with the hitbox the shots meet.
 var look: BossLook
+## Seconds before it can throw another fireball (T-413).
+var fire_wait := 0.0
 var _move_left := 0.0
 var _claw_wait := 0.0
 var _charge_wait := 0.0
@@ -52,6 +55,8 @@ var _zone_wait := 0.0
 var _push_velocity := Vector3.ZERO
 var _push_left := 0.0
 var _second_claw := false
+var _cast_direction := Vector3.FORWARD
+var _rng := RandomNumberGenerator.new()
 
 
 func _init(p_mode: VersusMode) -> void:
@@ -70,6 +75,8 @@ func _ready() -> void:
 	brain = BossBrain.new(mode.settings)
 	health.phase_changed.connect(_on_phase_changed)
 	NoiseBus.noise_emitted.connect(_on_noise)
+	if body is MonsterAvatar:
+		(body as MonsterAvatar).scan_enabled = false  # Right click throws fire.
 	if is_local():
 		view_model = ViewModel.new(ViewModel.Kind.BOSS)
 		(body as MonsterAvatar).get_camera().add_child(view_model)
@@ -181,6 +188,24 @@ func claw() -> bool:
 	return true
 
 
+## Starts a fireball toward direction (S-025, T-413) if it can: its arm
+## goes up for fireball_windup seconds, then the ball flies (BossFire).
+func cast_fireball(direction: Vector3) -> bool:
+	if move != Move.NONE or fire_wait > 0.0 or mode.fire == null:
+		return false
+	move = Move.CASTING
+	_move_left = mode.settings.fireball_windup
+	_cast_direction = direction.normalized()
+	fire_wait = mode.settings.fireball_cooldown
+	if not body is MonsterAvatar:
+		_face(Vector3(direction.x, 0.0, direction.z))
+	_hold()
+	_play_gesture(MonsterBody.Action.CATCH, mode.settings.fireball_windup + 0.2)
+	if view_model != null:
+		view_model.swipe()
+	return true
+
+
 ## Starts the charge toward direction (Q9) if it can.
 func charge(direction: Vector3) -> bool:
 	if move != Move.NONE or _charge_wait > 0.0:
@@ -259,11 +284,13 @@ func _physics_process(delta: float) -> void:
 		land(fallen)
 	_claw_wait = maxf(_claw_wait - delta, 0.0)
 	_charge_wait = maxf(_charge_wait - delta, 0.0)
+	fire_wait = maxf(fire_wait - delta, 0.0)
 	var settings: MonsterSettings = body.get(&"settings")
 	_slow_left = maxf(_slow_left - delta, 0.0)
 	var slow := 1.0 - mode.settings.laser_slow if _slow_left > 0.0 else 1.0
-	settings.walk_speed = _base_walk * health.speed_scale() * slow
-	settings.run_speed = _base_run * health.speed_scale() * slow
+	var pace := health.speed_scale() * slow * mode.settings.boss_speed_scale
+	settings.walk_speed = _base_walk * pace
+	settings.run_speed = _base_run * pace
 	if _push_left > 0.0:
 		_push_left -= delta
 		body.move_and_collide(_push_velocity * delta)
@@ -295,6 +322,12 @@ func _physics_process(delta: float) -> void:
 			body.global_position = leap.fly(delta)
 			if not leap.leaping:
 				_land_leap()
+		Move.CASTING:
+			_hold()
+			_move_left -= delta
+			if _move_left <= 0.0:
+				_throw_fireball()
+				_end_move()
 		Move.STUNNED:
 			_hold()
 			_move_left -= delta
@@ -343,6 +376,9 @@ func _read_commands(commands: PlayerCommands, delta: float) -> void:
 			return
 	if keys.pressed(PlayerCommands.FLAG_FIRE):
 		claw()
+	if keys.pressed(PlayerCommands.FLAG_SCAN):
+		var look := Basis.from_euler(Vector3(commands.pitch, commands.yaw, 0.0))
+		cast_fireball(VersusView.aim_direction(body, eyes(), look, mode.settings))
 	if keys.pressed(PlayerCommands.FLAG_DODGE):
 		charge(-body.global_basis.z)
 	if keys.pressed(PlayerCommands.FLAG_BREATH):
@@ -373,8 +409,9 @@ func _think(delta: float) -> void:
 	if finish.target != null or target == null:
 		return
 	var lone: Variant = _lone_noise(places)
-	var sees := distance <= mode.settings.charge_distance and _sees(target)
-	match brain.choose(distance, sees, lone != null, health.poise / mode.settings.poise_max):
+	var sees := distance <= mode.settings.fireball_range and _sees(target)
+	var poise := health.poise / mode.settings.poise_max
+	match brain.choose(distance, sees, lone != null, poise, fire_wait <= 0.0):
 		BossBrain.Act.CLAW:
 			_face(offset)
 			claw()
@@ -383,9 +420,31 @@ func _think(delta: float) -> void:
 			charge(offset)
 		BossBrain.Act.LEAP:
 			leap_to(lone)
+		BossBrain.Act.FIREBALL:
+			cast_fireball(_lead(target))
 		BossBrain.Act.RETREAT:
 			if body is Monster:
 				(body as Monster).walk_away(target.body.global_position)
+
+
+## Where the AI throws at target: where it will be when the ball gets
+## there, at its chest, missed by up to fireball_ai_error.
+func _lead(target: HunterKit) -> Vector3:
+	var from := eyes()
+	var chest := target.body.global_position + Vector3.UP
+	var flight := from.distance_to(chest) / mode.settings.fireball_speed
+	var ahead := chest + Vector3(target.body.velocity.x, 0.0, target.body.velocity.z) * flight
+	var miss := deg_to_rad(mode.settings.fireball_ai_error)
+	var error := Basis.from_euler(
+		Vector3(_rng.randf_range(-miss, miss), _rng.randf_range(-miss, miss), 0.0)
+	)
+	return error * (ahead - from).normalized()
+
+
+func _throw_fireball() -> void:
+	var at := eyes() + _cast_direction * 1.4 + Vector3.DOWN * 0.3
+	var thrower := body as CollisionObject3D
+	mode.fire.cast(at, _cast_direction * mode.settings.fireball_speed, thrower)
 
 
 ## The AI boss heads back into the zone (S-025, T-408) when it is or soon

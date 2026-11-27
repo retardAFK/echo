@@ -8,13 +8,14 @@ extends RefCounted
 ##   is barely farther (brain_grudge_margin): it goes for that one.
 ## - Claws a target in reach; leaps onto a lone shooter (no teammate within
 ##   brain_lone_distance) whose noise it heard (phase 2+); charges a target
-##   6 to 14 m away in a clear line.
+##   6 to 14 m away in a clear line; else throws a fireball at a target in
+##   sight between fireball_min_distance and fireball_range (S-025, T-413).
 ## - Backs off (brain_retreat_time) when its poise is nearly full
 ##   (brain_retreat_poise), before it would kneel.
 ## - The Fury: BossKit starts it as soon as it can.
 
 ## What it chooses this frame.
-enum Act { WAIT, CLAW, CHARGE, LEAP, RETREAT }
+enum Act { WAIT, CLAW, CHARGE, LEAP, RETREAT, FIREBALL }
 
 var settings: VersusSettings
 ## Seconds left of backing off, while it does not attack.
@@ -35,8 +36,10 @@ func is_retreating() -> bool:
 
 ## Its choice against its target at distance (flat), in sight or not;
 ## lone_leap says a leap onto a lone shooter is ready; poise_ratio is its
-## poise over its maximum.
-func choose(distance: float, sees: bool, lone_leap: bool, poise_ratio: float) -> Act:
+## poise over its maximum; fire_ready says a fireball is ready.
+func choose(
+	distance: float, sees: bool, lone_leap: bool, poise_ratio: float, fire_ready := false
+) -> Act:
 	if is_retreating():
 		return Act.WAIT
 	if poise_ratio >= settings.brain_retreat_poise and distance <= settings.charge_distance:
@@ -48,7 +51,10 @@ func choose(distance: float, sees: bool, lone_leap: bool, poise_ratio: float) ->
 		return Act.LEAP
 	if sees and distance >= settings.charge_min_distance and distance <= settings.charge_distance:
 		return Act.CHARGE
-	return Act.WAIT
+	var in_range := (
+		distance >= settings.fireball_min_distance and distance <= settings.fireball_range
+	)
+	return Act.FIREBALL if sees and fire_ready and in_range else Act.WAIT
 
 
 ## Its target among the standing hunted (each with its place and the damage

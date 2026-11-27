@@ -45,6 +45,9 @@ const VIEWS := [
 	["joueur_1p_vise_pompe_tir", Vector3(140, 0, 96), Vector3(143.5, 1.5, 94)],
 	["joueur_vise_fusil_tir", Vector3(130, 0, 104), Vector3(152, 1.5, 88)],
 	["joueur_1p_vise_fusil_tir", Vector3(130, 0, 104), Vector3(152, 1.5, 88)],
+	# T-413: the boss's fireball flying at the player, then bursting by it.
+	["joueur_feu", Vector3(140, 0, 96), Vector3(152, 1.5, 88)],
+	["joueur_feu_boum", Vector3(140, 0, 96), Vector3(152, 1.5, 88)],
 	# T-406: the zone after its second step, the player outside it.
 	["joueur_zone", Vector3(96, 0, 132), Vector3(110, 3.0, 110)],
 ]
@@ -91,13 +94,15 @@ func _ready() -> void:
 		else:
 			camera.make_current()
 			camera.look_at_from_position(eye, target)
-		var firing := String(view[0]).ends_with(FIRE_SUFFIX)
+		var firing := String(view[0]).ends_with(FIRE_SUFFIX) or String(view[0]).contains("_feu")
 		# Slow time while it fires: a tracer lasts a tenth of a second, less
 		# than a frame of this slow renderer.
 		Engine.time_scale = 0.15 if firing else 1.0
 		for i in SETTLE_FRAMES:
-			if firing:
+			if String(view[0]).ends_with(FIRE_SUFFIX):
 				_fire(map)
+			if String(view[0]).contains("_feu") and i == 0:
+				_throw_fire(map, String(view[0]).ends_with("_boum"))
 			await get_tree().process_frame
 		var draws := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 		get_viewport().get_texture().get_image().save_png(out_dir.path_join("%s.png" % view[0]))
@@ -117,7 +122,11 @@ func _stand_player(map: Node, feet: Vector3, target: Vector3, view_name: String)
 		versus.view.call(&"_apply")  # As the V key does.
 		if not versus.view.first_person:
 			versus.view.camera.make_current()
-	var at_boss := view_name.ends_with("_boss") or view_name.ends_with(FIRE_SUFFIX)
+	var at_boss := (
+		view_name.ends_with("_boss")
+		or view_name.ends_with(FIRE_SUFFIX)
+		or view_name.contains("_feu")
+	)
 	if versus.boss != null and at_boss:
 		versus.boss.body.global_position = target - Vector3.UP * 1.5  # In view.
 	if view_name.ends_with(FIRE_SUFFIX):
@@ -149,6 +158,26 @@ func _open_chests(versus: VersusMode, feet: Vector3, target: Vector3) -> void:
 		var chest := versus.add_chest(at, versus.item(guns[rarity], rarity))
 		chest.look_at(feet, Vector3.UP)
 		chest.open(null, versus.settings)
+
+
+## The boss throws a fireball at the player (T-413): aimed at its chest,
+## or, to see the burst, at the ground just before it.
+func _throw_fire(map: Node, burst: bool) -> void:
+	var versus := map.get_node("VersusMode") as VersusMode
+	var player: Player = map.get("player")
+	var boss := versus.boss
+	boss.body.set_physics_process(false)
+	var from := boss.eyes() + Vector3.DOWN * 0.3
+	var target := player.global_position + Vector3.UP * 1.2
+	if burst:
+		target = player.global_position.lerp(from, 0.3)
+		target.y = 0.0
+	var direction := (target - from).normalized()
+	var ball := versus.fire.cast(from + direction * 1.4, direction * versus.settings.fireball_speed)
+	if burst:
+		ball.global_position = target - direction * 0.5  # Bursts at once.
+	else:
+		ball.global_position = target - direction * 14.0  # Seen on its way.
 
 
 ## One shot of the player's gun, as soon as it can fire again.

@@ -11,7 +11,7 @@ extends Node
 ##   [health, state, down left, weapon id, clip, spare ammo, reloading,
 ##   battery, tools [[id, uses], ...], prompt, revives done, weapon rarity];
 ##   for the boss:
-##   [move, leap wait, prompt]; prompt as KitPrompts gives it.
+##   [move, leap wait, prompt, fireball wait]; prompt as KitPrompts gives it.
 ## Events (send_mode_event), as [Event, ...]:
 ##   [CHESTS, [[position, item id, open, rarity], ...]]: the chests, when
 ##   they change;
@@ -25,12 +25,15 @@ extends Node
 ##   and its sound (T-410);
 ##   [GUN, seat, item id, rarity]: the gun in that seat's hands, "" for
 ##   none (HeldGuns, T-409);
+##   [FIREBALL, position, velocity]: the boss threw a fireball (T-413),
+##   the clients show a harmless copy;
+##   [BLAST, point]: a fireball burst there (BossFire.burst);
 ##   [LIGHTS_OUT]: the cry of phase 2 (Q8);
 ##   [LEAP, target]: the boss leaps, its shadow shows there (Q9);
 ##   [END, winner, dawn, clock, rows, mvp seat]: the end screen (Q28), rows
 ##   as VersusStats.rows gives them.
 
-enum Event { CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END, TRACER, FLASH, BANNER, GUN }
+enum Event { CHESTS, SHOT, HIT, LIGHTS_OUT, LEAP, END, TRACER, FLASH, BANNER, GUN, FIREBALL, BLAST }
 
 var mode: VersusMode
 var net: NetGame
@@ -61,7 +64,8 @@ func net_snapshot(seat: int) -> Array:
 	var you: Array = []
 	var node := _avatar_of(seat)
 	if node == mode.boss.body:
-		you = [mode.boss.move, mode.boss.leap.wait, KitPrompts.of_boss(mode.boss)]
+		var boss := mode.boss
+		you = [boss.move, boss.leap.wait, KitPrompts.of_boss(boss), boss.fire_wait]
 	else:
 		var kit := mode.kit_of(node)
 		if kit != null:
@@ -168,6 +172,8 @@ func apply_net_snapshot(value: Variant) -> void:
 		mode.boss.move = you[0]
 		mode.boss.leap.wait = you[1]
 		mode.boss.mirror_prompt = you[2]
+		if you.size() >= 4:
+			mode.boss.fire_wait = you[3]
 	elif not mode.hunters.is_empty() and you.size() >= 12:
 		apply_hunter_state(mode.hunters[0], you)
 
@@ -236,6 +242,10 @@ func apply_net_event(payload: Array) -> void:
 				mode.sounds.banner(payload[1])
 		Event.GUN when payload.size() == 4 and mode.held_guns != null:
 			mode.held_guns.apply(payload[1], payload[2], payload[3])
+		Event.FIREBALL when payload.size() == 3 and mode.fire != null:
+			mode.fire.cast(payload[1], payload[2])
+		Event.BLAST when payload.size() == 2 and mode.fire != null:
+			mode.fire.burst(payload[1])
 		Event.LIGHTS_OUT:
 			mode.put_lights_out()
 		Event.LEAP when payload.size() == 2:
