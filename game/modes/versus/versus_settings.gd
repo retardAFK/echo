@@ -16,7 +16,7 @@ extends Resource
 ## That health scaled by the number of hunted: entry n - 1 for n hunted, 1
 ## past the end. Tuned by the simulations (T-408 and T-411, 12 games each):
 ## with 2, 3 and 4 AI hunted the AI boss then wins 58 % of the games.
-@export var boss_health_scales: PackedFloat32Array = [1.0, 0.7, 0.72, 0.55]
+@export var boss_health_scales: PackedFloat32Array = [1.0, 0.6, 0.68, 0.52]
 ## Phases, highest start_ratio first (Q8).
 @export var phases: Array[VersusPhase] = []
 ## Seconds the boss cannot be hurt when a phase starts (Q8, its cry).
@@ -327,8 +327,8 @@ extends Resource
 @export_range(0.5, 5.0, 0.1, "suffix:m") var chest_reach: float = 2.5
 @export_range(0.0, 60.0, 1.0, "suffix:m") var chest_noise_range: float = 10.0
 ## Chests of the arena at the start, and new ones at each phase (Q32).
-@export_range(0, 20) var arena_chests: int = 4
-@export_range(0, 20) var phase_chests: int = 3
+@export_range(0, 20) var arena_chests: int = 7
+@export_range(0, 20) var phase_chests: int = 4
 ## Spare shots a hunted has when it gets its first gun.
 @export_range(0, 300) var start_spare_ammo: int = 90
 

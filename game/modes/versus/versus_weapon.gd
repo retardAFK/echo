@@ -9,6 +9,10 @@ extends Resource
 
 ## Held fire keeps shooting (a machine gun), else one shot per click.
 @export var automatic := true
+## Shots a click fires, fire_interval apart (the burst rifle, T-415: 3),
+## then burst_pause before the next burst; 1: one shot.
+@export_range(1, 10) var burst: int = 1
+@export_range(0.0, 3.0, 0.01, "suffix:s") var burst_pause: float = 0.3
 ## Seconds between two shots (0.1: ten a second).
 @export_range(0.02, 3.0, 0.01, "suffix:s") var fire_interval: float = 0.1
 ## Damage of a pellet on the body; in the face, times face_multiplier.

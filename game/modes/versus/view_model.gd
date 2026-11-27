@@ -31,7 +31,13 @@ const DAMPING := 14.0
 ## scale in the hands, by item id (T-409).
 const GUN_GRIP := Vector3(0.17, -0.21, -0.34)
 const GUN_SCALES := {
-	&"light_smg": 0.62, &"precision_rifle": 0.5, &"sonic_shotgun": 0.55, &"assault_rifle": 0.52
+	&"light_smg": 0.62,
+	&"precision_rifle": 0.5,
+	&"sonic_shotgun": 0.55,
+	&"assault_rifle": 0.52,
+	&"pulse_pistol": 0.75,
+	&"burst_rifle": 0.55,
+	&"neon_minigun": 0.5,
 }
 ## Aiming (T-412): how fast the gun comes up to the eye (per second), how
 ## much closer it comes, and how much less it sways.
@@ -44,7 +50,8 @@ const SWIPE_ANGLE := 1.6
 
 var kind := Kind.HUNTER
 ## The hunted's weapon in hand (T-377): &"" (empty hands), &"light_smg",
-## &"precision_rifle", &"sonic_shotgun", &"assault_rifle" or &"uv_laser".
+## &"precision_rifle", &"sonic_shotgun", &"assault_rifle", &"pulse_pistol",
+## &"burst_rifle", &"neon_minigun" or &"uv_laser".
 var weapon := &""
 ## The color of its rarity (S-025, T-404), on the gun's glowing parts.
 var weapon_color := SMG_GLOW

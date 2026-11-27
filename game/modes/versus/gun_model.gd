@@ -19,6 +19,9 @@ const FORE_GRIPS := {
 	&"precision_rifle": Vector3(0.0, 0.0, -0.3),
 	&"sonic_shotgun": Vector3(0.0, -0.06, -0.22),
 	&"assault_rifle": Vector3(0.0, -0.03, -0.34),
+	&"pulse_pistol": Vector3(0.0, -0.08, -0.03),
+	&"burst_rifle": Vector3(0.0, -0.01, -0.26),
+	&"neon_minigun": Vector3(0.0, -0.04, -0.24),
 }
 ## How high above the grip the eye looks while aiming (meters, T-412,
 ## ViewModel): just over each gun's sight, which then sits under the HUD's
@@ -28,6 +31,9 @@ const SIGHTS := {
 	&"precision_rifle": 0.205,
 	&"sonic_shotgun": 0.17,
 	&"assault_rifle": 0.205,
+	&"pulse_pistol": 0.22,
+	&"burst_rifle": 0.165,
+	&"neon_minigun": 0.185,
 }
 
 static var _meshes := {}
