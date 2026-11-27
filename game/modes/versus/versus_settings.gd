@@ -161,7 +161,7 @@ extends Resource
 @export_range(0.2, 4.0, 0.1, "suffix:m") var claw_height: float = 1.5
 ## Seconds of the raised arm before the claw lands (Q9, the signal).
 @export_range(0.0, 2.0, 0.05, "suffix:s") var claw_windup: float = 0.35
-@export_range(0.1, 5.0, 0.05, "suffix:s") var claw_cooldown: float = 0.8
+@export_range(0.1, 5.0, 0.05, "suffix:s") var claw_cooldown: float = 0.6
 @export_range(1, 5) var claw_damage: int = 1
 ## Seconds the boss crouches and roars before charging (Q9, the signal).
 @export_range(0.0, 3.0, 0.05, "suffix:s") var charge_windup: float = 0.6
@@ -169,7 +169,7 @@ extends Resource
 @export_range(2.0, 40.0, 0.5, "suffix:m/s") var charge_speed: float = 16.0
 ## Nearest target the AI boss charges, in meters.
 @export_range(0.0, 20.0, 0.5, "suffix:m") var charge_min_distance: float = 6.0
-@export_range(0.5, 60.0, 0.5, "suffix:s") var charge_cooldown: float = 8.0
+@export_range(0.5, 60.0, 0.5, "suffix:s") var charge_cooldown: float = 5.0
 @export_range(1, 5) var charge_damage: int = 2
 ## Distance at which the charge hits a hunted, in meters.
 @export_range(0.3, 3.0, 0.1, "suffix:m") var charge_hit_radius: float = 1.2
@@ -190,10 +190,33 @@ extends Resource
 @export_range(0, 3) var leap_damage: int = 1
 @export_range(0.0, 10.0, 0.5, "suffix:m") var leap_knock: float = 3.0
 @export_range(1.0, 60.0, 0.5, "suffix:s") var leap_cooldown: float = 12.0
+## The boss's pace (S-025, T-413): its walk and run times this, before the
+## phases and the Fury (it must catch up with the hunted).
+@export_range(0.5, 2.0, 0.05) var boss_speed_scale: float = 1.3
 ## Seconds between the two blows of the double claw (phase 3, Q8).
 @export_range(0.1, 1.0, 0.05, "suffix:s") var double_claw_delay: float = 0.3
 ## Share of the ambient light left when the arena lights go out (Q8).
 @export_range(0.0, 1.0, 0.05) var lights_out_ambient: float = 0.5
+
+@export_group("Fireball")
+## The boss's fireball (S-025, T-413, BossFire): right click for a played
+## boss, at range for the AI. Seconds of the arm raised before it flies,
+## and between two; its speed, life and size.
+@export_range(0.0, 2.0, 0.05, "suffix:s") var fireball_windup: float = 0.3
+@export_range(0.5, 30.0, 0.5, "suffix:s") var fireball_cooldown: float = 3.5
+@export_range(5.0, 80.0, 1.0, "suffix:m/s") var fireball_speed: float = 30.0
+@export_range(0.5, 10.0, 0.5, "suffix:s") var fireball_life: float = 2.5
+@export_range(0.1, 1.5, 0.05, "suffix:m") var fireball_size: float = 0.5
+## The burst: its radius, the points a hunted in it loses, how far it is
+## thrown.
+@export_range(0.5, 10.0, 0.1, "suffix:m") var fireball_radius: float = 3.0
+@export_range(0, 3) var fireball_damage: int = 1
+@export_range(0.0, 10.0, 0.5, "suffix:m") var fireball_knock: float = 3.0
+## The AI boss throws at a hunted it sees between these distances, aiming
+## where it will be, and misses by up to this angle.
+@export_range(0.0, 40.0, 0.5, "suffix:m") var fireball_min_distance: float = 7.0
+@export_range(5.0, 80.0, 1.0, "suffix:m") var fireball_range: float = 35.0
+@export_range(0.0, 20.0, 0.5, "suffix:°") var fireball_ai_error: float = 4.0
 
 @export_group("End")
 ## Time scale of the slow motion on the killing blow, and its real length (Q1).

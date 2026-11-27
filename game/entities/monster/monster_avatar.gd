@@ -30,6 +30,9 @@ const BODY_SETTINGS := preload("res://game/data/monster_body_settings.tres")
 @export var controls: PlayerSettings
 
 var catch_count := 0
+## Whether the scan button scans buildings; a mode that gives the button
+## another use turns it off (the Versus boss's fireball, S-025, T-413).
+var scan_enabled := true
 var scan: ScanGauge
 ## Building being scanned, or null.
 var scan_target: Building
@@ -252,6 +255,7 @@ func set_look(yaw: float, pitch: float) -> void:
 
 ## Starts, keeps or stops the scan from the scan button, and drains or recharges the gauge.
 func update_scan(delta: float, holding: bool) -> void:
+	holding = holding and scan_enabled
 	if holding and not scan.active:
 		var building := aim_building()
 		if building != null and scan.start():

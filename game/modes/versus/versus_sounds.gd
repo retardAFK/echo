@@ -3,7 +3,8 @@ extends Node
 ## The sounds of the Versus arcade (spec S-025, T-410), made by
 ## tools/audio/versus_sounds.py (assets/audio/versus/): each gun's shot where
 ## it is fired, the hit tick and the head ding of one's own hits, reloading,
-## a chest opening, the flash grenade, the zone about to close. Shots and
+## a chest opening, the flash grenade, the zone about to close, the boss's
+## fireball thrown and bursting (T-413, BossFire). Shots and
 ## bursts play in the world (SoundSpace: farther is quieter, walls muffle);
 ## what only concerns the player (its hits, its reload, the zone) plays flat.
 ## The same calls on the room and on a client (VersusNet passes them on).
@@ -14,6 +15,8 @@ const STREAMS := {
 	&"rifle_shot": preload("res://assets/audio/versus/rifle_shot.wav"),
 	&"shotgun_shot": preload("res://assets/audio/versus/shotgun_shot.wav"),
 	&"ar_shot": preload("res://assets/audio/versus/ar_shot.wav"),
+	&"fireball_cast": preload("res://assets/audio/versus/fireball_cast.wav"),
+	&"fireball_boom": preload("res://assets/audio/versus/fireball_boom.wav"),
 	&"hit": preload("res://assets/audio/versus/hit.wav"),
 	&"hit_face": preload("res://assets/audio/versus/hit_face.wav"),
 	&"reload": preload("res://assets/audio/versus/reload.wav"),
