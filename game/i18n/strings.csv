@@ -362,6 +362,7 @@ VERSUS_CARD,Écho · Versus · %s · %s
 VERSUS_COPY_CARD,Copier la carte
 VERSUS_AMMO,%d / %d
 VERSUS_RELOADING,Rechargement…
+VERSUS_AIM_HINT,Clic droit maintenu : viser
 VERSUS_RAGE,Rage
 VERSUS_FURY,FUREUR
 VERSUS_FURY_READY,Fureur prête : R

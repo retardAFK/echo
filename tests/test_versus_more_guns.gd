@@ -100,3 +100,16 @@ static func _under_a_roof(spot: Vector3) -> bool:
 	var centre := Rect2(30, -50, 38, 24)
 	var flat := Vector2(spot.x, spot.z)
 	return tower.has_point(flat) or centre.has_point(flat)
+
+
+func test_the_hud_says_right_click_aims_with_every_gun() -> void:
+	var versus := await _open()
+	var hunter := versus.local_hunter()
+	for item in SETTINGS.items:
+		if item.weapon == null:
+			continue
+		hunter.equip(versus.item(item.id))
+		assert_true(VersusHud.shows_aim_hint(hunter), "%s: right click aims" % item.id)
+	hunter.aiming = true
+	assert_false(VersusHud.shows_aim_hint(hunter), "gone while aiming")
+	assert_ne(Text.t("VERSUS_AIM_HINT"), "VERSUS_AIM_HINT")
